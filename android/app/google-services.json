@@ -1,0 +1,29 @@
+{ 
+  "project_info": { 
+    "project_number": "408253993855", 
+    "project_id": "abbot-9ccfc", 
+    "storage_bucket": "abbot-9ccfc.firebasestorage.app" 
+  }, 
+  "client": [ 
+    { 
+      "client_info": { 
+        "mobilesdk_app_id": "1:408253993855:android:9d2a0b3573de86f285c04a", 
+        "android_client_info": { 
+          "package_name": "com.android.abbot" 
+        } 
+      }, 
+      "oauth_client": [], 
+      "api_key": [ 
+        { 
+          "current_key": "AIzaSyB1pwfVp72EvgaNQ8CNc1HG8XWxHhSXlGY" 
+        } 
+      ], 
+      "services": { 
+        "appinvite_service": { 
+          "other_platform_oauth_client": [] 
+        } 
+      } 
+    } 
+  ], 
+  "configuration_version": "1" 
+}
