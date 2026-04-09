@@ -55,9 +55,7 @@ export function resolveImageUrl(rawUrl) {
   try {
     // Handle relative paths (e.g., /media/..)
     if (/^\/.+/.test(normalized)) {
-      // Dev: gunakan path saja agar diproksi Vite
-      if (IS_DEV) return normalized
-      // Prod/APK: pastikan absolute ke origin frontend (bukan localhost)
+      // Pastikan absolute ke origin frontend (bukan localhost) agar domain backend tersembunyi
       return `${currentFrontendOrigin}${normalized}`
     }
 
@@ -68,11 +66,7 @@ export function resolveImageUrl(rawUrl) {
     // Selalu rute path media ke origin frontend agar tidak menampilkan host backend
     // Berlaku untuk URL apa pun yang memiliki path /media, terlepas dari host-nya.
     if (u.pathname.startsWith('/media')) {
-      // Dev: gunakan path-only agar diproksi oleh Vite ke backend
-      if (IS_DEV) {
-        return u.pathname + u.search
-      }
-      // Prod/APK: gunakan domain frontend sehingga Network panel tidak menampilkan domain backend
+      // Gunakan domain frontend sehingga Network panel tidak menampilkan domain backend
       return `${currentFrontendOrigin}${u.pathname}${u.search}`
     }
 
@@ -163,20 +157,13 @@ const toFrontendMedia = (url) => {
     }
   }
   try {
-    // Relative path: dev proxy or prod absolute
+    // Relative path: Prod absolute ke origin frontend (bukan localhost)
     if (/^\/.+/.test(normalized)) {
-      return IS_DEV ? normalized : `${FRONTEND_ORIGIN}${normalized}`
+      return `${FRONTEND_ORIGIN}${normalized}`
     }
     const u = new URL(normalized)
     
-    if (IS_DEV) {
-      // Di dev, gunakan proxy Vite: path-only untuk /media
-      if (u.pathname.startsWith('/media')) {
-        return u.pathname + u.search
-      }
-      return normalized
-    }
-    // Di produksi/Android, arahkan semua path /media ke domain frontend
+    // Arahkan semua path /media ke domain frontend agar domain backend tersembunyi
     if (u.pathname.startsWith('/media')) {
       return `${FRONTEND_ORIGIN}${u.pathname}${u.search}`
     }

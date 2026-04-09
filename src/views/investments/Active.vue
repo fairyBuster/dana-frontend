@@ -185,6 +185,7 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { resolveImageUrl } from '@/utils/imageCache'
 import FooterBar from '@/components/partials/FooterBar.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import { investmentAPI } from '@/services/api'
@@ -431,9 +432,32 @@ const getDisplayStatus = (inv) => {
 
 const fallbackImage = '/assets/image/27c56f86fe1c8990e4a0be8a57a8835a3a1bc1b9.png'
 const fallbackEmptyImage = '/assets/images/34646.png'
+
+const blobUrls = ref(new Map())
+
 const getProductImage = (inv) => {
-  const url = String(inv?.product_image || '').trim()
-  return url || fallbackImage
+  const raw = String(inv?.product_image || '').trim()
+  if (!raw) return fallbackImage
+  
+  const url = resolveImageUrl(raw)
+  if (blobUrls.value.has(url)) return blobUrls.value.get(url)
+  
+  // Load blob asynchronously
+  fetchImageAsBlob(url)
+  return url // Fallback to resolved URL (frontend domain) while loading
+}
+
+const fetchImageAsBlob = async (url) => {
+  if (!url || blobUrls.value.has(url)) return
+  try {
+    const resp = await fetch(url)
+    if (!resp.ok) throw new Error('Failed to fetch image')
+    const blob = await resp.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    blobUrls.value.set(url, blobUrl)
+  } catch (err) {
+    console.error('Error loading blob image:', err)
+  }
 }
 
 const onImageError = (e) => {

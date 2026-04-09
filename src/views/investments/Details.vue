@@ -148,6 +148,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { investmentAPI, transactionAPI } from '@/services/api'
+import { resolveImageUrl } from '@/utils/imageCache'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 
@@ -167,6 +168,31 @@ const getNowMs = () => Date.now() + (serverOffsetMs.value || 0)
 const nowMs = ref(getNowMs())
 let nowIntervalId = null
 const startedAtMs = ref(null)
+
+const investmentBlobUrl = ref('')
+
+const fetchImageAsBlob = async (url) => {
+  if (!url) return
+  const resolved = resolveImageUrl(url)
+  try {
+    const resp = await fetch(resolved)
+    if (!resp.ok) throw new Error('Failed to fetch image')
+    const blob = await resp.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    investmentBlobUrl.value = blobUrl
+  } catch (err) {
+    console.error('Error loading blob image:', err)
+  }
+}
+
+watch(
+  () => investment.value?.product_image,
+  (url) => {
+    if (url) {
+      fetchImageAsBlob(url)
+    }
+  }
+)
 
 onMounted(() => {
   nowIntervalId = window.setInterval(() => {
@@ -414,15 +440,12 @@ const normalizeTransactionsResponse = (data) => {
 
 const fetchInterestTransactions = async () => {
   try {
-    const now = new Date()
-    const endDate = formatYmd(now)
-    const start = new Date(now)
-    start.setDate(start.getDate() - 2)
-    const startDate = formatYmd(start)
-    const params = { type: 'INTEREST', page: 1 }
-    if (startDate) params.start_date = startDate
-    if (endDate) params.end_date = endDate
-    const resp = await transactionAPI.getTransactions(params)
+    const invId = investment.value?.id
+    if (!invId) {
+      interestTransactions.value = []
+      return
+    }
+    const resp = await investmentAPI.getInvestmentInterestTransactions(invId, { limit: 3 })
     interestTransactions.value = normalizeTransactionsResponse(resp?.data)
   } catch (_) {
     interestTransactions.value = []
@@ -487,8 +510,10 @@ const goToProduct = () => {
 const investmentTitle = computed(() => investment.value?.product_name || 'Drone')
 
 const investmentImage = computed(() => {
-  const url = String(investment.value?.product_image || '').trim()
-  return url || fallbackImage
+  if (investmentBlobUrl.value) return investmentBlobUrl.value
+  const raw = String(investment.value?.product_image || '').trim()
+  if (!raw) return fallbackImage
+  return resolveImageUrl(raw)
 })
 
 const onImageError = (e) => {

@@ -43,7 +43,7 @@
 
           <!-- Item 5 -->
           <div class="term-item">
-            <p class="term-text">5. Data dan Informasi<br>Data dan hasil analisis yang disediakan oleh SENT-OT bersifat estimasi dan dapat berubah sesuai kondisi lapangan.<br>OT-SENT tidak menjamin keakuratan mutlak dari seluruh data yang dihasilkan.<br>Pengguna bertanggung jawab atas penggunaan informasi yang diperoleh dari platform.</p>
+            <p class="term-text">5. Data dan Informasi<br>Data dan hasil analisis yang disediakan oleh OT-SENT bersifat estimasi dan dapat berubah sesuai kondisi lapangan.<br>OT-SENT tidak menjamin keakuratan mutlak dari seluruh data yang dihasilkan.<br>Pengguna bertanggung jawab atas penggunaan informasi yang diperoleh dari platform.</p>
           </div>
 
           <!-- Item 6 -->

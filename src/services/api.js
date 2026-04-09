@@ -667,6 +667,10 @@ export const investmentAPI = {
   getInvestment: (id, config = {}) => {
     return api.get(`/investments/${id}/`, config)
   },
+  // GET /api/investments/{id}/interest-transactions/ - Latest INTEREST transactions for a specific investment
+  getInvestmentInterestTransactions: (id, params = {}) => {
+    return api.get(`/investments/${id}/interest-transactions/`, { params })
+  },
   // Claim daily profit from an active investment
   claimProfit: (investmentId) => {
     return api.post('/investments/claim-profit/', { investment_id: investmentId })

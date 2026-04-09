@@ -226,7 +226,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { productAPI } from '@/services/api'
 import { resolveImageUrl } from '@/utils/imageCache'
@@ -249,6 +249,31 @@ const errorMessage = ref('')
 const redirectInvestmentId = ref(null)
 const redirectInvestmentData = ref(null)
 
+const productBlobUrl = ref('')
+
+const fetchImageAsBlob = async (url) => {
+  if (!url) return
+  const resolved = resolveImageUrl(url)
+  try {
+    const resp = await fetch(resolved)
+    if (!resp.ok) throw new Error('Failed to fetch image')
+    const blob = await resp.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    productBlobUrl.value = blobUrl
+  } catch (err) {
+    console.error('Error loading blob image:', err)
+  }
+}
+
+watch(
+  () => product.value?.image,
+  (url) => {
+    if (url) {
+      fetchImageAsBlob(url)
+    }
+  }
+)
+
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return null
   const n = Number(String(value).replace(/,/g, ''))
@@ -265,6 +290,7 @@ const formatNumber = (value) => {
 const productTitle = computed(() => product.value?.name || 'Drone')
 
 const productImage = computed(() => {
+  if (productBlobUrl.value) return productBlobUrl.value
   const raw = String(product.value?.image || '').trim()
   if (!raw) return ''
   return String(resolveImageUrl(raw) || '').trim()
@@ -335,6 +361,12 @@ const fetchProduct = async () => {
     isLoading.value = false
   }
 }
+
+onBeforeUnmount(() => {
+  if (productBlobUrl.value) {
+    URL.revokeObjectURL(productBlobUrl.value)
+  }
+})
 
 watch(() => route.params.id, fetchProduct, { immediate: true })
 

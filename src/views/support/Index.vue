@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="app-container">
     <section id="section-header">
       <header class="app-header">
@@ -14,7 +14,7 @@
     <section id="section-content">
       <div class="content-container">
         
-        <!-- Card 1: Saluran Telegram -->
+     
         <article class="card">
           <img src="/assets/images/145_313.svg" class="card-bg" alt="">
           <div class="card-inner">
@@ -36,7 +36,7 @@
           </div>
         </article>
 
-        <!-- Card 2: Telegram Resmi -->
+   
         <article class="card">
           <img src="/assets/images/145_334.svg" class="card-bg" alt="">
           <div class="card-inner">
@@ -58,7 +58,6 @@
           </div>
         </article>
 
-        <!-- Card 3: Pusat Bantuan -->
         <article class="card">
           <img src="/assets/images/145_345.svg" class="card-bg" alt="">
           <div class="card-inner">
@@ -83,7 +82,7 @@
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { ref, onMounted } from 'vue'

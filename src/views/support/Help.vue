@@ -169,36 +169,9 @@ const scrollToBottom = async () => {
 
 const openChat = async () => {
   chatOpen.value = true
+  isSending.value = true
+  isTyping.value = false
   await scrollToBottom()
-  
-  // Ambil history chat jika ada
-  try {
-    const resp = await supportAPI.getChatMessages()
-    if (resp?.data && Array.isArray(resp.data)) {
-      messages.value = resp.data.map(m => ({
-        text: m.message,
-        sender: m.is_from_user ? 'user' : 'bot',
-        time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }))
-      await scrollToBottom()
-    }
-  } catch (_) {}
-
-  // Mulai stream SSE
-  if (!chatStream) {
-    chatStream = supportAPI.streamChatWithFetch((payload) => {
-      // payload: { message: string, is_from_user: boolean, created_at: string }
-      if (payload && payload.message) {
-        isTyping.value = false
-        messages.value.push({
-          text: payload.message,
-          sender: payload.is_from_user ? 'user' : 'bot',
-          time: new Date(payload.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        })
-        scrollToBottom()
-      }
-    })
-  }
 }
 
 const closeChat = () => {
