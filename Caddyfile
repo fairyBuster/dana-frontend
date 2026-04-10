@@ -1,4 +1,9 @@
 :80 {
+    log {
+        output stdout
+        format console
+        level info
+    }
 
     @allowed {
         remote_ip 139.99.103.108 ::1
@@ -12,10 +17,13 @@
         handle @api {
             reverse_proxy https://croucloud.xyz {
                 header_up Host croucloud.xyz
-                header_up X-Forwarded-Proto https
-                header_up X-Original-Client-IP {http.request.header.CF-Connecting-IP}
-                header_up X-Real-IP {http.request.header.CF-Connecting-IP}
-                header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
+                header_up X-Forwarded-Proto {scheme}
+                header_up X-Real-IP {http.request.remote}
+                header_up X-Forwarded-For {http.request.header.X-Forwarded-For},{http.request.remote}
+                header_up User-Agent {>User-Agent}
+                header_up Accept {>Accept}
+                header_up Accept-Language {>Accept-Language}
+                header_up Content-Type {>Content-Type}
             }
             encode gzip zstd
         }
