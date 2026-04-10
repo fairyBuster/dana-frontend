@@ -1,0 +1,23 @@
+:80 {
+
+    @allowed {
+        remote_ip 15.235.197.134 15.235.142.16 176.97.64.112 127.0.0.1 ::1
+    }
+
+    handle @allowed {
+
+        root * /srv
+
+        handle_path /api/* {
+            reverse_proxy https://croucloud.xyz
+        }
+
+        try_files {path} /index.html
+        encode gzip zstd
+        file_server
+    }
+
+    handle {
+        respond "Forbidden" 403
+    }
+}
