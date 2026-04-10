@@ -17,7 +17,10 @@ const ENV_USE_COOKIES_MOBILE = String(import.meta?.env?.VITE_USE_COOKIES_MOBILE 
 const CSRF_COOKIE_NAME = import.meta?.env?.VITE_CSRF_COOKIE_NAME || 'csrftoken'
 const CSRF_HEADER_NAME = import.meta?.env?.VITE_CSRF_HEADER_NAME || 'X-CSRFToken'
 const FORCE_LOGOUT_ON_401 = String(import.meta?.env?.VITE_FORCE_LOGOUT_ON_401 || 'false') === 'true'
-const ENV_ALLOW_ABSOLUTE_WEB_API = String(import.meta?.env?.VITE_ALLOW_ABSOLUTE_WEB_API || 'false') === 'true'
+const ENV_ENABLE_API_ENCODE = String(import.meta?.env?.VITE_ENABLE_API_ENCODE || '').toLowerCase()
+const ENABLE_API_ENCODE = ENV_ENABLE_API_ENCODE
+  ? ENV_ENABLE_API_ENCODE === 'true'
+  : IS_CAPACITOR_RUNTIME
 
 const API_BASE_URL = (() => {
   // Pada aplikasi Android (Capacitor), gunakan domain frontend atau VITE_MOBILE_API agar CORS ok
@@ -27,15 +30,8 @@ const API_BASE_URL = (() => {
     if (ENV_FRONTEND && /^https?:\/\//.test(ENV_FRONTEND)) return `${ENV_FRONTEND.replace(/\/$/, '')}/api`
     return 'http://localhost:8000/api'
   }
-  if (ENV_API && /^https?:\/\//.test(ENV_API)) {
-    try {
-      const apiURL = new URL(ENV_API)
-      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
-      if (ENV_ALLOW_ABSOLUTE_WEB_API || !currentOrigin || apiURL.origin === currentOrigin) {
-        return ENV_API
-      }
-    } catch (_) {}
-  }
+  // Jika env sudah absolute (http/https), gunakan langsung
+  if (ENV_API && /^https?:\/\//.test(ENV_API)) return ENV_API
   // Jika env relative, gunakan proxy '/api' di web
   if (ENV_API && !/^https?:\/\//.test(ENV_API)) {
     // Gunakan path relative dari env apa adanya (mis. '/api')
@@ -209,6 +205,7 @@ function attachAuthHeader(config) {
 // Stack: [Encoding, Auth]. Execution: Auth -> Encoding.
 api.interceptors.request.use((config) => {
   try {
+    if (!ENABLE_API_ENCODE) return config
     const url = config.url || ''
     // Ignore if already encoded
     if (url.includes('/api/enc/') || url.includes('/enc/')) return config

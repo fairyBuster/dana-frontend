@@ -1,4 +1,4 @@
-:80 {
+:80, :443 {
     log {
         output stdout
         format console
@@ -9,74 +9,29 @@
         remote_ip 139.99.103.108 ::1
     }
 
+    @allowed_api {
+        remote_ip 139.99.103.108 ::1
+        path /api/*
+    }
+
+    @allowed_media {
+        remote_ip 139.99.103.108 ::1
+        path /media/*
+    }
+
+    handle @allowed_api {
+        reverse_proxy https://croucloud.xyz
+        encode gzip zstd
+    }
+
+    handle @allowed_media {
+        reverse_proxy https://croucloud.xyz
+        encode gzip zstd
+    }
+
     handle @allowed {
-
         root * /srv
-
-        @api path /api/*
-        handle @api {
-            reverse_proxy https://croucloud.xyz {
-                header_up Host croucloud.xyz
-                header_up X-Forwarded-Proto https
-                header_up X-Original-Client-IP {http.request.header.CF-Connecting-IP}
-                header_up X-Real-IP {http.request.header.CF-Connecting-IP}
-                header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
-            }
-            encode gzip zstd
-        }
-
-        @logout path /logout
-        handle @logout {
-            reverse_proxy https://croucloud.xyz {
-                header_up Host croucloud.xyz
-                header_up X-Forwarded-Proto https
-                header_up X-Original-Client-IP {http.request.header.CF-Connecting-IP}
-                header_up X-Real-IP {http.request.header.CF-Connecting-IP}
-                header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
-            }
-        }
-
-        @gateway path /gateway/*
-        handle @gateway {
-            uri replace /gateway/ /api/
-            reverse_proxy https://croucloud.xyz {
-                header_up Host croucloud.xyz
-                header_up X-Forwarded-Proto https
-                header_up X-Original-Client-IP {http.request.header.CF-Connecting-IP}
-                header_up X-Real-IP {http.request.header.CF-Connecting-IP}
-                header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
-            }
-        }
-
-        @media_options {
-            path /media/*
-            method OPTIONS
-        }
-        handle @media_options {
-            header Access-Control-Allow-Origin {http.request.header.Origin}
-            header Access-Control-Allow-Methods "GET, OPTIONS"
-            header Access-Control-Allow-Headers "Authorization, Content-Type, X-Requested-With"
-            header Access-Control-Max-Age "86400"
-            header Content-Length "0"
-            respond 204
-        }
-
-        @media_content {
-            path /media/*
-        }
-        handle @media_content {
-            header Access-Control-Allow-Origin {http.request.header.Origin}
-            reverse_proxy https://croucloud.xyz {
-                header_up Host croucloud.xyz
-                header_up X-Forwarded-Proto https
-                header_up X-Original-Client-IP {http.request.header.CF-Connecting-IP}
-                header_up X-Real-IP {http.request.header.CF-Connecting-IP}
-                header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
-            }
-        }
-
         try_files {path} /index.html
-
         encode gzip zstd
         file_server
     }
