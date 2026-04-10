@@ -1,15 +1,23 @@
 :80 {
 
     @allowed {
-        remote_ip 15.235.197.134 15.235.142.16 176.97.64.112 127.0.0.1 ::1
+        remote_ip 139.99.103.108 ::1
     }
 
     handle @allowed {
 
         root * /srv
 
-        handle_path /api/* {
-            reverse_proxy https://croucloud.xyz
+        @api path /api/*
+        handle @api {
+            reverse_proxy https://croucloud.xyz {
+                header_up Host croucloud.xyz
+                header_up X-Forwarded-Proto https
+                header_up X-Original-Client-IP {http.request.header.CF-Connecting-IP}
+                header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+                header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
+            }
+            encode gzip zstd
         }
 
         try_files {path} /index.html
