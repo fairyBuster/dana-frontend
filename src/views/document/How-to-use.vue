@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="app-container">
     <section id="section-header" class="header-section">
       <div class="header-container">
@@ -19,8 +19,7 @@
     </section>
     
     <section id="section-infocards" class="cards-section">
-      
-      <!-- Card: Nama Usaha -->
+
       <article class="info-card bg-bidang-layanan">
         <div class="card-content">
           <h3 class="card-label">Nama Usaha</h3>
@@ -28,7 +27,7 @@
         </div>
       </article>
 
-      <!-- Card: Nama Merek Dagang -->
+   
       <article class="info-card bg-bidang-layanan">
         <div class="card-content">
           <h3 class="card-label">Nama Merek Dagang</h3>
@@ -36,7 +35,7 @@
         </div>
       </article>
 
-      <!-- Card: Badan Hukum -->
+ 
       <article class="info-card bg-bidang-layanan">
         <div class="card-content">
           <h3 class="card-label">Badan Hukum</h3>
@@ -44,7 +43,6 @@
         </div>
       </article>
 
-      <!-- Card: Status Operasional -->
       <article class="info-card bg-bidang-layanan">
         <div class="card-content">
           <h3 class="card-label">Status Operasional</h3>
@@ -52,7 +50,7 @@
         </div>
       </article>
 
-      <!-- Card: Bidang Layanan -->
+  
       <article class="info-card bg-bidang-layanan">
         <div class="card-content">
           <h3 class="card-label">Bidang Layanan</h3>
@@ -60,7 +58,6 @@
         </div>
       </article>
 
-      <!-- Card: Informasi Perizinan -->
       <article class="info-card ">
         <div class="card-content">
           <h3 class="card-label">Informasi Perizinan dan Registrasi</h3>
@@ -78,7 +75,7 @@ Operasional sistem layanan keuangan berbasis digital sesuai regulasi yang berlak
         </div>
       </article>
 
-      <!-- Card: Alamat -->
+  
       <article class="info-card">
         <div class="card-content">
           <h3 class="card-label">Alamat dan Operasional</h3>
@@ -93,7 +90,6 @@ Senin – Minggu
         </div>
       </article>
 
-      <!-- Card: Layanan Bantuan -->
       <article class="info-card ">
         <div class="card-content">
           <h3 class="card-label">Layanan Bantuan Resmi</h3>
@@ -112,7 +108,7 @@ Setiap hari pukul 09.00 – 21.00 WIB</p>
         </div>
       </article>
 
-      <!-- Card: Keamanan -->
+
       <article class="info-card ">
         <div class="card-content">
           <h3 class="card-label">Keamanan dan Transaksi Akun</h3>
@@ -123,7 +119,6 @@ Audit internal berkala</p>
         </div>
       </article>
 
-      <!-- Card: Privasi -->
       <article class="info-card ">
         <div class="card-content">
           <h3 class="card-label">Privasi dan Perlindungan Data</h3>
@@ -153,7 +148,7 @@ Audit internal berkala</p>
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { useRouter } from 'vue-router'

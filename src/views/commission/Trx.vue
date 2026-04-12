@@ -24,6 +24,11 @@
         </div>
         <div class="card-amount">{{ formatCurrency(commission.amount) }}</div>
       </div>
+      <div v-if="commissions.length > 0 && hasMore" class="pagination-row">
+        <button class="load-more-btn" @click="loadMore" :disabled="isLoading">
+          Memuat lebih banyak
+        </button>
+      </div>
     </section>
 
     <ErrorModal v-model="errorModalOpen" :message="errorMessage" />
@@ -39,8 +44,12 @@ import ErrorModal from '@/components/modals/ErrorModal.vue'
 const router = useRouter()
 
 const commissions = ref([])
+const allCommissions = ref([])
 const errorModalOpen = ref(false)
 const errorMessage = ref('')
+const isLoading = ref(false)
+const pageSize = 20
+const visibleCount = ref(pageSize)
 
 const goBack = () => {
   router.go(-1)
@@ -100,7 +109,8 @@ const mapTransactionToCommission = (trx) => {
     id: trx?.id ?? trx?.trx_id,
     memberId: trx?.upline_phone || trx?.user_phone || trx?.trx_id || '-',
     date: formatDateTime(trx?.created_at),
-    amount: parseNumber(trx?.amount)
+    amount: parseNumber(trx?.amount),
+    createdAtRaw: trx?.created_at || null
   }
 }
 
@@ -129,34 +139,77 @@ const dedupeAndMap = (transactions) => {
   return mapped.map((x) => x.mapped)
 }
 
-const fetchCommissionTransactions = async () => {
+const hasMore = ref(true)
+const nextFetchPage = ref(1)
+
+const fetchPageByType = async (type, page) => {
+  const resp = await transactionAPI.getTransactions({ type, page, page_size: pageSize })
+  return normalizeTransactionsResponse(resp?.data)
+}
+
+const loadPage = async (page) => {
+  if (isLoading.value) return false
+  isLoading.value = true
   errorModalOpen.value = false
   errorMessage.value = ''
-
-  const fetchByType = async (type) => {
-    const resp = await transactionAPI.getTransactions({ type, page: 1 })
-    return normalizeTransactionsResponse(resp?.data)
-  }
-
   try {
-    const settled = await Promise.allSettled(COMMISSION_TYPES.map(fetchByType))
+    const settled = await Promise.allSettled(COMMISSION_TYPES.map((t) => fetchPageByType(t, page)))
     const combined = settled.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
     const filtered = combined.filter(isCommissionTransaction)
-    if (filtered.length) {
-      commissions.value = dedupeAndMap(filtered)
-      return
+    if (!filtered.length) return false
+    const mapped = dedupeAndMap(filtered)
+    const seen = new Set(allCommissions.value.map((x) => String(x.id)))
+    const append = mapped.filter((m) => !seen.has(String(m.id)))
+    if (append.length) {
+      const merged = [...allCommissions.value, ...append]
+      merged.sort((a, b) => {
+        const da = new Date(a?.createdAtRaw || a?.date || 0).getTime()
+        const db = new Date(b?.createdAtRaw || b?.date || 0).getTime()
+        return db - da
+      })
+      allCommissions.value = merged
+      return true
     }
-  } catch (_) {}
-
-  try {
-    const resp = await transactionAPI.getTransactions({ page: 1 })
-    const list = normalizeTransactionsResponse(resp?.data)
-    commissions.value = dedupeAndMap(list.filter(isCommissionTransaction))
+    return false
   } catch (err) {
-    commissions.value = []
     errorMessage.value = extractErrorMessage(err)
     errorModalOpen.value = true
+    return false
+  } finally {
+    isLoading.value = false
   }
+}
+
+const fetchCommissionTransactions = async () => {
+  commissions.value = []
+  allCommissions.value = []
+  nextFetchPage.value = 1
+  hasMore.value = true
+  visibleCount.value = pageSize
+
+  let tries = 0
+  while (allCommissions.value.length < visibleCount.value && tries < 5) {
+    const ok = await loadPage(nextFetchPage.value)
+    if (ok) nextFetchPage.value += 1
+    tries += 1
+    if (!ok) break
+  }
+  commissions.value = allCommissions.value.slice(0, visibleCount.value)
+  hasMore.value = allCommissions.value.length >= visibleCount.value
+}
+
+const loadMore = async () => {
+  if (isLoading.value || !hasMore.value) return
+  visibleCount.value += pageSize
+  let tries = 0
+  while (allCommissions.value.length < visibleCount.value && tries < 5) {
+    const ok = await loadPage(nextFetchPage.value)
+    if (ok) nextFetchPage.value += 1
+    tries += 1
+    if (!ok) break
+  }
+  commissions.value = allCommissions.value.slice(0, visibleCount.value)
+  hasMore.value = allCommissions.value.length >= visibleCount.value
 }
 
 onMounted(() => {
@@ -306,5 +359,22 @@ onMounted(() => {
   color: #ffffff;
   align-self: center;
   font-weight: 400;
+}
+
+.pagination-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.load-more-btn {
+  width: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 0;
 }
 </style>

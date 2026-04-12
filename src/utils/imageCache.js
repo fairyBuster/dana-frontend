@@ -38,12 +38,14 @@ export function resolveImageUrl(rawUrl) {
   let normalized = String(rawUrl ?? '').trim()
   if (!normalized) return ''
   
-  // Get dynamic frontend URL
-  const currentFrontendUrl = getFrontendUrl() || 'https://www.ccvoltasein.com'
-  let currentFrontendOrigin = currentFrontendUrl
-  try {
-    currentFrontendOrigin = new URL(currentFrontendUrl).origin
-  } catch (_) {}
+  let currentFrontendOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+  if (!currentFrontendOrigin) {
+    const currentFrontendUrl = getFrontendUrl() || 'https://www.ccvoltasein.com'
+    currentFrontendOrigin = currentFrontendUrl
+    try {
+      currentFrontendOrigin = new URL(currentFrontendUrl).origin
+    } catch (_) {}
+  }
 
   if (normalized.length >= 2) {
     const first = normalized[0]

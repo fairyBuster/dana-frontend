@@ -144,10 +144,7 @@ const isValidAmount = computed(() => {
   // Check minimum and maximum limits
   if (amount < MIN_WITHDRAW || amount > MAX_WITHDRAW) return false
   
-  // Check if amount doesn't exceed withdrawable balance
-  const totalFee = (amount * SERVICE_FEE_RATE) + FIXED_FEE
-  const totalRequired = amount + totalFee
-  if (totalRequired > withdrawableBalance.value) return false
+  if (amount > withdrawableBalance.value) return false
   
   return true
 })

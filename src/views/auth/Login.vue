@@ -312,8 +312,7 @@ const handleLogin = async () => {
     // Default error
     let msg = 'Nomor yang Anda masukkan belum terdaftar di sistem.Silakan periksa kembali atau lakukan pendaftaran akun baru.'
     if (!error.response) {
-      msg = 'Tidak dapat terhubung ke server. Silakan periksa koneksi Anda dan coba lagi.'
-    }
+      msg = 'Tidak mendapatkan koneksi. Silakan periksa koneksi Anda dan coba beberapa saat lagi.'}
 
     if (status === 401) {
       if (errorData?.phone || detail.includes('not found') || detail.includes('tidak ditemukan') || detail.includes('user') || message.includes('not found')) {

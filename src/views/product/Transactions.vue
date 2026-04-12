@@ -18,6 +18,12 @@
         <div class="order-price">{{ formatCurrency(order.price) }}</div>
       </div>
 
+      <div v-if="orders.length > 0 && hasMore" class="pagination-row">
+        <button class="load-more-btn" @click="loadMore" :disabled="isLoading">
+          Memuat lebih banyak
+        </button>
+      </div>
+
       <div v-if="orders.length === 0" class="empty-state">
         <img src="/assets/image/empty.png" alt="No Data" class="empty-icon">
        
@@ -34,6 +40,12 @@ import { transactionAPI } from '@/services/api'
 const router = useRouter()
 
 const orders = ref([])
+const allOrders = ref([])
+const isLoading = ref(false)
+const pageSize = 20
+const hasMore = ref(true)
+const nextFetchPage = ref(1)
+const visibleCount = ref(pageSize)
 
 const goBack = () => {
   router.go(-1)
@@ -63,19 +75,64 @@ const normalizeTransactionsResponse = (data) => {
   return []
 }
 
-const fetchInterestTransactions = async () => {
+const loadPage = async (page) => {
+  isLoading.value = true
   try {
-    const resp = await transactionAPI.getTransactions({ type: 'INTEREST', page: 1 })
+    const resp = await transactionAPI.getTransactions({ type: 'INTEREST', page, page_size: pageSize })
     const items = normalizeTransactionsResponse(resp?.data)
-    orders.value = items.map((t) => ({
+    const mapped = items.map((t) => ({
       id: t?.id ?? t?.trx_id ?? `${t?.created_at || ''}-${t?.amount || ''}`,
       orderId: t?.product_name || t?.trx_id || '-',
       date: formatDateTime(t?.created_at),
-      price: t?.amount
+      price: t?.amount,
+      createdAtRaw: t?.created_at || null
     }))
+    const seen = new Set(allOrders.value.map((x) => String(x.id)))
+    const append = mapped.filter((m) => !seen.has(String(m.id)))
+    if (append.length) {
+      const merged = [...allOrders.value, ...append]
+      merged.sort((a, b) => new Date(b.createdAtRaw || 0).getTime() - new Date(a.createdAtRaw || 0).getTime())
+      allOrders.value = merged
+      return true
+    }
+    return false
   } catch (_) {
-    orders.value = []
+    return false
+  } finally {
+    isLoading.value = false
   }
+}
+
+const fetchInterestTransactions = async () => {
+  orders.value = []
+  allOrders.value = []
+  hasMore.value = true
+  nextFetchPage.value = 1
+  visibleCount.value = pageSize
+
+  let tries = 0
+  while (allOrders.value.length < visibleCount.value && tries < 5) {
+    const ok = await loadPage(nextFetchPage.value)
+    if (ok) nextFetchPage.value += 1
+    tries += 1
+    if (!ok) break
+  }
+  orders.value = allOrders.value.slice(0, visibleCount.value)
+  hasMore.value = allOrders.value.length >= visibleCount.value
+}
+
+const loadMore = async () => {
+  if (isLoading.value || !hasMore.value) return
+  visibleCount.value += pageSize
+  let tries = 0
+  while (allOrders.value.length < visibleCount.value && tries < 5) {
+    const ok = await loadPage(nextFetchPage.value)
+    if (ok) nextFetchPage.value += 1
+    tries += 1
+    if (!ok) break
+  }
+  orders.value = allOrders.value.slice(0, visibleCount.value)
+  hasMore.value = allOrders.value.length >= visibleCount.value
 }
 
 onMounted(() => {
@@ -212,5 +269,22 @@ img {
 .empty-text {
   font-size: 14px;
   color: #a0a0a0;
+}
+
+.pagination-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 10px;
+}
+
+.load-more-btn {
+  width: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 0;
 }
 </style>

@@ -20,7 +20,7 @@
       </div>
       <div v-for="attendance in attendances" :key="attendance.id" class="card">
         <div class="card-details">
-          <h2 class="card-title">{{ attendance.title }}</h2>
+          <h2 class="card-title">Masuk hari ini</h2>
           <div class="card-date">{{ attendance.date }}</div>
         </div>
         <div class="card-amount">{{ formatCurrency(attendance.amount) }}</div>

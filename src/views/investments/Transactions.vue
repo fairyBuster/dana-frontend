@@ -28,7 +28,7 @@
             </div>
             
             <div class="card-media">
-              <img :src="flight.droneImage" :alt="flight.droneName" class="drone-image">
+              <img :src="flight.droneImage" :alt="flight.droneName" class="drone-image" @error="onFlightImageError">
             </div>
 
             <div class="card-status">
@@ -38,6 +38,11 @@
             </div>
           </div>
         </article>
+        <div v-if="flights.length > 0 && hasMore" class="pagination-row">
+          <button class="load-more-btn" @click="loadMore" :disabled="isLoading">
+            Memuat lebih banyak
+          </button>
+        </div>
       </div>
     </section>
   </div>
@@ -47,11 +52,19 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { investmentAPI, transactionAPI } from '@/services/api'
+import { resolveImageUrl } from '@/utils/imageCache'
 
 const router = useRouter()
 
 const flights = ref([])
+const allFlights = ref([])
 const loadError = ref('')
+const isLoading = ref(false)
+const pageSize = 20
+const hasMore = ref(true)
+const nextFetchPage = ref(1)
+const visibleCount = ref(pageSize)
+const investmentStatusByTransactionId = new Map()
 
 const fallbackImage = '/assets/image/27c56f86fe1c8990e4a0be8a57a8835a3a1bc1b9.png'
 
@@ -94,6 +107,36 @@ const addHours = (iso, hours) => {
   return d.toISOString()
 }
 
+const getTransactionImageRaw = (t) => {
+  const candidates = [
+    t?.product_image,
+    t?.product?.image,
+    t?.product?.product_image,
+    t?.product?.thumbnail,
+    t?.product_thumbnail,
+    t?.product_image_url,
+    t?.image,
+    t?.image_url,
+    t?.thumbnail
+  ]
+  for (const c of candidates) {
+    const s = String(c || '').trim()
+    if (s) return s
+  }
+  return ''
+}
+
+const resolveTransactionImageUrl = (t) => {
+  const raw = getTransactionImageRaw(t)
+  const resolved = raw ? String(resolveImageUrl(raw) || '').trim() : ''
+  return resolved || fallbackImage
+}
+
+const onFlightImageError = (e) => {
+  const el = e?.target
+  if (el && el.src && !String(el.src).includes(fallbackImage)) el.src = fallbackImage
+}
+
 const mapToFlight = (t) => {
   const statusRaw = t?.status
   const badge = mapStatusToBadge(statusRaw)
@@ -120,7 +163,7 @@ const mapToFlight = (t) => {
     quantity: Number.isFinite(Number(t?.investment_quantity)) ? Number(t.investment_quantity) : 1,
     badgeClass,
     badgeText,
-    droneImage: fallbackImage,
+    droneImage: resolveTransactionImageUrl(t),
     createdAtRaw: createdAt || null
   }
 }
@@ -134,48 +177,106 @@ const extractErrorMessage = (err) => {
   return 'Gagal mengambil data'
 }
 
+const ensureInvestmentStatusMap = async () => {
+  if (investmentStatusByTransactionId.size > 0) return
+  try {
+    const [respActive, respExpired] = await Promise.all([
+      investmentAPI.getInvestments({ status: 'ACTIVE' }),
+      investmentAPI.getInvestments({ status: 'EXPIRED' })
+    ])
+    const allInv = [
+      ...normalizeInvestmentsResponse(respActive?.data),
+      ...normalizeInvestmentsResponse(respExpired?.data)
+    ]
+    allInv.forEach((inv) => {
+      const key = inv?.transaction_id
+      if (!key) return
+      investmentStatusByTransactionId.set(String(key), String(inv?.status || '').toUpperCase())
+    })
+  } catch (_) {}
+}
+
+const fetchTransactionsPage = async (page) => {
+  const tryFetch = async (type) => {
+    const resp = await transactionAPI.getTransactions({ type, page, page_size: pageSize })
+    const items = normalizeTransactionsResponse(resp?.data)
+    return items
+  }
+  let combined = []
+  const types = ['INVESTMENTS', 'INVESTMENT', 'INTEREST']
+  const settled = await Promise.allSettled(types.map((t) => tryFetch(t)))
+  settled.forEach((r) => {
+    if (r.status === 'fulfilled') combined = combined.concat(r.value)
+  })
+  return combined
+}
+
+const mergeFlights = (items) => {
+  const withStatus = items.map((t) => {
+    const trxKey = t?.trx_id || t?.transaction_id
+    const invStatus = trxKey ? investmentStatusByTransactionId.get(String(trxKey)) : null
+    return { ...t, _investment_status: invStatus || null }
+  })
+  const mapped = withStatus.map(mapToFlight)
+  const seen = new Set(allFlights.value.map((x) => String(x.id)))
+  const append = mapped.filter((m) => !seen.has(String(m.id)))
+  if (!append.length) return false
+  const merged = [...allFlights.value, ...append]
+  merged.sort((a, b) => new Date(b.createdAtRaw || 0).getTime() - new Date(a.createdAtRaw || 0).getTime())
+  allFlights.value = merged
+  return true
+}
+
+const loadPage = async (page) => {
+  await ensureInvestmentStatusMap()
+  const items = await fetchTransactionsPage(page)
+  if (!items.length) return false
+  return mergeFlights(items)
+}
+
 const fetchInvestmentTransactions = async () => {
   loadError.value = ''
+  isLoading.value = true
+  hasMore.value = true
+  flights.value = []
+  allFlights.value = []
+  nextFetchPage.value = 1
+  visibleCount.value = pageSize
   try {
-    const tryFetch = async (type) => {
-      const resp = await transactionAPI.getTransactions({ type, page: 1 })
-      const items = normalizeTransactionsResponse(resp?.data)
-      return items
+    let tries = 0
+    while (allFlights.value.length < visibleCount.value && tries < 5) {
+      const ok = await loadPage(nextFetchPage.value)
+      if (ok) nextFetchPage.value += 1
+      tries += 1
+      if (!ok) break
     }
-
-    let items = await tryFetch('INVESTMENTS')
-    if (!items.length) items = await tryFetch('INVESTMENT')
-    if (!items.length) items = await tryFetch('INTEREST')
-
-    const investmentStatusByTransactionId = new Map()
-    try {
-      const [respActive, respExpired] = await Promise.all([
-        investmentAPI.getInvestments({ status: 'ACTIVE' }),
-        investmentAPI.getInvestments({ status: 'EXPIRED' })
-      ])
-      const allInv = [
-        ...normalizeInvestmentsResponse(respActive?.data),
-        ...normalizeInvestmentsResponse(respExpired?.data)
-      ]
-      allInv.forEach((inv) => {
-        const key = inv?.transaction_id
-        if (!key) return
-        investmentStatusByTransactionId.set(String(key), String(inv?.status || '').toUpperCase())
-      })
-    } catch (_) {}
-
-    const withInvestmentStatus = items.map((t) => {
-      const trxKey = t?.trx_id || t?.transaction_id
-      const invStatus = trxKey ? investmentStatusByTransactionId.get(String(trxKey)) : null
-      return { ...t, _investment_status: invStatus || null }
-    })
-
-    const mapped = withInvestmentStatus.map(mapToFlight)
-    mapped.sort((a, b) => new Date(b.createdAtRaw || 0).getTime() - new Date(a.createdAtRaw || 0).getTime())
-    flights.value = mapped
+    flights.value = allFlights.value.slice(0, visibleCount.value)
+    hasMore.value = allFlights.value.length >= visibleCount.value
   } catch (err) {
     flights.value = []
     loadError.value = extractErrorMessage(err)
+    hasMore.value = false
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const loadMore = async () => {
+  if (!hasMore.value || isLoading.value) return
+  isLoading.value = true
+  visibleCount.value += pageSize
+  try {
+    let tries = 0
+    while (allFlights.value.length < visibleCount.value && tries < 5) {
+      const ok = await loadPage(nextFetchPage.value)
+      if (ok) nextFetchPage.value += 1
+      tries += 1
+      if (!ok) break
+    }
+    flights.value = allFlights.value.slice(0, visibleCount.value)
+    hasMore.value = allFlights.value.length >= visibleCount.value
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -381,5 +482,22 @@ img {
   background-color: #b4b8e3;
   border: 1px solid #746a9a;
   color: #000000;
+}
+
+.pagination-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 0 0;
+}
+
+.load-more-btn {
+  width: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 0;
 }
 </style>

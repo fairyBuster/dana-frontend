@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="app-container">
     <section id="section-header">
       <header class="app-header">
@@ -12,7 +12,7 @@
     <section id="section-content">
       <div class="content-container">
         
-        <!-- Card 1: Saldo Isi Ulang -->
+  
         <div class="card">
          
           <div class="card-body with-icon">
@@ -28,7 +28,7 @@
           </div>
         </div>
 
-        <!-- Card 2: Saldo Tersedia -->
+     
         <div class="card">
           <div class="card-body with-icon">
             <h2 class="card-title">Saldo Tersedia</h2>
@@ -43,10 +43,10 @@
           </div>
         </div>
 
-        <!-- Section Title -->
+   
         <h3 class="section-heading">Hitungan Detail Saldo</h3>
 
-        <!-- Card 3: Saldo Kliring -->
+      
         <div class="card">
           <div class="card-body with-icon">
             <h2 class="card-title">Saldo Kliring</h2>
@@ -61,7 +61,7 @@
           </div>
         </div>
 
-        <!-- Card 4: Saldo Yang Sudah Ditarik -->
+
         <div class="card">
           <div class="card-body with-icon">
             <h2 class="card-title">Saldo Yang Sudah Ditarik</h2>
@@ -76,7 +76,7 @@
           </div>
         </div>
 
-        <!-- Card 5: Saldo Komisi Undangan -->
+       
         <div class="card">
           <div class="card-body with-icon">
             <h2 class="card-title">Saldo Komisi Undangan</h2>
@@ -95,7 +95,7 @@
     </section>
     <LoadingSpinner :visible="loading" :overlay="true" message="" />
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { ref, onMounted } from 'vue'

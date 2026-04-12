@@ -24,6 +24,11 @@
           <div class="transaction-amount">{{ formatCurrency(transaction.amount) }}</div>
         </div>
       </article>
+      <div v-if="transactions.length > 0 && hasMore" class="pagination-row">
+        <button class="load-more-btn" @click="loadMore" :disabled="isLoading">
+          Memuat lebih banyak
+        </button>
+      </div>
     </section>
   </div>
   <LoadingSpinner :visible="isLoading" :overlay="true" message="" />
@@ -43,7 +48,12 @@ const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 const transactions = ref([])
+const allTransactions = ref([])
 let refreshIntervalId = 0
+const pageSize = 20
+const hasMore = ref(true)
+const nextFetchPage = ref(1)
+const visibleCount = ref(pageSize)
 
 const goBack = () => {
   router.go(-1)
@@ -90,35 +100,85 @@ const formatCurrency = (value) => {
   }).format(num)
 }
 
-const fetchWithdrawTransactions = async () => {
-  if (isLoading.value) return
+const fetchPage = async (page) => {
   isLoading.value = true
   showErrorModal.value = false
   errorMessage.value = ''
   try {
-    const resp = await withdrawalAPI.getTransactions({ page: 1 })
+    const resp = await withdrawalAPI.getTransactions({ page, page_size: pageSize })
     const data = resp?.data
     const items = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : [])
-    transactions.value = items.map((t) => ({
+    const mapped = items.map((t) => ({
       id: t.id ?? t.trx_id ?? `${t.created_at || ''}-${t.amount || ''}`,
       status: mapStatus(t.status),
       date: formatDate(t.created_at),
+      createdAtRaw: t.created_at || null,
       amount: t.amount,
       statusClass: mapStatusClass(t.status)
     }))
+    return mapped
   } catch (err) {
-    transactions.value = []
     errorMessage.value = extractErrorMessage(err)
     showErrorModal.value = true
+    return []
   } finally {
     isLoading.value = false
+  }
+}
+
+const mergeTransactions = (items) => {
+  if (!items.length) return false
+  const seen = new Set(allTransactions.value.map((x) => String(x.id)))
+  const append = items.filter((m) => !seen.has(String(m.id)))
+  if (!append.length) return false
+  const merged = [...allTransactions.value, ...append]
+  merged.sort((a, b) => new Date(b.createdAtRaw || 0).getTime() - new Date(a.createdAtRaw || 0).getTime())
+  allTransactions.value = merged
+  return true
+}
+
+const ensureBuffer = async (need) => {
+  let tries = 0
+  while (allTransactions.value.length < need && tries < 5) {
+    const items = await fetchPage(nextFetchPage.value)
+    const ok = mergeTransactions(items)
+    if (ok) nextFetchPage.value += 1
+    tries += 1
+    if (!ok) break
+  }
+  transactions.value = allTransactions.value.slice(0, need)
+  hasMore.value = allTransactions.value.length >= need
+}
+
+const fetchWithdrawTransactions = async () => {
+  transactions.value = []
+  allTransactions.value = []
+  hasMore.value = true
+  nextFetchPage.value = 1
+  visibleCount.value = pageSize
+  await ensureBuffer(visibleCount.value)
+}
+
+const loadMore = async () => {
+  if (isLoading.value || !hasMore.value) return
+  visibleCount.value += pageSize
+  await ensureBuffer(visibleCount.value)
+}
+
+const refreshFirstPage = async () => {
+  if (isLoading.value) return
+  const items = await fetchPage(1)
+  const ok = mergeTransactions(items)
+  if (ok) {
+    transactions.value = allTransactions.value.slice(0, visibleCount.value)
+    hasMore.value = allTransactions.value.length >= visibleCount.value
   }
 }
 
 const startAutoRefresh = () => {
   if (refreshIntervalId) return
   refreshIntervalId = window.setInterval(() => {
-    fetchWithdrawTransactions()
+    refreshFirstPage()
   }, 8000)
 }
 
@@ -302,5 +362,22 @@ h1, h2, h3, p {
   color: #FFFFFF;
   text-align: right;
   white-space: nowrap;
+}
+
+.pagination-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.load-more-btn {
+  width: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 0;
 }
 </style>

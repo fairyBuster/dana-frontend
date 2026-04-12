@@ -26,6 +26,11 @@
           <span>{{ formatCurrency(transaction.amount) }}</span>
         </div>
       </div>
+      <div v-if="transactions.length > 0 && hasMore" class="pagination-row">
+        <button class="load-more-btn" @click="loadMore" :disabled="isLoading">
+          Memuat lebih banyak
+        </button>
+      </div>
     </section>
   </div>
   <LoadingSpinner :visible="isLoading" :overlay="true" message="" />
@@ -42,9 +47,14 @@ import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 const router = useRouter()
 
 const transactions = ref([])
+const allTransactions = ref([])
 const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
+const pageSize = 20
+const hasMore = ref(true)
+const nextFetchPage = ref(1)
+const visibleCount = ref(pageSize)
 
 const goBack = () => {
   router.go(-1)
@@ -93,12 +103,12 @@ const mapTitle = (t) => {
   return 'Saldo isi ulang'
 }
 
-const fetchDepositTransactions = async () => {
+const loadPage = async (page) => {
   isLoading.value = true
   showErrorModal.value = false
   errorMessage.value = ''
   try {
-    const resp = await depositAPI.getTransactions({ page: 1 })
+    const resp = await depositAPI.getTransactions({ page, page_size: pageSize })
     const items = normalizeTransactionsResponse(resp?.data)
     const completedOnly = items.filter((t) => {
       const s = String(t?.status || t?.state || t?.payment_status || '').toUpperCase()
@@ -112,15 +122,54 @@ const fetchDepositTransactions = async () => {
         amount: t?.amount,
         createdAtRaw: t?.created_at || null
       }))
-      .sort((a, b) => new Date(b.createdAtRaw || 0).getTime() - new Date(a.createdAtRaw || 0).getTime())
-    transactions.value = mapped
+    const seen = new Set(allTransactions.value.map((x) => String(x.id)))
+    const append = mapped.filter((m) => !seen.has(String(m.id)))
+    if (append.length) {
+      const merged = [...allTransactions.value, ...append]
+      merged.sort((a, b) => new Date(b.createdAtRaw || 0).getTime() - new Date(a.createdAtRaw || 0).getTime())
+      allTransactions.value = merged
+      return true
+    }
+    return false
   } catch (err) {
-    transactions.value = []
     errorMessage.value = extractErrorMessage(err)
     showErrorModal.value = true
+    return false
   } finally {
     isLoading.value = false
   }
+}
+
+const fetchDepositTransactions = async () => {
+  transactions.value = []
+  allTransactions.value = []
+  hasMore.value = true
+  nextFetchPage.value = 1
+  visibleCount.value = pageSize
+
+  let tries = 0
+  while (allTransactions.value.length < visibleCount.value && tries < 5) {
+    const ok = await loadPage(nextFetchPage.value)
+    if (ok) nextFetchPage.value += 1
+    tries += 1
+    if (!ok) break
+  }
+  transactions.value = allTransactions.value.slice(0, visibleCount.value)
+  hasMore.value = allTransactions.value.length >= visibleCount.value
+}
+
+const loadMore = async () => {
+  if (isLoading.value || !hasMore.value) return
+  visibleCount.value += pageSize
+  let tries = 0
+  while (allTransactions.value.length < visibleCount.value && tries < 5) {
+    const ok = await loadPage(nextFetchPage.value)
+    if (ok) nextFetchPage.value += 1
+    tries += 1
+    if (!ok) break
+  }
+  transactions.value = allTransactions.value.slice(0, visibleCount.value)
+  hasMore.value = allTransactions.value.length >= visibleCount.value
 }
 
 onMounted(() => {
@@ -260,5 +309,22 @@ img {
   font-weight: 400;
   color: #ffffff;
   text-align: right;
+}
+
+.pagination-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.load-more-btn {
+  width: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 0;
 }
 </style>

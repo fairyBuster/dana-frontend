@@ -457,7 +457,7 @@ const handleRegister = async () => {
         const referralErrors = errorData.referral_code || errorData.referralCode
         const referralMessage = Array.isArray(referralErrors) ? referralErrors.join(' ') : String(referralErrors)
         if (referralMessage.toLowerCase().includes('batas undang harian tercapai')) {
-          generalError.value = 'Anda tidak bisa mendaftar menggunakan kode undangan ini'
+          generalError.value = 'Kode undangan telah mencapai batas. Silakan coba kembali besok'
         } else {
           generalError.value = 'Pastikan kode undangan yang Anda masukkan benar.'
         }
