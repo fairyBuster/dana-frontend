@@ -1,24 +1,24 @@
-<template>
+<!-- <template>
   <div class="app-container">
-    <!-- Header Section -->
+   
     <section id="section-header">
       <div class="header-container">
         <div class="back-button" @click="goBack">
-          <img src="/assets/image/140_1209.svg" alt="Back">
+          <img src="/assets/images/2023_1661.svg" alt="Back">
         </div>
         <h1 class="header-title">Keberuntungan</h1>
       </div>
     </section>
 
-    <!-- Hero Section -->
+
     <section id="section-hero">
       <div class="hero-container">
-        <!-- Title Banner -->
+ 
         <div class="title-banner">
-          <img src="/assets/image/ff83259569a0c5a9b39882ac1e66d8f607f0b24b.png" alt="Putaran Keberuntungan">
+          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Putaran Keberuntungan">
         </div>
 
-        <!-- Wheel and Pedestal Assembly -->
+     
         <div class="wheel-assembly">
           <div class="wheel-wrapper">
             <div class="wheel-rotor" :style="wheelStyle">
@@ -48,22 +48,22 @@
             </div>
             <div class="wheel-pointer"></div>
           </div>
-          <img class="pedestal-img" src="/assets/image/8fbe7faabcb82c6cacc46eb7bbe9c1b45cbe7e09.png" alt="Pedestal">
+          <img class="pedestal-img" src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Pedestal">
         </div>
 
-        <!-- Action Button -->
+
         <div class="action-button-container" :class="{ disabled: isSpinning || isLoading }" @click="spinWheel">
-          <img class="btn-bg" src="/assets/image/cf351e6f126f7eef60698fb120fe96529107a205.png" alt="Button Background">
+          <img class="btn-bg" src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Button Background">
           <span class="btn-text">Undian</span>
         </div>
       </div>
     </section>
 
-    <!-- Rules Section -->
+   
     <section id="section-rules">
       <div class="rules-card">
         <div class="rules-header">
-          <img src="/assets/image/76a9501409631f06aa5ac32a04574949156d640a.png" alt="Icon" class="rules-icon">
+          <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon" class="rules-icon">
           <h3 class="rules-title">Aturan meja putar</h3>
         </div>
         <p class="rules-subtitle">Tiket putar tersedia: {{ availableTickets }}</p>
@@ -76,7 +76,7 @@
 
   <ErrorModal v-model="showErrorModal" :message="errorMessage" />
   <SuccessModal v-model="showSuccessModal" :message="successMessage" />
-</template>
+</template> -->
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'

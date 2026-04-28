@@ -1,89 +1,57 @@
 <template>
   <div class="app-container">
-    <!-- Header Section -->
-    <section id="section-header" class="container">
-      <header class="app-header">
-        <div class="back-button" @click="goBack">
-          <img src="/assets/image/135_592.svg" alt="Back">
-        </div>
-        <h1 class="page-title">Tantangan</h1>
-      </header>
-    </section>
-
-    <!-- Notification Section -->
-    <section id="section-notification" class="container">
-      <div class="notification-bar">
-        <img src="/assets/image/137_598.svg" alt="Speaker" class="notification-icon">
-        <div class="notification-text">
-          <div class="notification-marquee">
-            <div class="notification-marquee-inner">
-              Por favor, complete algumas missões disponíveis abaixo para obter muita sorte para você
-            </div>
+    <section id="section-header">
+      <div class="header-content">
+        <button class="back-btn" @click="goBack" aria-label="Go back">
+          <img src="/assets/images/18_219.svg" alt="Back">
+        </button>
+        <div class="user-info">
+          <h1 class="greeting">Hai, {{ displayUsername }}</h1>
+          <div class="level-info">
+            <span class="level-label">Level saat ini:</span>
+            <span class="level-value">{{ currentLevel }}</span>
           </div>
+        </div>
+        <div class="logo-container">
+          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Trivex Logo" class="logo-img">
         </div>
       </div>
     </section>
 
-    <!-- Order Tasks Section -->
-    <section v-if="orderMissions.length" id="section-order-tasks" class="container">
-      <div class="task-groups">
-        <div v-for="(group, groupIdx) in orderMissionGroups" :key="`order-${groupIdx}`" class="task-card">
-          <div v-for="mission in group" :key="mission.id" class="task-item">
-            <div class="task-header">
-              <div class="task-header-left">
-                <span class="task-desc">{{ mission.description || mission.title }}</span>
-                <div class="reward-badge">
-                  <img src="/assets/image/bf8b81ef2600b30e06ec0a2ae89fa57be2e4397a.png" alt="Diamond" class="diamond-icon">
-                  <div class="reward-pill">Rp {{ formatCurrency(mission.reward) }}</div>
-                </div>
-              </div>
-              <div class="task-header-right"></div>
+    <section id="section-task-list">
+      <div class="task-list">
+        <div
+          v-for="mission in sortedMissions"
+          :key="mission.id"
+          class="task-card"
+        >
+          <div class="task-card-header">
+            <div class="task-title-group">
+              <img src="/assets/images/35c8b6a18c2ca182842dd2334e0d97ca5f0a270c.png" alt="Task Icon" class="task-icon">
+              <h2 class="task-title">Tugas berhadiah</h2>
             </div>
-            <div class="task-body">
-              <div class="task-progress-row">
-                <div class="progress-track">
-                  <div class="progress-fill" :style="{ width: `${getProgressPercent(mission)}%` }"></div>
-                </div>
-                <button class="btn-claim" :disabled="!mission.can_claim || mission.claimed || isClaiming" @click="claimMission(mission)">Terima</button>
-              </div>
-              <div class="task-status">{{ getStatusText(mission) }}</div>
+            <button
+              class="claim-btn"
+              :disabled="!mission.can_claim || mission.claimed || isClaiming"
+              @click="claimMission(mission)"
+            >
+              {{ mission.claimed ? 'Diklaim' : 'Klaim' }}
+            </button>
+          </div>
+          <div class="task-card-body">
+            <div class="task-desc-row">
+              <p class="task-desc">{{ mission.description || mission.title }}</p>
+              <span class="task-reward">+Rp {{ formatCurrency(mission.reward) }}</span>
             </div>
+            <p class="task-status">{{ getStatusText(mission) }}</p>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Referral Tasks Section -->
-    <section v-if="referralMissions.length" id="section-referral-tasks" class="container">
-      <div class="task-groups">
-        <div v-for="(group, groupIdx) in referralMissionGroups" :key="`ref-${groupIdx}`" class="task-card">
-          <div v-for="mission in group" :key="mission.id" class="task-item">
-            <div class="task-header">
-              <div class="task-header-left">
-                <span class="task-desc">{{ mission.description || mission.title }}</span>
-                <div class="reward-badge">
-                  <img src="/assets/image/bf8b81ef2600b30e06ec0a2ae89fa57be2e4397a.png" alt="Diamond" class="diamond-icon">
-                  <div class="reward-pill">Rp {{ formatCurrency(mission.reward) }}</div>
-                </div>
-              </div>
-              <div class="task-header-right"></div>
-            </div>
-            <div class="task-body">
-              <div class="task-progress-row">
-                <div class="progress-track">
-                  <div class="progress-fill" :style="{ width: `${getProgressPercent(mission)}%` }"></div>
-                </div>
-                <button class="btn-claim" :disabled="!mission.can_claim || mission.claimed || isClaiming" @click="claimMission(mission)">Terima</button>
-              </div>
-              <div class="task-status">{{ getStatusText(mission) }}</div>
-            </div>
-          </div>
+        <div v-if="!sortedMissions.length && !errorModalOpen" class="empty-state">
+          <p class="empty-text">Belum ada tugas tersedia</p>
         </div>
       </div>
     </section>
-    <br>
-    <br>
-    <br>
 
     <SuccessModal v-model="successModalOpen" :message="successMessage" />
     <ErrorModal v-model="errorModalOpen" :message="errorMessage" />
@@ -93,15 +61,14 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { missionAPI } from '@/services/api'
+import { authAPI, missionAPI } from '@/services/api'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 
 const router = useRouter()
-const goBack = () => {
-  router.go(-1)
-}
 
+const accountInfo = ref(null)
+const rankStatus = ref(null)
 const missions = ref([])
 const isClaiming = ref(false)
 const successModalOpen = ref(false)
@@ -109,12 +76,85 @@ const successMessage = ref('')
 const errorModalOpen = ref(false)
 const errorMessage = ref('')
 
+const goBack = () => {
+  router.go(-1)
+}
+
+const toNumber = (value) => {
+  if (value === null || value === undefined || value === '') return 0
+  const n = Number(String(value).replace(/[^0-9.-]/g, ''))
+  return Number.isFinite(n) ? n : 0
+}
+
+const displayUsername = computed(() => {
+  const d = accountInfo.value || {}
+  const username = String(d.username || d.full_name || d.name || '').trim()
+  return username || ''
+})
+
+const currentLevel = computed(() => {
+  const d = rankStatus.value || {}
+  const title = String(d.current_title || '').trim()
+  if (title) return title
+  const n = toNumber(d.current_rank)
+  return Number.isFinite(n) ? `LV${n}` : 'LV0'
+})
+
+const formatCurrency = (value) => {
+  const num = toNumber(value)
+  return new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(num)
+}
+
 const normalizeMissionsResponse = (data) => {
   if (!data) return []
   if (Array.isArray(data)) return data
   if (Array.isArray(data.results)) return data.results
   return []
 }
+
+const getMissionProgress = (mission) => {
+  return toNumber(mission?.progress_amount ?? mission?.progress ?? 0)
+}
+
+const getMissionRequirement = (mission) => {
+  return toNumber(mission?.requirement_amount ?? mission?.requirement ?? mission?.target_amount ?? 0)
+}
+
+const getMissionRemaining = (mission) => {
+  const req = getMissionRequirement(mission)
+  const prog = getMissionProgress(mission)
+  if (req <= 0) return 0
+  return Math.max(0, req - prog)
+}
+
+const sortedMissions = computed(() => {
+  const list = Array.isArray(missions.value) ? [...missions.value] : []
+  list.sort((a, b) => {
+    const aClaimed = Boolean(a?.claimed)
+    const bClaimed = Boolean(b?.claimed)
+    if (aClaimed !== bClaimed) return aClaimed ? 1 : -1
+
+    const aCan = Boolean(a?.can_claim)
+    const bCan = Boolean(b?.can_claim)
+    if (aCan !== bCan) return aCan ? -1 : 1
+
+    const ar = getMissionRemaining(a)
+    const br = getMissionRemaining(b)
+    if (ar !== br) return ar - br
+
+    const reqA = getMissionRequirement(a)
+    const reqB = getMissionRequirement(b)
+    if (reqA !== reqB) return reqA - reqB
+
+    const idA = Number(a?.id ?? 0)
+    const idB = Number(b?.id ?? 0)
+    return idA - idB
+  })
+  return list
+})
 
 const extractErrorMessage = (err) => {
   const data = err?.response?.data
@@ -128,60 +168,36 @@ const extractErrorMessage = (err) => {
   return 'Permintaan gagal, segarkan halaman'
 }
 
-const parseNumber = (value) => {
-  if (value === null || value === undefined || value === '') return 0
-  const n = Number(String(value).replace(/[^0-9.-]/g, ''))
-  return Number.isFinite(n) ? n : 0
-}
-
-const formatCurrency = (value) => {
-  const num = parseNumber(value)
-  return new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(num)
-}
-
-const isDepositMission = (mission) => String(mission?.type || '').toLowerCase() === 'deposit'
-
-const orderMissions = computed(() => missions.value.filter((m) => !isDepositMission(m)))
-const referralMissions = computed(() => missions.value.filter((m) => isDepositMission(m)))
-
-const sortByIdAsc = (items) => {
-  return [...(items || [])].sort((a, b) => {
-    const av = parseNumber(a?.id)
-    const bv = parseNumber(b?.id)
-    if (av < bv) return -1
-    if (av > bv) return 1
-    return 0
-  })
-}
-
-const chunkList = (items, size) => {
-  const arr = Array.isArray(items) ? items : []
-  const n = Number(size)
-  const chunkSize = Number.isFinite(n) && n > 0 ? Math.floor(n) : 1
-  const out = []
-  for (let i = 0; i < arr.length; i += chunkSize) out.push(arr.slice(i, i + chunkSize))
-  return out
-}
-
-const orderMissionGroups = computed(() => chunkList(sortByIdAsc(orderMissions.value), 4))
-const referralMissionGroups = computed(() => chunkList(sortByIdAsc(referralMissions.value), 4))
-
-const getProgressPercent = (mission) => {
-  const requirement = parseNumber(mission?.requirement)
-  if (!requirement) return 0
-  const progress = isDepositMission(mission) ? parseNumber(mission?.progress_amount) : parseNumber(mission?.progress)
-  return Math.min(Math.max((progress / requirement) * 100, 0), 100)
-}
-
 const getStatusText = (mission) => {
-  if (isDepositMission(mission)) {
+  const isDeposit = String(mission?.type || '').toLowerCase() === 'deposit'
+  if (isDeposit) {
     const lvl = Array.isArray(mission?.referral_levels) && mission.referral_levels.length ? mission.referral_levels[0] : 1
-    return `Terhitung teman saya di tingkat ${lvl} Rp ${formatCurrency(mission?.progress_amount)}`
+    return `Teman aktif tingkat ${lvl}: Rp ${formatCurrency(mission?.progress_amount)}`
   }
-  return `Anda saat ini sudah memiliki ${parseNumber(mission?.progress)} drone`
+  const progress = getMissionProgress(mission)
+  const requirement = getMissionRequirement(mission)
+  if (requirement > 0) {
+    return `Progres saat ini: ${progress}/${requirement}`
+  }
+  return `Progres saat ini: ${progress}`
+}
+
+const fetchAccountInfo = async () => {
+  try {
+    const resp = await authAPI.getAccountInfo()
+    accountInfo.value = resp?.data || null
+  } catch (_) {
+    accountInfo.value = null
+  }
+}
+
+const fetchRankStatus = async () => {
+  try {
+    const resp = await authAPI.getRankStatus()
+    rankStatus.value = resp?.data || null
+  } catch (_) {
+    rankStatus.value = null
+  }
 }
 
 const fetchMissions = async () => {
@@ -208,8 +224,8 @@ const claimMission = async (mission) => {
   try {
     const resp = await missionAPI.claimMission(mission.id)
     const data = resp?.data || {}
-    const amount = parseNumber(data.reward_amount ?? data.reward ?? mission.reward)
-    successMessage.value = `Adicionar Rp ${formatCurrency(amount)}`
+    const amount = toNumber(data.reward_amount ?? data.reward ?? mission.reward)
+    successMessage.value = `Berhasil klaim Rp ${formatCurrency(amount)}`
     successModalOpen.value = true
     await fetchMissions()
   } catch (err) {
@@ -221,257 +237,229 @@ const claimMission = async (mission) => {
 }
 
 onMounted(() => {
-  fetchMissions()
+  Promise.all([fetchAccountInfo(), fetchRankStatus(), fetchMissions()])
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 .app-container {
   font-family: 'Inter', sans-serif;
-  background-color: #0a0a1a;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  min-height: 150vh;
-  color: #ffffff;
-  margin: 0 !important;
-  padding: 0 !important;
-  
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin: 0;
+  padding: 0;
+  max-width: 412px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0a4345 0%, #0b6563 100%);
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 * {
   box-sizing: border-box;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-}
-
-.container {
-  width: 100%;
-  max-width: 412px;
-  position: relative;
-  padding: 0 12px;
+h1, h2, p {
+  margin: 0;
 }
 
 /* Header Section */
-.app-header {
-  display: flex;
-  align-items: center;
-  padding: 20px 0;
+#section-header {
+  padding: 28px 18px 24px 19px;
   position: relative;
 }
 
-.back-button {
-  width: 24px;
-  height: 24px;
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.back-btn {
+  position: absolute;
+  left: 5px;
+  top: 20px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  position: absolute;
-  left: 0px;
+  width: 41px;
+  height: 41px;
 }
 
-.page-title {
-  flex: 1;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
-  color: #ffffff;
+.back-btn img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
 }
 
-/* Notification Bar */
-.notification-bar {
-  margin: 5px 0;
-  height: 29px;
-  background: linear-gradient(180deg, #100f2c 0%, #0f132e 48%, #0a1025 100%);
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  gap: 8px;
-  overflow: hidden;
-}
-
-.notification-icon {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.notification-text {
-  flex: 1;
-  font-size: 12px;
-  color: #c4c4c4;
-  overflow: hidden;
-  line-height: 14px;
-}
-
-.notification-marquee {
-  width: 100%;
-  overflow: hidden;
-}
-
-.notification-marquee-inner {
-  display: inline-block;
-  white-space: nowrap;
-  padding-left: 100%;
-  animation: notification-marquee 12s linear infinite;
-}
-
-@keyframes notification-marquee {
-  to { transform: translateX(-100%) }
-}
-
-/* Task Card */
-.task-groups {
-  width: 100%;
+.user-info {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
+}
+
+.greeting {
+  margin: 0;
+  color: #ffffff;
+  margin-left:25px;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.level-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.level-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+.level-value {
+  color: #de6f00;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-img {
+  width: 100px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 50px;
+}
+
+/* Task List Section */
+#section-task-list {
+  padding: 0 19px 24px 24px;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
 }
 
 .task-card {
-  margin: 0;
-  padding: 14px 12px;
-  background: linear-gradient(180deg, #100f2c 0%, #0f132e 48%, #0a1025 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-margin-bottom: 6px;
-  box-shadow: 0px 4px 4px 0px rgba(158, 158, 158, 0.25);
-}
-
-.task-item {
-  padding: 14px 0;
-
-}
-
-.task-item:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.task-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.task-header-left {
-  width: 80%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-width: 0;
-}
-
-.task-header-right {
-  width: 20%;
-  flex-shrink: 0;
-}
-
-.task-desc {
-  font-size: 10px;
-  color: #ffffff;
-  max-width: 90%;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.reward-badge {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 26px;
-}
-
-.diamond-icon {
-  width: 29px;
-  height: 26px;
-  position: absolute;
-  left: -10px;
-  z-index: 2;
-}
-
-.reward-pill {
-  background-color: #a296ff;
-  border-radius: 10px;
-  padding: 2px 8px 2px 12px;
-  font-size: 10px;
-  color: #301f80;
-  font-weight: 700;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  box-shadow: inset 0px 4px 30px 0px rgba(0, 0, 0, 0.3);
-}
-
-.task-body {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 18px 14px;
+  margin-bottom: 12px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
 }
 
-.task-progress-row {
+.task-card:last-child {
+  margin-bottom: 0;
+}
+
+.task-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.task-title-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 9px;
 }
 
-.progress-track {
-  flex: 1;
-  height: 5px;
-  background-color: rgba(116, 106, 154, 0.55);
-  border-radius: 15px;
-  overflow: hidden;
+.task-icon {
+  width: 39px;
+  height: 39px;
+  object-fit: contain;
 }
 
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 31%, #9047e0 100%);
-  border-radius: 15px;
-}
-
-.task-status {
-  font-size: 11px;
+.task-title {
+  margin: 0;
   color: #ffffff;
-  text-align: center;
-  opacity: 0.95;
+  font-size: 15px;
+  font-weight: 500;
 }
 
-.btn-claim {
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 31%, #9047e0 100%);
-  border: 1px solid #746a9a;
-  border-radius: 14px;
-  color: white;
-  font-size: 13px;
-  padding: 0 16px;
-  height: 30px;
+.claim-btn {
+  background: linear-gradient(90deg, #4e733f 0%, #60995b 100%);
+  border-radius: 20px;
+  width: 86px;
+  height: 24px;
+  border: none;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  white-space: nowrap;
-  flex: 0 0 20%;
-  width: auto;
-  min-width: 76px;
+  padding: 0;
+  font-family: inherit;
+  transition: opacity 0.2s ease;
 }
 
-.btn-claim:disabled {
+.claim-btn:hover {
+  opacity: 0.9;
+}
+
+.claim-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.task-card-body {
+  padding-left: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.task-desc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.task-desc {
+  flex: 1;
+  margin: 0;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.task-reward {
+  color: #de9400;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.task-status {
+  margin: 0;
+  color: #ffbd7b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.empty-state {
+  padding: 40px 0;
+  text-align: center;
+}
+
+.empty-text {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
 }
 </style>

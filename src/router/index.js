@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { authAPI } from '../services/api'
 
 // Code Splitting (Dynamic Imports)
@@ -58,6 +58,8 @@ const BankIndex = () => import('../views/bank/Index.vue')
 const BankAdd = () => import('../views/bank/Add.vue')
 const BankEdit = () => import('../views/bank/Edit.vue')
 const ShareIndex = () => import('../views/share/Index.vue')
+const ReviewIndex = () => import('../views/review/Index.vue')
+const ReviewAdd = () => import('../views/review/Add.vue')
 const WithdrawCreate = () => import('../views/withdraw/Create.vue')
 const WithdrawRecords = () => import('../views/withdraw/Withdraw-trx.vue')
 const HowToUse = () => import('../views/document/How-to-use.vue')
@@ -77,26 +79,22 @@ const routes = [
     path: '/',
     name: 'Index',
     component: Index,
-    beforeEnter: (to, from, next) => {
-      // Check for referral code
-      try {
-        const params = new URLSearchParams(window.location.search || '')
-        const v = params.get('v')
-        if (v) {
-          next({ path: '/pages/account/register', query: { ref: v } })
-          return
-        }
-      } catch (_) {}
-      next()
-    }
   },
   {
-    path: '/pages/account/download-app',
+    path: '/download-app',
     name: 'DownloadApp',
     component: DownloadApp
   },
   {
-    path: '/pages/account/register/ref',
+    path: '/signup/invite/:code(.*)',
+    name: 'SignupInvite',
+    redirect: (to) => {
+      const code = decodeURIComponent(String(to.params.code || ''))
+      return { path: '/register', query: { ...to.query, ref: code }, hash: to.hash }
+    }
+  },
+  {
+    path: '/register/ref',
     name: 'ReferralRegisterRef',
     beforeEnter: (to, from, next) => {
       // Handle /register/ref?={code}
@@ -117,21 +115,21 @@ const routes = [
         }
       } catch (_) {}
       
-      if (code) return next({ path: '/pages/account/register', query: { ref: code } })
-      return next('/pages/account/register')
+      if (code) return next({ path: '/register', query: { ref: code } })
+      return next('/register')
     }
   },
   {
-    path: '/pages/account/register=:code(.*)',
+    path: '/register=:code(.*)',
     name: 'RegisterEq',
     beforeEnter: (to, from, next) => {
       const code = decodeURIComponent(String(to.params.code || '').replace(/^\?/, ''))
-      if (code) return next({ path: '/pages/account/register', query: { ref: code } })
-      return next('/pages/account/register')
+      if (code) return next({ path: '/register', query: { ref: code } })
+      return next('/register')
     }
   },
   {
-    path: '/pages/account/register/invitecode',
+    path: '/register/invitecode',
     name: 'ReferralRedirect',
     beforeEnter: (to, from, next) => {
       let code = to.query.ref || to.query.code || null
@@ -149,27 +147,17 @@ const routes = [
           }
         } catch (_) {}
       }
-      if (code) return next({ path: '/pages/account/register', query: { ref: code } })
-      return next('/pages/account/register')
+      if (code) return next({ path: '/register', query: { ref: code } })
+      return next('/register')
     }
   },
   {
-    path: '/pages/auth/register',
-    name: 'RegisterAuth',
-    component: Register
-  },
-  {
-    path: '/pages/auth/register/:refCode(.*)',
-    name: 'RegisterAuthWithReferral',
-    component: Register
-  },
-  {
-    path: '/pages/account/register/:refCode(.*)',
+    path: '/register/:refCode(.*)',
     name: 'PagesRegisterWithReferral',
     component: Register
   },
   {
-    path: '/pages/account/register',
+    path: '/register',
     name: 'Register',
     component: Register,
     beforeEnter: (to, from, next) => {
@@ -184,7 +172,7 @@ const routes = [
       if (!code) {
         try {
           const fp = to.fullPath || ''
-          const matchEq = fp.match(/\/pages\/account\/register=([^?&#]+)/)
+          const matchEq = fp.match(/\/register=([^?&#]+)/)
           if (matchEq && matchEq[1]) {
             code = decodeURIComponent(matchEq[1])
           }
@@ -207,7 +195,7 @@ const routes = [
     }
   },
   {
-    path: '/pages/account/access',
+    path: '/login',
     name: 'Login',
     component: Login,
     beforeEnter: (to, from, next) => {
@@ -220,89 +208,89 @@ const routes = [
         to.query.code ||
         null
       if (type === 'register' && invite) {
-        return next({ path: '/pages/account/register', query: { ref: invite } })
+        return next({ path: '/register', query: { ref: invite } })
       }
       return next()
     }
   },
   {
-    path: '/pages/account/forgot-password',
+    path: '/forgot-password',
     name: 'ForgotPassword',
     component: ForgotPassword
   },
   {
-    path: '/pages/account/terms',
+    path: '/terms',
     name: 'Terms',
     component: Terms
   },
   {
-    path: '/pages/account/privacy',
+    path: '/privacy',
     name: 'PrivacyPolicy',
     component: Policy
   },
   {
-    path: '/pages/account/cookie',
+    path: '/cookie',
     name: 'CookiePolicy',
     component: Cookie
   },
   {
-    path: '/pages/account/media',
+    path: '/media',
     name: 'Media',
     component: Media
   },
   {
-    path: '/pages/account/media/:id',
+    path: '/media/:id',
     name: 'MediaDetails',
     component: MediaDetails,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/career',
+    path: '/career',
     name: 'Career',
     component: Career
   },
   {
-    path: '/pages/account/solution',
+    path: '/solution',
     name: 'Solution',
     component: Solution
   },
   {
-    path: '/pages/account/active',
+    path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/about',
+    path: '/about',
     name: 'AboutUs',
     component: AboutUs
   },
   {
-    path: '/pages/account/account',
+    path: '/profile',
     name: 'Profile',
     component: Profile,
     meta: { requiresAuth: true }
   },
-  // {
-  //   path: '/profile/statistic',
-  //   name: 'ProfileStatistic',
-  //   component: ProfileStatistic,
-  //   meta: { requiresAuth: true }
-  // },
   {
-    path: '/pages/balance/recharge',
+    path: '/profile/statistic',
+    name: 'ProfileStatistic',
+    component: ProfileStatistic,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dep',
     name: 'Deposit',
     component: Deposit,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/history/recharge',
+    path: '/dep/history',
     name: 'WalletHistory',
     component: DepositRecords,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/settings',
+    path: '/settings',
     name: 'Settings',
     component: Settings,
     meta: { requiresAuth: true }
@@ -320,31 +308,31 @@ const routes = [
   //   meta: { requiresAuth: true }
   // },
   {
-    path: '/pages/account/settings/personal-info',
+    path: '/settings/personal-info',
     name: 'PersonalInfo',
     component: PersonalInfo,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/settings/change-password',
+    path: '/settings/change-password',
     name: 'ChangePassword',
     component: ChangePassword,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/settings/pin-withdraw',
+    path: '/settings/pin-withdraw',
     name: 'PinWithdraw',
     component: PinWithdraw,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/settings/device-info',
+    path: '/settings/device-info',
     name: 'InfoPerangkat',
     component: InfoPerangkat,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/settings/address',
+    path: '/settings/address',
     name: 'SettingsAddress',
     component: SettingsAddress,
     meta: { requiresAuth: true }
@@ -356,13 +344,13 @@ const routes = [
   //   meta: { requiresAuth: true }
   // },
   {
-    path: '/pages/account/missions',
+    path: '/task',
     name: 'Missions',
     component: Missions,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/benefits/premium',
+    path: '/vp',
     name: 'MissionsSvip',
     component: MissionsSvip,
     meta: { requiresAuth: true }
@@ -380,43 +368,43 @@ const routes = [
   //   meta: { requiresAuth: true }
   // },
   {
-    path: '/pages/account/missions/user-status',
+    path: '/task/user-status',
     name: 'UserStatus',
     component: UserStatus,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/missions/status/instructions',
+    path: '/task/status/instructions',
     name: 'InstructionsStatus',
     component: InstructionsStatus,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/attendance',
+    path: '/sign',
     name: 'Attendance',
     component: AttendanceIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/history/attendance',
+    path: '/sign/history',
     name: 'AttendanceHistory',
     component: AttendanceTrx,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/billing/overview',
+    path: '/informations/overview',
     name: 'BillingOverview',
     component: Transactions,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/history/transaction',
+    path: '/trx',
     name: 'TransactionsIndex',
     component: Transactions,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/billing/options',
+    path: '/informations/options',
     name: 'BillingOptions',
     component: TransactionChoose,
     meta: { requiresAuth: true }
@@ -428,207 +416,315 @@ const routes = [
   //   meta: { requiresAuth: true }
   // },
   {
-    path: '/pages/history/teams',
+    path: '/commission/history',
     name: 'CommissionHistory',
     component: CommissionTrx,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/support/platform',
+    path: '/support/platform',
     name: 'Support',
     component: Support,
     meta: { requiresAuth: false }
   },
   {
-    path: '/pages/account/support',
+    path: '/support',
     name: 'SupportIndex',
     component: SupportIndex,
     meta: { requiresAuth: false }
   },
   {
-    path: '/pages/account/support/bot',
+    path: '/support/bot',
     name: 'Bot',
     component: Bot,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/support/help',
+    path: '/support/help',
     name: 'SupportHelp',
     component: Help,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/help',
+    path: '/help',
     name: 'Help',
     component: Help,
     meta: { requiresAuth: false }
   },
   {
-    path: '/pages/invite/team/level/1',
+    path: '/team/1',
     name: 'Teams',
     component: Teams,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/invite/team/level/2',
+    path: '/team/2',
     name: 'Teams2',
     component: Teams2,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/invite/team/level/3',
+    path: '/team/3',
     name: 'Teams3',
     component: Teams3,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/invite/team',
+    path: '/team',
     name: 'TeamIndex',
     component: TeamIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/news',
+    path: '/review',
+    name: 'ReviewIndex',
+    component: ReviewIndex,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/review/add',
+    name: 'ReviewAdd',
+    component: ReviewAdd,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/news',
     name: 'NewsIndex',
     component: NewsIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/news/:id',
+    path: '/news/:id',
     name: 'NewsDetails',
     component: NewsDetails,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/products',
+    path: '/products',
     name: 'ProductIndex',
     component: ProductIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/history/order',
+    path: '/orders',
     name: 'ProductHistory',
     component: ProductTransactions,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/products/:id',
+    path: '/products/:id',
     name: 'ProductDetails',
     component: ProductDetails,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/panel',
+    path: '/portfolio',
     name: 'ActiveProduct',
     component: InvestmentsActive,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/panel/:id',
+    path: '/portfolio/:id',
     name: 'ActiveProductDetails',
     component: InvestmentDetails,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/panel/history',
+    path: '/portfolio/history',
     name: 'InvestmentHistory',
     component: InvestmentTransactions,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/history/records',
-    name: 'InvestmentTransactions',
-    component: InvestmentTransactions,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/pages/assets/bind',
+    path: '/connect',
     name: 'BankIndex',
     component: BankIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/assets/bind/add',
+    path: '/connect/add',
     name: 'BankAdd',
     component: BankAdd,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/assets/bind/edit',
+    path: '/connect/edit',
     name: 'BankEdit',
     component: BankEdit,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/invite/invite',
+    path: '/share',
     name: 'ShareIndex',
     component: ShareIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/assets/release',
+    path: '/flow',
     name: 'WithdrawCreate',
     component: WithdrawCreate,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/history/release',
+    path: '/flow/history',
     name: 'SettlementHistory',
     component: WithdrawRecords,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/rewards',
+    path: '/rewards',
     name: 'VoucherIndex',
     component: VoucherIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/history/rewards',
+    path: '/rewards/history',
     name: 'VoucherHistory',
     component: VoucherTrx,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/history/bonus',
+    path: '/bonus/history',
     name: 'PointHistory',
     component: PointHistory,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/bonus',
+    path: '/bonus',
     name: 'PointExchange',
     component: PointExchange,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/notifications',
+    path: '/notifications',
     name: 'Notifications',
     component: NotificationIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/company/security',
+    path: '/company/security',
     name: 'Security',
     component: Security,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/ranking',
+    path: '/ranking',
     name: 'Ranking',
     component: Ranking,
     meta: { requiresAuth: true }
   },
   {
-    path: '/pages/account/rules',
+    path: '/rules',
     name: 'Rules',
     component: HowToUse,
     meta: { requiresAuth: true }
-  }
+  },
+  { path: '/me', redirect: '/profile' },
+  { path: '/me/statistic', redirect: '/profile/statistic' },
+  { path: '/deposit', redirect: '/dep' },
+  { path: '/deposit/history', redirect: '/dep/history' },
+  { path: '/missions', redirect: '/task' },
+  { path: '/missions/user-status', redirect: '/task/user-status' },
+  { path: '/missions/status/instructions', redirect: '/task/status/instructions' },
+  { path: '/svip', redirect: '/vp' },
+  { path: '/attendance', redirect: '/sign' },
+  { path: '/attendance/history', redirect: '/sign/history' },
+  { path: '/billing/overview', redirect: '/informations/overview' },
+  { path: '/billing/options', redirect: '/informations/options' },
+  { path: '/transactions', redirect: '/trx' },
+  { path: '/bank', redirect: '/connect' },
+  { path: '/bank/add', redirect: '/connect/add' },
+  { path: '/bank/edit', redirect: '/connect/edit' },
+  { path: '/invite', redirect: '/share' },
+  { path: '/withdraw', redirect: '/flow' },
+  { path: '/withdraw/history', redirect: '/flow/history' },
+  { path: '/index/download-app', redirect: '/download-app' },
+  { path: '/index/access', redirect: '/login' },
+  {
+    path: '/index/register/ref',
+    redirect: (to) => ({ path: '/register/ref', query: to.query, hash: to.hash })
+  },
+  {
+    path: '/index/register=:code(.*)',
+    redirect: (to) => ({ path: `/register=${encodeURIComponent(String(to.params.code || ''))}`, query: to.query, hash: to.hash })
+  },
+  {
+    path: '/index/register/invitecode',
+    redirect: (to) => ({ path: '/register/invitecode', query: to.query, hash: to.hash })
+  },
+  {
+    path: '/index/register/:refCode(.*)',
+    redirect: (to) => ({ path: `/register/${to.params.refCode || ''}`, query: to.query, hash: to.hash })
+  },
+  { path: '/index/register', redirect: '/register' },
+  { path: '/index/forgot-password', redirect: '/forgot-password' },
+  { path: '/index/terms', redirect: '/terms' },
+  { path: '/index/privacy', redirect: '/privacy' },
+  { path: '/index/cookie', redirect: '/cookie' },
+  { path: '/index/media', redirect: '/media' },
+  { path: '/index/media/:id', redirect: (to) => ({ path: `/media/${to.params.id}`, query: to.query, hash: to.hash }) },
+  { path: '/index/career', redirect: '/career' },
+  { path: '/index/solution', redirect: '/solution' },
+  { path: '/index/active', redirect: '/dashboard' },
+  { path: '/index/about', redirect: '/about' },
+  { path: '/index/account', redirect: '/profile' },
+  { path: '/balance/recharge', redirect: '/dep' },
+  { path: '/history/recharge', redirect: '/dep/history' },
+  { path: '/index/settings', redirect: '/settings' },
+  { path: '/index/settings/personal-info', redirect: '/settings/personal-info' },
+  { path: '/index/settings/change-password', redirect: '/settings/change-password' },
+  { path: '/index/settings/pin-withdraw', redirect: '/settings/pin-withdraw' },
+  { path: '/index/settings/device-info', redirect: '/settings/device-info' },
+  { path: '/index/settings/address', redirect: '/settings/address' },
+  { path: '/index/missions', redirect: '/task' },
+  { path: '/benefits/premium', redirect: '/vp' },
+  { path: '/index/missions/user-status', redirect: '/task/user-status' },
+  { path: '/index/missions/status/instructions', redirect: '/task/status/instructions' },
+  { path: '/index/attendance', redirect: '/sign' },
+  { path: '/history/attendance', redirect: '/sign/history' },
+  { path: '/index/billing/overview', redirect: '/informations/overview' },
+  { path: '/history/transaction', redirect: '/trx' },
+  { path: '/index/billing/options', redirect: '/informations/options' },
+  { path: '/history/teams', redirect: '/commission/history' },
+  { path: '/index/support/platform', redirect: '/support/platform' },
+  { path: '/index/support', redirect: '/support' },
+  { path: '/index/support/bot', redirect: '/support/bot' },
+  { path: '/index/support/help', redirect: '/support/help' },
+  { path: '/index/help', redirect: '/help' },
+  { path: '/invite/team/level/1', redirect: '/team/1' },
+  { path: '/invite/team/level/2', redirect: '/team/2' },
+  { path: '/invite/team/level/3', redirect: '/team/3' },
+  { path: '/invite/team', redirect: '/team' },
+  { path: '/team/level/:level(1|2|3)', redirect: (to) => ({ path: `/team/${to.params.level}`, query: to.query, hash: to.hash }) },
+  { path: '/index/news', redirect: '/news' },
+  { path: '/index/news/:id', redirect: (to) => ({ path: `/news/${to.params.id}`, query: to.query, hash: to.hash }) },
+  { path: '/index/products', redirect: '/products' },
+  { path: '/history/order', redirect: '/orders' },
+  { path: '/index/products/:id', redirect: (to) => ({ path: `/products/${to.params.id}`, query: to.query, hash: to.hash }) },
+  { path: '/index/panel', redirect: '/portfolio' },
+  { path: '/index/panel/history', redirect: '/portfolio/history' },
+  { path: '/index/panel/:id', redirect: (to) => ({ path: `/portfolio/${to.params.id}`, query: to.query, hash: to.hash }) },
+  { path: '/history/records', redirect: '/portfolio/history' },
+  { path: '/assets/bind', redirect: '/connect' },
+  { path: '/assets/bind/add', redirect: '/connect/add' },
+  { path: '/assets/bind/edit', redirect: '/connect/edit' },
+  { path: '/invite/invite', redirect: '/share' },
+  { path: '/assets/release', redirect: '/flow' },
+  { path: '/history/release', redirect: '/flow/history' },
+  { path: '/index/rewards', redirect: '/rewards' },
+  { path: '/history/rewards', redirect: '/rewards/history' },
+  { path: '/history/bonus', redirect: '/bonus/history' },
+  { path: '/index/bonus', redirect: '/bonus' },
+  { path: '/index/notifications', redirect: '/notifications' },
+  { path: '/index/company/security', redirect: '/company/security' },
+  { path: '/index/ranking', redirect: '/ranking' },
+  { path: '/index/rules', redirect: '/rules' },
+  { path: '/auth/register', redirect: '/register' },
+  { path: '/auth/register/:refCode(.*)', redirect: (to) => ({ path: `/register/${to.params.refCode || ''}`, query: to.query, hash: to.hash }) }
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes
 })
 
@@ -639,16 +735,20 @@ router.beforeEach(async (to, from, next) => {
   const sessionOk = localStorage.getItem('session_authenticated') === 'true'
 
   const publicRoutes = [
-    '/pages/account/access',
-    '/pages/account/register',
-    '/pages/account/forgot-password',
-    '/pages/account/terms',
-    '/pages/account/privacy',
-    '/pages/account/cookie',
-    '/pages/account/media',
-    '/pages/account/career',
-    '/pages/account/solution',
-    '/pages/account/help'
+    '/',
+    '/download-app',
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/terms',
+    '/privacy',
+    '/cookie',
+    '/media',
+    '/career',
+    '/solution',
+    '/about',
+    '/help',
+    '/support'
   ]
   const isPublicRoute = publicRoutes.some(route => to.path.startsWith(route))
 
@@ -659,11 +759,11 @@ router.beforeEach(async (to, from, next) => {
         return next()
       } catch (_) {
         localStorage.removeItem('session_authenticated')
-        return next('/pages/account/access?session_expired=true')
+        return next('/login?session_expired=true')
       }
     }
     if (!isPublicRoute) {
-      return next('/pages/account/access')
+      return next('/login')
     }
   }
 

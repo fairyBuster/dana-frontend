@@ -1,95 +1,90 @@
 <template>
   <div class="app-container">
-    <!-- Header Section -->
-    <section id="header-section">
-      <header class="top-nav">
-        <div class="nav-left" @click="goBack">
-          <img src="/assets/image/132_171.svg" alt="Back" class="icon-back">
-        </div>
-        <h1 class="page-title">Kehadiran</h1>
-      </header>
-
-      <div class="user-profile">
-        <div class="avatar-container">
-          <img :src="avatarSrc" alt="User Avatar" class="avatar">
-        </div>
-        <div class="user-info">
-          <div class="username">{{ displayUsername }}</div>
-          <div class="uid">UID {{ displayUid }}</div>
-        </div>
+    <section id="section-header">
+      <div class="section-container">
+        <header class="app-header">
+          <button class="back-button" @click="goBack" aria-label="Go back">
+            <img src="/assets/images/2023_1661.svg" alt="Back Icon">
+          </button>
+          <h1 class="page-title">Hadiah harian</h1>
+        </header>
       </div>
     </section>
 
-    <!-- Progress Section -->
-    <section id="progress-section">
-      <div class="card progress-card">
-        <div class="progress-header">
-          <span class="progress-title">Terbang {{ cycleDaysText }} hari untuk dapatkan</span>
-          <div class="reward-badge">
-            <div class="reward-pill">
-              <img src="/assets/image/bf8b81ef2600b30e06ec0a2ae89fa57be2e4397a.png" alt="Gem" class="gem-icon-sm">
-              <span class="reward-text">Rp {{ bonusRewardText }}</span>
+    <section id="section-summary">
+      <div class="section-container">
+        <div class="summary-wrapper">
+          <div class="summary-card">
+            <div class="summary-item">
+              <span class="summary-value">{{ totalClaimCountText }} Hari</span>
+              <span class="summary-label">Total berhasil absen</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+              <span class="summary-value">{{ formatCurrency(totalEarned) }}</span>
+              <span class="summary-label">Total rupiah absen</span>
             </div>
           </div>
         </div>
-
-        <div class="progress-bar-container">
-          <div class="progress-track">
-            <div class="progress-fill" :style="{ width: `${progressPercent}%` }"></div>
-          </div>
-        </div>
-
-        <div class="progress-footer">
-          <span class="status-text">Anda sudah aktif bersama kami selama {{ streakText }} hari</span>
-          <button class="btn-claim" type="button" :disabled="!canClaimBonus" @click="handleClaimBonus">Terima</button>
-        </div>
       </div>
     </section>
 
-    <!-- Check-in Section -->
-    <section id="checkin-section">
-      <div class="card checkin-card">
-        <div class="checkin-header">
-          <img src="/assets/image/868a72556c0a6003d94f0f0d9ec7951c93a698eb.png" alt="Bag" class="header-icon">
-          <p class="checkin-desc">Selesaikan masuk selama {{ cycleDaysText }} hari berturut-turut untuk mendapatkan bonus kumulatif diatas</p>
-        </div>
-
-        <div class="days-grid">
-          <div v-for="item in dayItems" :key="item.day" class="day-item">
-            <div class="day-box" :class="{ special: item.special }">
-              <img :src="item.checked ? checkedIconSrc : gemIconSrc" :alt="item.checked ? 'Checked' : 'Gem'" class="day-icon">
-              <span class="day-amount">Rp {{ item.amountText }}</span>
+    <section id="section-calendar">
+      <div class="section-container">
+        <div class="calendar-wrapper">
+          <div class="calendar-card">
+            <div class="calendar-header">
+              <div class="calendar-icon-bg">
+                <img src="/assets/images/da35b1bd478095c4d10f2741cad43f6fbf632e97.png" alt="Calendar Icon" class="calendar-icon">
+              </div>
+              <p class="calendar-subtitle">{{ canClaimToday ? 'Silakan absen untuk hari ini' : 'Anda sudah absen hari ini' }}</p>
             </div>
-            <span class="day-label">{{ item.label }}</span>
+
+            <div class="calendar-grid">
+              <button
+                v-for="item in visibleDayItems"
+                :key="item.day"
+                type="button"
+                class="day-item"
+                :class="{ checked: item.checked, special: item.special, claimable: item.claimable }"
+                :disabled="isClaiming || !item.claimable"
+                @click="handleDayClick(item)"
+              >
+                <img class="day-icon" :src="item.checked ? checkedIconSrc : gemIconSrc" alt="Day Icon">
+                <div class="day-label">{{ item.label }}</div>
+              </button>
+            </div>
+
+            <button
+              v-if="dayItems.length > collapsedCount"
+              type="button"
+              class="toggle-calendar-btn"
+              @click="toggleCalendarView"
+            >
+              {{ showAllDays ? 'Tampilkan sedikit' : 'Tampilkan semua' }}
+            </button>
           </div>
-        </div>
-
-        <button class="btn-checkin" type="button" :disabled="isClaiming || !canClaimToday" @click="handleCheckIn">
-          <img src="/assets/image/7b8632cb6ba78c8c3ae42b19a7795386bc75f8e1.png" alt="Check" class="btn-icon">
-          <span>{{ canClaimToday ? 'Masuk sekarang' : 'Sudah Masuk' }}</span>
-        </button>
-
-        <div class="instructions">
-          <h3>Petunjuk masuk</h3>
-          <p>Masuk setiap hari untuk mendapatkan hadiah.</p>
-          <p>Jika pengumpulannya terganggu, maka akan diterbitkan kembali dari pengumpulan pertama.</p>
-          <p>Pengguna harus masuk sekali sehari dan hadiah akan masuk secara real-time.</p>
-          <p>Hadiah mengikuti distribusi sistem dan tampilan platform.</p>
-          <p>Jika ditemukan kecurangan, platform berhak membatalkan partisipasi dan hadiah.</p>
-          <p>Platform berhak atas interpretasi akhir acara ini.</p>
         </div>
       </div>
-      <div class="footer-brand">
-          <div class="brand-row">
-            <img src="/assets/image/983276.png" alt="Ot-Sent" class="footer-logo">
-            <span class="copyright">© 2026 OT-SENT. All Rights Reserved</span>
-          </div>
-          <p class="tagline">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
-        </div>
     </section>
 
-    <!-- Footer Section -->
-    
+    <section id="section-rules">
+      <div class="section-container">
+        <div class="rules-wrapper">
+          <div class="rules-card">
+            <h2 class="rules-title">Petunjuk absen</h2>
+            <div class="rules-text">
+              <p>Masuk setiap hari untuk mendapatkan hadiah.</p>
+              <p>Jika pengumpulannya terganggu, maka akan diterbitkan kembali dari pengumpulan pertama.</p>
+              <p>Pengguna harus masuk sekali sehari dan hadiah akan masuk secara real-time.</p>
+              <p>Hadiah mengikuti distribusi sistem dan tampilan platform.</p>
+              <p>Jika ditemukan kecurangan, platform berhak membatalkan partisipasi dan hadiah.</p>
+              <p>Platform berhak atas interpretasi akhir acara ini.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
   <LoadingSpinner :visible="isLoading" :overlay="true" message="" />
   <ErrorModal v-model="showErrorModal" :message="errorMessage" />
@@ -99,8 +94,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { avatarSrc } from '@/utils/avatar'
-import { attendanceAPI, authAPI } from '@/services/api'
+import { attendanceAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
@@ -110,20 +104,20 @@ const goBack = () => {
   router.go(-1)
 }
 
-const checkedIconSrc = '/assets/image/7b8632cb6ba78c8c3ae42b19a7795386bc75f8e1.png'
-const gemIconSrc = '/assets/image/bf8b81ef2600b30e06ec0a2ae89fa57be2e4397a.png'
+const checkedIconSrc = '/assets/images/d4eaa5839a5872cc4c32f292c0feaee334e99300.png'
+const gemIconSrc = '/assets/images/da4151be78469acf27cc0da4d60d3f5fcefd602d.png'
 
 const isLoading = ref(false)
 const isClaiming = ref(false)
-const isClaimingBonus = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 const showSuccessModal = ref(false)
 const successMessage = ref('')
 
-const accountInfo = ref(null)
 const settings = ref(null)
 const status = ref(null)
+const showAllDays = ref(false)
+const collapsedCount = 14
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return 0
@@ -165,13 +159,17 @@ const parseNumber = (value) => {
   return Number.isFinite(n) ? n : 0
 }
 
-const formatAmount = (value) => {
+const formatCurrency = (value) => {
   const n = parseNumber(value)
   const hasFraction = Math.abs(n % 1) > 1e-9
   return new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: hasFraction ? 0 : 0,
     maximumFractionDigits: hasFraction ? 2 : 0
   }).format(n)
+}
+
+const formatRupiah = (value) => {
+  return `Rp ${formatCurrency(value)}`
 }
 
 const extractErrorMessage = (err) => {
@@ -191,9 +189,8 @@ const cycleDays = computed(() => {
   const fromStatus = parseNumber(status.value?.cycle_days)
   if (fromStatus > 0) return fromStatus
   const fromSettings = parseNumber(settings.value?.daily_cycle_days)
-  return fromSettings > 0 ? fromSettings : 14
+  return fromSettings > 0 ? fromSettings : 20
 })
-const cycleDaysText = computed(() => String(cycleDays.value))
 
 const cycleDay = computed(() => {
   const n = parseNumber(status.value?.cycle_day)
@@ -201,28 +198,22 @@ const cycleDay = computed(() => {
   return Math.min(streakCount.value, cycleDays.value)
 })
 
-const bonusRewardText = computed(() => {
-  const s = settings.value
-  if (!s) return '0'
-  const bonus7 = parseNumber(s.bonus_7_days)
-  const bonus30 = parseNumber(s.bonus_30_days)
-  const fallback = parseNumber(s.fixed_amount)
-  const best = bonus7 || bonus30 || fallback
-  return formatAmount(best)
-})
-
 const streakCount = computed(() => {
   const d = status.value || {}
-  const n = parseNumber(d.streak ?? d.streak_count ?? d.current_streak ?? 0)
+  const n = parseNumber(d.streak ?? d.current_streak ?? d.streak_count ?? d.streak_days ?? 0)
   return n >= 0 ? n : 0
 })
-const streakText = computed(() => String(streakCount.value))
 
-const progressPercent = computed(() => {
-  const total = cycleDays.value
-  if (!total) return 0
-  const pct = (cycleDay.value / total) * 100
-  return Math.max(0, Math.min(100, Math.round(pct)))
+const totalClaimCount = computed(() => {
+  const d = status.value || {}
+  const n = parseNumber(d.total_claim_count ?? d.total_claimed_count ?? d.claim_count ?? d.total_count ?? 0)
+  return n >= 0 ? n : 0
+})
+const totalClaimCountText = computed(() => String(totalClaimCount.value))
+
+const totalEarned = computed(() => {
+  const d = status.value || {}
+  return parseNumber(d.total_claimed_amount ?? d.total_earned ?? d.total_reward ?? d.total_amount ?? 0)
 })
 
 const canClaimToday = computed(() => {
@@ -232,26 +223,6 @@ const canClaimToday = computed(() => {
   const claimed = d.claimed_today ?? d.has_claimed_today ?? null
   if (claimed !== null && claimed !== undefined) return !claimed
   return true
-})
-
-const hasClaimedToday = computed(() => {
-  const d = status.value || {}
-  const claimed = d.has_claimed_today ?? d.claimed_today ?? null
-  if (claimed !== null && claimed !== undefined) return !!claimed
-  return !canClaimToday.value
-})
-
-const displayUsername = computed(() => {
-  const d = accountInfo.value || {}
-  const username = String(d.username || d.name || '').trim()
-  return username || 'Username'
-})
-
-const displayUid = computed(() => {
-  const d = accountInfo.value || {}
-  const uid = d.referral_code ?? d.id ?? d.user_id ?? null
-  if (uid === null || uid === undefined || uid === '') return '-'
-  return String(uid)
 })
 
 const getDayAmount = (day) => {
@@ -265,44 +236,34 @@ const getDayAmount = (day) => {
 }
 
 const getDayLabel = (day) => {
-  const d = Number(day)
-  if (!Number.isFinite(d)) return `${day} Day`
-  const mod100 = d % 100
-  if (mod100 >= 11 && mod100 <= 13) return `${d}th Day`
-  const mod10 = d % 10
-  if (mod10 === 1) return `${d}st Day`
-  if (mod10 === 2) return `${d}nd Day`
-  if (mod10 === 3) return `${d}rd Day`
-  return `${d}th Day`
+  return `${day} Hari`
 }
 
 const dayItems = computed(() => {
   const total = cycleDays.value
+  const nextClaimDay = canClaimToday.value && cycleDay.value < total ? cycleDay.value + 1 : null
   const out = []
   for (let d = 1; d <= total; d += 1) {
     out.push({
       day: d,
       label: getDayLabel(d),
-      amountText: formatAmount(getDayAmount(d)),
+      amountText: formatCurrency(getDayAmount(d)),
       checked: d <= cycleDay.value,
+      claimable: nextClaimDay !== null && d === nextClaimDay,
       special: d === total
     })
   }
   return out
 })
 
-const claimBonusEligible = computed(() => {
-  const enabled = settings.value?.consecutive_bonus_enabled
-  if (enabled === false) return false
-  return cycleDay.value >= cycleDays.value
+const visibleDayItems = computed(() => {
+  if (showAllDays.value) return dayItems.value
+  return dayItems.value.slice(0, collapsedCount)
 })
 
-const canClaimBonus = computed(() => {
-  if (isLoading.value || isClaimingBonus.value) return false
-  if (!claimBonusEligible.value) return false
-  if (!hasClaimedToday.value) return false
-  return true
-})
+const toggleCalendarView = () => {
+  showAllDays.value = !showAllDays.value
+}
 
 const fetchSettings = async () => {
   try {
@@ -343,16 +304,13 @@ const fetchAttendance = async () => {
   showErrorModal.value = false
   errorMessage.value = ''
   try {
-    const [acc, streakResp, setData] = await Promise.all([
-      authAPI.getAccountInfo(),
+    const [streakResp, setData] = await Promise.all([
       attendanceAPI.getStreak(),
       fetchSettings()
     ])
-    accountInfo.value = acc?.data || null
     settings.value = setData || null
     status.value = streakResp?.data || null
   } catch (err) {
-    accountInfo.value = null
     settings.value = null
     status.value = null
     errorMessage.value = extractErrorMessage(err)
@@ -369,13 +327,28 @@ const handleCheckIn = async () => {
   errorMessage.value = ''
   try {
     const res = await attendanceAPI.claim()
-    const data = res?.data?.data || res?.data || {}
+    const data = res?.data || {}
     const streakResp = await attendanceAPI.getStreak()
     status.value = streakResp?.data || null
-    const amountFromResponse = parseNumber(data.amount ?? data.reward ?? data.bonus_amount ?? data.bonus)
-    const fallbackAmount = getDayAmount(cycleDay.value)
-    const amount = amountFromResponse > 0 ? amountFromResponse : (fallbackAmount > 0 ? fallbackAmount : amountFromResponse)
-    successMessage.value = `Adicionar Rp ${formatAmount(amount)}`
+    const claimedAmount = parseNumber(
+      data.claimed_amount ??
+        data.log?.amount ??
+        data.amount ??
+        data.reward ??
+        data.bonus_amount ??
+        data.bonus ??
+        0
+    )
+    const streakAfter = parseNumber(data.streak ?? data.log?.streak_count ?? streakCount.value)
+    const baseMsg = String(data.message || 'Klaim absensi berhasil').trim()
+    const nextClaimDate = data.next_claim_date ? String(data.next_claim_date) : ''
+
+    let msg = baseMsg || 'Klaim absensi berhasil'
+    if (claimedAmount > 0) msg += `! Anda mendapatkan ${formatRupiah(claimedAmount)}.`
+    else msg += '!'
+    if (streakAfter > 0) msg += ` Streak: ${streakAfter} hari.`
+    if (nextClaimDate) msg += ` Klaim berikutnya: ${nextClaimDate}.`
+    successMessage.value = msg
     showSuccessModal.value = true
   } catch (err) {
     errorMessage.value = extractErrorMessage(err)
@@ -385,32 +358,9 @@ const handleCheckIn = async () => {
   }
 }
 
-const handleClaimBonus = async () => {
-  if (!canClaimBonus.value) return
-  isClaimingBonus.value = true
-  showErrorModal.value = false
-  errorMessage.value = ''
-  try {
-    const res = await attendanceAPI.claimBonus()
-    const data = res?.data?.data || res?.data || {}
-    const streakResp = await attendanceAPI.getStreak()
-    status.value = streakResp?.data || null
-    const amountFromResponse = parseNumber(data.amount ?? data.bonus_amount ?? data.bonus ?? data.reward)
-    const s = settings.value || {}
-    const fallbackAmount =
-      parseNumber(s.bonus_7_days) ||
-      parseNumber(s.bonus_30_days) ||
-      parseNumber(s.fixed_amount) ||
-      0
-    const amount = amountFromResponse > 0 ? amountFromResponse : (fallbackAmount > 0 ? fallbackAmount : amountFromResponse)
-    successMessage.value = `Bonus berhasil diklaim. Rp ${formatAmount(amount)}`
-    showSuccessModal.value = true
-  } catch (err) {
-    errorMessage.value = extractErrorMessage(err)
-    showErrorModal.value = true
-  } finally {
-    isClaimingBonus.value = false
-  }
+const handleDayClick = async (item) => {
+  if (!item?.claimable) return
+  await handleCheckIn()
 }
 
 onMounted(() => {
@@ -419,390 +369,252 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 body {
   font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #050510;
-  color: #ffffff;
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
+  background-color: #f8f8f8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 .app-container {
-  width: 100%;
+  font-family: 'Inter', sans-serif;
   max-width: 412px;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  min-height: 120vh;
-  position: relative;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
+  margin: 0 auto;
+  width: 100%;
+  background-color: #f8f8f8;
+  min-height: 100vh;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-}
-
-.text-sm { font-size: 10px; }
-.text-md { font-size: 13px; }
-.text-lg { font-size: 15px; }
-.font-bold { font-weight: 700; }
-
-/* Header Section */
-#header-section {
-  padding: 13px 20px 20px;
-}
-
-.top-nav {
+/* Header */
+.app-header {
   display: flex;
   align-items: center;
-  margin-bottom: 25px;
+  padding: 20px 16px;
   position: relative;
+  height: 64px;
 }
 
-.nav-left {
+.back-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
   position: absolute;
-  left: 0;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.icon-back {
-  width: 24px;
-  height: 24px;
+.back-button img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
 }
 
 .page-title {
   flex: 1;
   text-align: center;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
   margin: 0;
-  color: white;
 }
 
-.user-profile {
+/* Summary */
+.summary-wrapper {
+  padding: 8px 16px 16px 16px;
+}
+
+.summary-card {
+  background-color: #eeeeee;
+  border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  padding: 16px 0;
 }
 
-.avatar-container {
-  width: 56px;
-  height: 57px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-info {
+.summary-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
 }
 
-.username {
-  font-size: 18px;
-  font-weight: 600;
-  color: white;
-}
-
-.uid {
+.summary-value {
+  color: #004d43;
   font-size: 14px;
-  opacity: 0.8;
-  color: white;
-}
-
-/* Progress Section */
-#progress-section {
-  padding: 0 16px;
-  margin-bottom: 16px;
-}
-
-.card {
-  background: linear-gradient(180deg, rgba(16, 15, 44, 1) 0%, rgba(15, 19, 46, 1) 48%, rgba(10, 16, 37, 1) 100%);
-  border-radius: 10px;
-  box-shadow: 0px 4px 4px 0px rgba(158, 158, 158, 0.25);
-  padding: 15px;
-}
-
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.progress-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: white;
-}
-
-.reward-badge {
-  position: relative;
-}
-
-.reward-pill {
-  background-color: #a296ff;
-  border-radius: 10px;
-  padding: 2px 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: inset 0px 4px 30px 0px rgba(0, 0, 0, 0.3);
-}
-
-.gem-icon-sm {
-  width: 25px;
-  height: 25px;
-}
-
-.reward-text {
-  color: #301f80;
-  font-size: 13px;
   font-weight: 700;
 }
 
-.progress-bar-container {
-  margin-bottom: 10px;
-}
-
-.progress-track {
-  background-color: #746a9a;
-  height: 4px;
-  border-radius: 15px;
-  width: 100%;
-  position: relative;
-}
-
-.progress-fill {
-  background: linear-gradient(90deg, #3F48C5 0%, #6135C4 30%, #9047E0 100%);
-  height: 100%;
-  border-radius: 15px;
-}
-
-.progress-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.status-text {
+.summary-label {
+  color: rgba(0, 0, 0, 0.5);
   font-size: 11px;
-  max-width: 220px;
-  color: white;
 }
 
-.btn-claim {
-  background: linear-gradient(90deg, #3F48C5 0%, #6135C4 30%, #9047E0 100%);
-  border: 1px solid #746a9a;
-  border-radius: 10px;
-  color: white;
-  padding: 4px 15px;
-  font-size: 14px;
-  cursor: pointer;
-  outline: none;
+.summary-divider {
+  width: 1px;
+  height: 36px;
+  background-color: rgba(0, 0, 0, 0.15);
 }
 
-/* Check-in Section */
-#checkin-section {
-  padding: 0 16px;
-  flex: 1;
+/* Calendar */
+.calendar-wrapper {
+  padding: 0 16px 16px 16px;
 }
 
-.checkin-card {
-  padding: 15px;
+.calendar-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 20px 16px;
+}
+
+.calendar-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
-.checkin-header {
+.calendar-icon-bg {
+  width: 36px;
+  height: 36px;
+  background-color: #e8f5e9;
+  border-radius: 50%;
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  width: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
-.header-icon {
-  width: 26px;
-  height: 27px;
-  flex-shrink: 0;
+.calendar-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
-.checkin-desc {
+.calendar-subtitle {
+  color: rgba(0, 0, 0, 0.5);
   font-size: 13px;
-  line-height: 1.4;
-  color: white;
   margin: 0;
 }
 
-.days-grid {
+.calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 12px 6px;
+  gap: 12px 8px;
+  margin-bottom: 8px;
+}
+
+.toggle-calendar-btn {
   width: 100%;
-  margin-bottom: 25px;
+  height: 44px;
+  margin-top: 10px;
+  border-radius: 20px;
+  background-color: #004d43;
+  border: 1px solid #004d43;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.toggle-calendar-btn:active {
+  opacity: 0.85;
 }
 
 .day-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-
-.day-box {
+  position: relative;
+  height: 50px;
   width: 100%;
-  aspect-ratio: 36/46;
-  background: linear-gradient(180deg, rgba(16, 15, 44, 1) 0%, rgba(15, 19, 46, 1) 48%, rgba(10, 16, 37, 1) 100%);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 2px;
-  padding: 5px 0;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  background-color: #eeeeee;
+  overflow: hidden;
+  border: none;
+  padding: 0;
+  cursor: default;
 }
 
-.day-box.special {
-  background: linear-gradient(180deg, rgba(63, 72, 197, 1) 0%, rgba(97, 53, 196, 1) 48%, rgba(144, 71, 224, 1) 100%);
+.day-item.checked {
+  background-color: rgba(0, 77, 67, 0.3);
+}
+
+.day-item.claimable {
+  cursor: pointer;
+  outline: 2px solid rgba(0, 77, 67, 0.35);
+  outline-offset: 2px;
+}
+
+.day-item:disabled {
+  cursor: default;
 }
 
 .day-icon {
-  width: 35px;
-  height: 30px;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 22px;
   object-fit: contain;
-}
-
-.day-item:not(:first-child) .day-icon {
-  width: 35px;
-  height: 30px;
-}
-
-.day-amount {
-  font-size: 8px;
-  font-weight: 500;
-  color: #fff;
 }
 
 .day-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15px;
+  background-color: #004d43;
+  color: #ffffff;
   font-size: 8px;
-  color: #fff;
-}
-
-.btn-checkin {
-  width: 100%;
-  height: 43px;
-  background: linear-gradient(90deg, #3F48C5 0%, #6135C4 30%, #9047E0 100%);
-  border: 1px solid #746a9a;
-  border-radius: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-bottom: 25px;
-}
-
-.btn-icon {
-  width: 20px;
-  height: 18px;
-}
-
-.instructions {
-  width: 100%;
-  font-size: 10px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.instructions h3 {
-  font-size: 12px;
-  margin: 0 0 5px 0;
   font-weight: 700;
-}
-
-.instructions p {
-  margin: 0 0 4px 0;
-}
-
-/* Footer Section */
-#footer-section {
-  padding: 20px 16px 30px;
-  margin-top: auto;
-}
-
-.footer-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.powered-by {
-  font-size: 10px;
-  color: #c4c4c4;
-}
-
-.brand-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
 }
 
-.brand-logo {
-  height: 23px;
-  width: auto;
+.day-item.checked .day-label {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
-.copyright {
-  font-size: 10px;
-  color: white;
+/* Rules */
+.rules-wrapper {
+  padding: 0 16px 24px 16px;
 }
 
-.footer-brand {
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 20px;
+.rules-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 20px 16px;
 }
 
-.brand-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 5px;
+.rules-title {
+  color: #004d43;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
 }
 
-.footer-logo {
-  height: 24px;
-  width: auto;
-  object-fit: contain;
-  object-position: left;
+.rules-text {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 11px;
+  line-height: 1.6;
 }
 
-.copyright {
-  font-size: 10px;
-  color: #fff;
+.rules-text p {
+  margin: 0 0 8px 0;
 }
 
-.tagline {
-  font-size: 10px;
-  color: #c4c4c4;
-  margin: 0;
+.rules-text p:last-child {
+  margin-bottom: 0;
 }
-
 </style>

@@ -1,71 +1,62 @@
 <template>
   <Teleport to="body">
     <div v-if="modelValue" class="chatbot-overlay" @click.self="close">
-      <div class="chat-card">
+      <div class="chatbot-container">
         <!-- Header -->
-        <div class="chat-header">
-          <div class="header-left">
-            <img src="/assets/images/952cc0d03b5e5172c1cbc48fa9611d43b6f0d653.png" alt="Bot" class="bot-avatar-small">
-            <div class="header-info">
-              <span class="bot-name">CS Aset Finansial Nusantara</span>
-              <span class="bot-status">Online</span>
-            </div>
-          </div>
-          <button class="close-btn" @click="close">
-            <img src="/assets/images/145_336.svg" alt="Close">
+        <header class="chatbot-header">
+          <img src="/assets/images/6a724b73fb2c46483c7c2b348fcdc144d1a30b46.png" alt="Bot Avatar" class="header-avatar">
+          <h1 class="header-title">Selamat datang di<br>TRIVEX!</h1>
+          <button class="close-btn" @click="close" aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6L18 18" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </button>
-        </div>
+        </header>
 
-        <!-- Chat Body -->
-        <div class="chat-body" ref="chatBody">
-          <div class="message-row message-left">
-            <img src="/assets/images/952cc0d03b5e5172c1cbc48fa9611d43b6f0d653.png" alt="User Avatar" class="avatar">
-            <div class="bubble bubble-left">
+        <!-- Messages -->
+        <div class="chatbot-messages" ref="chatBody">
+          <div class="message bot-message">
+            <img src="/assets/images/6a724b73fb2c46483c7c2b348fcdc144d1a30b46.png" alt="Bot Avatar" class="message-avatar">
+            <div class="message-bubble">
               <p>Hai! Tanya saya dan saya akan menemukan jawabannya untuk Anda.</p>
             </div>
           </div>
           <div
             v-for="(message, index) in orderedMessages"
             :key="`msg-${index}`"
-            :class="['message-row', message.type === 'incoming' ? 'message-left' : 'message-right']"
+            :class="['message', message.type === 'incoming' ? 'bot-message' : 'user-message']"
           >
             <template v-if="message.type === 'incoming'">
-              <img src="/assets/images/952cc0d03b5e5172c1cbc48fa9611d43b6f0d653.png" alt="User Avatar" class="avatar">
-              <div class="bubble bubble-left">
+              <img src="/assets/images/6a724b73fb2c46483c7c2b348fcdc144d1a30b46.png" alt="Bot Avatar" class="message-avatar">
+              <div class="message-bubble">
                 <p>{{ message.text }}</p>
               </div>
             </template>
             <template v-else>
-              <div class="bubble bubble-right">
+              <div class="message-bubble user-bubble">
                 <p>{{ message.text }}</p>
               </div>
-              <img src="/assets/image/983276.png" alt="Ocerin Icon" class="message-icon">
             </template>
           </div>
         </div>
 
-        <!-- Footer -->
-        <footer class="chat-footer">
-          <div class="input-area">
-            <input
-              type="text"
-              v-model="newMessage"
-              class="chat-input"
-              placeholder="Masukkan informasi..."
-              @keyup.enter="sendMessage"
-            >
-          </div>
+        <!-- Input -->
+        <div class="chatbot-input-area">
+          <input
+            type="text"
+            v-model="newMessage"
+            class="chat-input"
+            placeholder="Masukkan informasi..."
+            @keyup.enter="sendMessage"
+          >
           <button
             class="send-button"
             :disabled="!newMessage.trim() || isSending"
             @click="sendMessage"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            Send
           </button>
-        </footer>
+        </div>
       </div>
     </div>
   </Teleport>
@@ -73,7 +64,7 @@
 
 <script setup>
 import { ref, computed, onUnmounted, nextTick, watch } from 'vue'
-import { supportAPI } from '../../services/api'
+import { supportAPI } from '@/services/api'
 
 const props = defineProps({
   modelValue: {
@@ -213,187 +204,172 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 .chatbot-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(80, 80, 80, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 20px;
 }
 
-.chat-card {
-  width: 100%;
-  max-width: 100%;
+.chatbot-container {
+  width: 331px;
   height: 500px;
   background-color: #ffffff;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   font-family: 'Inter', sans-serif;
 }
 
-/* Header Styles */
-.chat-header {
+/* Header */
+.chatbot-header {
   height: 101px;
-  background: linear-gradient(90deg, #FFF2DD 0%, #45887D 100%);
+  background: linear-gradient(90deg, #507742 0%, #5F9659 100%);
   display: flex;
   align-items: center;
-  padding: 0 14px;
+  padding: 0 20px;
+  color: #ffffff;
   flex-shrink: 0;
   position: relative;
 }
 
-.header-logo {
-  width: 85px;
-  height: 74px;
-  object-fit: contain;
-  margin-right: 19px;
+.header-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  margin-right: 16px;
+  object-fit: cover;
 }
 
 .header-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #000000;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
   margin: 0;
-  line-height: 1.2;
   flex: 1;
 }
 
 .close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   background: none;
   border: none;
-  font-size: 24px;
   cursor: pointer;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  color: #000;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Chat Body Styles */
-.chat-body {
+/* Messages */
+.chatbot-messages {
   flex: 1;
-  padding: 20px 14px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
+  background-color: #ffffff;
 }
 
-.message-row {
+.message {
   display: flex;
-  align-items: flex-end;
-  width: 100%;
+  align-items: flex-start;
+  gap: 12px;
 }
 
-.message-left {
+.bot-message {
   justify-content: flex-start;
 }
 
-.message-right {
+.user-message {
   justify-content: flex-end;
 }
 
-.avatar {
-  width: 27px;
-  height: 27px;
+.message-avatar {
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 9px;
+  flex-shrink: 0;
 }
 
-.message-icon {
-  width: 30px;
-  height: 29px;
-  object-fit: contain;
-  margin-left: 10px;
-  margin-bottom: 5px;
-}
-
-.bubble {
-  padding: 12px 16px;
-  max-width: 70%;
-  position: relative;
-}
-
-.bubble p {
-  margin: 0;
-  font-size: 14px;
-  color: #000000;
-}
-
-.bubble-left {
+.message-bubble {
   background-color: #ebebeb;
-  border-radius: 0 10px 10px 10px;
-  min-width: 101px;
-  min-height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 4px;
+  max-width: 75%;
 }
 
-.bubble-right {
-  background-color: #b0bda4;
-  border-radius: 10px 0 10px 10px;
-  min-width: 140px;
-  min-height: 77px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.message-bubble p {
+  margin: 0;
+  font-size: 13px;
+  color: #000000;
+  line-height: 1.4;
 }
 
-/* Footer Styles */
-.chat-footer {
+.user-bubble {
+  background-color: #d4e8d0;
+}
+
+/* Input */
+.chatbot-input-area {
   height: 80px;
   border-top: 0.5px solid rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 14px;
+  padding: 0 16px;
+  gap: 12px;
   background-color: #ffffff;
   flex-shrink: 0;
 }
 
-.input-area {
-  flex: 1;
-  margin-right: 10px;
-}
-
 .chat-input {
-  width: 100%;
+  flex: 1;
   border: none;
   outline: none;
-  font-size: 14px;
+  font-size: 13px;
   color: #000000;
+  background: transparent;
   font-family: 'Inter', sans-serif;
 }
 
 .chat-input::placeholder {
-  color: #000000;
-  opacity: 0.8;
+  color: #666666;
 }
 
 .send-button {
   width: 80px;
   height: 33px;
-  background-color: #00e8a6;
-  border: none;
+  background: linear-gradient(90deg, #527B45 0%, #5D9156 100%);
   border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: none;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.send-button:hover {
+  opacity: 0.9;
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

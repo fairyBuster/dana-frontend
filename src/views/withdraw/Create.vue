@@ -1,100 +1,128 @@
 <template>
-  <div class="withdraw-page">
-  <section id="header">
-    <div class="app-container">
-      <header class="top-bar">
-        <button class="back-btn" @click="goBack">
-          <img src="/assets/image/161_500.svg" alt="Back" width="24" height="24">
+  <div class="app-container">
+    <section id="section-header">
+      <header class="header">
+        <button class="back-btn" @click="goBack" aria-label="Go back">
+          <img src="/assets/images/17_36.svg" alt="Back Icon">
         </button>
-        <h1 class="page-title">Tarik uang</h1>
+        <h1 class="page-title">Withdraw</h1>
       </header>
-    </div>
-  </section>
+    </section>
 
-  <section id="form-section">
-    <div class="app-container">
-      
-      <!-- Balance Card -->
-      <div class="card balance-card">
-        <div class="card-row top-row">
-          <span class="label">Saldo yang dapat ditarik</span>
-          <a href="/#/pages/history/release" class="history-tag" @click.prevent="router.push('/pages/history/release')">
-            <span>Catatan tarik saya</span>
-            <img src="/assets/image/155_1476.svg" alt="Arrow" width="12" height="12">
-          </a>
+    <section id="section-balance">
+      <div class="balance-card">
+        <div class="balance-info">
+          <p class="balance-label">Saldo rekening utama saya</p>
+          <p class="balance-amount">{{ formatCurrency(withdrawableBalance) }}</p>
         </div>
-        <div class="amount">{{ formatCurrency(withdrawableBalance) }}</div>
-        <div class="fee">Biaya layanan 3% + RP 6500</div>
+        <img
+          src="/assets/images/3949bfaf68a457f5031cbc2104b43e4f33f5e668.png"
+          alt="Wallet Icon"
+          class="wallet-icon"
+        >
       </div>
+    </section>
 
-      <!-- Bank Card -->
-      <div class="card bank-card">
-        <div class="card-row">
-          <span class="label">Kartu bank penerima</span>
-          <a href="/#/pages/assets/bind" class="view-all-btn" @click.prevent="router.push('/pages/assets/bind')">
-            <span>Lihat semua kartu</span>
-            <img src="/assets/image/161_524.svg" alt="Arrow" width="6" height="4">
-          </a>
-        </div>
-        <div class="bank-value">
-          <template v-if="selectedUserBank">
-            <div class="bank-line bank-line--primary">{{ selectedUserBank.bank_name || selectedUserBank.bank_code || '-' }}</div>
-            <div class="bank-line">{{ selectedUserBank.account_name || '-' }}</div>
-            <div class="bank-line">{{ selectedUserBank.account_number || '-' }}</div>
-          </template>
-          <template v-else>-</template>
-        </div>
-      </div>
+    <section id="section-form">
+      <div class="form-container">
+        <h2 class="section-title">Data Pengguna</h2>
 
-      <!-- Alert Banner -->
-      <div class="alert-banner">
-        <img src="/assets/image/161_529.svg" alt="Alert" width="16" height="16">
-        <div class="alert-marquee">
-          <div class="alert-marquee-track">
-            <span class="alert-text">Silakan periksa kembali kartu bank penerima sebelum Anda melanjutkan proses</span>
-            <span class="alert-text">Silakan periksa kembali kartu bank penerima sebelum Anda melanjutkan proses</span>
+        <div class="form-group bank-select" @click="handleBankSelectClick">
+          <div class="input-content">
+            <label>Rekening Penarikan</label>
+            <template v-if="selectedUserBank">
+              <p class="placeholder">
+                {{ selectedUserBank.bank_name || selectedUserBank.bank_code || '-' }} · {{ selectedUserBank.account_number || '-' }}
+              </p>
+            </template>
+            <template v-else>
+              <p class="placeholder">Pilih rekening bank</p>
+            </template>
+          </div>
+          <img src="/assets/images/2010_849.svg" alt="Select Bank" class="dropdown-icon">
+        </div>
+
+        <div class="form-group amount-input-group">
+          <div class="amount-input-inner">
+            <label>Nominal Penarikan</label>
+            <input
+              type="text"
+              class="amount-value"
+              :value="displayAmount"
+              @input="formatInput"
+              placeholder="Rp 0"
+            >
+          </div>
+          <div class="fee-info">
+            <span class="fee-rate">Fee transaksi: 10%</span>
+            <span class="fee-total">Setelah biaya: Rp {{ formatCurrency(afterFeeAmount) }}</span>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Input Field -->
-       <label class="input-label">Silakan masukkan jumlah tarik uang</label>
-      <div class="input-group">
-        
-        <div class="input-box">
-          <input 
-            v-model="withdrawAmount" 
-            type="text" 
-            placeholder="Silakan masukkan jumlah tarik uang" 
-            class="text-input"
-            @input="formatInput"
-          >
+    <section id="section-info">
+      <div class="info-container">
+        <ul class="rules-list">
+          <li>Minimal penarikan 35.000</li>
+          <li>Maksimal pengiriman 24 jam</li>
+          <li>Biaya pengiriman 10% dipotong secara langsung</li>
+          <li>Pengiriman penarikan setiap hari</li>
+        </ul>
+
+        <div class="terms-container">
+          <img src="/assets/images/d9b41d54b13e3f872bf656657234e30868c2d994.png" alt="Agree" class="check-icon">
+          <p class="terms-text">
+            Dengan melanjutkan proses ini, kamu menyetujui
+            <router-link to="/terms" class="text-green">Syarat & Ketentuan</router-link>
+            yang berlaku
+          </p>
         </div>
       </div>
+    </section>
 
-      <!-- Submit Button -->
-      <button class="submit-btn" @click="handleWithdraw" :disabled="!isValidAmount">
-        Selesaikan penarikan
-      </button>
-
-    </div>
-  </section>
-
-  <section id="instructions">
-    <div class="app-container">
-      <h2 class="instructions-title">Instruksi penarikan</h2>
-      <div class="instructions-text">
-        Panduan pengajuan penarikan<br>
-        -Anda harus mengisi ulang dan membeli drone untuk mengaktifkan akun Anda sebelum Anda dapat mengajukan penarikan.<br>
-        -Anda hanya dapat melakukan 1 kali penarikan tunai dalam sehari. Harap rencanakan penarikan Anda dengan bijaksana.<br>
-        -Batas jumlah penarikan<br>
-        Minimum penarikan= Rp 25.000<br>
-        Maksimum penarikan= Rp 100.000.000<br>
-        Biaya layanan 3% + Rp 6500<br>
-        Pastikan jumlah penarikan Anda berada dalam rentang yang diizinkan<br>
-        -Harap konfirmasikan informasi akun yang menguntungkan Anda sebelum melakukan penarikan. Jika informasi Anda salah, perusahaan kami tidak akan bertanggung jawab atas jumlah kerugian.<br>
-        -Perusahaan SENT bertugas memantau dan mengawasi prosesi penarikan agar tidak melebihi batas waktu maksimum 72 jam. Masalah cepat atau lambatnya sebuah proses penarikan adalah tanggung jawab bank terkait. Pastikan data rekening Anda sudah diisi dengan benar sebelum mengajukan penarikan.
+    <section id="section-action">
+      <div class="action-container">
+        <button class="submit-btn" @click="handleWithdraw" :disabled="!isValidAmount || isSubmitting">
+          <LoadingSpinner v-if="isSubmitting" :visible="true" message="" />
+          <span v-else>Lanjutkan</span>
+        </button>
       </div>
+    </section>
+  </div>
+
+  <section v-if="isBottomSheetOpen" id="section-bottom-sheet">
+    <div class="overlay" @click="closeBottomSheet"></div>
+    <div class="bottom-sheet">
+      <div class="drag-handle"></div>
+
+      <template v-if="(userBanks?.length || 0) > 0">
+        <div
+          v-for="bank in userBanks"
+          :key="bank?.id || `${bank?.bank_code || ''}-${bank?.account_number || ''}`"
+          class="account-card"
+          @click="selectBank(bank)"
+        >
+          <div class="account-details">
+            <span class="account-label">Data Rekening</span>
+            <span class="account-number">{{ bank?.account_number || '-' }}</span>
+            <span class="account-bank">{{ bank?.bank_name || bank?.bank_code || '-' }}</span>
+            <span class="account-name">{{ bank?.account_name || '-' }}</span>
+          </div>
+          <img class="radio-icon" src="/assets/images/2011_1066.svg" alt="Selected">
+        </div>
+      </template>
+
+      <template v-else>
+        <img
+          src="/assets/images/d634ba55ee38309526b6d657b8e1a5a382ef7c60.png"
+          alt="Wallet Illustration"
+          class="illustration"
+        >
+        <h3 class="sheet-title">Rekening Penarikan</h3>
+        <p class="sheet-desc">Yuk, tambahkan rekening penarikan Anda untuk melakukan transaksi penarikan!</p>
+        <button type="button" class="btn-add" @click="handleAddBank">Tambah Rekening Penarikan</button>
+      </template>
     </div>
   </section>
 
@@ -104,13 +132,13 @@
     @confirm="handleSuccessConfirm"
   />
   <ErrorModal v-model="errorModalOpen" :message="errorMessage" />
-  </div>
 </template>
 
 <script setup>
 import { computed, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI, bankAPI, withdrawalAPI } from '@/services/api'
+import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 
@@ -123,6 +151,7 @@ const isSubmitting = ref(false)
 const serviceId = ref(null)
 const successModalOpen = ref(false)
 const errorModalOpen = ref(false)
+const isBottomSheetOpen = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 const isRefreshing = ref(false)
@@ -130,22 +159,36 @@ const lastRefreshedAt = ref(0)
 let successRedirectTimeoutId = 0
 let hasRedirectedAfterSuccess = false
 
-const MIN_WITHDRAW = 25000
+const MIN_WITHDRAW = 30000
 const MAX_WITHDRAW = 100000000
-const SERVICE_FEE_RATE = 0.06
-const FIXED_FEE = 6500
+const SERVICE_FEE_RATE = 0.10
+
+const numericAmount = computed(() => {
+  const raw = withdrawAmount.value.replace(/[^0-9]/g, '')
+  return Number.parseInt(raw, 10) || 0
+})
+
+const displayAmount = computed(() => {
+  const num = numericAmount.value
+  if (!num) return ''
+  return `Rp ${new Intl.NumberFormat('id-ID').format(num)}`
+})
+
+const feeAmount = computed(() => {
+  return Math.round(numericAmount.value * SERVICE_FEE_RATE)
+})
+
+const afterFeeAmount = computed(() => {
+  return Math.max(0, numericAmount.value - feeAmount.value)
+})
 
 const isValidAmount = computed(() => {
   if (isSubmitting.value) return false
   if (!selectedUserBankId.value) return false
-  const amount = parseFloat(withdrawAmount.value.replace(/[^0-9]/g, ''))
-  if (isNaN(amount) || amount <= 0) return false
-  
-  // Check minimum and maximum limits
+  const amount = numericAmount.value
+  if (amount <= 0) return false
   if (amount < MIN_WITHDRAW || amount > MAX_WITHDRAW) return false
-  
   if (amount > withdrawableBalance.value) return false
-  
   return true
 })
 
@@ -153,13 +196,34 @@ const goBack = () => {
   router.go(-1)
 }
 
+const goToBindBank = () => {
+  router.push('/connect')
+}
+
+const closeBottomSheet = () => {
+  isBottomSheetOpen.value = false
+}
+
+const handleAddBank = () => {
+  closeBottomSheet()
+  goToBindBank()
+}
+
+const selectBank = (bank) => {
+  const id = bank?.id ?? null
+  if (!id) return
+  selectedUserBankId.value = id
+  closeBottomSheet()
+}
+
+const handleBankSelectClick = () => {
+  isBottomSheetOpen.value = true
+}
+
 const formatInput = (event) => {
-  // Remove non-numeric characters
-  const value = event.target.value.replace(/[^0-9]/g, '')
-  if (value) {
-    // Format with thousand separators
-    const formatted = new Intl.NumberFormat('id-ID').format(parseInt(value))
-    withdrawAmount.value = formatted
+  const raw = event?.target?.value?.replace(/[^0-9]/g, '') || ''
+  if (raw) {
+    withdrawAmount.value = new Intl.NumberFormat('id-ID').format(Number.parseInt(raw, 10))
   } else {
     withdrawAmount.value = ''
   }
@@ -180,7 +244,7 @@ const parseNumber = (value) => {
   return Number.isFinite(n) ? n : 0
 }
 
-const normalizeWithdrawErrorMessage = (err, fallbackTotalDeductionText = '') => {
+const normalizeWithdrawErrorMessage = (err) => {
   const data = err?.response?.data
   const raw =
     (typeof data === 'string' && data) ||
@@ -205,7 +269,6 @@ const normalizeWithdrawErrorMessage = (err, fallbackTotalDeductionText = '') => 
     return 'Pastikan jumlah penarikan Anda berada dalam rentang yang diizinkan.'
   }
   if (raw) return String(raw)
-  if (fallbackTotalDeductionText) return fallbackTotalDeductionText
   return 'Permintaan gagal, segarkan halaman'
 }
 
@@ -278,21 +341,18 @@ const handleSuccessConfirm = () => {
     window.clearTimeout(successRedirectTimeoutId)
     successRedirectTimeoutId = 0
   }
-  router.push('/pages/account/active')
+  router.push('/dashboard')
 }
 
 const handleWithdraw = async () => {
   if (!isValidAmount.value) return
   if (!selectedUserBankId.value) {
-    errorMessage.value = 'Silakan pilih kartu bank penerima'
+    errorMessage.value = 'Silakan pilih rekening bank penerima'
     errorModalOpen.value = true
     return
   }
-  
-  const amount = parseInt(withdrawAmount.value.replace(/[^0-9]/g, ''))
-  const serviceFee = (amount * SERVICE_FEE_RATE) + FIXED_FEE
-  const totalDeduction = amount + serviceFee
 
+  const amount = numericAmount.value
   isSubmitting.value = true
   try {
     await withdrawalAPI.createWithdrawal({
@@ -312,11 +372,10 @@ const handleWithdraw = async () => {
       if (hasRedirectedAfterSuccess) return
       hasRedirectedAfterSuccess = true
       successModalOpen.value = false
-      router.push('/pages/history/release')
+      router.push('/flow/history')
     }, 1200)
   } catch (err) {
-    const fallbackText = `Gagal mengajukan penarikan. Total dipotong: Rp ${formatCurrency(totalDeduction)}`
-    errorMessage.value = normalizeWithdrawErrorMessage(err, fallbackText)
+    errorMessage.value = normalizeWithdrawErrorMessage(err)
     errorModalOpen.value = true
   } finally {
     isSubmitting.value = false
@@ -342,275 +401,410 @@ onActivated(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+.app-container {
+  --bg-color: #f8f8f8;
+  --text-main: #000000;
+  --text-light: #ffffff;
+  --text-muted: rgba(0, 0, 0, 0.5);
+  --primary-color: #004d43;
+  --card-bg: #eeeeee;
+  --input-bg: #f8f8f8;
 
-.withdraw-page {
   font-family: 'Inter', sans-serif;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
-  background-color: #0f1020;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
+  background-color: var(--bg-color);
   min-height: 100vh;
-  color: #ffffff;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  width: 100%;
+  max-width: 412px;
 }
 
 * {
   box-sizing: border-box;
 }
 
-.app-container {
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+section {
   width: 100%;
-  max-width: 412px;
-  padding: 0 20px;
-  position: relative;
 }
 
-button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: inherit;
-  padding: 0;
-}
-
-/* Header */
-#header {
-  width: 100%;
-  padding-top: 16px;
-  padding-bottom: 20px;
-}
-
-.top-bar {
+/* Header Section */
+#section-header .header {
   display: flex;
   align-items: center;
+  padding: 20px 10px;
   position: relative;
-  height: 24px;
+  height: 60px;
 }
 
-.back-btn {
+#section-header .back-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 40px;
+  height: 40px;
+  z-index: 1;
+}
+
+#section-header .back-btn img {
+  width: 35px;
+  height: 35px;
+}
+
+#section-header .page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
   position: absolute;
   left: 0;
-}
-
-.page-title {
-  flex: 1;
+  right: 0;
   text-align: center;
-  font-size: 17px;
-  font-weight: 600;
-  margin: 0;
-  color: #ffffff;
+  pointer-events: none;
 }
 
-/* Form Section */
-#form-section {
-  width: 100%;
-}
-
-.card {
-  background-color: #1d2138;
-  border-radius: 10px;
-  padding: 16px 12px;
-  margin-bottom: 16px;
-  position: relative;
-}
-
-.balance-card {
-  height: 84px;
-}
-
-.card-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.label {
-  font-size: 10px;
-  color: #ffffff;
-}
-
-.history-tag {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 30%, #9047e0 100%);
-  border: 1px solid #746a9a;
-  border-radius: 12px;
-  padding: 4px 8px;
-  font-size: 11px;
-  color: #ffffff;
-  position: absolute;
-  top: 13px;
-  right: 12px;
-  height: 23px;
-  box-sizing: border-box;
-}
-
-.amount {
-  font-size: 16px;
-  font-weight: 700;
-  margin-top: 20px;
-  color: #ffffff;
-}
-
-.fee {
-  font-size: 10px;
-  color: #ffffff;
-  position: absolute;
-  bottom: 10px;
-  right: 12px;
-}
-
-.bank-card {
-  height: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.view-all-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #7e7e7e;
-  font-size: 13px;
-}
-
-.bank-value {
-  font-size: 13px;
-  margin-top: 14px;
-  color: #ffffff;
-}
-
-.bank-line {
-  font-size: 12px;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.bank-line--primary {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.alert-banner {
-  background: linear-gradient(90deg, #100f2c 0%, #0f132e 48%, #0a1025 100%);
-  border-radius: 2px;
-  padding: 6px 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 24px;
-  overflow: hidden;
-}
-
-.alert-marquee {
-  flex: 1;
-  overflow: hidden;
-}
-
-.alert-marquee-track {
-  display: flex;
-  width: max-content;
-  gap: 28px;
-  animation: withdrawAlertMarquee 14s linear infinite;
-  will-change: transform;
-}
-
-.alert-text {
-  font-size: 10px;
-  color: #c4c4c4;
-  margin: 0;
-  white-space: nowrap;
-}
-
-@keyframes withdrawAlertMarquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-.input-group {
-  margin-bottom: 24px;
-}
-
-.input-label {
-  display: block;
-  font-size: 10px;
-  color: #ffffff;
-  margin-bottom: 16px;
-}
-
-.input-box {
-  background-color: #1d2138;
-  border: 1px solid #746a9a;
-  border-radius: 10px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  width: 100%;
+/* Balance Section */
+#section-balance {
   padding: 0 16px;
 }
 
-.text-input {
-  background: transparent;
-  border: none;
-  color: #ffffff;
-  width: 100%;
-  font-size: 14px;
-  outline: none;
+#section-balance .balance-card {
+  background: linear-gradient(90deg, #4e733f 0%, #60995b 100%);
+  border-radius: 15px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-light);
 }
 
-.text-input::placeholder {
-  color: #505050;
+#section-balance .balance-label {
+  font-size: 12px;
+  margin: 0 0 4px 0;
+  font-weight: 400;
 }
 
-.submit-btn {
-  width: 100%;
-  height: 51px;
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 30%, #9047e0 100%);
-  border: 1px solid #746a9a;
-  border-radius: 10px;
-  color: #ffffff;
+#section-balance .balance-amount {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+#section-balance .wallet-icon {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+/* Form Section */
+#section-form {
+  padding: 24px 16px 0;
+}
+
+#section-form .section-title {
   font-size: 14px;
   font-weight: 600;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  color: var(--text-main);
+  margin: 0 0 12px 0;
 }
 
-.submit-btn:disabled {
+#section-form .form-group {
+  background-color: var(--card-bg);
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+#section-form .bank-select {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+#section-form .input-content label {
+  display: block;
+  font-size: 12px;
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+#section-form .input-content .placeholder {
+  font-size: 12px;
+  color: var(--text-muted);
+  background-color: transparent;
+  margin: 0;
+}
+
+#section-form .dropdown-icon {
+  width: 24px;
+  height: 24px;
+}
+
+#section-form .amount-input-group {
+  padding: 16px;
+}
+
+#section-form .amount-input-inner {
+  background-color: var(--input-bg);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+#section-form .amount-input-inner label {
+  display: block;
+  font-size: 12px;
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+#section-form .amount-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-main);
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+#section-form .amount-value::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+#section-form .fee-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+  font-size: 10px;
+}
+
+#section-form .fee-rate {
+  color: var(--text-muted);
+}
+
+#section-form .fee-total {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* Info Section */
+#section-info {
+  padding: 24px 20px;
+}
+
+#section-info .rules-list {
+  margin: 0 0 24px 0;
+  padding-left: 16px;
+  font-size: 10px;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+#section-info .rules-list li {
+  margin-bottom: 4px;
+  padding-left: 4px;
+}
+
+#section-info .terms-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+#section-info .check-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+#section-info .terms-text {
+  font-size: 10px;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.text-green {
+  color: #4caf50;
+  text-decoration: none;
+}
+
+/* Action Section */
+#section-action {
+  padding: 16px 20px 40px;
+}
+
+#section-action .submit-btn {
+  width: 100%;
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 20px;
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.2s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#section-action .submit-btn:active {
+  opacity: 0.8;
+}
+
+#section-action .submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Instructions */
-#instructions {
+#section-bottom-sheet {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
-  padding-top: 24px;
-  padding-bottom: 40px;
+  max-width: 412px;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 2000;
+  background: transparent;
 }
 
-.instructions-title {
+#section-bottom-sheet .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(217, 217, 217, 0.6);
+  pointer-events: auto;
+}
+
+#section-bottom-sheet .bottom-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  min-height: 50vh;
+  background-color: #ffffff;
+  border-radius: 24px 24px 0 0;
+  padding: 16px 20px 40px;
+  pointer-events: auto;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+}
+
+#section-bottom-sheet .drag-handle {
+  width: 60px;
+  height: 6px;
+  background-color: #d9d9d9;
+  border-radius: 10px;
+  margin: 0 auto 24px;
+}
+
+#section-bottom-sheet .account-card {
+  background-color: #eeeeee;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#section-bottom-sheet .account-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#section-bottom-sheet .account-label {
   font-size: 12px;
-  color: #ffffff;
-  margin: 0 0 8px 0;
-  font-weight: 400;
+  color: #004d43;
+  font-weight: 600;
 }
 
-.instructions-text {
-  font-size: 10px;
+#section-bottom-sheet .account-number {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+}
+
+#section-bottom-sheet .account-bank,
+#section-bottom-sheet .account-name {
+  font-size: 12px;
+  color: #000000;
+}
+
+#section-bottom-sheet .radio-icon {
+  width: 24px;
+  height: 24px;
+}
+
+#section-bottom-sheet .illustration {
+  width: 139px;
+  height: 139px;
+  margin-bottom: 28px;
+  object-fit: contain;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#section-bottom-sheet .sheet-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+#section-bottom-sheet .sheet-desc {
+  font-size: 14px;
+  color: #7b7b7b;
+  text-align: center;
+  margin: 0 0 32px 0;
   line-height: 1.5;
-  color: #b7b7b7;
-  white-space: pre-line;
-  text-align: justify;
+  max-width: 368px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#section-bottom-sheet .btn-add {
+  width: 100%;
+  max-width: 387px;
+  background-color: #004d43;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  height: 58px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
+
+

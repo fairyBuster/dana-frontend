@@ -5,7 +5,7 @@
         <div class="modal-content">
           <h2 class="modal-title">Informasi</h2>
           <img
-            src="/assets/image/image 10.png"
+            src="/assets/images/d4eaa5839a5872cc4c32f292c0feaee334e99300.png"
             alt="Red Envelope"
             class="modal-image"
           >

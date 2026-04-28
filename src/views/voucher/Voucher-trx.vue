@@ -1,9 +1,9 @@
-<template>
+<!-- <template>
   <div class="app-container">
     <section id="header-section">
       <header class="app-header">
         <div class="header-left" @click="goBack">
-          <img src="/assets/image/178_1333.svg" alt="Back" class="icon-back">
+          <img src="/assets/images/2023_1661.svg" alt="Back" class="icon-back">
         </div>
         <h1 class="header-title">Catatan menukar</h1>
       </header>
@@ -13,7 +13,7 @@
       <LoadingSpinner v-if="loading" :visible="true" :overlay="true" message="" />
 
       <div v-else-if="displayedTransactions.length === 0" class="empty-state">
-        <img src="/assets/image/empty.png" alt="No Data" class="empty-icon">
+        <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="No Data" class="empty-icon">
 
       </div>
 
@@ -40,7 +40,7 @@
       </template>
     </main>
   </div>
-</template>
+</template> -->
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { transactionAPI } from '@/services/api'
@@ -190,7 +190,7 @@ onMounted(() => {
   max-width: 412px;
   min-height: 100vh;
   background-color: #000;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -1,250 +1,219 @@
 <template>
   <div class="app-container">
-    <!-- Header Section -->
-    <section id="app-header">
-      <header class="header-container">
-        <div class="icon-wrapper" @click="goBack">
-          <img src="/assets/image/176_906.svg" alt="Back" class="icon-back">
+    <section id="section-header">
+      <header class="header-content">
+        <div class="header-text">
+          <h1 class="header-title">Trivex Capital Sekuritas</h1>
+          <div class="header-subtitle">
+            <span class="subtitle-text">Terpercaya</span>
+            <span class="subtitle-highlight">NO.1</span>
+          </div>
         </div>
-        <h1 class="header-title">Tentang kami</h1>
+        <img
+          class="header-logo"
+          src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png"
+          alt="Trivex Logo"
+        >
       </header>
     </section>
 
-    <!-- Main Content Section -->
-    <section id="main-content">
-      <article class="content-wrapper">
-        <div class="article-header">
-          <h2 class="article-title">Tentang Ot-Sent</h2>
-          <time class="article-date">{{ articleDateTime }}</time>
+    <section id="section-list">
+      <div class="card-list">
+        <div class="card">
+          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
+          <div class="card-text">
+            <h2 class="card-title">Trivex Capital Sekuritas</h2>
+            <p class="card-desc">
+              TRIVEX (Transaksi Investasi & Valuta Exchange) adalah platform digital yang berfokus pada pengelolaan aset dan aktivitas investasi berbasis teknologi modern. TRIVEX hadir untuk memberikan kemudahan bagi pengguna dalam mengakses berbagai pilihan produk investasi dengan sistem yang efisien, transparan, dan mudah digunakan.
+              <br>
+              <br>
+              Dengan mengusung konsep platform yang terintegrasi, TRIVEX menyediakan layanan yang memungkinkan pengguna untuk melakukan pengelolaan aset secara fleksibel, mulai dari pemantauan portofolio hingga aktivitas transaksi dalam satu aplikasi.
+            </p>
+          </div>
         </div>
-        
-        <div class="article-body" v-html="articleContent"></div>
-      </article>
-    </section>
-
-    <!-- Footer Section -->
-    <footer class="site-footer">
-      <div class="footer-divider"></div>
-      <p class="footer-desc">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
-      <div class="footer-bottom">
-        <img src="/assets/image/983276.png" alt="Ot-Sent Logo" class="footer-logo">
-        <span class="footer-copyright">© 2026 OT-SENT. All Rights Reserved</span>
+        <div class="card">
+          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
+          <div class="card-text">
+            <h2 class="card-title">Visi Trivex Capital Sekuritas</h2>
+            <p class="card-desc">Menjadi platform investasi digital yang terpercaya, inovatif, dan mudah diakses oleh semua kalangan.</p>
+          </div>
+        </div>
+        <div class="card">
+          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
+          <div class="card-text">
+            <h2 class="card-title">Misi Trivex Capital Sekuritas</h2>
+            <p class="card-desc">
+              - Menghadirkan sistem investasi yang sederhana dan efisien
+              <br>
+              - Memberikan pengalaman pengguna yang aman dan nyaman
+              <br>
+              - Mengembangkan teknologi untuk mendukung pertumbuhan aset digital
+              <br>
+              - Menyediakan layanan yang transparan dan berkelanjutan
+            </p>
+          </div>
+        </div>
+        <div class="card">
+          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
+          <div class="card-text">
+            <h2 class="card-title">Legalitas & Informasi Perusahaan</h2>
+            <p class="card-desc">
+              Nama Perusahaan: PT Trivex Capital Sekuritas
+              <br>
+              Status: Perusahaan berbasis teknologi finansial (Fintech Platform)
+              <br>
+              Nomor Usaha: 10.249.338.1-092.785
+              <br>
+              Nomor Registrasi Sistem Elektronik: 082648/DJAI.PSE/01/2026
+            </p>
+          </div>
+        </div>
+        <div class="card">
+          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
+          <div class="card-text">
+            <h2 class="card-title">Kantor Operasional</h2>
+            <p class="card-desc">
+              Gedung Perkantoran Kawasan Bisnis
+              <br>
+              Jl. TB Simatupang
+              <br>
+              Jakarta Selatan, DKI Jakarta, Indonesia
+            </p>
+          </div>
+        </div>
+        <div class="card">
+          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
+          <div class="card-text">
+            <h2 class="card-title">Keamanan & Sistem</h2>
+            <p class="card-desc">TRIVEX menggunakan sistem keamanan berlapis dengan dukungan enkripsi data dan teknologi SSL aktif untuk menjaga kerahasiaan serta keamanan informasi pengguna.</p>
+          </div>
+        </div>
       </div>
-    </footer>
+    </section>
   </div>
+
+  <FooterBar />
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
-const articleDateTime = ref('05/02/2025 20:45:12')
-
-const articleContent = ref(`
-<p>Ot-Sent adalah perusahaan teknologi yang berfokus pada pengembangan solusi pemetaan udara berbasis kecerdasan buatan. Perusahaan ini mengintegrasikan teknologi drone, analisis data cerdas, serta sistem otomatisasi untuk menghadirkan layanan pemetaan yang efisien, akurat, dan dapat ditingkatkan skalanya di berbagai sektor industri.</p>
-
-<p>Seiring perkembangan teknologi global, Ot-Sent berkomitmen untuk menghadirkan inovasi yang meningkatkan efisiensi operasional sekaligus memperluas akses pengguna ke ekosistem teknologi digital.</p>
-
-<p>Melalui platform yang dikembangkan, pengguna dapat memantau aktivitas secara real-time, mengelola perangkat secara terintegrasi, serta mengakses data yang diproses melalui sistem berbasis cloud dan machine learning.</p>
-
-<h3>Visi</h3>
-<p>Menjadi perusahaan teknologi global terdepan dalam solusi pemetaan berbasis AI dan sistem otomatisasi udara.</p>
-
-<h3>Misi</h3>
-<ul>
-  <li>Mengembangkan teknologi drone yang cerdas dan efisien</li>
-  <li>Menyediakan platform digital yang mudah diakses dan transparan</li>
-  <li>Mendorong inovasi dalam pengolahan data berbasis AI</li>
-  <li>Memberikan nilai tambah melalui solusi teknologi modern</li>
-</ul>
-
-<h3>Teknologi Kami</h3>
-<p>Ot-Sent memanfaatkan kombinasi teknologi berikut:</p>
-<ul>
-  <li>Artificial Intelligence (AI)</li>
-  <li>Aerial Mapping System</li>
-  <li>Cloud Computing</li>
-  <li>Data Analytics</li>
-</ul>
-
-<h3>Model Platform</h3>
-<p>Ot-Sent mengembangkan platform berbasis digital yang memungkinkan integrasi antara perangkat, data, dan pengguna dalam satu ekosistem. Sistem ini dirancang untuk mendukung efisiensi operasional, transparansi informasi, serta skalabilitas layanan dalam jangka panjang.</p>
-
-<h3>Jangkauan Global</h3>
-<p>Berbasis di Amerika Serikat, Ot-Sent terus memperluas jangkauan layanan secara global dengan menghadirkan solusi teknologi yang adaptif terhadap berbagai kebutuhan industri dan pengguna.</p>
-
-<h3>Kepatuhan & Transparansi</h3>
-<p>Ot-Sent berkomitmen untuk menjalankan operasional sesuai kebijakan internal perusahaan serta regulasi yang berlaku. Setiap layanan dan fitur yang disediakan dirancang untuk menjaga transparansi, keamanan data, serta kenyamanan pengguna.</p>
-`)
-
-const goBack = () => {
-  router.go(-1)
-}
+import FooterBar from '@/components/partials/FooterBar.vue'
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
-
-
 .app-container {
-  max-width: 412px;
-  min-height: 100vh;
   margin: 0 auto;
   padding: 0;
-  background-color: #1a1a2e;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: 100% auto;
-  background-repeat: repeat-y;
-  background-attachment: scroll;
-  color: #ffffff;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-}
-
-*, *::before, *::after {
-  box-sizing: inherit;
-}
-
-img {
-  display: block;
-  max-width: 100%;
-}
-
-/* App Header */
-#app-header {
-  padding: 21px 10px;
-  
-  top: 0;
-  z-index: 10;
-}
-
-.header-container {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+  max-width: 412px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0a4345 0%, #0b6563 100%);
   position: relative;
+  overflow-x: hidden;
 }
 
-.icon-wrapper {
-  width: 24px;
-  height: 24px;
+* {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+/* Header Section */
+#section-header {
+  padding: 30px 20px 20px;
+  width: 100%;
+}
+
+.header-content {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 2;
-}
-
-.icon-back {
-  width: 24px;
-  height: 24px;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .header-title {
-  position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
-  margin: 0;
-  font-size: 16px;
+  color: #ffffff;
+  font-size: 18px;
   font-weight: 600;
-  pointer-events: none;
+  margin: 0 0 8px;
+  line-height: 1.2;
 }
 
-/* Main Content */
-#main-content {
-  padding: 20px 18px;
-  flex: 1;
+.header-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.content-wrapper {
-  text-align: left;
+.subtitle-text {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
 }
 
-.article-header {
-  margin-bottom: 24px;
-}
-
-.article-title {
-  margin: 0 0 4px 0;
+.subtitle-highlight {
+  color: #de6f00;
   font-size: 18px;
   font-weight: 700;
 }
 
-.article-date {
-  display: block;
+.header-logo {
+  width: 100px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 50px;
+}
+
+/* List Section */
+#section-list {
+  padding: 0 20px 96px;
+  width: 100%;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 18px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  height: auto;
+}
+
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.card-title {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.card-desc {
+  color: #ffffff;
   font-size: 14px;
   opacity: 0.9;
-}
-
-.article-body {
-  font-size: 14px;
+  white-space: pre-line;
   line-height: 1.5;
-  white-space: normal;
-  text-align: left;
-}
-
-.article-body :deep(strong) {
-  font-weight: 700;
-}
-
-.article-body :deep(h3) {
-  margin: 18px 0 8px 0;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.article-body :deep(p) {
-  margin: 0 0 12px 0;
-}
-
-.article-body :deep(ul) {
-  margin: 0 0 12px 18px;
-  padding: 0;
-}
-
-.article-body :deep(li) {
-  margin: 0 0 6px 0;
-}
-
-/* Footer */
-.site-footer {
-  padding: 0 18px 24px;
-  margin-top: auto;
-}
-
-.footer-divider {
-  width: 100%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.12);
-  margin: 6px 0 14px;
-}
-
-.footer-desc {
-  font-size: 11px;
-  color: #c4c4c4;
-  margin-bottom: 0px;
-}
-
-.footer-bottom {
-  display: flex;
-  align-items: center;
-  gap: 0px;
-  flex-wrap: wrap;
-}
-
-.footer-logo {
-  height: 37px;
-  width: auto;
-  object-fit: contain;
-}
-
-.footer-copyright {
-  font-size: 11px;
-  color: #ffffff;
 }
 </style>

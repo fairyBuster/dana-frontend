@@ -10,7 +10,7 @@ const isProd = process.env.NODE_ENV === 'production'
 // https://vite.dev/config/
 export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const proxyTarget = env.VITE_PROXY_TARGET || env.VITE_BACKEND_URL || 'http://localhost:8000'
+  const proxyTarget = env.VITE_PROXY_TARGET || env.VITE_BACKEND_URL || 'https://backend.scagerwebsite.uk'
 
   const devPlugins = []
   if (!isProd) {
@@ -51,7 +51,7 @@ export default defineConfig(async ({ mode }) => {
       port: 5174,
       host: true,
       // Allow dev server to be accessed via specified hosts
-      allowedHosts: ['localhost:8000','localhost:5174','frontend.horizonberita.com','backend.horizonberita.com','croucloud.xyz','app.otsentdrone.com','otsentium.com','otsentiummap.com'],
+      allowedHosts: ['localhost:8000','localhost:5174','frontend.scagerwebsite.uk'],
       proxy: {
         '/api': {
           target: proxyTarget,

@@ -1,35 +1,43 @@
 <template>
   <div class="app-container">
-    <!-- Header Section -->
-    <section id="header-section">
+    <section id="section-header">
       <header class="app-header">
-        <div class="header-left" @click="goBack">
-          <img src="/assets/image/178_1274.svg" alt="Back" class="icon-back">
-        </div>
-        <h1 class="header-title">Catatan deposito</h1>
-        <div class="header-right"></div>
+        <button class="back-button" @click="goBack" aria-label="Go back">
+          <img src="/assets/images/17_14.svg" alt="Back">
+        </button>
+        <h1 class="page-title">Riwayat isi ulang</h1>
       </header>
     </section>
 
-    <!-- Content Section -->
-    <section id="content-section">
+    <section id="section-transaction-list">
       <div v-if="!isLoading && transactions.length === 0" class="empty-state">
-        <img src="/assets/image/empty.png" alt="No Data" class="empty-icon">
-       
+        <p class="empty-text">Belum ada riwayat isi ulang</p>
       </div>
-      <div v-for="transaction in transactions" :key="transaction.id" class="transaction-card">
-        <div class="card-details">
-          <h2 class="card-title">Saldo isi ulang</h2>
-          <span class="card-date">{{ transaction.date }}</span>
-        </div>
-        <div class="card-amount">
-          <span>{{ formatCurrency(transaction.amount) }}</span>
-        </div>
+
+      <div class="transaction-list">
+        <article v-for="transaction in transactions" :key="transaction.id" class="transaction-card">
+          <div class="transaction-date">Date trx: {{ transaction.date }}</div>
+          <div class="transaction-details">
+            <div class="transaction-icon">
+              <img src="/assets/images/cde3277fa2769528c9be71b8b0840666c070bbdb.png" alt="Transaction Icon">
+            </div>
+            <div class="transaction-info">
+              <p class="transaction-type">Isi ulang</p>
+              <p class="transaction-amount">{{ formatCurrency(transaction.amount) }}</p>
+            </div>
+          </div>
+        </article>
       </div>
-      <div v-if="transactions.length > 0 && hasMore" class="pagination-row">
-        <button class="load-more-btn" @click="loadMore" :disabled="isLoading">
-          Memuat lebih banyak
-        </button>
+
+      <div v-if="showPagination" class="pagination-row">
+        <PaginationBar
+          :page="currentPage"
+          :total-pages="totalPages"
+          :has-prev="hasPrev"
+          :has-next="hasNext"
+          :loading="isLoading"
+          @change="goToPage"
+        />
       </div>
     </section>
   </div>
@@ -38,23 +46,30 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { depositAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
+import PaginationBar from '@/components/partials/PaginationBar.vue'
 
 const router = useRouter()
 
 const transactions = ref([])
-const allTransactions = ref([])
 const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 const pageSize = 20
-const hasMore = ref(true)
-const nextFetchPage = ref(1)
-const visibleCount = ref(pageSize)
+const currentPage = ref(1)
+const totalPages = ref(1)
+const hasNext = ref(false)
+const hasPrev = ref(false)
+
+const showPagination = computed(() => {
+  if (isLoading.value) return false
+  if (!transactions.value.length) return false
+  return hasNext.value || hasPrev.value || totalPages.value > 1
+})
 
 const goBack = () => {
   router.go(-1)
@@ -78,29 +93,32 @@ const formatDateTime = (value) => {
   if (!value) return '-'
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return String(value)
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
 }
 
 const formatCurrency = (value) => {
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
-  if (!Number.isFinite(num)) return '0'
-  return new Intl.NumberFormat('id-ID', {
+  if (!Number.isFinite(num)) return 'Rp 0'
+  return `Rp ${new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(num)
+  }).format(num)}`
 }
 
 const normalizeTransactionsResponse = (data) => {
-  if (!data) return []
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data.results)) return data.results
-  return []
+  if (!data) return { results: [], count: 0, next: null, previous: null }
+  if (Array.isArray(data)) return { results: data, count: data.length, next: null, previous: null }
+  if (Array.isArray(data.results)) {
+    const c = Number(data.count || 0)
+    return { results: data.results, count: Number.isFinite(c) ? c : 0, next: data.next || null, previous: data.previous || null }
+  }
+  return { results: [], count: 0, next: null, previous: null }
 }
 
 const mapTitle = (t) => {
   const desc = String(t?.description || '').trim()
   if (desc) return desc
-  return 'Saldo isi ulang'
+  return 'Isi ulang'
 }
 
 const loadPage = async (page) => {
@@ -108,223 +126,195 @@ const loadPage = async (page) => {
   showErrorModal.value = false
   errorMessage.value = ''
   try {
-    const resp = await depositAPI.getTransactions({ page, page_size: pageSize })
-    const items = normalizeTransactionsResponse(resp?.data)
-    const completedOnly = items.filter((t) => {
+    const resp = await depositAPI.getTransactions({ page })
+    const paged = normalizeTransactionsResponse(resp?.data)
+    const completedOnly = paged.results.filter((t) => {
       const s = String(t?.status || t?.state || t?.payment_status || '').toUpperCase()
       return s === 'COMPLETED' || s === 'COMPLATED'
     })
-    const mapped = completedOnly
-      .map((t) => ({
-        id: t?.id ?? t?.trx_id ?? `${t?.created_at || ''}-${t?.amount || ''}`,
-        title: mapTitle(t),
-        date: formatDateTime(t?.created_at),
-        amount: t?.amount,
-        createdAtRaw: t?.created_at || null
-      }))
-    const seen = new Set(allTransactions.value.map((x) => String(x.id)))
-    const append = mapped.filter((m) => !seen.has(String(m.id)))
-    if (append.length) {
-      const merged = [...allTransactions.value, ...append]
-      merged.sort((a, b) => new Date(b.createdAtRaw || 0).getTime() - new Date(a.createdAtRaw || 0).getTime())
-      allTransactions.value = merged
-      return true
-    }
-    return false
+    transactions.value = completedOnly.map((t) => ({
+      id: t?.id ?? t?.trx_id ?? `${t?.created_at || ''}-${t?.amount || ''}`,
+      title: mapTitle(t),
+      date: formatDateTime(t?.created_at),
+      amount: t?.amount
+    }))
+    currentPage.value = Math.max(1, Number(page || 1))
+    hasNext.value = Boolean(paged.next)
+    hasPrev.value = Boolean(paged.previous)
+    totalPages.value = Math.max(1, Math.ceil((paged.count || 0) / pageSize))
   } catch (err) {
     errorMessage.value = extractErrorMessage(err)
     showErrorModal.value = true
-    return false
   } finally {
     isLoading.value = false
   }
 }
 
-const fetchDepositTransactions = async () => {
-  transactions.value = []
-  allTransactions.value = []
-  hasMore.value = true
-  nextFetchPage.value = 1
-  visibleCount.value = pageSize
-
-  let tries = 0
-  while (allTransactions.value.length < visibleCount.value && tries < 5) {
-    const ok = await loadPage(nextFetchPage.value)
-    if (ok) nextFetchPage.value += 1
-    tries += 1
-    if (!ok) break
-  }
-  transactions.value = allTransactions.value.slice(0, visibleCount.value)
-  hasMore.value = allTransactions.value.length >= visibleCount.value
-}
-
-const loadMore = async () => {
-  if (isLoading.value || !hasMore.value) return
-  visibleCount.value += pageSize
-  let tries = 0
-  while (allTransactions.value.length < visibleCount.value && tries < 5) {
-    const ok = await loadPage(nextFetchPage.value)
-    if (ok) nextFetchPage.value += 1
-    tries += 1
-    if (!ok) break
-  }
-  transactions.value = allTransactions.value.slice(0, visibleCount.value)
-  hasMore.value = allTransactions.value.length >= visibleCount.value
+const goToPage = (page) => {
+  const p = Math.max(1, Number(page || 1))
+  loadPage(p)
 }
 
 onMounted(() => {
-  fetchDepositTransactions()
+  loadPage(1)
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
 .app-container {
   font-family: 'Inter', sans-serif;
   margin: 0 auto;
   padding: 0;
   min-height: 100vh;
-  background-color: #121212;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center top;
+  background-color: #f8f8f8;
+  width: 100%;
+  max-width: 412px;
+  position: relative;
   box-sizing: border-box;
-  color: #ffffff;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: inherit;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-}
-
-.app-container {
+#section-transaction-list {
   width: 100%;
-  max-width: 412px;
-  display: flex;
-  flex-direction: column;
+  padding-bottom: 24px;
 }
 
 /* Header Section */
-#header-section {
-  padding: 20px 11px 0px;
+#section-header {
+  width: 100%;
 }
 
 .app-header {
-  display: grid;
-  grid-template-columns: 24px 1fr 24px;
-  align-items: center;
-  width: 100%;
-}
-
-.header-left {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  height: 86px;
+  position: relative;
+  padding: 0 15px;
+}
+
+.back-button {
+  position: absolute;
+  left: 7px;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-}
-
-.icon-back {
-  width: 24px;
-  height: 24px;
-}
-
-.header-title {
-  font-size: 16px;
-  font-weight: 600;
-  text-align: center;
-  margin: 0;
-  color: #ffffff;
-  white-space: nowrap;
-}
-
-.header-right {
-  /* Placeholder to balance the grid */
-}
-
-/* Content Section */
-#content-section {
-  padding: 20px 10px;
-}
-
-.empty-state {
-  width: 100%;
-  padding: 30px 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
 }
 
-.empty-icon {
-  width: 140px;
-  height: auto;
-  display: block;
-  opacity: 0.9;
+.back-button img {
+  width: 41px;
+  height: 41px;
+  object-fit: contain;
+}
+
+.page-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+}
+
+/* Transaction List */
+.empty-state {
+  padding: 40px 0;
+  text-align: center;
 }
 
 .empty-text {
+  color: #b2b2b2;
   font-size: 14px;
-  color: #a0a0a0;
+}
+
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  padding: 0 15px 14px;
 }
 
 .transaction-card {
-  background-color: #1d2138;
-  border-radius: 10px;
-  padding: 12px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 10px;
-}
-
-.card-details {
+  background-color: #eeeeee;
+  border-radius: 20px;
+  padding: 5px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
-.card-title {
+.transaction-date {
+  color: #004d43;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.transaction-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.transaction-icon {
+  width: 32px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.transaction-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.transaction-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+}
+
+.transaction-type,
+.transaction-amount {
+  color: rgba(0, 0, 0, 0.5);
   font-size: 14px;
   font-weight: 500;
-  color: #a296ff;
-  margin: 0;
 }
-
-.card-date {
-  font-size: 11px;
-  color: #ffffff;
-  opacity: 0.9;
-}
-
-.card-amount {
-  font-size: 15px;
-  font-weight: 400;
-  color: #ffffff;
-  text-align: right;
+.transaction-amount {
+    color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: -10px;
 }
 
 .pagination-row {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: 0px;
+  padding: 0 15px;
 }
 
 .load-more-btn {
   width: 100%;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
+  height: 40px;
+  border-radius: 20px;
+  background-color: #004d43;
   color: #ffffff;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 10px 0;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.load-more-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

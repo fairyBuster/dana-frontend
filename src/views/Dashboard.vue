@@ -1,914 +1,795 @@
 <template>
   <div class="app-container">
-    
-    <!-- Hero Section -->
-    <section class="hero">
-      <img src="/assets/image/bg.png" alt="Drone Mapping Hero" class="hero-bg">
-      <!-- Status Bar Overlapping Hero -->
-      <div class="status-bar">
-        <div class="status-text">
-          <span class="status-dot"></span>
-          {{ statusText }}
+    <!-- Header Section -->
+    <section id="section-header">
+      <header class="main-header">
+        <div class="top-bar">
+          <router-link class="user-pill" to="/settings">
+            <div class="user-info">
+              <span class="greeting">Hai, {{ username }}</span>
+              <span class="phone">{{ phoneDisplay }}</span>
+            </div>
+            <img src="/assets/images/2010_761.svg" alt="Dropdown" class="icon-dropdown">
+          </router-link>
+          <router-link to="/news" class="notification-area">
+            <div class="notification-icon-wrapper">
+              <img src="/assets/images/cb42829baac29d56fa551a762cf2ae5608e0f23c.png" alt="Notification">
+            </div>
+            <span class="notification-text">Pemberitahuan</span>
+          </router-link>
         </div>
-        <div class="status-online">{{ statusOnlineText }}</div>
-      </div>
-    </section>
 
-    <!-- Quick Actions Section -->
-    <section class="quick-actions">
-      <div class="section-header">
-        <h3 class="section-title">Aksi cepat</h3>
-        <div class="section-link" @click="goToInvestments">
-          <span>Periksa drone saya</span>
-          <img src="/assets/image/120_1292.svg" alt="arrow" class="icon-arrow">
-        </div>
-      </div>
-      <div class="action-buttons">
-        <button class="btn btn-primary" type="button" @click="goToMissions">Mulai misi</button>
-        <button class="btn btn-secondary" type="button" @click="goToProducts">Sewa drone</button>
-      </div>
-    </section>
-
-    <!-- Notification Ticker -->
-    <section class="ticker-section">
-      <div class="ticker-content">
-        <img src="/assets/image/126_114.svg" alt="volume" class="icon-volume">
-        <div class="ticker-marquee">
-          <div class="ticker-marquee-track">
-            <span class="ticker-marquee-text">{{ tickerText }}</span>
-            <span class="ticker-marquee-text">{{ tickerText }}</span>
+        <div class="balance-container">
+          <div class="main-balance-area">
+            <div class="balance-label-row">
+              <span class="label-text">Saldo Utama</span>
+              <img src="/assets/images/2013_1238.svg" alt="Toggle Visibility" class="icon-eye" @click="toggleBalanceVisibility">
+            </div>
+            <div class="main-amount">{{ balanceDisplay }}</div>
+          </div>
+          <div class="today-balance-area">
+            <span class="label-text">Saldo hari ini</span>
+            <span class="today-amount">{{ todayBalanceDisplay }}</span>
           </div>
         </div>
+
+        <div class="action-buttons">
+          <button class="btn-primary" @click="goToDeposit">Deposito</button>
+          <button class="btn-secondary" @click="goToWithdraw">Tarik Uang</button>
+        </div>
+      </header>
+    </section>
+
+    <!-- Spacer Section -->
+    <section id="section-spacer">
+      <img src="/assets/images/image 85.png" alt="Spacer" class="icon-spacer">
+    </section>
+
+    <!-- Menu Section -->
+    <section id="section-menu">
+      <div class="menu-section-wrapper">
+        <div class="announcement-bar">
+          <img src="/assets/images/13_158.svg" alt="Speaker" class="icon-speaker">
+          <div class="announcement-marquee" aria-label="Selamat datang di TRIVEX">
+            <div class="marquee-track">
+              <span class="announcement-text">Selamat datang di TRIVEX</span>
+                  </div>
+          </div>
+        </div>
+
+        <div class="quick-actions-grid">
+          <router-link to="/dep" class="action-item">
+            <img src="/assets/images/c1cce73b33fa2a2b6bc94e7f2b82bd66e20b9fa9.png" alt="Deposito">
+            <span>Deposito</span>
+          </router-link>
+          <router-link to="/flow" class="action-item">
+            <img src="/assets/images/d634ba55ee38309526b6d657b8e1a5a382ef7c60.png" alt="Tarik dana">
+            <span>Tarik dana</span>
+          </router-link>
+          <router-link to="/about" class="action-item">
+            <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Tentang kami">
+            <span>Tentang kami</span>
+          </router-link>
+          <router-link to="/support" class="action-item">
+            <img src="/assets/images/a45539f924d91cd414fa3d9c7ba05b2beb121149.png" alt="Layanan umum">
+            <span>Layanan umum</span>
+          </router-link>
+          <router-link to="/share" class="action-item">
+            <img src="/assets/images/1be34f61fca8018ee484cfa57216986588de26b2.png" alt="Kartu undangan">
+            <span>Kartu<br>undangan</span>
+          </router-link>
+          <router-link to="/download-app" class="action-item">
+            <img src="/assets/images/6a724b73fb2c46483c7c2b348fcdc144d1a30b46.png" alt="Aplikasi kami">
+            <span>Aplikasi kami</span>
+          </router-link>
+          <router-link to="/informations/options" class="action-item">
+            <img src="/assets/images/334cb4459143d492b5a8194e9812907fd3771af9.png" alt="Riwayat transaksi">
+            <span>Riwayat<br>transaksi</span>
+          </router-link>
+          <router-link to="/sign" class="action-item">
+            <img src="/assets/images/942258d392b49b3593405d1bc54bedbd3b192e38.png" alt="Hadiah harian">
+            <span>Hadiah<br>harian</span>
+          </router-link>
+        </div>
       </div>
     </section>
 
-    <!-- Progress Card -->
-    <section class="progress-card">
-      <div class="progress-top">
-        <div class="progress-title">
-          <img src="/assets/image/bf8b81ef2600b30e06ec0a2ae89fa57be2e4397a.png" alt="Gem" class="gem-icon">
-          <span>Progress Penerbangan</span>
+    <!-- Banners Section -->
+    <section id="section-banners">
+      <div class="voucher-banner" @click="openVoucherModal">
+        <div class="banner-text-content">
+          <h3 class="banner-title">Memiliki voucher?</h3>
+          <p class="banner-subtitle">Tukar kode voucher Anda disini</p>
         </div>
-        <span class="level-text">{{ levelDroneText }}</span>
       </div>
-
       
-      <div class="progress-mid">
-        <div class="progress-desc">
-          <span>Terbang {{ targetDays }} hari untuk dapatkan</span>
-          <span class="reward-inline">
-            <img src="/assets/image/bf8b81ef2600b30e06ec0a2ae89fa57be2e4397a.png" alt="Gem" class="gem-inline">
-            <span class="progress-reward">Rp {{ rewardText }}</span>
-          </span>
+      <div class="portfolio-banner" @click="goToPortfolio">
+        <div class="banner-text-content">
+          <h3 class="banner-title">Periksa portofolio saya</h3>
+          <p class="banner-subtitle">Kembangkan asetmu di TRIVEX sekarang!</p>
         </div>
-      </div>
-
-      <div class="progress-bar-row">
-        <div class="progress-track">
-          <div class="progress-fill" :style="{ width: `${progressPercent}%` }"></div>
-        </div>
-            <a class="btn-more" href="/#/pages/account/attendance">
-              <span>Lebih banyak</span>
-              <img src="/assets/image/120_1292.svg" alt="arrow" class="icon-arrow-small">
-            </a>
-      </div>
-
-      <div class="progress-pill">Anda sudah aktif bersama kami selama {{ daysActiveText }} hari</div>
-    </section>
-    
-
-    <!-- Exclusive Grid Section -->
-    <section class="exclusive-section">
-      <h2 class="gradient-text">Eksklusif untuk Anda</h2>
-      <div class="grid-menu">
-        <div class="grid-card" role="button" tabindex="0" @click="goToMissions">
-          <div class="grid-card-bg">
-            <span class="grid-title">Tantangan</span>
-          </div>
-          <img src="/assets/image/gift 2.png" alt="Tantangan" class="grid-img img-tantangan">
-        </div>
-        <div class="grid-card" role="button" tabindex="0" @click="goToVoucher">
-          <div class="grid-card-bg">
-            <span class="grid-title">Menukarkan</span>
-          </div>
-          <img src="/assets/image/gift 1.png" alt="Menukarkan" class="grid-img img-menukarkan">
-        </div>
-        <div class="grid-card" role="button" tabindex="0" @click="goToPoints">
-          <div class="grid-card-bg">
-            <span class="grid-title">Keberuntungan</span>
-          </div>
-          <img src="/assets/image/gift 3.png" alt="Keberuntungan" class="grid-img img-keberuntungan">
-        </div>
+        <button class="btn-icon-round">
+          <img src="/assets/images/2010_761.svg" alt="Arrow">
+        </button>
       </div>
     </section>
 
-    <!-- Insight Card -->
-    <section class="info-card insight-ai-card">
-      <div class="insight-header">
-        <img src="/assets/image/star.png" alt="Insight AI" class="insight-icon" style="width: 24px;">
-        <h3 class="insight-title">Insight AI</h3>
-      </div>
-      <div class="insight-body">
-        <div class="insight-main">Efisiensi pemetaan meningkat 12% dibanding kemarin</div>
-        <div class="insight-sub">Tidak ada gangguan - Sistem berjalan normal.</div>
+    <!-- Chart Section -->
+    <section id="section-chart">
+      <div class="chart-section-wrapper">
+        <div class="partners-logos">
+          <img src="/assets/images/image 61 (2).png" alt="Bappebti" class="logo-bappebti">
+          <img src="/assets/images/a648e454f7e6e93caec0f833a59b7dcec155605e.png" alt="OJK" class="logo-ojk">
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-image-container">
+            <svg
+              v-if="chartReady"
+              class="main-chart-img"
+              viewBox="0 0 300 120"
+              preserveAspectRatio="none"
+              aria-label="Grafik investor bulanan"
+            >
+              <defs>
+                <linearGradient id="chartFillGreen" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="rgba(21, 178, 92, 0.28)" />
+                  <stop offset="100%" stop-color="rgba(21, 178, 92, 0)" />
+                </linearGradient>
+                <filter id="chartShadowGreen" x="-20%" y="-40%" width="140%" height="200%">
+                  <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#15B25C" flood-opacity="0.35" />
+                </filter>
+              </defs>
+              <path :d="chartAreaPath" fill="url(#chartFillGreen)" />
+              <path :d="chartLinePath" stroke="#15B25C" stroke-width="3" fill="none" filter="url(#chartShadowGreen)" />
+            </svg>
+            <img v-else src="/assets/images/2012_1128.svg" alt="Chart" class="main-chart-img">
+          </div>
+          <div class="chart-x-axis">
+            <span v-for="m in chartMonthLabels" :key="m">{{ m }} </span>
+          </div>
+        </div>
+
+        <div class="chart-footer">
+          <span class="chart-title">{{ chartTitle }}</span>
+        </div>
       </div>
     </section>
-
-    <a class="info-card notice-card notice-link" href="/#/pages/account/news">
-      <div class="notice-header">
-        <div class="notice-title-row">
-          <img src="/assets/image/bell.png" alt="bell" class="icon-bell" style="width: 20px;">
-          <h3 class="notice-title">Pemberitahuan pesan</h3>
-        </div>
-        <div class="notice-meta">
-          <span class="notice-age">{{ newsAgeText }}</span>
-          <img src="/assets/image/120_1292.svg" alt="arrow" class="icon-arrow">
-        </div>
-      </div>
-      <div class="notice-body">
-        <div class="notice-headline">{{ newsTitleText }}</div>
-        <div class="notice-text">{{ newsBodyText }}</div>
-      </div>
-    </a>
-
-    <!-- Footer -->
-    <footer class="site-footer">
-      <div class="footer-logo-row">
-        <img src="/assets/image/983276.png" alt="OT-Sent Logo" class="footer-logo">
-        <span class="copyright">© 2026 OT-SENT. All Rights Reserved</span>
-      </div>
-      <p class="footer-desc">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
-    </footer>
-
-   
   </div>
+  <VoucherModal v-model="isVoucherModalOpen" @submit="handleVoucherSubmit" />
+  <AnnouncementModal v-model="isAnnouncementOpen" />
   <FooterBar />
 </template>
 
 <script setup>
-import { computed, onActivated, onMounted, ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import FooterBar from '@/components/partials/FooterBar.vue'
-import { authAPI, attendanceAPI, newsAPI } from '@/services/api'
+import VoucherModal from '@/components/modals/VoucherModal.vue'
+import AnnouncementModal from '@/components/modals/AnnouncementModal.vue'
+import { authAPI } from '@/services/api'
 
 const router = useRouter()
 
-const activeInvestmentsCount = ref(0)
-const accountCreatedAt = ref(null)
-const currentRank = ref(null)
-const currentTitle = ref(null)
-const latestNews = ref(null)
-const attendanceStatus = ref(null)
-const isRefreshing = ref(false)
-const lastRefreshedAt = ref(0)
+const username = ref('Username')
+const phone = ref('+•••••••')
+const mainBalance = ref(0)
+const todayBalance = ref(0)
+const isBalanceVisible = ref(false)
+const isVoucherModalOpen = ref(false)
+const isAnnouncementOpen = ref(false)
+const investorsMonthly = ref([])
+const chartMonthLabels = ref(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'])
+const isChartLoading = ref(false)
 
-const tickerText = ref('Por favor, complete algumas missões disponíveis abaixo para obter muita sorte para você')
-const targetDays = 14
-const rewardAmount = 15000
+const phoneDisplay = computed(() => phone.value)
 
-const statusOnlineText = computed(() => `${activeInvestmentsCount.value} Drone Online`)
-const statusText = computed(() => {
-  if (activeInvestmentsCount.value > 0) return 'Drone sedang aktif saat ini'
-  return 'Tidak ada drone aktif'
+const balanceDisplay = computed(() => {
+  if (isBalanceVisible.value) {
+    return `Rp ${new Intl.NumberFormat('id-ID').format(mainBalance.value)}`
+  }
+  return 'Rp *******'
 })
 
-const toNumber = (value) => {
-  const n = Number(String(value ?? 0).replace(/[^0-9.-]/g, ''))
+const todayBalanceDisplay = computed(() => {
+  if (isBalanceVisible.value) {
+    return `Rp${new Intl.NumberFormat('id-ID').format(todayBalance.value)}`
+  }
+  return 'Rp*******'
+})
+
+const toggleBalanceVisibility = () => {
+  isBalanceVisible.value = !isBalanceVisible.value
+}
+
+const toAmount = (value) => {
+  const n = Number(String(value ?? '').replace(/[^0-9.-]/g, ''))
   return Number.isFinite(n) ? n : 0
 }
 
-const attendanceDaysActive = computed(() => {
-  const d = attendanceStatus.value || {}
-  const cycleDay = toNumber(d.cycle_day)
-  if (cycleDay > 0) return cycleDay
-  const streak = toNumber(d.streak ?? d.streak_count ?? d.current_streak ?? d.current_streak_count)
-  if (streak > 0) return streak
-  return 0
-})
-
-const daysActive = computed(() => {
-  if (attendanceDaysActive.value > 0) return attendanceDaysActive.value
-  if (!accountCreatedAt.value) return 0
-  const d = new Date(accountCreatedAt.value)
-  if (Number.isNaN(d.getTime())) return 0
-  const diffMs = Date.now() - d.getTime()
-  return Math.max(0, Math.floor(diffMs / 86400000))
-})
-
-const daysActiveText = computed(() => String(daysActive.value))
-
-const progressPercent = computed(() => {
-  if (!targetDays) return 0
-  return Math.max(0, Math.min(100, Math.round((daysActive.value / targetDays) * 100)))
-})
-
-const rewardText = computed(() => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(rewardAmount))
-const levelDroneText = computed(() => {
-  const r = currentRank.value
-  const title = String(currentTitle.value || '').trim()
-  if (title) return `Level drone: ${title}`
-  if (r === null || r === undefined || r === '') return 'Level drone: -'
-  const n = Number(r)
-  if (!Number.isFinite(n)) return `Level drone: ${String(r)}`
-  return `Level drone: V${n}`
-})
-
-const newsTitleText = computed(() => {
-  const title = String(latestNews.value?.title || '').trim()
-  return title || 'Belum ada berita'
-})
-
-const newsBodyText = computed(() => {
-  const body = String(latestNews.value?.body || '').replace(/\s+/g, ' ').trim()
-  if (!body) return 'Silakan cek halaman berita untuk info terbaru.'
-  return body.length > 70 ? `${body.slice(0, 70)}...` : body
-})
-
-const newsAgeText = computed(() => {
-  const raw = latestNews.value?.published_at || latestNews.value?.updated_at || null
-  if (!raw) return '-'
-  const d = new Date(raw)
-  if (Number.isNaN(d.getTime())) return '-'
-  const diffDays = Math.floor((Date.now() - d.getTime()) / 86400000)
-  if (diffDays <= 0) return 'Hari ini'
-  return `${diffDays} hari lalu`
-})
-
 const fetchAccountInfo = async () => {
   try {
-    const resp = await authAPI.getAccountInfo()
-    const n = Number(resp?.data?.active_investments_count ?? 0)
-    activeInvestmentsCount.value = Number.isFinite(n) ? n : 0
-    accountCreatedAt.value = resp?.data?.created_at || null
-  } catch (_) {
-    activeInvestmentsCount.value = 0
-    accountCreatedAt.value = null
-  }
-}
-
-const fetchLatestNews = async () => {
-  try {
-    const resp = await newsAPI.getNews({ page: 1 })
-    const results = Array.isArray(resp?.data?.results) ? resp.data.results : []
-    const published = results.filter((x) => x && (x.is_published === undefined || x.is_published === true))
-    published.sort((a, b) => {
-      const ad = new Date(a?.published_at || a?.updated_at || 0).getTime()
-      const bd = new Date(b?.published_at || b?.updated_at || 0).getTime()
-      return bd - ad
-    })
-    latestNews.value = published[0] || results[0] || null
-  } catch (_) {
-    latestNews.value = null
-  }
-}
-
-const fetchRankStatus = async () => {
-  try {
-    const resp = await authAPI.getRankStatus()
-    currentRank.value = resp?.data?.current_rank ?? null
-    currentTitle.value = resp?.data?.current_title ?? null
-  } catch (_) {
-    currentRank.value = null
-    currentTitle.value = null
-  }
-}
-
-const fetchAttendanceStreak = async () => {
-  try {
-    const resp = await attendanceAPI.getStreak()
-    attendanceStatus.value = resp?.data || null
-  } catch (_) {
-    attendanceStatus.value = null
-  }
-}
-
-const goToProducts = () => {
-  router.push('/pages/account/products')
-}
-
-const goToMissions = () => {
-  router.push('/pages/account/missions')
-}
-
-const goToVoucher = () => {
-  router.push('/pages/account/rewards')
-}
-
-const goToAttendance = () => {
-  router.push('/pages/account/attendance')
-}
-
-const goToPoints = () => {
-  router.push('/pages/account/bonus')
-}
-
-const goToInvestments = () => {
-  router.push('/pages/account/panel')
-}
-
-const refreshDashboardData = async () => {
-  if (isRefreshing.value) return
-  isRefreshing.value = true
-  try {
-    await Promise.all([
-      fetchAccountInfo(),
-      fetchRankStatus(),
-      fetchLatestNews(),
-      fetchAttendanceStreak()
+    const [accountRes, statsRes] = await Promise.allSettled([
+      authAPI.getAccountInfo(),
+      authAPI.getBalanceStatistics('today')
     ])
-  } finally {
-    lastRefreshedAt.value = Date.now()
-    isRefreshing.value = false
+
+    if (accountRes.status === 'fulfilled') {
+      const data = accountRes.value?.data || {}
+      username.value = data?.username || 'Username'
+      phone.value = data?.phone || '+62 81239402453'
+      mainBalance.value = toAmount(data?.balance ?? 0)
+    }
+
+    if (statsRes.status === 'fulfilled') {
+      const stats = statsRes.value?.data || {}
+      todayBalance.value = toAmount(stats?.total_income ?? 0)
+    }
+  } catch (_) {
+    // Use defaults
   }
+}
+
+const formatYYYYMM = (date) => {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  return `${y}-${m}`
+}
+
+const getLastMonths = (count = 6) => {
+  const end = new Date()
+  end.setDate(1)
+  const months = []
+  for (let i = count - 1; i >= 0; i -= 1) {
+    const d = new Date(end)
+    d.setMonth(d.getMonth() - i)
+    months.push(formatYYYYMM(d))
+  }
+  return months
+}
+
+const monthLabel = (yyyyMm) => {
+  const [y, m] = String(yyyyMm || '').split('-')
+  const mm = Number(m || 0)
+  const date = new Date(Number(y || 2000), Math.max(0, mm - 1), 1)
+  const label = date.toLocaleString('en-US', { month: 'short' })
+  return label.replace('.', '')
+}
+
+const chartTitle = computed(() => {
+  const labels = chartMonthLabels.value || []
+  const list = investorsMonthly.value || []
+  
+  if (labels.length === 0 || list.length === 0) {
+    return 'Data investor 6 bulan terakhir'
+  }
+  
+  // Ambil tahun dari data bulan (format YYYY-MM)
+  const startYear = list[0].month.split('-')[0]
+  const endYear = list[list.length - 1].month.split('-')[0]
+  const yearDisplay = endYear || startYear
+
+  return `Data investor ${labels[0]} - ${labels[labels.length - 1]} ${yearDisplay}`
+})
+
+const fetchInvestorsMonthly = async () => {
+  isChartLoading.value = true
+  try {
+    // Panggil API tanpa start/end tetap untuk mendapatkan data terbaru dari server
+    const resp = await authAPI.getInvestorsMonthly()
+    const points = Array.isArray(resp?.data?.points) ? resp.data.points : []
+    
+    // Ambil maksimal 6 data terakhir (sliding window)
+    const lastSixPoints = points.slice(-6)
+    
+    // Update data investor dan label bulan berdasarkan respon API
+    investorsMonthly.value = lastSixPoints.map((p) => ({
+      month: String(p?.month || ''),
+      total_investors: Number(p?.total_investors || 0)
+    }))
+    
+    chartMonthLabels.value = lastSixPoints.map((p) => monthLabel(p.month))
+  } catch (_) {
+    investorsMonthly.value = []
+    chartMonthLabels.value = []
+  } finally {
+    isChartLoading.value = false
+  }
+}
+
+const chartValues = computed(() => {
+  const list = investorsMonthly.value || []
+  if (list.length > 0) return list.map((p) => Number(p?.total_investors || 0))
+  return [0, 0, 0, 0, 0, 0]
+})
+
+const chartPoints = computed(() => {
+  const values = chartValues.value
+  const count = values.length
+  const w = 300
+  const h = 120
+  const padX = 8
+  const padTop = 12
+  const padBottom = 18
+  const innerW = w - padX * 2
+  const innerH = h - padTop - padBottom
+  const max = Math.max(1, ...values)
+  
+  return values.map((v, idx) => {
+    const x = padX + (innerW * idx) / Math.max(1, count - 1)
+    const y = padTop + innerH * (1 - v / max)
+    return { x, y }
+  })
+})
+
+const chartLinePath = computed(() => {
+  const pts = chartPoints.value
+  if (!pts.length) return ''
+  if (pts.length < 2) return ''
+  const path = [`M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`]
+  for (let i = 0; i < pts.length - 1; i += 1) {
+    const p0 = pts[i - 1] || pts[i]
+    const p1 = pts[i]
+    const p2 = pts[i + 1]
+    const p3 = pts[i + 2] || p2
+    const cp1x = p1.x + (p2.x - p0.x) / 6
+    const cp1y = p1.y + (p2.y - p0.y) / 6
+    const cp2x = p2.x - (p3.x - p1.x) / 6
+    const cp2y = p2.y - (p3.y - p1.y) / 6
+    path.push(
+      `C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)} ${cp2x.toFixed(2)} ${cp2y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
+    )
+  }
+  return path.join(' ')
+})
+
+const chartAreaPath = computed(() => {
+  const pts = chartPoints.value
+  if (!pts.length) return ''
+  const baseY = 120 - 18
+  if (pts.length < 2) return ''
+  const path = [`M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`]
+  for (let i = 0; i < pts.length - 1; i += 1) {
+    const p0 = pts[i - 1] || pts[i]
+    const p1 = pts[i]
+    const p2 = pts[i + 1]
+    const p3 = pts[i + 2] || p2
+    const cp1x = p1.x + (p2.x - p0.x) / 6
+    const cp1y = p1.y + (p2.y - p0.y) / 6
+    const cp2x = p2.x - (p3.x - p1.x) / 6
+    const cp2y = p2.y - (p3.y - p1.y) / 6
+    path.push(
+      `C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)} ${cp2x.toFixed(2)} ${cp2y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
+    )
+  }
+  path.push(`L ${pts[pts.length - 1].x.toFixed(2)} ${baseY}`)
+  path.push(`L ${pts[0].x.toFixed(2)} ${baseY}`)
+  path.push('Z')
+  return path.join(' ')
+})
+
+const chartReady = computed(() => !isChartLoading.value && (investorsMonthly.value || []).length > 0)
+
+const goToDeposit = () => {
+  router.push('/dep')
+}
+
+const goToWithdraw = () => {
+  router.push('/flow')
+}
+
+const goToPortfolio = () => {
+  router.push('/portfolio')
+}
+
+const openVoucherModal = () => {
+  isVoucherModalOpen.value = true
+}
+
+const handleVoucherSubmit = () => {
+  isVoucherModalOpen.value = false
 }
 
 onMounted(() => {
-  refreshDashboardData()
-})
-
-onActivated(() => {
-  const now = Date.now()
-  if (now - lastRefreshedAt.value < 300) return
-  refreshDashboardData()
+  isAnnouncementOpen.value = true
+  fetchAccountInfo()
+  fetchInvestorsMonthly()
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+.app-container {
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+  max-width: 412px;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  margin: 0 auto;
+}
 
 * {
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
+h1, h2, h3, h4, h5, h6, p {
   margin: 0;
-  padding: 0;
-  background-color: #050510;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Header Section */
+.main-header {
+  background-color: #f8f8f8;
+  padding: 20px 20px 15px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.user-pill {
+  background-color: #004d43;
+  border-radius: 25px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.greeting {
   color: #ffffff;
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-img {
-  max-width: 100%;
-  display: block;
-}
-
-h1, h2, h3, p {
-  margin: 0;
-}
-
-.material-icons {
-  font-size: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* App Container */
-.app-container {
-  width: 100%;
-  max-width: 412px;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: top center;
-  background-repeat: no-repeat;
-  position: relative;
-  padding-bottom: 80px;
-  overflow-x: hidden;
-}
-
-.notice-link {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-}
-
-/* Hero */
-.hero {
-  position: relative;
-  width: 100%;
-  height: 195px;
-}
-
-.hero-bg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-}
-
-.status-bar {
-  position: absolute;
-  bottom: -18px;
-  left: 16px;
-  right: 16px;
-  height: 36px;
-  background: linear-gradient(90deg, #100f2c 0%, #0f132e 48%, #0a1025 100%);
-  border-radius: 10px;
-  box-shadow: 0px 4px 4px rgba(137, 137, 137, 0.25);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 12px;
   font-size: 12px;
-}
-
-.status-text {
-  background: linear-gradient(90deg, #8265e3 0%, #8a77c9 35%, #9085b5 62%, #8c6cff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   font-weight: 600;
+}
+
+.phone {
+  color: #ffffff;
+  font-size: 10px;
+  opacity: 0.9;
+}
+
+.icon-dropdown {
+  width: 24px;
+  height: 24px;
+  rotate: 270deg;
+}
+
+.notification-area {
   display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  background-color: #4ade80;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.status-online {
-  color: #c4c4c4;
-  font-size: 11px;
-}
-
-/* Quick Actions */
-.quick-actions {
-  margin-top: 35px;
-  padding: 0 16px;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.section-title {
-  font-size: 14px;
-  color: #c4c4c4;
-  font-weight: 500;
-}
-
-.section-link {
-  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
-  color: #777777;
+  text-decoration: none;
+}
+
+.notification-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.notification-icon-wrapper img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.notification-text {
+  font-size: 10px;
+  color: #000000;
+}
+
+.balance-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.main-balance-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.balance-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.label-text {
+  font-size: 10px;
+  color: #000000;
+}
+
+.icon-eye {
+  width: 16px;
+  height: 16px;
   cursor: pointer;
+}
+
+.main-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #de9400;
+}
+
+.today-balance-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  text-align: right;
+}
+
+.today-amount {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4e733f;
 }
 
 .action-buttons {
   display: flex;
-  gap: 12px;
-}
-
-.btn {
-  flex: 1;
-  height: 37px;
-  border: none;
-  border-radius: 10px;
-  color: white;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0px 4px 30px rgba(0, 0, 0, 0.3);
+  gap: 15px;
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, #0f0b2e 0%, #2b1b6f 100%);
+  flex: 1;
+  background-color: #004d43;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 0;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .btn-secondary {
-  background-color: #736da6;
-  border: 0.5px solid #6975ae;
+  flex: 1;
+  background-color: transparent;
+  color: rgba(0, 0, 0, 0.5);
+  border: 1px solid #004d43;
+  border-radius: 20px;
+  padding: 10px 0;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-/* Ticker */
-.ticker-section {
-  margin: 15px 16px;
-  height: 29px;
-  background: linear-gradient(90deg, #100f2c 0%, #0f132e 48%, #0a1025 100%);
-  border-radius: 2px;
+/* Spacer Section */
+#section-spacer {
+  width: 100%;
+}
+
+.icon-spacer,
+.grey-icon-spacer {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  max-height: 140px;
+}
+
+/* Menu Section */
+.menu-section-wrapper {
+  background-color: #f8f8f8;
+  padding-top: 15px;
+}
+
+.announcement-bar {
   display: flex;
   align-items: center;
+  gap: 10px;
+  padding: 0 20px 20px;
+}
+
+.icon-speaker {
+  width: 24px;
+  height: 24px;
+}
+
+.announcement-text {
+  color: #004d43;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.announcement-marquee {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-track {
+  display: inline-block;
+  padding-left: 100%;
+  animation: announcement-marquee 12s linear infinite;
+}
+
+.marquee-gap {
+  color: rgba(0, 77, 67, 0.6);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@keyframes announcement-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  row-gap: 20px;
+  padding: 0 10px 20px;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  gap: 8px;
+}
+
+.action-item img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.action-item span {
+  color: #000000;
+  font-size: 10px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Banners Section */
+.voucher-banner {
+  background-image: url('/assets/images/eb0223403093bc6b599eb51e245dac92caa46ad3.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 25px 20px;
+  min-height: 143px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.portfolio-banner {
+  background: linear-gradient(90deg, #4e733f 0%, #60995b 100%);
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 80px;
+  cursor: pointer;
+}
+
+.banner-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.banner-title {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.banner-subtitle {
+  color: #ffffff;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.btn-icon-round {
+  width: 44px;
+  height: 44px;
+  background-color: #004d43;
+  border-radius: 50%;
+  border: none;
+  rotate: 270deg;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-icon-round img {
+  width: 24px;
+  height: 24px;
+}
+
+/* Chart Section */
+.chart-section-wrapper {
+  background-color: #f8f8f8;
+  padding-bottom: 80px;
+}
+
+.partners-logos {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+}
+
+.logo-bappebti {
+  height: 34px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logo-ojk {
+  height: 34px;
+  width: auto;
+  object-fit: contain;
+}
+
+.chart-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  margin: 0px;
+
+
+}
+
+.chart-image-container {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.main-chart-img {
+  width: 100%;
+  height: 150px;
+  display: block;
+}
+
+.chart-x-axis {
+  display: flex;
+  justify-content: space-between;
   padding: 0 8px;
 }
 
-.ticker-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow: hidden;
-}
-
-.ticker-marquee {
-  flex: 1;
-  overflow: hidden;
-}
-
-.ticker-marquee-track {
-  display: flex;
-  width: max-content;
-  animation: tickerScroll 14s linear infinite;
-  gap: 28px;
-  will-change: transform;
-}
-
-.ticker-marquee-text {
+.chart-x-axis span {
   font-size: 10px;
-  color: #c4c4c4;
-  white-space: nowrap;
+  color: #000000;
 }
 
-@keyframes tickerScroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-/* Progress Card */
-.progress-card {
-  margin: 0 16px 15px;
-  background: linear-gradient(180deg, #100f2c 0%, #0f132e 48%, #0a1025 100%);
-  border-radius: 10px;
-  box-shadow: 0px 4px 4px rgba(158, 158, 158, 0.25);
-  padding: 12px 14px;
-  position: relative;
-  
-}
-
-.progress-top {
+.chart-footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  justify-content: flex-end;
+  padding: 15px 20px 20px;
 }
 
-.progress-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.gem-icon {
-  width: 32px;
-  margin-left: -20px;
-margin-top: -4px;
-  height: auto;
-}
-
-.level-text {
-  font-size: 11px;
-  color: #c4c4c4;
-}
-
-.progress-mid {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  
-  margin-bottom: 10px;
-}
-
-.progress-desc {
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  
-  gap: 6px;
-  font-size: 11px;
-  color: rgba(255,255,255,0.8);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.reward-inline {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-.gem-inline {
-  width: 14px;
-  height: 14px;
-}
-
-.progress-reward {
-  color: #a296ff;
-  font-weight: 600;
-}
-
-.progress-bar-row {
-  display: flex;
-  
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  margin-bottom: 0px;
-}
-
-.progress-track {
-  height: 4px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.12);
-  overflow: hidden;
-  width: 70%;
-}
-
-.progress-fill {
-  height: 100%;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 31%, #9047e0 100%);
-}
-
-.progress-pill {
-  height: 15px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0px;
- 
-  color: rgba(255,255,255,0.85);
+.chart-title {
   font-size: 10px;
-
-  width: 70%;
-  margin-top: 0;
-  align-self: flex-end;
-}
-
-.btn-more {
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 31%, #9047e0 100%);
-  border: 1px solid #746a9a;
-  border-radius: 10px;
-  color: white;
-  font-size: 10px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.icon-arrow-small {
-  width: 12px;
-  height: 12px;
-}
-
-/* Exclusive Grid */
-.exclusive-section {
-  margin: 0 16px 15px;
-}
-
-.gradient-text {
-  background: linear-gradient(90deg, #8265e3 0%, #8a77c9 35%, #9085b5 62%, #8c6cff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-
-.grid-menu {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.grid-card {
-  position: relative;
-  height: 144px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  cursor: pointer;
-}
-
-.grid-card-bg {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, #100f2c 0%, #0f132e 48%, #0a1025 100%);
-  border-radius: 10px;
-  padding-top: 12px;
-  text-align: center;
-}
-
-.grid-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: white;
-  text-align: left;
-}
-
-.grid-img {
-  position: absolute;
-  bottom: 0;
-  z-index: 2;
-}
-
-.img-tantangan {
-  width: 90%;
-  bottom: 10px;
-}
-
-.img-menukarkan {
-  width: 85%;
-  bottom: 0px;
-}
-
-.img-keberuntungan {
-  width: 80%;
-  bottom: 10px;
-}
-
-/* Info Cards */
-.info-card {
-  margin: 0 16px 12px;
-  background: linear-gradient(180deg, #0f0b2e 0%, #2b1b6f 100%);
-  border-radius: 10px;
-  box-shadow: inset 0px 4px 30px rgba(0, 0, 0, 0.3);
-  padding: 14px;
-}
-
- .insight-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.insight-icon {
-  font-size: 18px;
-  color: rgba(180, 160, 255, 1);
-}
-
-.insight-title {
-  font-size: 13px;
-  color: #ffffff;
-  font-weight: 600;
-}
-
-.insight-body {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.insight-main {
-  font-size: 12px;
-  color: rgba(255,255,255,0.9);
-  line-height: 1.35;
-}
-
-.insight-sub {
-  font-size: 10px;
-  color: rgba(255,255,255,0.65);
-  line-height: 1.35;
-}
-
-.notice-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.notice-title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.notice-icon {
-  font-size: 18px;
-  color: rgba(180, 160, 255, 1);
-}
-
-.notice-title {
-  font-size: 12px;
-  color: rgba(255,255,255,0.9);
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.notice-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: rgba(255,255,255,0.55);
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.notice-chevron {
-  font-size: 14px;
-  color: rgba(255,255,255,0.55);
-}
-
-.notice-body {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.notice-headline {
-  font-size: 14px;
-  color: #ffffff;
-  font-weight: 500;
-}
-
-.notice-text {
-  font-size: 11px;
-  color: rgba(255,255,255,0.7);
-}
-
-.news-title-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.card-icon-small {
-  width: 20px;
-  height: auto;
-}
-
-.news-title-group h3 {
-  font-size: 13px;
-  font-weight: 600;
-  color: white;
-}
-
-.news-date {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: #777777;
-}
-
-.icon-calendar {
-  width: 14px;
-  height: 14px;
-}
-
-.news-headline {
-  font-size: 15px;
-  margin-bottom: 4px;
-}
-
-.news-snippet {
-  font-size: 12px;
-  color: #c4c4c4;
-}
-
-/* Footer */
-.site-footer {
-  padding: 20px 16px;
-  margin-bottom: 20px;
-}
-
-.footer-logo-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.footer-logo {
-  height: 24px;
-  width: auto;
-}
-
-.copyright {
-  font-size: 11px;
-  color: white;
-}
-
-.footer-desc {
-  font-size: 11px;
-  color: #c4c4c4;
+  color: #000000;
 }
 </style>
+

@@ -1,92 +1,116 @@
 <template>
   <div class="app-container">
-    <section id="header-section">
-      <div class="header-container">
-        <button class="back-btn" @click="goBack">
-          <img src="/assets/image/172_391.svg" alt="Back">
+    <section id="section-header">
+      <header class="header-inner">
+        <button class="back-btn" @click="goBack" aria-label="Go back">
+          <img src="/assets/images/37_185.svg" alt="Back Icon">
         </button>
-        <h1 class="page-title">Detail tim {{ teamId }}</h1>
+        <h1 class="page-title">Lihat tim</h1>
+      </header>
+    </section>
+
+    <section id="section-team-stats">
+      <div class="stats-inner">
+        <div class="stats-row">
+          <h2 class="team-name">Tim {{ teamLevel }}</h2>
+          <div class="stat-item member-valid">
+            <span class="stat-value">{{ teamData.effective }}</span>
+            <span class="stat-label">Member<br>valid</span>
+          </div>
+          <div class="stat-item total-member">
+            <span class="stat-value">{{ teamData.size }}</span>
+            <span class="stat-label">Total<br>member</span>
+          </div>
+        </div>
+        <div class="divider"></div>
       </div>
     </section>
 
-    <section id="stats-section">
-      <div class="stats-wrapper">
-        <div class="stats-card">
-          <div class="stats-top">
-            <div class="avatar-col">
-              <img src="/assets/image/cce62d9ede0d2eb5043f2e6d3fbdbf6eaa437582.png" alt="Team Avatar" class="team-avatar">
-            </div>
-            <div class="info-col">
-              <h2 class="team-name">{{ teamData.name }}</h2>
-              <p class="team-metric">Team size: {{ formatNumber(teamData.size) }}</p>
-              <p class="team-metric">Team effective: {{ formatNumber(teamData.effective) }}</p>
-            </div>
-            <div class="deposito-col">
-              <p class="deposito-label">Deposito team:</p>
-              <p class="deposito-value">RP {{ formatCurrency(teamData.deposit) }}</p>
-            </div>
+    <section id="section-member-list">
+      <div class="list-inner">
+        <div v-if="transactions.length === 0 && !isLoading" class="empty-state">
+          <p class="empty-text">Belum ada anggota tim</p>
+        </div>
+
+        <div v-for="transaction in transactions" :key="transaction.id" class="member-card">
+          <div class="member-info">
+            <span class="member-phone">{{ transaction.id }}</span>
+            <span class="member-date">{{ transaction.date }}</span>
           </div>
+          <span class="member-amount">Rp {{ formatCurrency(transaction.amount) }}</span>
+        </div>
 
-          <div class="divider"></div>
-
-          <p class="card-footer-text">
-            {{ teamData.description }}
-          </p>
+        <div v-if="showPagination" class="pagination-row">
+          <PaginationBar
+            :page="membersPage"
+            :total-pages="membersTotalPages"
+            :has-prev="membersHasPrev"
+            :has-next="membersHasNext"
+            :loading="isLoading"
+            @change="goToPage"
+          />
         </div>
       </div>
     </section>
 
-    <section id="transactions-section">
-      <div class="transactions-wrapper">
-        <div v-if="members.length === 0 && !loading" class="empty-state">
-          <img src="/assets/image/empty.png" alt="No Data" class="empty-icon">
-        </div>
-
-        <article v-for="member in visibleMembers" :key="member.id" class="transaction-card">
-          <div class="card-row top-row">
-            <span class="id-text">{{ member.phone || member.username || '-' }}</span>
-            <span class="amount-text">Deposito: RP {{ formatCurrency(member.total_deposit || 0) }}</span>
-          </div>
-          <div class="card-row">
-            <span class="date-text">{{ formatDate(member.registration_date) }}</span>
-          </div>
-          <div v-if="member.note" class="card-row">
-            <span class="desc-text">{{ member.note }}</span>
-          </div>
-          <!-- <div class="card-row">
-            <span class="desc-text">{{ member.username || '-' }}</span>
-          </div> -->
-        </article>
-
-        <div v-if="!loading && canLoadMore" class="pagination-row">
-          <button class="load-more-btn" @click="loadMore">
-            Memuat lebih banyak
-          </button>
-        </div>
-        <div v-if="loading" class="loading-state"></div>
-      </div>
-    </section>
+    <LoadingSpinner :visible="isLoading" :overlay="true" message="" />
+    <ErrorModal v-model="showErrorModal" :message="errorMessage" />
   </div>
-  <LoadingSpinner :visible="loading" :overlay="true" message="" />
-  <ErrorModal v-model="showErrorModal" :message="errorMessage" />
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI, investmentAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
+import PaginationBar from '@/components/partials/PaginationBar.vue'
 
 const router = useRouter()
-const teamId = ref('3')
-const members = ref([])
-const loading = ref(false)
-const currentPage = ref(1)
-const pageSize = 20
+const overview = ref(null)
+const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 const myMaxOrderAmount = ref(null)
+const membersPage = ref(1)
+const membersTotalPages = ref(1)
+const membersHasNext = ref(false)
+const membersHasPrev = ref(false)
+
+const teamLevel = computed(() => 3)
+
+const levelData = computed(() => {
+  const levels = Array.isArray(overview.value?.levels) ? overview.value.levels : []
+  return levels.find((l) => Number(l?.level) === Number(teamLevel.value)) || null
+})
+
+const teamDescriptions = {
+  1: 'Anggota yang bergabung langsung melalui tautan undangan Anda.',
+  2: 'Anggota yang bergabung melalui undangan dari Tim Tingkat 1 Anda',
+  3: 'Anggota yang bergabung melalui undangan dari Tim Tingkat 2 Anda',
+  4: 'Anggota yang bergabung melalui undangan dari Tim Tingkat 3 Anda',
+  5: 'Anggota yang bergabung melalui undangan dari Tim Tingkat 4 Anda'
+}
+
+const teamData = computed(() => {
+  const l = levelData.value
+  const lvl = Number(teamLevel.value)
+  return {
+    name: `Team ${lvl}`,
+    size: Number(l?.member_count || 0),
+    effective: Number(l?.active_member_count || 0),
+    deposit: l?.total_deposit_amount ?? '0',
+    description: teamDescriptions[lvl] || 'Ikhtisar tim.'
+  }
+})
+
+const pad2 = (n) => String(n).padStart(2, '0')
+const formatDate = (dateString) => {
+  if (!dateString) return '-'
+  const d = new Date(dateString)
+  if (Number.isNaN(d.getTime())) return '-'
+  return `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()}`
+}
 
 const parseAmount = (value) => {
   if (value === null || value === undefined || value === '') return null
@@ -94,62 +118,52 @@ const parseAmount = (value) => {
   return Number.isFinite(num) ? num : null
 }
 
-const memberEstimatedMaxOrder = (member) => {
-  const totalInv = parseAmount(member?.total_investment_amount)
-  const totalInvCount = parseAmount(member?.total_investments)
-  if (totalInv === null) return null
-  if (totalInvCount && totalInvCount > 0) return totalInv / totalInvCount
-  return totalInv
-}
-
-const annotatedMembers = computed(() => {
+const transactions = computed(() => {
+  const members = Array.isArray(levelData.value?.members) ? levelData.value.members : []
   const myMax = myMaxOrderAmount.value
-  return members.value.map((m) => {
-    const memberMax = memberEstimatedMaxOrder(m)
-    const hasHigher = myMax !== null && memberMax !== null && memberMax > myMax
+  const list = members.map((m, i) => {
+    const phone = String(m?.phone || '').trim()
+    const username = String(m?.username || '').trim()
+    const rawDate = m?.registration_date || null
+    const d = rawDate ? new Date(rawDate) : null
+    const ts = d && !Number.isNaN(d.getTime()) ? d.getTime() : 0
+
+    const totalInv = parseAmount(m?.total_investment_amount)
+    const totalInvCount = parseAmount(m?.total_investments)
+    const memberEstimatedMax = totalInv !== null
+      ? (totalInvCount && totalInvCount > 0 ? totalInv / totalInvCount : totalInv)
+      : null
+    const hasHigherOrder = myMax !== null && memberEstimatedMax !== null && memberEstimatedMax > myMax
+
     return {
-      ...m,
-      note: hasHigher ? 'Teman anda memiliki pesanan lebih tinggi' : ''
+      id: phone || username || String(i + 1),
+      amount: m?.total_deposit_amount ?? '0',
+      date: formatDate(rawDate),
+      description: username || '-',
+      note: hasHigherOrder ? 'Teman anda memiliki pesanan lebih tinggi' : '',
+      ts
     }
   })
+  return list.sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0))
 })
 
-const visibleMembers = computed(() => {
-  const end = currentPage.value * pageSize
-  return annotatedMembers.value.slice(0, end)
+const showPagination = computed(() => {
+  if (isLoading.value) return false
+  if (!transactions.value.length) return false
+  return membersTotalPages.value > 1
 })
-
-const canLoadMore = computed(() => visibleMembers.value.length < annotatedMembers.value.length)
-const level3Members = ref(0)
-const level3Active = ref(0)
-const level3Deposit = ref(0)
-
-const teamData = computed(() => ({
-  name: `Team ${teamId.value}`,
-  size: level3Members.value,
-  effective: level3Active.value,
-  deposit: level3Deposit.value,
-  description: 'Anggota yang bergabung melalui undangan dari Tim Tingkat 2 Anda'
-}))
 
 const goBack = () => {
   router.go(-1)
 }
 
-const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(Number(value || 0))
-
 const formatCurrency = (value) => {
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
   if (!Number.isFinite(num)) return '0'
-  return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num)
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return '-'
-  const d = new Date(dateString)
-  if (Number.isNaN(d.getTime())) return '-'
-  const pad2 = (n) => String(n).padStart(2, '0')
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
+  return new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(num)
 }
 
 const extractErrorMessage = (err) => {
@@ -159,6 +173,42 @@ const extractErrorMessage = (err) => {
   if (data.detail) return String(data.detail)
   if (data.message) return String(data.message)
   return 'Gagal mengambil data'
+}
+
+const fetchOverview = async () => {
+  isLoading.value = true
+  showErrorModal.value = false
+  errorMessage.value = ''
+  try {
+    const resp = await authAPI.getDownlineOverview({ page: membersPage.value })
+    overview.value = resp?.data || null
+    const pag = levelData.value?.members_pagination || null
+    if (pag) {
+      const p = Number(pag.page || membersPage.value || 1)
+      const tp = Number(pag.total_pages || 1)
+      membersPage.value = Number.isFinite(p) && p > 0 ? p : 1
+      membersTotalPages.value = Number.isFinite(tp) && tp > 0 ? tp : 1
+      membersHasNext.value = Boolean(pag.has_next)
+      membersHasPrev.value = Boolean(pag.has_previous)
+    } else {
+      membersTotalPages.value = 1
+      membersHasNext.value = false
+      membersHasPrev.value = false
+    }
+  } catch (err) {
+    overview.value = null
+    errorMessage.value = extractErrorMessage(err)
+    showErrorModal.value = true
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const goToPage = (page) => {
+  const p = Math.max(1, Number(page || 1))
+  if (p === membersPage.value) return
+  membersPage.value = p
+  fetchOverview()
 }
 
 const normalizeInvestmentsResponse = (data) => {
@@ -191,326 +241,213 @@ const fetchMyMaxOrderAmount = async () => {
   }
 }
 
-const fetchMembers = async () => {
-  try {
-    loading.value = true
-    showErrorModal.value = false
-    errorMessage.value = ''
-    currentPage.value = 1
-    const response = await authAPI.getDownlineOverview()
-    const data = response.data || {}
-    
-    const levels = data.levels || []
-    const level3Data = levels.find(l => l.level === 3) || {}
-
-    level3Members.value = Number(level3Data.member_count || 0)
-    level3Active.value = Number(level3Data.active_member_count || 0)
-    level3Deposit.value = Number(level3Data.total_deposit_amount || 0)
-
-    if (level3Data.members) {
-      members.value = level3Data.members.map((m, index) => ({
-        id: m.phone || m.username || String(index + 1),
-        phone: m.phone || '',
-        username: m.username || '',
-        registration_date: m.registration_date || null,
-        total_deposit: m.total_deposit_amount ?? '0',
-        total_investment_amount: m.total_investment_amount ?? '0',
-        total_investments: m.total_investments ?? 0
-      }))
-    } else {
-      members.value = []
-    }
-  } catch (error) {
-    members.value = []
-    errorMessage.value = extractErrorMessage(error)
-    showErrorModal.value = true
-  } finally {
-    loading.value = false
-  }
-}
-
-const loadMore = () => {
-  if (!canLoadMore.value) return
-  currentPage.value += 1
-}
-
 onMounted(() => {
+  membersPage.value = 1
+  fetchOverview()
   fetchMyMaxOrderAmount()
-  fetchMembers()
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-body {
+.app-container {
   font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #0f0f1c;
-  color: #ffffff;
-  display: flex;
-  justify-content: center;
+  width: 100%;
+  max-width: 412px;
+  background-color: #f8f8f8;
   min-height: 100vh;
+  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
 }
 
-.app-container {
-  width: 100%;
-  max-width: 412px;
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: top center;
-  background-repeat: no-repeat;
-  margin: 0 auto;
-}
-
 p, h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
-#header-section {
+#section-header {
+  background-color: #f8f8f8;
   width: 100%;
-  display: flex;
-  justify-content: center;
 }
 
-.header-container {
-  min-height: auto;
-  background: transparent;
+.header-inner {
+  height: 60px;
   display: flex;
   align-items: center;
-  padding: 18px 10px;
+  justify-content: center;
   position: relative;
-  width: 100%;
 }
 
 .back-btn {
-  background: none;
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 41px;
+  height: 41px;
+  background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  z-index: 10;
+}
+
+.back-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .page-title {
-  position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
-  color: #ffffff;
   font-size: 16px;
-  font-weight: 600;
-  pointer-events: none;
-  white-space: nowrap;
+  font-weight: 700;
+  color: #000000;
 }
 
-#stats-section {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.stats-wrapper {
-  min-height: auto;
-  background: transparent;
-  padding: 24px 18px 0 18px;
+#section-team-stats {
+  background-color: #f8f8f8;
   width: 100%;
 }
 
-.stats-card {
-  width: 100%;
-  background: linear-gradient(180deg, #100F2C 0%, #0F132E 47.6%, #0A1025 100%);
-  border-radius: 10px;
-  box-shadow: 0px 4px 4px 0px rgba(158, 158, 158, 0.25);
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.stats-inner {
+  padding-top: 13px;
 }
 
-.stats-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.avatar-col {
-  flex-shrink: 0;
-  margin-right: 8px;
-}
-
-.team-avatar {
-  width: 27px;
-  height: 26px;
-  object-fit: contain;
-  display: block;
-}
-
-.info-col {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+.stats-row {
+  position: relative;
+  height: 61px;
+  margin-bottom: 16px;
 }
 
 .team-name {
-  color: #FFFFFF;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-  margin-bottom: 3px;
+  position: absolute;
+  left: 21px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  font-weight: 700;
+  color: #000000;
 }
 
-.team-metric {
-  color: #FFFFFF;
-  font-size: 11px;
-  line-height: 1.2;
-}
-
-.deposito-col {
-  text-align: right;
+.stat-item {
+  position: absolute;
+  top: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  width: 74px;
+  height: 61px;
 }
 
-.deposito-label, .deposito-value {
-  color: #FFFFFF;
-  font-size: 11px;
+.stat-item.member-valid {
+  left: 102px;
+}
+
+.stat-item.total-member {
+  left: 317px;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 4px;
   line-height: 1.2;
 }
 
-.deposito-value {
-  font-weight: 600;
+.stat-label {
+  font-size: 12px;
+  color: #b2b2b2;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .divider {
-  height: 1px;
-  background-color: #746A9A;
+  height: 4px;
+  background-color: #004d43;
+  margin: 0 21px 0 14px;
+}
+
+#section-member-list {
+  background-color: #f8f8f8;
   width: 100%;
-  border-radius: 15px;
-  opacity: 0.5;
-  margin: 5px 0;
+  padding-bottom: 40px;
 }
 
-.card-footer-text {
-  color: #746A9A;
-  font-size: 10px;
-  line-height: 1.3;
+.list-inner {
+  padding: 11px 13px 0 14px;
 }
 
-#transactions-section {
-  width: 100%;
+.member-card {
+  background-color: #eeeeee;
+  border-radius: 20px;
+  height: 67px;
   display: flex;
-  justify-content: center;
-}
-
-.transactions-wrapper {
-  min-height: auto;
-  background: transparent;
-  padding: 11px 18px 20px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-}
-
-.transaction-card {
-  background: linear-gradient(90deg, #100F2C 0%, #0F132E 48%, #0A1025 100%);
-  border-radius: 10px;
-  padding: 10px 13px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-height: 57px;
-  justify-content: center;
-  box-shadow: 0px 4px 4px 0px rgba(158, 158, 158, 0.25);
-}
-
-.card-row {
-  display: flex;
-  width: 100%;
-}
-
-.top-row {
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2px;
+  padding: 0 16px;
+  margin-bottom: 8px;
 }
 
-.id-text {
-  color: #A296FF;
+.member-card:last-child {
+  margin-bottom: 0;
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.member-phone {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
+  color: #004d43;
 }
 
-.amount-text {
-  color: #FFFFFF;
-  font-size: 10px;
-  text-align: right;
+.member-date {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.5);
 }
 
-.date-text {
-  color: #FFFFFF;
-  font-size: 10px;
-  opacity: 0.9;
-}
-
-.desc-text {
-  color: #FFFFFF;
-  font-size: 10px;
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.member-amount {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
 }
 
 .empty-state {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 30px 0;
+  padding: 40px 0;
+  text-align: center;
 }
 
-.empty-icon {
-  width: 120px;
-  height: auto;
-  opacity: 0.8;
+.empty-text {
+  color: #b2b2b2;
+  font-size: 14px;
 }
 
 .pagination-row {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .load-more-btn {
   width: 100%;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
+  border-radius: 20px;
+  background-color: #004d43;
   color: #ffffff;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 10px 0;
-}
-
-.loading-state {
-  text-align: center;
-  padding: 20px 0;
-  color: #c4c4c4;
-  font-size: 12px;
+  padding: 12px 0;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 </style>

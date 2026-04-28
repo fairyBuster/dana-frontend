@@ -3,7 +3,7 @@
     <section id="header-section">
       <div class="app-header">
         <button class="back-button" @click="goBack">
-          <img src="/assets/image/40_280.svg" alt="Back" width="41" height="41">
+          <img src="/assets/images/2023_1661.svg" alt="Back" width="41" height="41">
         </button>
         <h1 class="page-title">Pengaturan personal</h1>
       </div>

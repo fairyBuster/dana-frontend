@@ -2,7 +2,7 @@
   <section class="language-selection-screen">
     <header class="language-header">
       <a href="javascript:void(0)" @click.prevent="goBack" class="back-button">
-        <img src="/assets/image/159_516.svg" alt="Back">
+        <img src="/assets/images/2023_1661.svg" alt="Back">
       </a>
       <h1 class="header-title">{{ $t('language.title') || 'Language' }}</h1>
     </header>
@@ -10,7 +10,7 @@
     <main class="language-list-container">
       <img 
         class="checkmark" 
-        src="/assets/image/8743bdb260cc563617589431a294e8ffc80dad73.png" 
+        src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" 
         alt="Selected"
         :style="{ top: getCheckmarkTop() + 'px' }"
       >
@@ -205,7 +205,7 @@ onMounted(() => {
   max-width: 100%;
   min-height: 100vh;
   margin: 0;
-  background-image: url('/assets/image/2ee4d30dab6e87d3002380ed508ec6f82f40048f.png');
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

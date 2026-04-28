@@ -1,33 +1,33 @@
-<template>
+<!-- <template>
   <section id="career-page">
     <div class="mobile-wrapper">
-      <!-- Header -->
+
       <header class="app-header">
         <div class="back-button" @click="goBack">
-          <img src="/assets/image/73_1158.svg" alt="Back">
+          <img src="/assets/images/2023_1661.svg" alt="Back">
         </div>
         <h1 class="page-title">Karir</h1>
       </header>
 
-      <!-- Main Content -->
+   
       <div class="content-area">
-        <!-- Hero Section -->
+     
         <div class="hero-section">
           <h2 class="hero-title">Karir di SENT</h2>
           <p class="hero-subtitle">Bergabunglah dalam pengembangan teknologi pemetaan udara berbasis AI.</p>
         </div>
 
-        <!-- About Team Card -->
+       
         <div class="card">
           <h3 class="card-title">Tentang Tim</h3>
           <p class="card-text">OT-SENT merupakan platform teknologi yang berfokus pada pengembangan sistem pemetaan udara, monitoring dan analisis data berbasis drone. Kami membuka peluang bagi individu yang ingin berkembang bersama teknologi masa depan.</p>
         </div>
 
-        <!-- Jobs Section -->
+
         <div class="jobs-section">
           <h3 class="section-heading">Lowongan pekerjaan</h3>
 
-          <!-- Job Card 1 -->
+  
           <div class="card job-card">
             <h4 class="job-title">AI Engineer</h4>
             <div class="divider"></div>
@@ -40,7 +40,6 @@
             </div>
           </div>
 
-          <!-- Job Card 2 -->
           <div class="card job-card">
             <h4 class="job-title">Drone Operator</h4>
             <div class="divider"></div>
@@ -53,24 +52,23 @@
           </div>
         </div>
 
-        <!-- Apply Info -->
+   
         <div class="apply-section">
           <p class="apply-label">🟣 Cara Melamar<br>Kirimkan CV dan informasi pendukung ke:</p>
           <p class="apply-email">career@otsent.com</p>
         </div>
       </div>
 
-      <!-- Footer -->
       <footer class="app-footer">
         <p class="footer-note">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
         <div class="footer-brand">
-          <img src="/assets/image/983276.png" alt="Ot-Sent Logo" class="footer-logo">
+          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Logo" class="footer-logo">
           <span class="copyright">© 2026 OT-SENT. All Rights Reserved</span>
         </div>
       </footer>
     </div>
   </section>
-</template>
+</template> -->
 
 <script setup>
 import { useRouter } from 'vue-router'
@@ -118,7 +116,7 @@ h1, h2, h3, h4, p {
   width: 100%;
   max-width: 412px;
   min-height: 100vh;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

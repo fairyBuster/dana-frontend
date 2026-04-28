@@ -1,136 +1,48 @@
 <template>
   <div class="app-container">
-    <header class="app-header">
-      <div class="header-content">
-        <button class="back-button" @click="goBack">
-          <img src="/assets/image/169_294.svg" alt="Back">
-        </button>
-        <h1 class="screen-title">Manajemen kartu</h1>
-      </div>
-    </header>
-
-    <section id="section-form">
-      <form class="card-form" novalidate @submit.prevent="handleSubmit">
-        <div class="form-group">
-          <label class="form-label">Nama bank</label>
-          <div class="custom-select" @click="showBankModal = true">
-            <span :class="{ 'placeholder-text': !selectedBank }">
-              {{ selectedBank || 'Escolha o banco' }}
-            </span>
-            <img src="/assets/image/172_306.svg" alt="Dropdown" class="dropdown-icon">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Nama penerima kartu</label>
-          <input
-            v-model="formData.accountHolder"
-            type="text"
-            class="form-input"
-            placeholder="Silakan masukkan nama Anda"
-            @input="onAccountHolderInput"
-          >
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Nomor rekening bank</label>
-          <input
-            v-model="formData.accountNumber"
-            type="text"
-            inputmode="numeric"
-            class="form-input"
-            placeholder="Silakan masukkan nomor rekening Anda"
-            @input="onAccountNumberInput"
-          >
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Nomor telepon</label>
-          <input
-            v-model="formData.phone"
-            type="tel"
-            class="form-input"
-            placeholder="Silakan masukkan nomor telepon Anda"
-          >
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Surat</label>
-          <input
-            v-model="formData.email"
-            type="email"
-            class="form-input"
-            placeholder="Silakan masukkan alamat email Anda"
-          >
-        </div>
-
-        <button type="submit" class="submit-btn" :disabled="loading">
-          {{ loading ? 'Menyimpan...' : submitLabel }}
-        </button>
-      </form>
+    <section id="section-header">
+      <header class="top-header">
+        <img src="/assets/images/2011_986.svg" alt="Back" class="back-icon" @click="goBack">
+        <h1 class="header-title">Tambah Rekening</h1>
+      </header>
     </section>
 
-    <BankOptionsModal
-      :visible="showBankModal"
-      :bank-options="bankOptions"
-      :selected-bank-id="formData.bankId"
-      null-label="Escolha o banco"
-      @close="showBankModal = false"
-      @select="selectBank"
-    />
+    <section id="section-info-banner">
+      <div class="banner-container">
+        <p class="banner-text">Pastikan nama pemilik rekening sudah sesuai dengan milik Anda.</p>
+      </div>
+    </section>
 
-    <ErrorModal v-model="errorModalOpen" :message="errorMessage" />
+    <section id="section-account-details">
+      <div class="account-card" v-if="userBank">
+        <h2 class="card-label">Data Rekening</h2>
+        <p class="account-number">{{ userBank.account_number || '-' }}</p>
+        <p class="bank-name">{{ userBank.bank_name || userBank.bank_code || '-' }}</p>
+        <p class="owner-name">{{ userBank.account_name || '-' }}</p>
+      </div>
+      <div class="account-card" v-else>
+        <h2 class="card-label">Data Rekening</h2>
+        <p class="account-number">-</p>
+        <p class="bank-name">Belum ada rekening terdaftar</p>
+        <p class="owner-name">-</p>
+      </div>
+
+      <div class="add-btn-container" v-if="!userBank">
+        <button class="btn-add" @click="router.push('/connect/add')">
+          Tambah Rekening Baru
+        </button>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { authAPI, bankAPI } from '@/services/api'
-import BankOptionsModal from '@/components/partials/BankOptionsModal.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import { bankAPI } from '@/services/api'
 
 const router = useRouter()
-const showBankModal = ref(false)
-const selectedBank = ref('')
-const loading = ref(false)
-const bankOptions = ref([])
-const errorModalOpen = ref(false)
-const errorMessage = ref('')
-
-const formData = reactive({
-  userBankId: null,
-  bankId: null,
-  accountHolder: '',
-  accountNumber: '',
-  phone: '',
-  email: '',
-  isDefault: true
-})
-
-const sanitizeAccountHolder = (value) => {
-  return String(value || '')
-    .replace(/[^\p{L}\s]/gu, '')
-    .replace(/\s+/g, ' ')
-    .trimStart()
-}
-
-const sanitizeAccountNumber = (value) => {
-  return String(value || '').replace(/\D+/g, '')
-}
-
-const onAccountHolderInput = () => {
-  formData.accountHolder = sanitizeAccountHolder(formData.accountHolder)
-}
-
-const onAccountNumberInput = () => {
-  formData.accountNumber = sanitizeAccountNumber(formData.accountNumber)
-}
-
-const submitLabel = computed(() => {
-  if (formData.userBankId) return 'Perbarui kartu bank'
-  return 'Simpan kartu bank'
-})
+const userBank = ref(null)
 
 const goBack = () => {
   router.go(-1)
@@ -143,280 +55,186 @@ const normalizeBanksResponse = (data) => {
   return []
 }
 
-const selectBank = (bank) => {
-  if (!bank?.id) {
-    selectedBank.value = ''
-    formData.bankId = null
-    showBankModal.value = false
-    return
-  }
-
-  selectedBank.value = bank.name
-  formData.bankId = bank.id
-  showBankModal.value = false
-}
-
-const extractErrorMessage = (err) => {
-  const data = err?.response?.data
-  if (!data) return err?.message || 'Permintaan gagal, segarkan halaman'
-  if (typeof data === 'string') return data
-  if (data.detail) return String(data.detail)
-  const firstKey = Object.keys(data)[0]
-  const firstVal = data[firstKey]
-  if (Array.isArray(firstVal) && firstVal.length) return String(firstVal[0])
-  if (firstVal) return String(firstVal)
-  return 'Permintaan gagal, segarkan halaman'
-}
-
-const fetchBanks = async () => {
-  try {
-    const resp = await bankAPI.getBanks()
-    const list = normalizeBanksResponse(resp?.data)
-    bankOptions.value = list
-      .map((b) => ({
-        id: b?.id,
-        name: b?.name || b?.bank_name || b?.code || String(b?.id ?? '')
-      }))
-      .filter((b) => b.id !== null && b.id !== undefined && b.name)
-    if (formData.bankId && !selectedBank.value) {
-      const found = bankOptions.value.find((b) => String(b.id) === String(formData.bankId))
-      if (found) selectedBank.value = found.name
-    }
-  } catch (err) {
-    bankOptions.value = []
-  }
-}
-
-const fetchAccountInfo = async () => {
-  try {
-    const resp = await authAPI.getAccountInfo()
-    const data = resp?.data || {}
-    const phone = String(data.phone || data.phone_number || data.user_phone || '').trim()
-    const email = String(data.email || '').trim()
-    if (!formData.phone && phone) formData.phone = phone
-    if (!formData.email && email) formData.email = email
-  } catch (_) {
-  }
-}
-
 const fetchUserBanks = async () => {
   try {
     const resp = await bankAPI.getUserBanks()
     const list = normalizeBanksResponse(resp?.data)
     const chosen = list.find((b) => b?.is_default) || list[0] || null
-    if (!chosen) return
-    formData.userBankId = chosen?.id ?? null
-    formData.bankId = chosen?.bank ?? null
-    formData.accountHolder = chosen?.account_name || ''
-    formData.accountNumber = chosen?.account_number || ''
-    formData.isDefault = chosen?.is_default !== undefined ? Boolean(chosen.is_default) : true
-    const label = chosen?.bank_name || chosen?.bank_code || ''
-    if (label && !selectedBank.value) selectedBank.value = label
-    if (formData.bankId) {
-      const found = bankOptions.value.find((b) => String(b.id) === String(formData.bankId))
-      if (found) selectedBank.value = found.name
-    }
-  } catch (err) {
-    errorMessage.value = extractErrorMessage(err)
-    errorModalOpen.value = true
-  }
-}
-
-const handleSubmit = async () => {
-  errorModalOpen.value = false
-  errorMessage.value = ''
-  if (!formData.bankId || !formData.accountHolder || !formData.accountNumber || !formData.phone || !formData.email) {
-    errorMessage.value = 'Mohon lengkapi semua data'
-    errorModalOpen.value = true
-    return
-  }
-
-  formData.accountHolder = sanitizeAccountHolder(formData.accountHolder)
-  formData.accountNumber = sanitizeAccountNumber(formData.accountNumber)
-  if (!formData.accountHolder) {
-    errorMessage.value = 'Nama penerima kartu wajib huruf saja'
-    errorModalOpen.value = true
-    return
-  }
-  if (!formData.accountNumber) {
-    errorMessage.value = 'Nomor rekening wajib angka saja'
-    errorModalOpen.value = true
-    return
-  }
-
-  loading.value = true
-  try {
-    const payload = {
-      bank: Number(formData.bankId),
-      account_name: String(formData.accountHolder).trim(),
-      account_number: String(formData.accountNumber).replace(/\s+/g, ''),
-      is_default: Boolean(formData.isDefault)
-    }
-
-    if (formData.userBankId) {
-      await bankAPI.updateUserBank({ id: formData.userBankId, ...payload })
-    } else {
-      let isDefault = true
-      try {
-        const resp = await bankAPI.getUserBanks()
-        const list = normalizeBanksResponse(resp?.data)
-        isDefault = !list.length
-      } catch (_) {
-        isDefault = true
+    if (chosen) {
+      userBank.value = {
+        id: chosen.id,
+        account_number: chosen.account_number || '-',
+        account_name: chosen.account_name || '-',
+        bank_name: chosen.bank_name || chosen.bank_code || '-',
+        bank_code: chosen.bank_code || '',
+        is_default: chosen.is_default || false
       }
-      await bankAPI.addUserBank({ ...payload, is_default: isDefault })
     }
-    await fetchUserBanks()
-    router.replace('/pages/account/account')
-  } catch (error) {
-    errorMessage.value = extractErrorMessage(error)
-    errorModalOpen.value = true
-  } finally {
-    loading.value = false
+  } catch (_) {
+    userBank.value = null
   }
 }
 
 onMounted(() => {
-  fetchBanks()
-  fetchAccountInfo()
   fetchUserBanks()
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
 .app-container {
-  width: 100%;
+  font-family: 'Inter', sans-serif;
+  margin: 0 auto;
+  padding: 0;
   max-width: 412px;
   min-height: 100vh;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: 412px auto;
-  background-repeat: no-repeat;
-  background-position: top center;
-  background-color: #0f0f1f;
-  display: flex;
-  flex-direction: column;
+  background-color: #f8f8f8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
 }
 
-.app-header {
-  padding-top: 18px;
-  padding-bottom: 20px;
-  padding-left: 10px;
-  padding-right: 10px;
+h1, h2, p {
+  margin: 0;
 }
 
-.header-content {
+section {
+  max-width: 412px;
+  margin: 0 auto;
+  background-color: #f8f8f8;
+  width: 100%;
+}
+
+/* Header Section */
+#section-header {
+  height: 60px;
   position: relative;
-  display: flex;
-  align-items: center;
-  height: 24px;
 }
 
-.back-button {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+.top-header {
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  z-index: 2;
+  padding-top: 10px;
+  box-sizing: border-box;
 }
 
-.screen-title {
+.back-icon {
   position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
-  margin: 0;
+  left: 5px;
+  top: 15px;
+  width: 41px;
+  height: 41px;
+  cursor: pointer;
+}
+
+.header-title {
   font-size: 16px;
-  font-weight: 600;
-  color: #ffffff;
-  pointer-events: none;
+  font-weight: 700;
+  color: #000000;
+  line-height: 20px;
 }
 
-#section-form {
-  padding: 0 22px 40px 22px;
+/* Info Banner Section */
+#section-info-banner {
+  margin-top: 20px;
+  padding-left: 21px;
+  padding-right: 6px;
+  box-sizing: border-box;
 }
 
-.card-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-label {
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 400;
-}
-
-.form-input, .custom-select {
+.banner-container {
+  background: linear-gradient(90deg, rgba(209, 233, 226, 1) 0%, rgba(209, 233, 226, 1) 42.79%, rgba(223, 239, 233, 1) 68.27%, rgba(214, 235, 229, 1) 82.69%, rgba(232, 244, 239, 1) 100%);
+  border-radius: 20px;
   width: 100%;
-  height: 43px;
-  background-color: #1d2138;
-  border: 1px solid #746a9a;
-  border-radius: 5px;
-  padding: 0 10px;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  color: #ffffff;
+  max-width: 385px;
+  height: 54px;
   display: flex;
   align-items: center;
+  padding: 0 12px;
+  box-sizing: border-box;
 }
 
-.custom-select {
-  justify-content: space-between;
-  cursor: pointer;
-  position: relative;
+.banner-text {
+  font-size: 13px;
+  font-weight: 400;
+  color: #000000;
+  line-height: 22px;
 }
 
-.placeholder-text {
-  color: #505050;
+/* Account Details Section */
+#section-account-details {
+  padding: 14px 21px 6px 21px;
+  box-sizing: border-box;
 }
 
-.form-input::placeholder {
-  color: #505050;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #8e84b5;
-}
-
-.submit-btn {
-  margin-top: 20px;
+.account-card {
+  background-color: #eeeeee;
+  border-radius: 20px;
   width: 100%;
-  height: 51px;
-  border-radius: 10px;
-  border: 1px solid #746a9a;
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 30%, #9047e0 100%);
-  color: #ffffff;
+  max-width: 385px;
+  padding: 19px 15px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-label {
+  font-size: 13px;
+  font-weight: 400;
+  color: #004d43;
+  margin: 0 0 12px 0;
+  line-height: 17px;
+}
+
+.account-number {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 11px 0;
+  line-height: 17px;
+}
+
+.bank-name {
+  font-size: 13px;
+  font-weight: 400;
+  color: #000000;
+  margin: 0 0 5px 0;
+  line-height: 17px;
+}
+
+.owner-name {
+  font-size: 13px;
+  font-weight: 400;
+  color: #000000;
+  margin: 0;
+  line-height: 17px;
+}
+
+.add-btn-container {
+  margin-top: 24px;
+}
+
+.btn-add {
+  width: 100%;
+  background-color: #004d43;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  text-align: center;
+  font-family: inherit;
 }
 
-.submit-btn:hover {
-  opacity: 0.9;
-}
-
-.submit-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.btn-add:active {
+  opacity: 0.8;
 }
 </style>
+
+

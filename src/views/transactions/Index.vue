@@ -1,70 +1,102 @@
 <template>
   <div class="app-container">
     <section id="section-header">
-      <header class="app-header">
-        <button class="back-button" @click="goBack">
-          <img src="/assets/image/178_1300.svg" alt="Back">
+      <header class="header-container">
+        <button class="back-button" @click="goBack" aria-label="Kembali">
+          <img src="/assets/images/2018_1480.svg" alt="Back">
         </button>
-        <h1 class="header-title">Catatan lainnya</h1>
-        <div class="header-spacer"></div>
+        <h1 class="page-title">Riwayat lainnya</h1>
       </header>
     </section>
-<br>
-    <main class="content-area">
-      <LoadingSpinner v-if="isLoading" :visible="true" :overlay="true" message="" />
 
-      <div v-else-if="displayedTransactions.length === 0" class="empty-state">
-        <img src="/assets/image/empty.png" alt="No Data" class="empty-icon">
-     
-        
+    <section id="section-history-list">
+      <div v-if="isLoading" class="loading-state">
+        <LoadingSpinner :visible="true" :overlay="false" message="" />
       </div>
 
-      <template v-else>
-        <article v-for="(item, idx) in displayedTransactions" :key="getKey(item, idx)" class="transaction-card">
-          <div class="card-details">
-            <h2 class="card-title">{{ getTitle(item) }}</h2>
-            <time class="card-date">{{ formatDate(item.created_at) }}</time>
-          </div>
-          <div class="card-value">
-            <span class="amount">{{ formatCurrency(item.amount) }}</span>
+      <div v-else-if="displayTransactions.length === 0" class="empty-state">
+        <p class="empty-text">Belum ada riwayat transaksi</p>
+      </div>
+
+      <div v-else class="list-container">
+        <article v-for="(item, idx) in displayTransactions" :key="getKey(item, idx)" class="history-card">
+          <time class="card-date">Date trx: {{ formatDate(item.created_at) }}</time>
+          <div class="card-content">
+            <img src="/assets/images/51c612507498a1350e8a34d624b4f99146ecdfe9.png" alt="" class="card-icon" aria-hidden="true">
+            <div class="card-info">
+              <h2 class="card-title">{{ getTitle(item) }}</h2>
+              <p class="card-amount">{{ formatCurrency(item.amount) }}</p>
+            </div>
           </div>
         </article>
 
-        <div v-if="totalPages > 1" class="pagination-controls">
-          <button class="pagination-btn" @click="prevPage" :disabled="currentPage === 1">
-            &lt;
-          </button>
-          <span class="pagination-info">{{ currentPage }} / {{ totalPages }}</span>
-          <button class="pagination-btn" @click="nextPage" :disabled="currentPage === totalPages">
-            &gt;
-          </button>
+        <div v-if="showPagination" class="pagination-controls">
+          <PaginationBar
+            :page="currentPage"
+            :total-pages="totalPages"
+            :has-prev="hasPrev"
+            :has-next="hasNext"
+            :loading="isLoading"
+            @change="goToPage"
+          />
         </div>
-      </template>
-    </main>
+      </div>
+    </section>
   </div>
   <ErrorModal v-model="showErrorModal" :message="errorMessage" />
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { transactionAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
+import PaginationBar from '@/components/partials/PaginationBar.vue'
 
 const router = useRouter()
-const transactions = ref([])
+const allTransactions = ref([])
 const isLoading = ref(false)
 const currentPage = ref(1)
-const itemsPerPage = ref(20)
-const totalPages = ref(1)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
+const PAGE_SIZE = 20
+const MAX_PAGES = 200
 
-const displayedTransactions = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return transactions.value.slice(start, end)
+const ALLOWED_TRANSACTION_TYPES = new Set([
+  'MISSIONS',
+  'BONUS',
+  'VOUCHER',
+  'CREDIT',
+  'BALANCE_PLUS',
+  'DEBIT',
+  'BALANCE_MINUS',
+  'ATTENDANCE'
+])
+
+const filteredTransactions = computed(() => {
+  return (allTransactions.value || []).filter((trx) => {
+    const t = String(trx?.type || '').toUpperCase()
+    return ALLOWED_TRANSACTION_TYPES.has(t)
+  })
+})
+
+const totalPages = computed(() => {
+  return Math.max(1, Math.ceil(filteredTransactions.value.length / PAGE_SIZE))
+})
+
+const hasPrev = computed(() => currentPage.value > 1)
+const hasNext = computed(() => currentPage.value < totalPages.value)
+
+const displayTransactions = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE
+  const end = start + PAGE_SIZE
+  return filteredTransactions.value.slice(start, end)
+})
+
+const showPagination = computed(() => {
+  if (isLoading.value) return false
+  return totalPages.value > 1
 })
 
 const parseNumber = (value) => {
@@ -75,7 +107,7 @@ const parseNumber = (value) => {
 
 const formatCurrency = (value) => {
   const num = parseNumber(value)
-  return '' + new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num)
+  return `Rp ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num)}`
 }
 
 const formatDate = (dateString) => {
@@ -83,16 +115,18 @@ const formatDate = (dateString) => {
   const d = new Date(dateString)
   if (Number.isNaN(d.getTime())) return '-'
   const pad2 = (n) => String(n).padStart(2, '0')
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
 }
 
 const getTitle = (trx) => {
   const t = String(trx?.type || '').toUpperCase()
   const desc = String(trx?.description || '')
-  if (t === 'MISSIONS') return 'Selesaikan tantangan'
-  if (t === 'BONUS') return 'Keberuntungan'
-  if (t === 'CREDIT' || t === 'BALANCE_PLUS') return 'Penambahan saldo'
+  if (t === 'MISSIONS') return 'Tugas berhadiah -Undang teman'
+  if (t === 'BONUS') return 'Bonus daftar'
+  if (t === 'VOUCHER') return 'Kode voucher'
+  if (t === 'CREDIT' || t === 'BALANCE_PLUS') return 'Tambah saldo'
   if (t === 'DEBIT' || t === 'BALANCE_MINUS') return 'Pengurangan saldo'
+  if (t === 'ATTENDANCE') return 'Hadiah harian'
   if (desc) return desc
   if (t) return t.replace(/_/g, ' ')
   return 'Aktivitas'
@@ -103,15 +137,25 @@ const getKey = (item, idx) => {
   return String(v)
 }
 
+const normalizeTransactionsResponse = (data) => {
+  if (!data) return { results: [], count: 0, next: null, previous: null }
+  if (Array.isArray(data)) return { results: data, count: data.length, next: null, previous: null }
+  if (Array.isArray(data.results)) {
+    const c = Number(data.count || 0)
+    return { results: data.results, count: Number.isFinite(c) ? c : 0, next: data.next || null, previous: data.previous || null }
+  }
+  return { results: [], count: 0, next: null, previous: null }
+}
+
 const goBack = () => {
   try {
     if (window.history.length > 1) {
       router.back()
     } else {
-      router.push('/h5/profile')
+      router.push('/profile')
     }
   } catch (_) {
-    router.push('/h5/profile')
+    router.push('/profile')
   }
 }
 
@@ -119,63 +163,30 @@ const fetchTransactions = async () => {
   isLoading.value = true
   showErrorModal.value = false
   errorMessage.value = ''
-  
+
   try {
-    const TYPES = ['MISSIONS', 'DEBIT', 'CREDIT', 'BONUS']
-    const settled = await Promise.allSettled(
-      TYPES.map((type) => transactionAPI.getTransactions({ type, page: 1, page_size: itemsPerPage.value }))
-    )
-    const combined = settled.flatMap((r) => {
-      if (r.status !== 'fulfilled') return []
-      const data = r.value?.data
-      if (Array.isArray(data?.results)) return data.results
-      if (Array.isArray(data)) return data
-      if (Array.isArray(data?.data)) return data.data
-      return []
-    })
-    const deduped = []
-    const seenKeys = new Set()
-    for (const item of combined) {
-      const key = String(item?.id ?? item?.trx_id ?? '')
-      if (!key) continue
-      if (seenKeys.has(key)) continue
-      seenKeys.add(key)
-      deduped.push(item)
+    const all = []
+    for (let page = 1; page <= MAX_PAGES; page += 1) {
+      const resp = await transactionAPI.getTransactions({ page, page_size: PAGE_SIZE })
+      const paged = normalizeTransactionsResponse(resp?.data)
+      if (paged.results?.length) all.push(...paged.results)
+      if (!paged.next) break
     }
-
-    deduped.sort((a, b) => {
-      const da = new Date(a?.created_at || 0).getTime()
-      const db = new Date(b?.created_at || 0).getTime()
-      return db - da
-    })
-
-    transactions.value = deduped
-    totalPages.value = Math.max(1, Math.ceil(transactions.value.length / itemsPerPage.value))
-    currentPage.value = 1
-    
+    allTransactions.value = all
+    if (currentPage.value > totalPages.value) currentPage.value = totalPages.value
   } catch (error) {
     errorMessage.value = error?.response?.data?.detail || error?.message || 'Gagal mengambil data'
     showErrorModal.value = true
-    transactions.value = []
-    totalPages.value = 1
+    allTransactions.value = []
     currentPage.value = 1
   } finally {
     isLoading.value = false
   }
 }
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+const goToPage = (page) => {
+  currentPage.value = Math.max(1, Math.min(totalPages.value, Number(page || 1)))
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 onMounted(() => {
@@ -184,7 +195,22 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  font-family: inherit;
+}
 
 .app-container {
   font-family: 'Inter', sans-serif;
@@ -192,145 +218,142 @@ onMounted(() => {
   max-width: 412px;
   margin: 0 auto;
   min-height: 100vh;
-  background-color: #121212;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: top center;
-  min-height: 100vh;
+  background-color: #f8f8f8;
+  display: flex;
   flex-direction: column;
-  display: flex;
-  box-sizing: border-box;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-}
-
-h1, h2, h3, p {
-  margin: 0;
-}
-
+/* Header */
 #section-header {
+  background-color: #f8f8f8;
+  display: flex;
+  justify-content: center;
   width: 100%;
-  padding-top: 20px;
-  padding-left: 11px;
-  padding-right: 11px;
 }
 
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 24px;
+.header-container {
+  width: 100%;
+  max-width: 412px;
+  height: 86px;
+  position: relative;
 }
 
 .back-button {
-  width: 24px;
-  height: 24px;
+  position: absolute;
+  top: 21px;
+  left: 7px;
+  width: 41px;
+  height: 41px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
 }
 
 .back-button img {
-  width: 24px;
-  height: 24px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.header-title {
-  font-size: 16px;
-  font-weight: 600;
+.page-title {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  width: 100%;
   text-align: center;
-  color: #ffffff;
-  margin: 0;
-  flex-grow: 1;
-}
-
-.header-spacer {
-  width: 24px;
-}
-
-/* Content area copied style from voucher */
-.content-area {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 0 10px;
-  gap: 10px;
-}
-
-.transaction-card {
-  background-color: #1d2138;
-  border-radius: 10px;
-  padding: 12px 11px 10px 13px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.card-details {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.card-title {
-  font-size: 14px;
-  line-height: 17px;
-  font-weight: 500;
-  color: #a296ff;
-  margin: 0;
-}
-
-.card-date {
-  font-size: 12px;
-  line-height: 15px;
-  color: #ffffff;
-  display: block;
-}
-
-.card-value {
-  display: flex;
-  align-items: center;
-}
-
-.amount {
   font-size: 16px;
-  line-height: 20px;
-  font-weight: 400;
-  color: #ffffff;
-  white-space: nowrap;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  pointer-events: none;
+}
+
+/* History List */
+#section-history-list {
+  background-color: #f8f8f8;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(100vh - 86px);
+}
+
+.loading-state {
+  padding: 40px 0;
+  text-align: center;
 }
 
 .empty-state {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 40px 0;
-  width: 100%;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.empty-icon {
-  width: 140px;
-  height: auto;
-  display: block;
-  opacity: 0.9;
+  text-align: center;
 }
 
 .empty-text {
+  color: #b2b2b2;
   font-size: 14px;
-  color: #a0a0a0;
-  text-align: center;
+}
+
+.list-container {
+  width: 100%;
+  max-width: 412px;
+  padding: 0 13px 20px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.history-card {
+  background-color: #eeeeee;
+  border-radius: 20px;
+  padding: 15px 16px 16px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-date {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #004d43;
+  margin-bottom: 11px;
+  line-height: 1.2;
+}
+
+.card-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.card-icon {
+  width: 31px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card-title {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.card-amount {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.5);
+  margin: 0;
+  line-height: 1.2;
 }
 
 .pagination-controls {
@@ -343,33 +366,32 @@ h1, h2, h3, p {
 }
 
 .pagination-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background-color: #eeeeee;
+  border: none;
+  color: #004d43;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 16px;
+  font-weight: 600;
 }
 
 .pagination-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
-  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .pagination-btn:not(:disabled):hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background-color: #e0e0e0;
 }
 
 .pagination-info {
-  color: #fff;
+  color: #000000;
   font-size: 14px;
   font-family: 'Inter', sans-serif;
   min-width: 60px;

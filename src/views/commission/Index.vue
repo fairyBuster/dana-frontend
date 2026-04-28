@@ -1,7 +1,7 @@
 <!-- <template>
   <section class="team-commission-page">
     <header class="site-header">
-      <a href="#/mainboard" class="back-button" :aria-label="$t('commission.backAria')">
+      <a href="/mainboard" class="back-button" :aria-label="$t('commission.backAria')">
         <img src="/assets/images/Ellipse 1.png" alt="Back arrow">
       </a>
       <h1 class="page-title">{{ $t('commission.title') }}</h1>
@@ -39,7 +39,7 @@
           </div>
             </div>
             <img
-              src="/assets/image/7c0d37769bc08f51da706d68f37f782e20eaa4f8.png"
+              src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png"
               alt="Team and commission illustration"
               class="commission-image"
             >
@@ -143,8 +143,8 @@ export default {
       downlineData: null,
       error: null,
       rewardImages: [
-        '/assets/image/94308fa7a9fd3430183b25523d0f05eb0da12914.png',
-        '/assets/image/94308fa7a9fd3430183b25523d0f05eb0da12914.png'
+        '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
+        '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png'
       ]
     }
   },
@@ -173,14 +173,11 @@ export default {
         const purchase = parseFloat(levelData.total_purchase_commission || 0)
         const membersArray = Array.isArray(levelData.members) ? levelData.members : null
         const membersCount = levelData.member_count || levelData.members_total || (membersArray ? membersArray.length : 0)
-        const activeFromMembers = membersArray ? membersArray.filter(m => m && m.is_active === true).length : null
 
         return {
           ...team,
           members: membersCount,
-          // Jika API menyediakan daftar members, hitung aktif berdasarkan is_active
-          // Jika tidak, fallback ke aggregate fields yang tersedia
-          active: (activeFromMembers !== null ? activeFromMembers : (levelData.members_active || levelData.active_member_count || 0)),
+          active: (levelData.members_active || levelData.active_member_count || 0),
           recharge: rechargeAmount,
           income: profit + purchase
         }
@@ -232,7 +229,7 @@ export default {
 .team-commission-page {
   max-width: 100%;
   min-height: 100vh;
-  background-image: url('/assets/image/a545d19c0ef7a51dd8d3593aaf32f06c9a2e24fe.png');
+  background-image: none;
   background-size: cover;
   background-position: center;
   padding: 18px 15px 40px;

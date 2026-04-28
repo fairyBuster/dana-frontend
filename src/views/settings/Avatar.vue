@@ -2,8 +2,8 @@
   <main class="avatar-page">
     <div class="container">
       <header class="page-header">
-        <a href="#/settings" class="back-link" aria-label="Go back">
-          <img src="/assets/image/326_192.svg" alt="Back" class="back-arrow" />
+        <a href="/settings" class="back-link" aria-label="Go back">
+          <img src="/assets/images/2023_1661.svg" alt="Back" class="back-arrow" />
         </a>
         <h1 class="page-title">Avatar</h1>
       </header>
@@ -70,31 +70,31 @@ import ErrorModal from '../../components/modals/ErrorModal.vue'
 
 const router = useRouter()
 
-const defaultAvatar = '/assets/image/0dac5f0b43bcd0640436ca267cb7a345a2ec967f.png'
+const defaultAvatar = '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png'
 const avatarOptions = [
   {
-    value: '/assets/image/1e9a861ea09406a3f58866abbd60d4a25581797e.png',
-    src: '/assets/image/1e9a861ea09406a3f58866abbd60d4a25581797e.png',
+    value: '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
+    src: '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
     alt: 'Duck avatar'
   },
   {
-    value: '/assets/image/066d9c8fac79096e8ec5f7d0ae2a3cc8aebcd5a2.png',
-    src: '/assets/image/066d9c8fac79096e8ec5f7d0ae2a3cc8aebcd5a2.png',
+    value: '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
+    src: '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
     alt: 'Penguin avatar'
   },
   {
-    value: '/assets/image/d0762afbfd7c8073a4e2f7effb6c28088b8fe643.png',
-    src: '/assets/image/d0762afbfd7c8073a4e2f7effb6c28088b8fe643.png',
+    value: '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
+    src: '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
     alt: 'Pig avatar'
   },
   {
-    value: '/assets/image/74c5d1ba5bb7f1e23caf50f8779a048882f4cfe0.png',
-    src: '/assets/image/74c5d1ba5bb7f1e23caf50f8779a048882f4cfe0.png',
+    value: '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
+    src: '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
     alt: 'Rabbit avatar'
   },
   {
-    value: '/assets/image/9ff172edbb5833706a24067488de49bc08c7f5db.png',
-    src: '/assets/image/9ff172edbb5833706a24067488de49bc08c7f5db.png',
+    value: '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
+    src: '/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png',
     alt: 'Bear avatar'
   },
   {
@@ -215,7 +215,7 @@ onMounted(() => {
 .avatar-page {
   min-height: 100vh;
   background-color: #e6eaf4;
-  background-image: url('/assets/image/2ee4d30dab6e87d3002380ed508ec6f82f40048f.png');
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -1,326 +1,150 @@
 <template>
   <div class="app-wrapper">
-    <!-- Header Section -->
-    <header class="app-header">
-      <div class="user-profile">
-        <div class="avatar-container">
-          <img :src="avatarSrc" alt="User Avatar" class="avatar">
-        </div>
+    <section id="section-header">
+      <div class="header-container">
         <div class="user-info">
-          <div class="username-row">
-            <span class="username">{{ displayUsername }}</span>
-            <div class="vip-badge">
-            
-              <img src="/assets/image/5fb42ec97aec809c1357f284f6344e0829f4ad5e.png" class="vip-icon" alt="vip">
-                <span class="vip-text">{{ vipText }}</span>
+          <h1 class="username">Hai, {{ displayUsername }}</h1>
+          <div class="user-meta">
+            <span class="reff-label">Reff ID: <span class="reff-val">{{ displayUid }}</span></span>
+            <div class="divider-vert"></div>
+            <span class="phone">{{ displayPhone }}</span>
+          </div>
+        </div>
+        <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Trivex Logo" class="header-logo">
+      </div>
+    </section>
+
+    <section id="section-referral">
+      <div class="referral-card">
+        <div class="ref-row" @click="router.push('/vp')">
+          <img src="/assets/images/35c8b6a18c2ca182842dd2334e0d97ca5f0a270c.png" alt="Level Icon" class="ref-icon">
+          <div class="ref-content">
+            <div class="ref-title">Level anggota</div>
+            <div class="ref-value">{{ vipText }}</div>
+          </div>
+          <img src="/assets/images/2038_126.svg" alt="Arrow Right" class="ref-arrow">
+        </div>
+        <div class="ref-divider"></div>
+        <div class="ref-row" @click="router.push('/share')">
+          <img src="/assets/images/99155724c1b89458bc852e2a45ac1027d8bfda23.png" alt="Referral Icon" class="ref-icon">
+          <div class="ref-content">
+            <div class="ref-title">Program Referral</div>
+            <div class="ref-value">Berikan tautan undangan Anda</div>
+          </div>
+          <img src="/assets/images/2038_167.svg" alt="Arrow Right" class="ref-arrow">
+        </div>
+      </div>
+    </section>
+
+    <section id="section-asset">
+      <div class="asset-card">
+        <div class="asset-header">
+          <div class="asset-title-wrap">
+            <img src="/assets/images/581d456ba831527e9d5b0cbe542825e6c12d42e1.png" alt="Asset Icon" class="asset-main-icon">
+            <span class="asset-main-title">Total Aset Saya</span>
+            <img src="/assets/images/2039_329.svg" alt="Toggle Visibility" class="asset-eye-icon" @click="isBalanceVisible = !isBalanceVisible">
+          </div>
+          <div class="asset-badges">
+            <img src="/assets/images/image 61 (2).png" alt="Bappebti Logo" class="badge-bappebti">
+            <img src="/assets/images/a648e454f7e6e93caec0f833a59b7dcec155605e.png" alt="SK Logo" class="badge-sk">
+          </div>
+        </div>
+
+        <div class="asset-list">
+          <div class="asset-item" @click="router.push('/flow')">
+            <div class="asset-info">
+              <div class="asset-label">Saldo Utama</div>
+              <div class="asset-val">{{ isBalanceVisible ? balanceText : 'Rp********' }}</div>
             </div>
+            <img src="/assets/images/2038_144.svg" alt="Arrow Right" class="asset-arrow">
           </div>
-          <div class="user-id-row">
-            <span class="user-id">ID akun: {{ displayUid }}</span>
-          
-            <a href="#/pages/account/settings" class="edit-row" @click.prevent="router.push('/pages/account/settings')">
-              <span class="edit-text">Lihat atau edit profil</span>
-              <img src="/assets/image/146_1420.svg" class="edit-icon" alt="edit">
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="header-menu">
-        <div class="menu-icon-wrapper" @click="isDrawerOpen = true">
-          <img src="/assets/image/145_1355.svg" class="menu-bg" alt="bg">
-          <img src="/assets/image/145_1359.svg" class="menu-lines" alt="menu">
-        </div>
-      </div>
-    </header>
+          <div class="asset-divider"></div>
 
-    <!-- Balance Actions -->
-    <section class="balance-actions">
-      <div class="action-card gradient-card-1">
-        <div class="action-content">
-          <div class="action-header">
-            <img src="/assets/image/c2e540a593496a59006c57a512b91431fca799d8.png" class="action-bg-icon" alt="icon">
-            <span class="action-title">Isi ulang saldo</span>
-            <a href="#/pages/balance/recharge" class="action-tag" @click.prevent="router.push('/pages/balance/recharge')">
-              <span>Deposito</span>
-              <img src="/assets/image/145_1391.svg" alt="arrow">
-            </a>
+          <div class="asset-item" @click="router.push('/dep')">
+            <div class="asset-info">
+              <div class="asset-label">Saldo Deposito</div>
+              <div class="asset-val">{{ isBalanceVisible ? balanceDepositText : 'Rp********' }}</div>
+            </div>
+            <img src="/assets/images/2038_149.svg" alt="Arrow Right" class="asset-arrow">
           </div>
-          <span class="action-value">{{ balanceDepositText }}</span>
-        </div>
-      </div>
+          <div class="asset-divider"></div>
 
-      <div class="action-card gradient-card-1">
-        <div class="action-content">
-          <div class="action-header">
-            <img src="/assets/image/89fbbbabd9999be65f129c983484f1a335bc24e1.png" class="mini-chart" alt="chart">
-            <span class="action-title">Saldo kuantitatif</span>
+          <div class="asset-item" @click="router.push('/portfolio/history')">
+            <div class="asset-info">
+              <div class="asset-label">Saldo Titip</div>
+              <div class="asset-val">{{ isBalanceVisible ? totalIncomeText : 'Rp********' }}</div>
+            </div>
+            <img src="/assets/images/2038_155.svg" alt="Arrow Right" class="asset-arrow">
           </div>
-          <div class="action-value-row">
-            <span class="action-value">{{ balanceText }}</span>
+          <div class="asset-divider"></div>
+
+          <div class="asset-item" @click="router.push('/flow/history')">
+            <div class="asset-info">
+              <div class="asset-label">Total Penarikan Sukses</div>
+              <div class="asset-val">{{ isBalanceVisible ? todayTotalIncomeText : 'Rp********' }}</div>
+            </div>
+            <img src="/assets/images/2038_161.svg" alt="Arrow Right" class="asset-arrow">
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Main Balance Card -->
-    <section class="main-balance-card">
-      <div class="balance-details">
-        <div class="balance-text-col">
-          <p>Bertambah hari ini:</p>
-          <p>Saldo bisa ditarik:</p>
-          <p>Akumulasi saldo:</p>
+    <section id="section-menu">
+      <div class="menu-container">
+        <div class="security-notice">
+          <img src="/assets/images/a876a13410d4439d34944ad319f54081e6d9ecf9.png" alt="Security Shield" class="sec-icon">
+          <p class="sec-text">Data Anda dilindungi dengan sistem enkripsi dan protokol keamanan SSL untuk menjaga kerahasiaan dan keamanan informasi.</p>
         </div>
-        <div class="balance-num-col">
-          <p>{{ todayTotalIncomeText }}</p>
-          <p>{{ balanceText }}</p>
-          <p>{{ totalIncomeText }}</p>
-        </div>
-      </div>
-      
-      <div class="card-footer">
-        <div class="detail-link" role="button" tabindex="0" @click="isDrawerOpen = true">
-          <span>Lihat detail saldo</span>
-          <img src="/assets/image/155_1476.svg" alt="arrow">
-        </div>
-          <a href="#/pages/assets/release" class="withdraw-btn" @click.prevent="router.push('/pages/assets/release')">
-            <span>Tarik</span>
-            <img src="/assets/image/149_1447.svg" alt="arrow">
-          </a>
-      </div>
-    </section>
 
-
-    <!-- Announcement -->
-    <div class="announcement-bar">
-      <img src="/assets/image/154_1458.svg" alt="speaker">
-      <div class="marquee">
-        <div class="marquee-track">
-          <span class="marquee-text">Por favor, complete algumas missões disponíveis abaixo untuk obter muita</span>
-          <span class="marquee-text">Por favor, complete algumas missões disponíveis abaixo untuk obter muita</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Feature Grid -->
-    <section class="feature-grid">
-      <!-- Item 1 -->
-      <div class="feature-item" @click="router.push('/pages/invite/invite')">
-        <div class="feature-text">
-          <h3>Undang pengguna</h3>
-          <p>Bagikan undangan Anda</p>
-        </div>
-        <img src="/assets/image/fd750d08b7e90034c1977da9ec7d41041d4ec384.png" class="feature-icon" alt="icon">
-      </div>
-
-      <!-- Item 2 -->
-     
-      <!-- Item 3 -->
-      <div class="feature-item" @click="router.push('/pages/benefits/premium')">
-        <div class="feature-text">
-          <h3>VIP</h3>
-          <p>Dapatkan hak eksklusif lebih banyak!</p>
-        </div>
-        <img src="/assets/image/vip.png" class="feature-icon" alt="icon">
-      </div>
-       <div class="feature-item" @click="router.push('/pages/assets/bind')">
-        <div class="feature-text">
-          <h3>Manajemen</h3>
-          <p>Atur kartu bank Anda untuk menarik uang!</p>
-        </div>
-        <img src="/assets/image/management.png" class="feature-icon" alt="icon">
-      </div>
-
-
-      <!-- Item 4 -->
-      <div class="feature-item" @click="router.push('/pages/invite/team')">
-        <div class="feature-text">
-          <h3>Tim</h3>
-          <p>Bentuk tim dan lihat mereka disini!</p>
-        </div>
-        <img src="/assets/image/teamm.png" class="feature-icon" alt="icon">
-      </div>
-    </section>
-
-    <!-- Menu Lists -->
-    <section class="menu-section">
-      <div class="menu-group">
-        <a href="#/pages/history/records" class="menu-item" @click.prevent="router.push('/pages/history/records')">
-          <img src="/assets/image/i1.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Catatan Penerbangan</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </a>
-        <div class="menu-divider"></div>
-        
-        <div class="menu-item" @click="router.push('/pages/account/missions')">
-          <img src="/assets/image/i2.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Tantangan</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </div>
-        <div class="menu-divider"></div>
-
-        <a href="#/pages/account/news" class="menu-item" @click.prevent="router.push('/pages/account/news')">
-          <img src="/assets/image/i3.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Pemberitahuan Pesan</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </a>
-        <div class="menu-divider"></div>
-
-          <div class="menu-item" @click="router.push('/pages/account/bonus')">
-          <img src="/assets/image/i4.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Keberuntungan</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </div>
-        <div class="menu-divider"></div>
-         <div class="menu-item" @click="router.push('/pages/account/attendance')">
-          <img src="/assets/image/i5.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Check-in</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </div>
-      </div>
-            <div class="menu-group">
-        <div class="menu-item" @click="router.push('/pages/account/terms')">
-          <img src="/assets/image/i6.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Terms of Service</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </div>
-        <div class="menu-divider"></div>
-        
-        <div class="menu-item" @click="router.push('/pages/account/privacy')">
-          <img src="/assets/image/i7.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Privacy Policy</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </div>
-        <div class="menu-divider"></div>
-
-        <a href="#/pages/account/company/security" class="menu-item" @click.prevent="router.push('/pages/account/company/security')">
-          <img src="/assets/image/i8.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Perjanjian anggota VIP</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </a>
-        
-        <div class="menu-divider"></div>
-         <div class="menu-item" @click="router.push('/pages/account/about')">
-          <img src="/assets/image/i9.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Tentang kami</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </div>
-        <div class="menu-divider"></div>
-        <a href="#/pages/account/support/bot" class="menu-item" @click.prevent="router.push('/pages/account/support/bot')">
-          <img src="/assets/image/i10.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Pelayanan Pelanggan</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </a>
-      </div>
-      <div class="menu-group">
-        <a href="#/pages/account/settings" class="menu-item" @click.prevent="router.push('/pages/account/settings')">
-          <img src="/assets/image/i11.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Pengaturan</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </a>
-        <div class="menu-divider"></div>
-        
-        <div class="menu-item" @click="router.push('/pages/account/download-app')">
-          <img src="/assets/image/i12.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Unduh aplikasi</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </div>
-        
-
-       
-      </div>
-
-
-      <div class="menu-group logout-group">
-        <div class="menu-item" @click="router.push('/pages/account/access')">
-          <img src="/assets/image/i13.png" class="menu-icon" alt="icon">
-          <span class="menu-label">Keluar</span>
-          <img src="/assets/image/155_1476.svg" class="menu-arrow" alt="arrow">
-        </div>
-      </div>
-    </section>
-
-    <!-- Drawer Overlay (Top Layer) -->
-    <div class="drawer-overlay" v-if="isDrawerOpen" @click="isDrawerOpen = false">
-      <div class="drawer-content" @click.stop>
-        <div class="drawer-body">
-          <div class="drawer-header-custom">
-            <div class="drawer-top-row">
-              <img src="/assets/image/161_396.svg" alt="Close" class="close-icon" @click="isDrawerOpen = false">
-            </div>
-            <div class="user-profile-row">
-              <div class="user-info">
-                <div class="phone-vip-row">
-                  <span class="phone-number">{{ displayPhone }}</span>
-                  <div class="vip-badge">
-                    <span class="vip-text">{{ vipText }}</span>
-                    <img src="/assets/image/5fb42ec97aec809c1357f284f6344e0829f4ad5e.png" class="vip-crown" alt="VIP">
-                  </div>
-                </div>
-                <div class="user-id">ID akun: {{ displayUid }}</div>
-              </div>
-              <div class="user-avatar">
-                <img :src="avatarSrc" alt="Avatar">
-              </div>
-            </div>
+        <div class="menu-list">
+          <div class="menu-item" @click="router.push('/settings')">
+            <img src="/assets/images/28513e18289d675dfcb2092e17ef5f318ad3ee70.png" alt="Data Saya" class="menu-icon">
+            <span class="menu-label">Data Saya</span>
+            <img src="/assets/images/2039_173.svg" alt="Arrow Right" class="menu-arrow">
           </div>
+          <div class="menu-divider"></div>
 
-          <!-- Info Card -->
-          <div class="info-card">
-            <div class="info-row">
-              <span class="label">Drone aktif:</span>
-              <span class="value">{{ activeDroneText }}</span>
-            </div>
-            <div class="info-row">
-              <span class="label">Bergabung sejak:</span>
-              <span class="value">{{ joinedSinceText }}</span>
-            </div>
+          <div class="menu-item" @click="router.push('/connect')">
+            <img src="/assets/images/d41cb37f383e118edae5c6a973ae9f86b1382288.png" alt="Tambah Rekening" class="menu-icon">
+            <span class="menu-label">Tambah Rekening</span>
+            <img src="/assets/images/2039_179.svg" alt="Arrow Right" class="menu-arrow">
           </div>
+          <div class="menu-divider"></div>
 
-          <!-- Menu List -->
-          <nav class="drawer-menu-card">
-            <a href="#/pages/history/recharge" class="menu-item" @click.prevent="router.push('/pages/history/recharge')">
-              <span class="menu-text">Catatan deposito</span>
-              <img src="/assets/image/155_1476.svg" class="chevron-icon" alt=">">
-            </a>
-            <a href="#/pages/history/release" class="menu-item" @click.prevent="router.push('/pages/history/release')">
-              <span class="menu-text">Catatan menarik</span>
-              <img src="/assets/image/155_1476.svg" class="chevron-icon" alt=">">
-            </a>
-            <a href="#/pages/history/order" class="menu-item" @click.prevent="router.push('/pages/history/order')">
-              <span class="menu-text">Catatan pesanan</span>
-              <img src="/assets/image/155_1476.svg" class="chevron-icon" alt=">">
-            </a>
-            <a href="#/pages/history/teams" class="menu-item" @click.prevent="router.push('/pages/history/teams')">
-              <span class="menu-text">Catatan komisi</span>
-              <img src="/assets/image/155_1476.svg" class="chevron-icon" alt=">">
-            </a>
-            <a href="#/pages/history/attendance" class="menu-item" @click.prevent="router.push('/pages/history/attendance')">
-              <span class="menu-text">Catatan kehadiran</span>
-              <img src="/assets/image/155_1476.svg" class="chevron-icon" alt=">">
-            </a>
-            <a href="#/pages/history/rewards" class="menu-item" @click.prevent="router.push('/pages/history/rewards')">
-              <span class="menu-text">Catatan menukar</span>
-              <img src="/assets/image/155_1476.svg" class="chevron-icon" alt=">">
-            </a>
-            <a href="#/pages/history/transaction" class="menu-item" @click.prevent="router.push('/pages/history/transaction')">
-              <span class="menu-text">Catatan lainnya</span>
-              <img src="/assets/image/155_1476.svg" class="chevron-icon" alt=">">
-            </a>
-          </nav>
+          <div class="menu-item" @click="router.push('/settings/change-password')">
+            <img src="/assets/images/fcd9fe1e45be040eb1fd3a3e8ca65794171b72a5.png" alt="Keamanan Akun" class="menu-icon">
+            <span class="menu-label">Keamanan Akun</span>
+            <img src="/assets/images/2039_186.svg" alt="Arrow Right" class="menu-arrow">
+          </div>
+          <div class="menu-divider"></div>
 
-          <!-- Logout Button -->
-          <div class="logout-container">
-            <button class="logout-btn" @click="router.push('/pages/account/access')">
-              <span>Keluar</span>
-              <img src="/assets/image/155_1476.svg" class="chevron-icon" alt=">">
-            </button>
+          <div class="menu-item" @click="router.push('/support/platform')">
+            <img src="/assets/images/dbf0ca110a19eb0771d0f64fec6d8bbad1c44406.png" alt="Pusat Bantuan" class="menu-icon">
+            <span class="menu-label">Pusat Bantuan</span>
+            <img src="/assets/images/2039_193.svg" alt="Arrow Right" class="menu-arrow">
+          </div>
+          <div class="menu-divider"></div>
+
+          <div class="menu-item" @click="router.push('/task')">
+            <img src="/assets/images/df083f3660cadeed4ff1250b110dd29ba5b04bfa.png" alt="Tugas Berhadiah" class="menu-icon">
+            <span class="menu-label">Tugas Berhadiah-Undang Teman</span>
+            <img src="/assets/images/2039_312.svg" alt="Arrow Right" class="menu-arrow">
+          </div>
+          <div class="menu-divider"></div>
+
+          <div class="menu-item" @click="router.push('/portfolio')">
+            <img src="/assets/images/d0494c7e58523da03bf49ec763727b638b172bd1.png" alt="Portofolio Saya" class="menu-icon">
+            <span class="menu-label">Portofolio Saya</span>
+            <img src="/assets/images/2040_335.svg" alt="Arrow Right" class="menu-arrow">
           </div>
         </div>
+
+        <button class="btn-logout" @click="router.push('/login')">Keluar</button>
       </div>
-    </div>
-    
-    <FooterBar />
+    </section>
   </div>
+
+  <FooterBar />
 </template>
 
 <script setup>
@@ -331,7 +155,7 @@ import { avatarSrc } from '@/utils/avatar'
 import { authAPI } from '@/services/api'
 
 const router = useRouter()
-const isDrawerOpen = ref(false)
+const isBalanceVisible = ref(false)
 
 const accountInfo = ref(null)
 const currentRank = ref(null)
@@ -344,7 +168,7 @@ const lastRefreshedAt = ref(0)
 const displayUsername = computed(() => {
   const d = accountInfo.value || {}
   const username = String(d.username || d.full_name || d.name || '').trim()
-  return username || 'Username'
+  return username || ''
 })
 
 const displayUid = computed(() => {
@@ -364,23 +188,9 @@ const vipText = computed(() => {
   const title = String(currentTitle.value || '').trim()
   if (title) return title
   const r = currentRank.value
-  if (r === null || r === undefined || r === '') return 'V0'
+  if (r === null || r === undefined || r === '') return 'LV0'
   const n = Number(r)
-  return Number.isFinite(n) ? `V${n}` : String(r)
-})
-
-const activeDroneText = computed(() => {
-  const n = Number(accountInfo.value?.active_investments_count ?? 0)
-  const cnt = Number.isFinite(n) ? n : 0
-  return `${cnt} drone`
-})
-
-const joinedSinceText = computed(() => {
-  const raw = accountInfo.value?.created_at || null
-  if (!raw) return '-'
-  const d = new Date(raw)
-  if (Number.isNaN(d.getTime())) return '-'
-  return d.toLocaleString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return Number.isFinite(n) ? `LV${n}` : String(r)
 })
 
 const toNumber = (v) => {
@@ -393,8 +203,8 @@ const formatIDR = (v) => {
 
 const balanceText = computed(() => formatIDR(balanceStats.value?.balance))
 const balanceDepositText = computed(() => formatIDR(balanceStats.value?.balance_deposit))
-const totalIncomeText = computed(() => formatIDR(balanceStats.value?.total_income))
-const todayTotalIncomeText = computed(() => formatIDR(todayStats.value?.total_income))
+const totalIncomeText = computed(() => formatIDR(balanceStats.value?.balance_hold))
+const todayTotalIncomeText = computed(() => formatIDR(todayStats.value?.total_withdraw_completed))
 
 const fetchAccountInfo = async () => {
   try {
@@ -462,729 +272,292 @@ onActivated(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-:root {
-  --primary-bg: #1d2138;
-  --text-white: #ffffff;
-  --text-grey: #c4c4c4;
-  --text-muted: #7e7e7e;
-  --accent-purple: #746a9a;
-}
-
-body {
+.app-wrapper {
   font-family: 'Inter', sans-serif;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
-  background-color: #0f0f1e;
-  display: flex;
-  justify-content: center;
+  max-width: 412px;
   min-height: 100vh;
+  background: linear-gradient(180deg, #0A4345 0%, #0B6563 100%);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
 * {
   box-sizing: border-box;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
+h1, h2, h3, p {
   margin: 0;
 }
 
-/* Main Wrapper */
-.app-wrapper {
-  width: 100%;
-  max-width: 412px;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: top center;
-  background-repeat: no-repeat;
-  min-height: 100vh;
-  position: relative;
-  padding-bottom: 80px;
-  overflow-x: hidden;
-}
-
-/* Header */
-.app-header {
+/* Header Section */
+.header-container {
+  padding: 24px 20px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 31px 20px 20px;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.avatar-container {
-  width: 56px;
-  height: 57px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.username-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .username {
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.vip-badge {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 2px 6px;
-  background-color: #a296ff;
-  border-radius: 10px;
-  height: 12px;
-  gap: 4px;
-}
-
-.vip-text {
-  font-size: 10px;
-  color: #301f80;
+  color: #ffffff;
+  font-size: 20px;
   font-weight: 700;
-  line-height: 1;
+  margin-bottom: 8px;
 }
 
-.vip-icon {
-  width: 16px;
+.user-meta {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.reff-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.reff-val {
+  color: #ffffff;
+}
+
+.divider-vert {
+  width: 1px;
   height: 12px;
+  background-color: #ffffff;
+  margin: 0 8px;
 }
 
-.user-id-row {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0px;
+.phone {
+  color: #ffffff;
 }
 
-.user-id {
-  color: #fff;
-  font-size: 12px;
-}
-
-.edit-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-decoration: none;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.edit-icon {
-  width: 6px;
-  height: 6px;
-}
-
-.edit-text {
-  color: #7e7e7e;
-  font-size: 11px;
-}
-
-.menu-icon-wrapper {
-  position: relative;
-  width: 30px;
-  height: 29px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.menu-bg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.menu-lines {
-  position: relative;
-  width: 20px;
-  height: 20px;
-  z-index: 1;
-}
-
-/* Balance Actions */
-.balance-actions {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 16px;
-  margin-bottom: 16px;
-}
-
-.action-card {
-  width: 48%;
-  height: 71px;
-  border-radius: 10px;
-  padding: 11px 5px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.gradient-card-1 {
-  background: linear-gradient(90deg, #2b2a62 0%, #0f132e 48%, #0a1025 100%);
-}
-
-.action-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  z-index: 1;
-}
-
-.action-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.action-header .action-tag {
-  margin-left: auto;
-}
-
-.action-title {
-  color: #fff;
-  font-size: 10px;
-}
-
-.action-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 30%, #9047e0 100%);
-  border: 1px solid #746a9a;
-  border-radius: 10px;
-  padding: 2px 6px;
-  width: fit-content;
-}
-
-.action-tag span {
-  color: #fff;
-  font-size: 9px;
-}
-
-.action-tag img {
-  width: 12px;
-  height: 12px;
-}
-
-.action-value {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  margin-top: auto;
-  margin-left: 5px;
-}
-
-.action-value-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-}
-
-.action-bg-icon {
-  width: 21px;
-  height: 20px;
-  opacity: 0.8;
-}
-
-.mini-chart {
-  width: 18px;
-  height: 15px;
-}
-
-/* Main Balance Card */
-.main-balance-card {
-  margin: 0 16px 16px;
-  height: 119px;
-  border-radius: 10px;
-  background-image: url('/assets/image/8ba466c0b79a0e8b82f25581ddfdcb6dbc460ad2.png');
-  background-size: cover;
-  background-position: center;
-  padding: 16px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.balance-details {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: auto;
-}
-
-.balance-text-col p, .balance-num-col p {
-  margin: 0 0 4px 0;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.balance-text-col p {
-  color: #000;
-}
-
-.balance-num-col p {
-  color: #000;
-  font-weight: 600;
-  text-align: right;
-}
-
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.detail-link {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-}
-
-.detail-link span {
-  color: #7e7e7e;
-  font-size: 11px;
-}
-
-.detail-link img {
-  width: 6px;
-  height: 6px;
-}
-
-.withdraw-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 30%, #9047e0 100%);
-  border: 1px solid #746a9a;
-  border-radius: 10px;
-  padding: 4px 12px;
-  color: white;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.withdraw-btn img {
-  width: 12px;
-  height: 12px;
-}
-
-/* Announcement */
-.announcement-bar {
-  margin: 0 16px 16px;
-  height: 29px;
-  background: linear-gradient(90deg, #100f2c 0%, #0f132e 48%, #0a1025 100%);
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  gap: 8px;
-  overflow: hidden;
-}
-
-.announcement-bar img {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.marquee {
-  white-space: nowrap;
-  overflow: hidden;
-  color: #c4c4c4;
-  font-size: 11px;
-  flex-grow: 1;
-}
-
-.marquee-track {
-  display: flex;
-  width: max-content;
-  gap: 28px;
-  animation: profileMarquee 14s linear infinite;
-  will-change: transform;
-}
-
-.marquee-text {
-  white-space: nowrap;
-}
-
-@keyframes profileMarquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-/* Feature Grid */
-.feature-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  padding: 0 23px;
-  margin-bottom: 20px;
-}
-
-.feature-item {
-  background-color: #1d2138;
-  border-radius: 10px;
-  padding: 8px 10px;
-  height: 57px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-}
-
-.feature-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  max-width: 70%;
-}
-
-.feature-text h3 {
-  margin: 0;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.feature-text p {
-  margin: 0;
-  color: #acacac;
-  font-size: 9px;
-  line-height: 1.2;
-}
-
-.feature-icon {
-  width: 44px;
-  height: 42px;
+.header-logo {
+  height: 24px;
+  border-radius: 50px;
   object-fit: contain;
 }
 
-/* Menu Lists */
-.menu-section {
-  padding: 0 23px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+/* Referral Section */
+#section-referral {
+  padding: 0 20px;
 }
 
-.menu-group {
-  background-color: #1d2138;
-  border-radius: 10px;
-  padding: 0 16px;
+.referral-card {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.ref-row {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.ref-icon {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+}
+
+.ref-content {
+  flex-grow: 1;
+}
+
+.ref-title {
+  color: #ffffff;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.ref-value {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ref-arrow {
+  width: 24px;
+  height: 24px;
+}
+
+.ref-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin: 12px 0;
+}
+
+/* Asset Section */
+#section-asset {
+  padding: 20px 20px 0;
+}
+
+.asset-card {
+  background-color: #eeeeee;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.asset-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.asset-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.asset-main-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.asset-main-title {
+  color: rgba(18, 18, 18, 0.6);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.asset-eye-icon {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.asset-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-bappebti {
+  height: 16px;
+  object-fit: contain;
+}
+
+.badge-sk {
+  height: 16px;
+  object-fit: contain;
+}
+
+.asset-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.asset-info {
+  flex-grow: 1;
+}
+
+.asset-label {
+  color: #121212;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.asset-val {
+  color: #121212;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.asset-arrow {
+  width: 24px;
+  height: 24px;
+}
+
+.asset-divider {
+  height: 1px;
+  background-color: rgba(5, 5, 5, 0.1);
+  margin: 4px 0;
+}
+
+/* Menu Section */
+#section-menu {
+  flex-grow: 1;
+  margin-top: 24px;
+  background-color: #f8f8f8;
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 80px;
+}
+
+.security-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.sec-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.sec-text {
+  color: #121212;
+  font-size: 10px;
+  line-height: 1.4;
+  opacity: 0.7;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  height: 48px;
   padding: 12px 0;
+  cursor: pointer;
 }
 
 .menu-icon {
-  width: 23px;
-  height: 22px;
-  margin-right: 12px;
-  object-fit: contain;
+  width: 28px;
+  height: 28px;
+  margin-right: 16px;
 }
 
 .menu-label {
   flex-grow: 1;
-  color: #fff;
-  font-size: 13px;
+  color: #121212;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .menu-arrow {
-  width: 7px;
-  height: 11px;
+  width: 24px;
+  height: 24px;
 }
 
 .menu-divider {
   height: 1px;
-  background-color: #746a9a;
-  opacity: 0.4;
+  background-color: rgba(5, 5, 5, 0.1);
+}
+
+.btn-logout {
   width: 100%;
-}
-
-.logout-group {
-  margin-bottom: 20px;
-}
-
-/* Bottom Nav */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 412px;
-  height: 63px;
-  background: linear-gradient(180deg, #0f0b2e 0%, #2b1b6f 100%);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  box-shadow: inset 0px 4px 30px 0px rgba(0, 0, 0, 0.3);
-  z-index: 100;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-}
-
-.nav-icon-wrapper {
-  width: 20px;
-  height: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.nav-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0.3;
-}
-
-.nav-item span {
-  font-size: 10px;
-  color: #c4c4c4;
-}
-
-.nav-item.active img {
-  opacity: 1;
-}
-
-.nav-item.active span {
-  color: #fff;
-}
-
-/* Drawer Overlay Styles */
-.drawer-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index: 1000;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.drawer-content {
-  width: 320px;
-  max-width: 85%;
-  height: 100%;
-  background-color: #35395a;
-  padding: 20px;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
-  animation: slideIn 0.3s ease forwards;
-  color: #fff;
-  overflow-y: auto;
-}
-
-.drawer-body {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* Drawer Header */
-.drawer-header-custom {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 4px;
-}
-
-.drawer-top-row {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.close-icon {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-.user-profile-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.phone-vip-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.phone-number {
+  margin-top: 32px;
+  padding: 14px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #4e733f 0%, #60995b 100%);
+  color: #ffffff;
   font-size: 16px;
-  font-weight: 500;
-}
-
-.vip-badge {
-  background: linear-gradient(90deg, #a296ff 0%, #7d6aff 100%);
-  border-radius: 10px;
-  padding: 2px 6px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  height: 16px;
-}
-
-.vip-text {
-  font-size: 10px;
-  color: #301f80;
   font-weight: 700;
-  line-height: 1;
-}
-
-.vip-crown {
-  width: 14px;
-  height: 14px;
-}
-
-.user-id {
-  font-size: 12px;
-  color: #c4c4c4;
-}
-
-.user-avatar img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-/* Cards */
-.info-card, .drawer-menu-card, .logout-btn {
-  background-color: #1d2138;
-  border-radius: 10px;
-  padding: 16px;
-}
-
-.info-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0px;
-}
-
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.info-row .label {
-  color: #c4c4c4;
-  font-size: 12px;
-}
-
-.info-row .value {
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 500;
-  font-style: italic;
-}
-
-/* Menu List */
-.drawer-menu-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0px;
-}
-
-.menu-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  text-decoration: none;
-}
-
-.menu-text {
-  font-size: 13px;
-  color: #ffffff;
-}
-
-.chevron-icon {
-  width: 6px;
-  height: 10px;
-  opacity: 0.6;
-}
-
-/* Logout Button */
-.logout-container {
-  margin-bottom: 20px;
-}
-
-.logout-btn {
-  width: 100%;
   border: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s;
 }
 
-.logout-btn span {
-  font-size: 13px;
-  color: #ffffff;
-}
-
-@keyframes slideIn {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+.btn-logout:active {
+  opacity: 0.8;
 }
 </style>
+
+

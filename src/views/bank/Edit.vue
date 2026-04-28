@@ -1,30 +1,30 @@
-<template>
+<!-- <template>
   <div class="app-container">
-    <!-- Header -->
+ 
     <header class="app-header">
       <div class="header-content">
         <button class="back-button" @click="goBack">
-          <img src="/assets/image/169_294.svg" alt="Back">
+          <img src="/assets/images/2011_913.svg" alt="Back">
         </button>
         <h1 class="screen-title">Edit kartu</h1>
       </div>
     </header>
 
-    <!-- Form Section -->
+
     <section id="section-form">
       <form class="card-form" @submit.prevent="handleSubmit">
-        <!-- Bank Selection -->
+       
         <div class="form-group">
           <label class="form-label">Nama bank</label>
           <div class="custom-select" @click="showBankModal = true">
             <span :class="{ 'placeholder-text': !selectedBank }">
               {{ selectedBank || 'Escolha o banco' }}
             </span>
-            <img src="/assets/image/172_306.svg" alt="Dropdown" class="dropdown-icon">
+            <img src="/assets/images/2011_934.svg" alt="Dropdown" class="dropdown-icon">
           </div>
         </div>
 
-        <!-- Card Holder Name -->
+        
         <div class="form-group">
           <label class="form-label">Nama penerima kartu</label>
           <input 
@@ -37,7 +37,6 @@
           >
         </div>
 
-        <!-- Account Number -->
         <div class="form-group">
           <label class="form-label">Nomor rekening bank</label>
           <input 
@@ -51,7 +50,6 @@
           >
         </div>
 
-        <!-- Phone Number -->
         <div class="form-group">
           <label class="form-label">Nomor telepon</label>
           <input 
@@ -63,7 +61,6 @@
           >
         </div>
 
-        <!-- Email -->
         <div class="form-group">
           <label class="form-label">Surat</label>
           <input 
@@ -75,7 +72,7 @@
           >
         </div>
 
-        <!-- Submit Button -->
+  
         <button type="submit" class="submit-btn" :disabled="loading">
           {{ loading ? 'Menyimpan...' : 'Perbarui kartu bank' }}
         </button>
@@ -93,7 +90,7 @@
 
     <ErrorModal v-model="errorModalOpen" :message="errorMessage" />
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
@@ -211,7 +208,7 @@ const loadBankData = async () => {
   if (!bankId) {
     errorMessage.value = 'ID kartu bank tidak ditemukan'
     errorModalOpen.value = true
-    router.push('/pages/assets/bind')
+    router.push('/connect')
     return
   }
 
@@ -222,7 +219,7 @@ const loadBankData = async () => {
     if (!found) {
       errorMessage.value = 'Data kartu bank tidak ditemukan'
       errorModalOpen.value = true
-      router.push('/pages/assets/bind')
+      router.push('/connect')
       return
     }
 
@@ -241,7 +238,7 @@ const loadBankData = async () => {
   } catch (error) {
     errorMessage.value = extractErrorMessage(error)
     errorModalOpen.value = true
-    router.push('/pages/assets/bind')
+    router.push('/connect')
   }
 }
 
@@ -274,7 +271,7 @@ const handleSubmit = async () => {
       account_number: String(formData.accountNumber).replace(/\s+/g, ''),
       is_default: Boolean(formData.isDefault)
     })
-    router.replace('/pages/account/account')
+    router.replace('/profile')
   } catch (error) {
     errorMessage.value = extractErrorMessage(error)
     errorModalOpen.value = true
@@ -297,7 +294,7 @@ onMounted(() => {
   width: 100%;
   max-width: 412px;
   min-height: 100vh;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: 412px auto;
   background-repeat: no-repeat;
   background-position: top center;
@@ -455,3 +452,5 @@ onMounted(() => {
   cursor: not-allowed;
 }
 </style>
+
+

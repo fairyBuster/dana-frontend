@@ -1,100 +1,97 @@
 <template>
-  <div class="terms-page">
+  <div class="terms-container">
     <!-- Header Section -->
-    <section id="header-section">
-      <header class="app-header">
-        <div class="header-left">
-          <img src="/assets/image/45_694.svg" alt="Back" class="icon-back" @click="goBack">
-        </div>
-        <div class="header-center">
-          <h1 class="nav-title">Terms of Service</h1>
-        </div>
+    <section id="section-header">
+      <header class="header">
+        <button class="back-button" @click="goBack" aria-label="Go back">
+          <img src="/assets/images/2039_205.svg" alt="Back">
+        </button>
       </header>
     </section>
 
     <!-- Content Section -->
-    <section id="content-section">
-      <div class="content-container">
-        <div class="page-intro">
-          <h2 class="page-title">Terms of Service</h2>
-          <p class="last-updated">Terakhir diperbarui: 2026</p>
-        </div>
-
-        <div class="terms-list">
-          <!-- Item 1 -->
-          <div class="term-item">
-            <p class="term-text">1. Ketentuan Umum<br>Selamat datang di OT-SENT. Dengan mengakses dan menggunakan platform ini, Anda menyetujui untuk terikat dengan Syarat dan Ketentuan yang berlaku. Jika Anda tidak menyetujui sebagian atau seluruh isi ketentuan ini, mohon untuk tidak menggunakan layanan kami.</p>
-          </div>
-
-          <!-- Item 2 -->
-          <div class="term-item">
-            <p class="term-text">2. Deskripsi Layanan<br>OT-SENT adalah platform teknologi berbasis kecerdasan buatan yang menyediakan layanan pemetaan udara, monitoring, dan analisis data melalui sistem drone terintegrasi. Layanan ini bertujuan untuk membantu pengguna dalam pengolahan dan pemantauan data berbasis udara secara real-time.</p>
-          </div>
-
-          <!-- Item 3 -->
-          <div class="term-item">
-            <p class="term-text">3. Akses dan Penggunaan<br>Pengguna wajib memberikan informasi yang akurat dan valid saat melakukan pendaftaran.<br>Akses ke platform hanya diperuntukkan bagi pengguna yang telah terdaftar.<br>Pengguna bertanggung jawab atas keamanan akun, termasuk kerahasiaan kata sandi dan informasi login.<br>Segala aktivitas yang terjadi pada akun menjadi tanggung jawab pengguna.</p>
-          </div>
-
-          <!-- Item 4 -->
-          <div class="term-item">
-            <p class="term-text">4. Penggunaan yang Dilarang<br>Pengguna dilarang untuk:<br>Menggunakan layanan untuk tujuan yang melanggar hukum atau peraturan yang berlaku.<br>Menyalahgunakan data, sistem, atau hasil analisis yang disediakan oleh OT-SENT.<br>Mengakses sistem secara tidak sah atau melakukan upaya peretasan.<br>Mengganggu atau merusak kinerja platform.</p>
-          </div>
-
-          <!-- Item 5 -->
-          <div class="term-item">
-            <p class="term-text">5. Data dan Informasi<br>Data dan hasil analisis yang disediakan oleh OT-SENT bersifat estimasi dan dapat berubah sesuai kondisi lapangan.<br>OT-SENT tidak menjamin keakuratan mutlak dari seluruh data yang dihasilkan.<br>Pengguna bertanggung jawab atas penggunaan informasi yang diperoleh dari platform.</p>
-          </div>
-
-          <!-- Item 6 -->
-          <div class="term-item">
-            <p class="term-text">6. Pembatasan Tanggung Jawab<br>OT-SENT tidak bertanggung jawab atas kerugian langsung maupun tidak langsung yang timbul dari penggunaan layanan.<br>Platform tidak menjamin ketersediaan layanan tanpa gangguan atau bebas dari kesalahan.<br>Keputusan yang diambil berdasarkan data dari platform sepenuhnya menjadi tanggung jawab pengguna.</p>
-          </div>
-
-          <!-- Item 7 -->
-          <div class="term-item">
-            <p class="term-text">7. Keamanan Sistem<br>OT-SENT menerapkan langkah-langkah keamanan untuk melindungi data dan sistem.<br>Aktivitas pengguna dapat dicatat untuk tujuan keamanan dan peningkatan layanan.<br>Pengguna dilarang mencoba mengganggu atau mengeksploitasi sistem keamanan platform.</p>
-          </div>
-
-          <!-- Item 8 -->
-          <div class="term-item">
-            <p class="term-text">8. Perubahan Layanan<br>OT-SENT berhak untuk:<br>Mengubah, memperbarui, atau menghentikan sebagian atau seluruh layanan sewaktu-waktu.<br>Memperbarui Syarat dan Ketentuan tanpa pemberitahuan sebelumnya. Pengguna disarankan untuk meninjau halaman ini secara berkala.</p>
-          </div>
-
-          <!-- Item 9 -->
-          <div class="term-item">
-            <p class="term-text">9. Hak Kekayaan Intelektual<br>Seluruh konten, desain, sistem, dan teknologi yang terdapat dalam platform OT-SENT merupakan milik resmi OT-SENT dan dilindungi oleh hukum yang berlaku. Dilarang menggunakan atau menyalin tanpa izin tertulis.</p>
-          </div>
-
-          <!-- Item 10 -->
-          <div class="term-item">
-            <p class="term-text">10. Penghentian Akses<br>OT-SENT berhak menangguhkan atau menghentikan akses pengguna jika ditemukan pelanggaran terhadap ketentuan ini tanpa kewajiban memberikan pemberitahuan sebelumnya.</p>
-          </div>
-
-          <!-- Item 11 -->
-          <div class="term-item">
-            <p class="term-text">11. Hukum yang Berlaku<br>Syarat dan Ketentuan ini diatur dan ditafsirkan sesuai dengan hukum yang berlaku di yurisdiksi terkait.</p>
-          </div>
-
-          <!-- Item 12 -->
-          <div class="term-item">
-            <p class="term-text">12. Kontak<br>Jika Anda memiliki pertanyaan terkait Syarat dan Ketentuan ini, silakan hubungi:<br>Email: support@otsent.com</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer Section -->
-    <section id="footer-section">
-      <div class="footer-container">
-        <p class="footer-tagline">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
+    <section id="section-content">
+      <div class="content">
+        <h1 class="title">Syarat dan Ketentuan TRIVEX</h1>
+        <p class="last-updated">Terakhir diperbarui: 01 Januari 2026</p>
         
-        <div class="footer-brand">
-          <div class="logo-wrapper">
-            <img src="/assets/image/983276.png" alt="Ot-Sent Logo" class="footer-logo">
-          </div>
-          <p class="copyright">© 2026 OT-SENT. All Rights Reserved</p>
+        <p class="intro">Dengan mengakses dan menggunakan layanan TRIVEX, pengguna dianggap telah membaca, memahami, dan menyetujui seluruh Syarat dan Ketentuan berikut.</p>
+        
+        <div class="terms-section">
+          <h2>1. Ketentuan Umum</h2>
+          <p>TRIVEX adalah platform yang menyediakan layanan terkait aktivitas transaksi dan pengelolaan aset digital. Pengguna wajib menggunakan layanan sesuai dengan hukum dan peraturan yang berlaku.</p>
         </div>
+
+        <div class="terms-section">
+          <h2>2. Pendaftaran Akun</h2>
+          <ul>
+            <li>Pengguna wajib memberikan informasi yang benar dan akurat saat pendaftaran</li>
+            <li>Setiap pengguna hanya diperbolehkan memiliki satu akun</li>
+            <li>Pengguna bertanggung jawab atas keamanan akun masing-masing</li>
+          </ul>
+        </div>
+
+        <div class="terms-section">
+          <h2>3. Penggunaan Layanan</h2>
+          <ul>
+            <li>Layanan TRIVEX hanya digunakan untuk tujuan yang sah</li>
+            <li>Dilarang menggunakan platform untuk aktivitas ilegal, penipuan, atau penyalahgunaan sistem</li>
+            <li>TRIVEX berhak membatasi atau menonaktifkan akun yang melanggar ketentuan</li>
+          </ul>
+        </div>
+
+        <div class="terms-section">
+          <h2>4. Transaksi dan Aktivitas</h2>
+          <ul>
+            <li>Semua aktivitas dalam akun menjadi tanggung jawab pengguna</li>
+            <li>Pengguna wajib memahami risiko dalam penggunaan layanan</li>
+            <li>TRIVEX tidak menjamin hasil atau keuntungan tertentu dari aktivitas pengguna</li>
+          </ul>
+        </div>
+
+        <div class="terms-section">
+          <h2>5. Dana dan Penarikan</h2>
+          <ul>
+            <li>Pengguna bertanggung jawab atas setiap transaksi yang dilakukan</li>
+            <li>Proses penarikan mengikuti ketentuan dan verifikasi yang berlaku</li>
+            <li>TRIVEX berhak menunda atau menolak transaksi jika ditemukan aktivitas mencurigakan</li>
+          </ul>
+        </div>
+
+        <div class="terms-section">
+          <h2>6. Keamanan</h2>
+          <ul>
+            <li>Pengguna wajib menjaga kerahasiaan data login</li>
+            <li>TRIVEX tidak bertanggung jawab atas kerugian akibat kelalaian pengguna</li>
+          </ul>
+        </div>
+
+        <div class="terms-section">
+          <h2>7. Hak dan Kewajiban TRIVEX</h2>
+          <ul>
+            <li>TRIVEX berhak mengubah, menambah, atau menghapus fitur layanan</li>
+            <li>TRIVEX dapat memperbarui syarat dan ketentuan sewaktu-waktu</li>
+            <li>TRIVEX berhak melakukan tindakan terhadap akun yang melanggar</li>
+          </ul>
+        </div>
+
+        <div class="terms-section">
+          <h2>8. Batasan Tanggung Jawab</h2>
+          <p>TRIVEX tidak bertanggung jawab atas kerugian yang timbul akibat penggunaan layanan, termasuk namun tidak terbatas pada kesalahan pengguna, gangguan sistem, atau faktor eksternal lainnya.</p>
+        </div>
+
+        <div class="terms-section">
+          <h2>9. Perubahan Ketentuan</h2>
+          <p>Syarat dan Ketentuan ini dapat diperbarui sewaktu-waktu. Pengguna disarankan untuk meninjau secara berkala.</p>
+        </div>
+
+        <div class="terms-section">
+          <h2>10. Kontak</h2>
+          <p>Jika terdapat pertanyaan terkait layanan, silakan hubungi:<br>
+          Email: hello@trivex.com</p>
+        </div>
+        
+        <p class="outro">Dengan menggunakan layanan TRIVEX, pengguna dianggap telah menyetujui seluruh isi Syarat dan Ketentuan ini.</p>
       </div>
     </section>
   </div>
@@ -110,172 +107,100 @@ const goBack = () => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
-.terms-page {
+.terms-container {
   font-family: 'Inter', sans-serif;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
-  background-color: #1a1a1a;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: 100% auto;
-  background-repeat: repeat-y;
-  background-position: top center;
+  background-color: #f8f8f8;
   max-width: 412px;
-  margin-left: auto;
-  margin-right: auto;
   min-height: 100vh;
-  color: #ffffff;
+  color: #000000;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
 }
 
 * {
   box-sizing: border-box;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-}
-
-p {
-  margin: 0 0 1em 0;
-  line-height: 1.5;
+h1, h2, p, ul {
+  margin: 0;
+  padding: 0;
 }
 
 /* Header Section */
-#header-section {
- padding: 10px 10px;
-}
-
-.app-header {
-  display: flex;
-  align-items: center;
-  position: relative;
-  height: 24px;
-}
-
-.header-left {
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 10;
-}
-
-.icon-back {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-}
-
-.header-center {
+.header {
+  padding: 21px 7px 12px;
   width: 100%;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: flex;
+  align-items: center;
   justify-content: center;
+  width: 41px;
+  height: 41px;
 }
 
-.nav-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0;
-  line-height: 20px;
-  text-align: center;
-}
-
-/* Content Section */
-#content-section {
-  padding: 0 10px;
-  margin-top: 30px;
-}
-
-.content-container {
-  max-width: 412px;
-  margin: 0 auto;
-}
-
-.page-intro {
-  margin-bottom: 40px;
-  text-align: left;
-}
-
-.page-title {
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 24px;
-  color: #ffffff;
-  margin: 0 0 8px 0;
-}
-
-.last-updated {
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  color: #ffffff;
-  margin: 0;
-  opacity: 0.9;
-}
-
-.terms-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.term-item {
-  margin-bottom: 5px;
-}
-
-.term-text {
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #a6a6a6;
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-/* Footer Section */
-#footer-section {
-  padding: 10px;
-  margin-top: 20px;
-}
-
-.footer-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.footer-tagline {
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  color: #c4c4c4;
-  margin: 0;
-}
-
-.footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo-wrapper {
-  width: 90px;
-  height: 37px;
-  display: flex;
-  align-items: center;
-}
-
-.footer-logo {
+.back-button img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.copyright {
-  font-family: 'Inter', sans-serif;
+/* Content Section */
+.content {
+  padding: 0 27px 40px;
   font-size: 12px;
-  color: #ffffff;
+  line-height: 1.5;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.last-updated {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.intro {
+  margin-bottom: 20px;
+}
+
+.terms-section {
+  margin-bottom: 20px;
+}
+
+.terms-section h2 {
+  font-size: 12px;
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+
+.terms-section p {
+  margin-bottom: 0;
+}
+
+.terms-section ul {
   margin: 0;
+  padding-left: 16px;
+}
+
+.terms-section li {
+  margin-bottom: 2px;
+  list-style-type: disc;
+}
+
+.outro {
+  margin-top: 20px;
 }
 </style>

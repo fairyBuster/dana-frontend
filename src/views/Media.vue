@@ -1,10 +1,10 @@
-<template>
+<!-- <template>
   <div class="media-page">
-    <!-- Header Section -->
+
     <section class="app-container header-section">
       <nav class="top-nav">
         <div class="back-link" @click="goBack">
-          <img src="/assets/image/48_833.svg" alt="Back" class="icon-back">
+          <img src="/assets/images/2023_1661.svg" alt="Back" class="icon-back">
           <span>Kembali ke beranda</span>
         </div>
       </nav>
@@ -15,7 +15,7 @@
       </div>
     </section>
 
-    <!-- About Card -->
+   
     <section class="app-container">
       <div class="card about-card">
         <h2 class="card-title">Tentang SENT</h2>
@@ -26,7 +26,6 @@
       </div>
     </section>
 
-    <!-- Media Kit Card -->
     <section class="app-container">
       <div class="card media-kit-card">
         <div class="title-row">
@@ -38,19 +37,19 @@
         <p class="media-desc">Unduh aset resmi OT-SENT untuk kebutuhan publikasi dan media.</p>
         
         <div class="gallery-grid">
-          <img src="/assets/image/e4875339e14d3421e70b600b50864cafd194de7e.png" alt="Media 1">
-          <img src="/assets/image/40e037e5eea2248fa485ee711e79643bb177b97e.png" alt="Media 2">
-          <img src="/assets/image/3c8a73dbd8e58a0918b148c1221b59dcaac0de2f.png" alt="Media 3">
-          <img src="/assets/image/d3af559f0405ac92f4b0667d92aeb49f07e72f43.png" alt="Media 4">
+          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Media 1">
+          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Media 2">
+          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Media 3">
+          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Media 4">
         </div>
         
         <p class="copyright-text">© 2026 OT-SENT. All Rights Reserved</p>
       </div>
     </section>
 
-    <!-- News Cards -->
+   
     <section class="app-container">
-      <!-- Card 1: Feature Launch -->
+   
       <div class="card news-card">
         <h2 class="card-title">Peluncuran Fitur Terbaru</h2>
         <p class="news-date">21 Maret 2026</p>
@@ -58,14 +57,14 @@
         <p class="news-excerpt">OT-SENT merilis fitur terbaru untuk pengguna.</p>
         
         <div class="btn-container">
-          <router-link to="/pages/account/media/feature-launch" class="btn-read-more">
+          <router-link to="/media/feature-launch" class="btn-read-more">
             <span>Baca selengkapnya</span>
-            <img src="/assets/image/52_881.svg" alt="arrow">
+            <img src="/assets/images/2038_161.svg" alt="arrow">
           </router-link>
         </div>
       </div>
 
-      <!-- Card 2: Collaboration -->
+    
       <div class="card news-card">
         <h2 class="card-title">Kolaborasi Strategis</h2>
         <p class="news-date">11 Maret 2026</p>
@@ -73,15 +72,15 @@
         <p class="news-excerpt">OT-SENT umumkan kemitraan baru dengan...</p>
         
         <div class="btn-container">
-          <router-link to="/pages/account/media/strategic-collaboration" class="btn-read-more">
+          <router-link to="/media/strategic-collaboration" class="btn-read-more">
             <span>Baca selengkapnya</span>
-            <img src="/assets/image/52_901.svg" alt="arrow">
+            <img src="/assets/images/2038_161.svg" alt="arrow">
           </router-link>
         </div>
       </div>
     </section>
 
-    <!-- Info Section -->
+    
     <section class="app-container info-section">
       <div class="facts-block">
         <h3>Fakta Singkat</h3>
@@ -104,24 +103,24 @@
       <div class="contact-block">
         <h3>Kontak Media</h3>
         <div class="contact-item">
-          <img src="/assets/image/5fea93b5f492cdd2ffd520ffdeb38691827fa383.png" alt="Email" class="icon-email">
+          <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Email" class="icon-email">
           <span>support@otsent.com</span>
         </div>
       </div>
     </section>
 
-    <!-- Footer -->
+    
     <section class="app-container">
       <footer class="site-footer">
         <p class="footer-desc">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
         <div class="footer-bottom">
-          <img src="/assets/image/983276.png" alt="Ot-Sent Logo" class="footer-logo">
+          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Logo" class="footer-logo">
           <span class="footer-copyright">© 2026 OT-SENT. All Rights Reserved</span>
         </div>
       </footer>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { useRouter } from 'vue-router'
@@ -140,7 +139,7 @@ const goBack = () => {
   margin: 0;
   padding: 0;
   background-color: #0F0B2E;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: 100% auto;
   background-repeat: no-repeat;
   background-position: top center;
@@ -419,3 +418,5 @@ ul {
   color: #ffffff;
 }
 </style>
+
+

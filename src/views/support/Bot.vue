@@ -1,29 +1,29 @@
-<template>
+<!-- <template>
   <div class="chat-app">
-    <!-- Header -->
+
     <header class="chat-header">
       <div class="header-left">
-        <img src="/assets/image/177_1062.svg" alt="Back" class="icon-back" @click="goBack">
+        <img src="/assets/images/2023_1661.svg" alt="Back" class="icon-back" @click="goBack">
         <div class="brand-container">
-          <img src="/assets/image/983276.png" alt="Logo" class="brand-logo">
+          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Logo" class="brand-logo">
           <span class="brand-text">OT-SENT</span>
         </div>
       </div>
     </header>
 
-    <!-- Chat Body -->
+
     <div ref="chatBodyEl" class="chat-body">
-      <!-- Messages -->
+   
       <div v-for="(message, index) in messages" :key="message.id ?? index" 
            :class="['message-row', message.type]">
         
-        <!-- Avatar for incoming messages -->
+   
         <div v-if="message.type === 'incoming'" class="avatar-wrapper">
-          <img src="/assets/image/983276.png" alt="Avatar" class="avatar">
+          <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Avatar" class="avatar">
         </div>
         
         <div class="message-content">
-          <!-- Meta info for outgoing messages -->
+       
           <div v-if="message.type === 'outgoing'" class="meta-info">
             <span>{{ message.timestamp }}</span>
           </div>
@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <!-- Footer / Input Area -->
+    
     <footer class="chat-footer">
       <div class="input-bar">
         <input 
@@ -46,13 +46,13 @@
           :disabled="isSending"
           @keyup.enter="sendMessage"
         >
-        <img src="/assets/image/52d07f48a5523655a4c9c36540d51d26d21423aa.png" alt="Send" class="icon-send" @click="sendMessage">
+        <img src="/assets/images/2039_205.svg" alt="Send" class="icon-send" @click="sendMessage">
       </div>
     </footer>
 
     <ErrorModal v-model="errorModalOpen" :message="errorMessage" />
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
@@ -240,7 +240,7 @@ img {
   width: 100%;
   max-width: 412px;
   min-height: 100vh;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

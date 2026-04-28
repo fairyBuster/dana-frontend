@@ -1,11 +1,11 @@
-<template>
+<!-- <template>
   <div class="app-container">
     <LoadingSpinner :visible="isLoading && !investment" :overlay="true" message="Memuat data drone..." />
-    <!-- Header Section -->
+  
     <header class="header-section">
       <div class="top-nav">
-        <a class="nav-left" href="#/pages/account/panel">
-          <img src="/assets/image/110_427.svg" alt="Back" class="icon-back">
+        <a class="nav-left" href="/portfolio">
+          <img src="/assets/images/2023_1661.svg" alt="Back" class="icon-back">
           <span class="nav-text">Kembali ke beranda</span>
         </a>
       </div>
@@ -18,7 +18,7 @@
       </div>
     </header>
 
-    <!-- Active Drone Section -->
+
     <section class="active-drone-section">
       <h2 class="section-label">DRONE AKTIF</h2>
       
@@ -55,12 +55,11 @@
       <div class="separator-line"></div>
     </section>
 
-    <!-- Stats Grid Section -->
     <section class="stats-section">
       <h3 class="section-title">Informasi drone</h3>
       
       <div class="stats-grid">
-        <!-- Row 1 -->
+ 
         <div class="stat-card">
           <span class="stat-label">Hari melayani</span>
           <span class="stat-value">{{ daysServedText }}</span>
@@ -74,7 +73,6 @@
           <span class="stat-value">{{ totalProfitText }}</span>
         </div>
 
-        <!-- Row 2 -->
         <div class="stat-card">
           <span class="stat-label">Kapasitas</span>
           <span class="stat-value">{{ capacityText }}</span>
@@ -88,7 +86,7 @@
           <span class="stat-value">{{ endDateText }}</span>
         </div>
 
-        <!-- Row 3 -->
+     
         <div class="stat-card">
           <span class="stat-label">Akumulasi melayani</span>
           <span class="stat-value">{{ accumulatedServingText }}</span>
@@ -104,13 +102,13 @@
       </div>
     </section>
 
-    <!-- Recent Orders Section -->
+
     <section class="orders-section">
       <div class="orders-header">
         <h3 class="section-title">Pesanan 3 hari terakhir</h3>
         <button class="btn-see-more" @click="goToTransactions">
           <span>Lihat lagi</span>
-          <img src="/assets/image/113_523.svg" alt="Arrow Right">
+          <img src="/assets/images/2038_161.svg" alt="Arrow Right">
         </button>
       </div>
 
@@ -129,11 +127,10 @@
       </div>
     </section>
 
-    <!-- Footer -->
     <footer class="site-footer">
       <div class="footer-content">
         <div class="footer-logo-row">
-          <img src="/assets/image/983276.png" alt="OT-Sent Logo" class="footer-logo">
+          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Logo" class="footer-logo">
           <p class="copyright">© 2026 OT-SENT. All Rights Reserved</p>
         </div>
         <p class="footer-desc">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
@@ -142,7 +139,7 @@
 
     <ErrorModal v-model="errorModalOpen" :message="errorMessage" />
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -490,20 +487,20 @@ watch(
 const goBack = () => {
   // Jika history cuma 1 (misal abis refresh atau link langsung), arahkan ke panel
   if (window.history.length <= 1) {
-    router.push('/pages/account/panel')
+    router.push('/portfolio')
   } else {
     router.go(-1)
   }
 }
 
 const goToTransactions = () => {
-  router.push('/pages/history/order')
+  router.push('/orders')
 }
 
 const goToProduct = () => {
   const productId = investment.value?.product
   if (productId) {
-    router.push(`/pages/account/products/${productId}`)
+    router.push(`/products/${productId}`)
   }
 }
 
@@ -676,7 +673,7 @@ h1, h2, h3, h4, p {
 .app-container {
   width: 100%;
   max-width: 412px;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1007,3 +1004,5 @@ h1, h2, h3, h4, p {
 }
 
 </style>
+
+

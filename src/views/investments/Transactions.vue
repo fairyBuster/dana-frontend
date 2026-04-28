@@ -1,283 +1,129 @@
 <template>
   <div class="app-container">
-    <!-- Header Section -->
+    <!-- Header -->
     <section id="section-header">
-      <div class="header-container">
-        <button class="back-button" @click="goBack">
-          <img src="/assets/image/173_658.svg" alt="Back">
+      <header class="app-header">
+        <button class="back-icon" @click="goBack" aria-label="Back">
+          <img src="/assets/images/18_153.svg" alt="Back">
         </button>
-        <h1 class="page-title">Catatan penerbangan</h1>
-        <div class="header-spacer"></div>
-      </div>
+        <h1 class="header-title">Riwayat keuntungan</h1>
+      </header>
     </section>
 
-    <!-- Flight List Section -->
-    <section id="section-flight-list">
-      <div class="list-container">
-        <div v-if="flights.length === 0" class="empty-state">
-          <img src="/assets/image/empty.png" alt="No Data" class="empty-icon">
-          <div v-if="loadError" class="empty-text">{{ loadError }}</div>
-        </div>
-        <article v-for="flight in flights" :key="flight.id" class="flight-card">
-          <div class="card-content">
-            <div class="card-info">
-              <h2 class="drone-name">{{ flight.droneName }}</h2>
-              <p class="info-text">Waktu pemesanan: {{ flight.orderTime }}</p>
-              <p class="info-text">Misi selesai: {{ flight.missionEnd }}</p>
-              <p class="info-text">Kuantitas pembelian: {{ flight.quantity }}</p>
-            </div>
-            
-            <div class="card-media">
-              <img :src="flight.droneImage" :alt="flight.droneName" class="drone-image" @error="onFlightImageError">
-            </div>
+    <!-- History List -->
+    <section id="section-history-list">
+      <div v-if="transactions.length === 0 && !isLoading" class="empty-state">
+        <p class="empty-text">Belum ada riwayat transaksi</p>
+      </div>
 
-            <div class="card-status">
-              <div :class="['badge', flight.badgeClass]">
-                <span>{{ flight.badgeText }}</span>
-              </div>
+      <div class="history-list">
+        <div v-for="transaction in transactions" :key="transaction.id" class="history-card">
+          <div class="card-date">Date trx: {{ transaction.date }}</div>
+          <div class="card-body">
+            <img src="/assets/images/51c612507498a1350e8a34d624b4f99146ecdfe9.png" alt="Transaction Icon" class="card-icon">
+            <div class="card-info">
+              <div class="card-title">{{ transaction.title }}</div>
+              <div class="card-amount">{{ transaction.amount }}</div>
             </div>
           </div>
-        </article>
-        <div v-if="flights.length > 0 && hasMore" class="pagination-row">
-          <button class="load-more-btn" @click="loadMore" :disabled="isLoading">
-            Memuat lebih banyak
-          </button>
         </div>
+      </div>
+
+      <div v-if="showPagination" class="pagination-row">
+        <PaginationBar
+          :page="currentPage"
+          :total-pages="totalPages"
+          :has-prev="hasPrev"
+          :has-next="hasNext"
+          :loading="isLoading"
+          @change="goToPage"
+        />
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { investmentAPI, transactionAPI } from '@/services/api'
-import { resolveImageUrl } from '@/utils/imageCache'
+import { transactionAPI } from '@/services/api'
+import PaginationBar from '@/components/partials/PaginationBar.vue'
 
 const router = useRouter()
 
-const flights = ref([])
-const allFlights = ref([])
-const loadError = ref('')
+const transactions = ref([])
 const isLoading = ref(false)
 const pageSize = 20
-const hasMore = ref(true)
-const nextFetchPage = ref(1)
-const visibleCount = ref(pageSize)
-const investmentStatusByTransactionId = new Map()
+const currentPage = ref(1)
+const totalPages = ref(1)
+const hasNext = ref(false)
+const hasPrev = ref(false)
 
-const fallbackImage = '/assets/image/27c56f86fe1c8990e4a0be8a57a8835a3a1bc1b9.png'
-
-const normalizeTransactionsResponse = (data) => {
-  if (!data) return []
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data.results)) return data.results
-  return []
-}
-
-const normalizeInvestmentsResponse = (data) => {
-  if (!data) return []
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data.results)) return data.results
-  return []
-}
+const showPagination = computed(() => {
+  if (isLoading.value) return false
+  if (!transactions.value.length) return false
+  return hasNext.value || hasPrev.value || totalPages.value > 1
+})
 
 const pad2 = (n) => String(n).padStart(2, '0')
 const formatDateTime = (value) => {
   if (!value) return '-'
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return String(value)
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
 }
 
-const mapStatusToBadge = (status) => {
-  const s = String(status || '').toUpperCase()
-  if (s === 'COMPLETED' || s === 'SUCCESS') return 'finished'
-  if (s === 'FAILED' || s === 'CANCELLED' || s === 'REJECTED') return 'finished'
-  return 'active'
+const formatCurrency = (value) => {
+  const num = Number(value || 0)
+  if (!Number.isFinite(num)) return 'Rp 0'
+  return 'Rp ' + new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(num)
 }
 
-const addHours = (iso, hours) => {
-  if (!iso) return null
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return null
-  const h = Number(hours)
-  if (!Number.isFinite(h) || h <= 0) return null
-  d.setTime(d.getTime() + h * 3600000)
-  return d.toISOString()
-}
-
-const getTransactionImageRaw = (t) => {
-  const candidates = [
-    t?.product_image,
-    t?.product?.image,
-    t?.product?.product_image,
-    t?.product?.thumbnail,
-    t?.product_thumbnail,
-    t?.product_image_url,
-    t?.image,
-    t?.image_url,
-    t?.thumbnail
-  ]
-  for (const c of candidates) {
-    const s = String(c || '').trim()
-    if (s) return s
+const normalizeTransactionsResponse = (data) => {
+  if (!data) return { results: [], count: 0, next: null, previous: null }
+  if (Array.isArray(data)) return { results: data, count: data.length, next: null, previous: null }
+  if (Array.isArray(data.results)) {
+    const c = Number(data.count || 0)
+    return { results: data.results, count: Number.isFinite(c) ? c : 0, next: data.next || null, previous: data.previous || null }
   }
-  return ''
+  return { results: [], count: 0, next: null, previous: null }
 }
 
-const resolveTransactionImageUrl = (t) => {
-  const raw = getTransactionImageRaw(t)
-  const resolved = raw ? String(resolveImageUrl(raw) || '').trim() : ''
-  return resolved || fallbackImage
-}
-
-const onFlightImageError = (e) => {
-  const el = e?.target
-  if (el && el.src && !String(el.src).includes(fallbackImage)) el.src = fallbackImage
-}
-
-const mapToFlight = (t) => {
-  const statusRaw = t?.status
-  const badge = mapStatusToBadge(statusRaw)
-  const createdAt = t?.created_at
-  const durationHours = t?.withdrawal_service_duration_hours
-  const endAt = addHours(createdAt, durationHours)
-
-  let badgeClass = badge === 'active' ? 'badge-active' : 'badge-finished'
-  let badgeText = badge === 'active' ? 'Aktif' : 'Selesai'
-  const investmentStatus = t?._investment_status
-  if (investmentStatus === 'ACTIVE') {
-    badgeClass = 'badge-active'
-    badgeText = 'Aktif'
-  } else if (investmentStatus === 'EXPIRED') {
-    badgeClass = 'badge-finished'
-    badgeText = 'Kedaluwarsa'
-  }
-
+const mapToTransaction = (t) => {
   return {
-    id: t?.id ?? t?.trx_id ?? `${createdAt || ''}-${t?.amount || ''}`,
-    droneName: t?.product_name || t?.trx_id || '-',
-    orderTime: formatDateTime(createdAt),
-    missionEnd: endAt ? formatDateTime(endAt) : '-',
-    quantity: Number.isFinite(Number(t?.investment_quantity)) ? Number(t.investment_quantity) : 1,
-    badgeClass,
-    badgeText,
-    droneImage: resolveTransactionImageUrl(t),
-    createdAtRaw: createdAt || null
+    id: t?.id ?? t?.trx_id ?? `${t?.created_at || ''}-${t?.amount || ''}`,
+    date: formatDateTime(t?.created_at),
+    title: t?.product_name || t?.description || 'Keuntungan dari nama produk',
+    amount: formatCurrency(t?.amount || t?.profit_amount || 0)
   }
-}
-
-const extractErrorMessage = (err) => {
-  const data = err?.response?.data
-  if (!data) return err?.message || 'Gagal mengambil data'
-  if (typeof data === 'string') return data
-  if (data.detail) return String(data.detail)
-  if (data.message) return String(data.message)
-  return 'Gagal mengambil data'
-}
-
-const ensureInvestmentStatusMap = async () => {
-  if (investmentStatusByTransactionId.size > 0) return
-  try {
-    const [respActive, respExpired] = await Promise.all([
-      investmentAPI.getInvestments({ status: 'ACTIVE' }),
-      investmentAPI.getInvestments({ status: 'EXPIRED' })
-    ])
-    const allInv = [
-      ...normalizeInvestmentsResponse(respActive?.data),
-      ...normalizeInvestmentsResponse(respExpired?.data)
-    ]
-    allInv.forEach((inv) => {
-      const key = inv?.transaction_id
-      if (!key) return
-      investmentStatusByTransactionId.set(String(key), String(inv?.status || '').toUpperCase())
-    })
-  } catch (_) {}
-}
-
-const fetchTransactionsPage = async (page) => {
-  const tryFetch = async (type) => {
-    const resp = await transactionAPI.getTransactions({ type, page, page_size: pageSize })
-    const items = normalizeTransactionsResponse(resp?.data)
-    return items
-  }
-  let combined = []
-  const types = ['INVESTMENTS', 'INVESTMENT', 'INTEREST']
-  const settled = await Promise.allSettled(types.map((t) => tryFetch(t)))
-  settled.forEach((r) => {
-    if (r.status === 'fulfilled') combined = combined.concat(r.value)
-  })
-  return combined
-}
-
-const mergeFlights = (items) => {
-  const withStatus = items.map((t) => {
-    const trxKey = t?.trx_id || t?.transaction_id
-    const invStatus = trxKey ? investmentStatusByTransactionId.get(String(trxKey)) : null
-    return { ...t, _investment_status: invStatus || null }
-  })
-  const mapped = withStatus.map(mapToFlight)
-  const seen = new Set(allFlights.value.map((x) => String(x.id)))
-  const append = mapped.filter((m) => !seen.has(String(m.id)))
-  if (!append.length) return false
-  const merged = [...allFlights.value, ...append]
-  merged.sort((a, b) => new Date(b.createdAtRaw || 0).getTime() - new Date(a.createdAtRaw || 0).getTime())
-  allFlights.value = merged
-  return true
 }
 
 const loadPage = async (page) => {
-  await ensureInvestmentStatusMap()
-  const items = await fetchTransactionsPage(page)
-  if (!items.length) return false
-  return mergeFlights(items)
-}
-
-const fetchInvestmentTransactions = async () => {
-  loadError.value = ''
   isLoading.value = true
-  hasMore.value = true
-  flights.value = []
-  allFlights.value = []
-  nextFetchPage.value = 1
-  visibleCount.value = pageSize
   try {
-    let tries = 0
-    while (allFlights.value.length < visibleCount.value && tries < 5) {
-      const ok = await loadPage(nextFetchPage.value)
-      if (ok) nextFetchPage.value += 1
-      tries += 1
-      if (!ok) break
-    }
-    flights.value = allFlights.value.slice(0, visibleCount.value)
-    hasMore.value = allFlights.value.length >= visibleCount.value
+    const resp = await transactionAPI.getTransactions({ type: 'INTEREST', page })
+    const paged = normalizeTransactionsResponse(resp?.data)
+    transactions.value = paged.results.map(mapToTransaction)
+    currentPage.value = Math.max(1, Number(page || 1))
+    hasNext.value = Boolean(paged.next)
+    hasPrev.value = Boolean(paged.previous)
+    totalPages.value = Math.max(1, Math.ceil((paged.count || 0) / pageSize))
   } catch (err) {
-    flights.value = []
-    loadError.value = extractErrorMessage(err)
-    hasMore.value = false
+    transactions.value = []
+    hasNext.value = false
+    hasPrev.value = false
+    totalPages.value = 1
   } finally {
     isLoading.value = false
   }
 }
 
-const loadMore = async () => {
-  if (!hasMore.value || isLoading.value) return
-  isLoading.value = true
-  visibleCount.value += pageSize
-  try {
-    let tries = 0
-    while (allFlights.value.length < visibleCount.value && tries < 5) {
-      const ok = await loadPage(nextFetchPage.value)
-      if (ok) nextFetchPage.value += 1
-      tries += 1
-      if (!ok) break
-    }
-    flights.value = allFlights.value.slice(0, visibleCount.value)
-    hasMore.value = allFlights.value.length >= visibleCount.value
-  } finally {
-    isLoading.value = false
-  }
+const goToPage = (page) => {
+  const p = Math.max(1, Number(page || 1))
+  loadPage(p)
 }
 
 const goBack = () => {
@@ -285,219 +131,176 @@ const goBack = () => {
 }
 
 onMounted(() => {
-  fetchInvestmentTransactions()
+  loadPage(1)
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+.app-container {
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+  max-width: 412px;
+  margin: 0 auto;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 * {
   box-sizing: border-box;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-}
-
-.app-container {
-  font-family: 'Inter', sans-serif;
+h1, h2, h3, p {
   margin: 0;
-  padding: 0;
-  background-color: #121212;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  width: 100%;
-  max-width: 412px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
-/* Header Section */
+/* Header */
 #section-header {
   width: 100%;
   max-width: 412px;
-  padding: 18px 10px;
+  margin: 0 auto;
+  background-color: #f8f8f8;
 }
 
-.header-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.app-header {
+  position: relative;
+  height: 70px;
+  width: 100%;
 }
 
-.back-button {
+.back-icon {
+  position: absolute;
+  left: 7px;
+  top: 21px;
+  width: 41px;
+  height: 41px;
   background: none;
   border: none;
-  padding: 0;
   cursor: pointer;
-  width: 24px;
-  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
 }
 
-.page-title {
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
-  font-weight: 600;
+.back-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.header-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 31px;
   font-size: 16px;
+  font-weight: 700;
+  color: #000000;
   line-height: 20px;
-  color: #FFFFFF;
-  margin: 0;
-  text-align: center;
-  flex-grow: 1;
+  white-space: nowrap;
 }
 
-.header-spacer {
-  width: 24px; /* Matches back button width */
-}
-
-/* Flight List Section */
-#section-flight-list {
+/* History List */
+#section-history-list {
   width: 100%;
   max-width: 412px;
-  padding: 0 15px 20px 15px;
+  margin: 0 auto;
+  background-color: #f8f8f8;
+  padding: 0 13px 20px 13px;
+  min-height: calc(100vh - 86px);
 }
 
-.list-container {
+.history-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
-.empty-state {
-  width: 100%;
-  padding: 30px 0;
+.history-card {
+  background-color: #eeeeee;
+  border-radius: 20px;
+  padding: 15px 16px 10px 16px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.empty-icon {
-  width: 140px;
-  height: auto;
-  display: block;
-  opacity: 0.9;
-}
-
-.empty-text {
-  font-size: 14px;
-  color: #a0a0a0;
-}
-
-.flight-card {
-  background-color: #1d2138;
-  border-radius: 10px;
-  padding: 12px;
   width: 100%;
-  position: relative;
 }
 
-.card-content {
+.card-date {
+  color: #004d43;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  margin-bottom: 9px;
+}
+
+.card-body {
   display: flex;
-  flex-direction: row;
   align-items: flex-start;
-  gap: 10px;
+}
+
+.card-icon {
+  width: 31px;
+  height: 28px;
+  object-fit: contain;
+  margin-right: 15px;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
 
 .card-info {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-width: 0; /* Prevents flex item from overflowing */
 }
 
-.drone-name {
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  line-height: 14px;
-  color: #a296ff;
-  margin: 0 0 8px 0;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.info-text {
-  font-family: 'Inter', sans-serif;
-  font-size: 9px;
-  line-height: 1.5;
-  color: #ffffff;
-  margin: 0 0 4px 0;
-}
-
-.info-text:last-child {
-  margin-bottom: 0;
-}
-
-.card-media {
-  flex-shrink: 0;
-  width: 87px;
-  height: 58px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.drone-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.card-status {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.badge {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 2px 10px;
-  height: 15px;
-  border-radius: 10px;
-  font-size: 10px;
-  line-height: 1;
+.card-title {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 13px;
   font-weight: 500;
+  line-height: 20px;
 }
 
-.badge-active {
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 30.77%, #9047e0 100%);
-  border: 1px solid #746a9a;
-  color: #ffffff;
+.card-amount {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  margin-top: -1px;
 }
 
-.badge-finished {
-  background-color: #b4b8e3;
-  border: 1px solid #746a9a;
-  color: #000000;
+.empty-state {
+  padding: 40px 0;
+  text-align: center;
+}
+
+.empty-text {
+  color: #b2b2b2;
+  font-size: 14px;
 }
 
 .pagination-row {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin: 10px 0 0 0;
+  margin-top: 16px;
 }
 
 .load-more-btn {
   width: 100%;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
+  height: 40px;
+  border-radius: 20px;
+  background-color: #004d43;
   color: #ffffff;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 10px 0;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.load-more-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

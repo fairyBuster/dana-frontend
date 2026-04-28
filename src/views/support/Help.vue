@@ -5,7 +5,7 @@
       <div class="main-container">
         <header class="site-header">
           <div class="header-left">
-            <img src="/assets/image/73_1153.svg" alt="Back" class="icon-back" @click="goBack">
+            <img src="/assets/images/2023_1661.svg" alt="Back" class="icon-back" @click="goBack">
           </div>
           <h1 class="page-title">Help Center</h1>
           <div class="header-right"></div>
@@ -20,13 +20,13 @@
         <!-- Card 1: Akun dan Akses -->
         <div class="card">
           <div class="card-header">
-            <img src="/assets/image/5d5f8739e5837488490f49139e2d7d99d25d4ef4.png" alt="User Icon" class="card-icon">
+            <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="User Icon" class="card-icon">
             <span class="card-title">Akun dan Akses</span>
           </div>
           <div class="card-divider"></div>
           <div class="card-question-row" @click="toggleCard(0)">
             <span class="card-question">Bagaimana cara membuat akun?</span>
-            <img src="/assets/image/62_1089.svg" alt="Toggle" :class="['card-arrow', { open: openCards[0] }]">
+            <img src="/assets/images/2038_161.svg" alt="Toggle" :class="['card-arrow', { open: openCards[0] }]">
           </div>
           <div v-show="openCards[0]" class="card-body">
             Anda dapat membuat akun melalui halaman pendaftaran dengan mengisi data yang diperlukan seperti nomor ponsel atau email. Setelah itu, ikuti langkah yang tersedia untuk menyelesaikan proses registrasi dan verifikasi.
@@ -36,13 +36,13 @@
         <!-- Card 2: Penggunaan Layanan -->
         <div class="card">
           <div class="card-header">
-            <img src="/assets/image/b178666246f67feb8349e1aca9f89b6059474394.png" alt="Drone Icon" class="card-icon">
+            <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Drone Icon" class="card-icon">
             <span class="card-title">Penggunaan Layanan</span>
           </div>
           <div class="card-divider"></div>
           <div class="card-question-row" @click="toggleCard(1)">
             <span class="card-question">Bagaimana SENT bekerja?</span>
-            <img src="/assets/image/62_1094.svg" alt="Toggle" :class="['card-arrow', { open: openCards[1] }]">
+            <img src="/assets/images/2038_161.svg" alt="Toggle" :class="['card-arrow', { open: openCards[1] }]">
           </div>
           <div v-show="openCards[1]" class="card-body">
             OT-SENT menggunakan sistem drone dan teknologi berbasis kecerdasan buatan untuk mengumpulkan dan mengolah data udara. Data tersebut kemudian ditampilkan dalam bentuk visualisasi yang dapat digunakan untuk monitoring dan analisis secara real-time.
@@ -52,13 +52,13 @@
         <!-- Card 3: Data dan Monitoring -->
         <div class="card">
           <div class="card-header">
-            <img src="/assets/image/8610a667d4e9132307dbfd92752fd5b48e372b8e.png" alt="Chart Icon" class="card-icon">
+            <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Chart Icon" class="card-icon">
             <span class="card-title">Data dan Monitoring</span>
           </div>
           <div class="card-divider"></div>
           <div class="card-question-row" @click="toggleCard(2)">
             <span class="card-question">Apa itu monitoring real-time?</span>
-            <img src="/assets/image/62_1100.svg" alt="Toggle" :class="['card-arrow', { open: openCards[2] }]">
+            <img src="/assets/images/2038_161.svg" alt="Toggle" :class="['card-arrow', { open: openCards[2] }]">
           </div>
           <div v-show="openCards[2]" class="card-body">
             Monitoring real-time adalah proses pemantauan data secara langsung saat sistem berjalan. Dengan fitur ini, pengguna dapat melihat hasil pemetaan dan perubahan data secara cepat tanpa perlu menunggu proses manual.
@@ -85,7 +85,7 @@
         <div class="chat-modal">
           <header class="chat-header">
             <div class="chat-header-left">
-              <img src="/assets/image/983276.png" alt="Logo" class="chat-logo">
+              <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Logo" class="chat-logo">
               <span class="chat-status">Support Online</span>
             </div>
             <button class="chat-close" @click="closeChat">×</button>
@@ -113,7 +113,7 @@
               :disabled="isSending"
             >
             <button type="submit" :disabled="!newMessage.trim() || isSending">
-              <img src="/assets/image/40_465.svg" alt="Send" class="send-icon">
+              <img src="/assets/images/2039_205.svg" alt="Send" class="send-icon">
             </button>
           </form>
         </div>
@@ -126,7 +126,7 @@
         <div class="footer-content">
           <p class="footer-text">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
           <div class="footer-logo-row">
-            <img src="/assets/image/983276.png" alt="Ot-Sent Logo" class="footer-logo">
+            <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Logo" class="footer-logo">
             <span class="copyright">© 2026 OT-SENT. All Rights Reserved</span>
           </div>
         </div>
@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 0;
   background-color: #0f0b2e;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center top;

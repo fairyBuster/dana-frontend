@@ -52,8 +52,8 @@ const { visible, overlay, containerClass, message } = toRefs(props)
   border-radius: 10px;
 
   width: 250px;
-  max-width: 320px;
-  min-height: 86px;
+  max-width: 180px;
+  min-height: 60px;
   padding: 18px 20px;
   display: inline-flex;
   flex-direction: column;
@@ -65,28 +65,14 @@ const { visible, overlay, containerClass, message } = toRefs(props)
 .custom-loader {
   width: 25px;
   height: 25px;
-  display: grid;
   border-radius: 50%;
-  -webkit-mask:radial-gradient(farthest-side,#0000 40%,#000 41%);
+  padding: 3px;
   background:
-    linear-gradient(0deg ,#F0ECF480 50%,#F0ECF4FF 0) center/2px 100%,
-    linear-gradient(90deg,#F0ECF440 50%,#F0ECF4BF 0) center/100% 2px;
+    conic-gradient(from 135deg at top, #ffffff 90deg, #0000 0) 0 calc(50% - 2px) / 8.5px 4.25px,
+    radial-gradient(farthest-side at bottom left, #0000 calc(100% - 3px), #ffffff calc(100% - 2.5px) 99%, #0000) top right / 50% 50% content-box content-box,
+    radial-gradient(farthest-side at top, #0000 calc(100% - 3px), #ffffff calc(100% - 2.5px) 99%, #0000) bottom / 100% 50% content-box content-box;
   background-repeat: no-repeat;
-  animation: s3 1s infinite steps(12);
-}
-.custom-loader::before,
-.custom-loader::after {
-  content: "";
-  grid-area: 1/1;
-  border-radius: 50%;
-  background: inherit;
-  opacity: 0.915;
-  transform: rotate(30deg);
-}
-
-.custom-loader::after {
-  opacity: 0.83;
-  transform: rotate(60deg);
+  animation: s1 1s infinite linear;
 }
 
 .spinner-message {
@@ -97,7 +83,9 @@ const { visible, overlay, containerClass, message } = toRefs(props)
   font-weight: 500;
 }
 
-@keyframes s3 {
-  100% { transform: rotate(1turn) }
+@keyframes s1 {
+  100% {
+    transform: rotate(1turn);
+  }
 }
 </style>

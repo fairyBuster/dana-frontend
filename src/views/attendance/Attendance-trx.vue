@@ -1,20 +1,20 @@
-<template>
+<!-- <template>
   <div class="app-container">
-    <!-- Header Section -->
+
     <section id="section-header">
       <header class="app-header">
         <div class="icon-container" @click="goBack">
-          <img src="/assets/image/178_1322.svg" alt="Back" class="back-icon">
+          <img src="/assets/images/2023_1661.svg" alt="Back" class="back-icon">
         </div>
         <h1 class="page-title">Catatan kehadiran</h1>
         <div class="header-spacer"></div>
       </header>
     </section>
 
-    <!-- Transaction List Section -->
+
     <section id="section-transaction-list">
       <div v-if="!attendances.length" class="empty-state">
-        <img src="/assets/image/empty.png" alt="No Data" class="empty-icon">
+        <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="No Data" class="empty-icon">
        
         <div v-if="loadError" class="empty-sub">{{ loadError }}</div>
       </div>
@@ -27,7 +27,7 @@
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
@@ -197,7 +197,7 @@ onMounted(() => {
   padding: 0;
   min-height: 100vh;
   background-color: #121212;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;

@@ -3,27 +3,29 @@
     <section id="bank-selector-section">
       <div class="mobile-container">
         <div class="bottom-sheet">
-          <header class="sheet-header">
-            <button type="button" class="sheet-action" @click="emitClose">Membatalkan</button>
-            <div class="sheet-spacer"></div>
-            <button type="button" class="sheet-action sheet-action--primary" @click="confirmSelection">Tentu</button>
+          <div class="sheet-handle" />
+           <header class="sheet-header">
+            
+            <button type="button" class="sheet-action sheet-action--primary" @click="confirmSelection">Pilih</button>
           </header>
 
           <div class="picker-wrapper">
-            <div class="picker-indicator"></div>
-            <div ref="scrollEl" class="picker" @scroll="onScroll">
-              <ul class="picker-list">
-                <li v-for="(opt, idx) in allOptions" :key="String(opt.id)" class="picker-row">
-                  <button
-                    type="button"
-                    class="picker-item"
-                    :class="{ active: isSelected(opt) }"
-                    @click="selectAndScroll(idx)"
-                  >
-                    {{ opt.name }}
-                  </button>
-                </li>
-              </ul>
+            <div class="picker-surface">
+              <div class="picker-indicator"></div>
+              <div ref="scrollEl" class="picker" @scroll="onScroll">
+                <ul class="picker-list">
+                  <li v-for="(opt, idx) in allOptions" :key="String(opt.id)" class="picker-row">
+                    <button
+                      type="button"
+                      class="picker-item"
+                      :class="{ active: isSelected(opt) }"
+                      @click="selectAndScroll(idx)"
+                    >
+                      {{ opt.name }}
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -139,7 +141,8 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.55);
-  z-index: 1050;
+  backdrop-filter: blur(2px);
+  z-index: 2000;
   display: flex;
   align-items: flex-end;
 }
@@ -153,17 +156,19 @@ onBeforeUnmount(() => {
 .mobile-container {
   width: 100%;
   max-width: 412px;
-  height: 40vh;
+ 
+  min-height: 250px;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18);
 }
 
 .bottom-sheet {
-  background: linear-gradient(180deg, #1a1f3a 0%, #0b0d1e 100%);
+  background-color: #f8f8f8;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -172,32 +177,49 @@ onBeforeUnmount(() => {
   font-family: 'Inter', sans-serif;
 }
 
+.sheet-handle {
+  width: 42px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  margin: 10px auto 6px;
+}
+
 .sheet-header {
-  height: 44px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
-  background: rgba(255, 255, 255, 0.02);
+  padding: 0 16px 8px;
+  background-color: transparent;
 }
 
-.sheet-spacer {
+.sheet-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  text-align: center;
   flex: 1;
 }
 
 .sheet-action {
-  background: transparent;
-  border: none;
-  padding: 0;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 0 12px;
   font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.7);
   cursor: pointer;
+  height: 34px;
+  min-width: 96px;
+  border-radius: 14px;
 }
 
 .sheet-action--primary {
-  color: rgba(255, 255, 255, 0.95);
+  background: #004d43;
+  border-color: #004d43;
+  color: #ffffff;
 }
 
 .picker-wrapper {
@@ -208,6 +230,15 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   position: relative;
+  padding: 4px 16px 16px;
+}
+
+.picker-surface {
+  width: 100%;
+  background: #eeeeee;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
 }
 
 .picker {
@@ -243,29 +274,32 @@ onBeforeUnmount(() => {
   border: none;
   padding: 0;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(0, 0, 0, 0.6);
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   text-align: center;
   line-height: 18px;
-  opacity: 0.35;
-  transition: opacity 0.12s ease, color 0.12s ease;
+  opacity: 0.42;
+  transition: opacity 0.12s ease, color 0.12s ease, font-weight 0.12s ease, transform 0.12s ease;
 }
 
 .picker-item.active {
   opacity: 1;
-  color: rgba(255, 255, 255, 1);
+  color: #004d43;
+  font-weight: 700;
+  transform: scale(1.02);
 }
 
 .picker-indicator {
   position: absolute;
   top: 50%;
-  left: 0;
-  right: 0;
+  left: 12px;
+  right: 12px;
   height: 36px;
   transform: translateY(-50%);
-  border-top: 0.5px solid rgba(255, 255, 255, 0.5);
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 14px;
+  background: rgba(0, 77, 67, 0.08);
+  border: 1px solid rgba(0, 77, 67, 0.12);
   pointer-events: none;
 }
 </style>

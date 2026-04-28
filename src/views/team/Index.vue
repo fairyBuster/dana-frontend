@@ -1,163 +1,103 @@
 <template>
   <div class="app-container">
-    <div class="content-wrapper">
-      <!-- Header -->
-      <header class="app-header">
-        <div class="back-btn" @click="goBack">
-          <img src="/assets/image/172_391.svg" alt="Back">
-        </div>
-        <h1 class="page-title">Tim</h1>
-        <div class="header-spacer"></div>
-      </header>
+    <!-- Header -->
+    <header class="main-header">
+      <h1 class="page-title">Tim Saya</h1>
+      <button class="invite-btn" @click="inviteMembers">
+        <img src="/assets/images/1be34f61fca8018ee484cfa57216986588de26b2.png" alt="Kartu undangan" class="invite-icon">
+        <span>Kartu<br>undangan</span>
+      </button>
+    </header>
 
-      <!-- Main Card -->
-      <main class="main-card">
-        <!-- Tab Label -->
-        <a
-          href="#/pages/history/teams"
-          class="benefit-tag"
-          @click.prevent="goToCommissionTrx"
-        >
-          <span>Catatan manfaat</span>
-        </a>
-
-        <!-- Profile Section -->
-        <div class="profile-section">
-          <div class="avatar-container">
-            <img :src="avatarSrc" alt="Avatar" class="avatar">
+    <!-- Overview Section -->
+    <div class="overview-section">
+      <h2 class="section-subtitle">Gambaran umum data tim</h2>
+      <div class="overview-cards">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <img src="/assets/images/cde3277fa2769528c9be71b8b0840666c070bbdb.png" alt="Icon" class="stat-card-icon">
+            <span class="stat-card-label">Total pendaftaran</span>
           </div>
-          <div class="user-info">
-            <h2 class="username">{{ displayUsername }}</h2>
-            <p class="user-id">ID akun: {{ displayUid }}</p>
-            <div class="vip-badge">
-              <span class="vip-text">{{ vipText }}</span>
-              <div class="vip-icon">
-                <img src="/assets/image/5fb42ec97aec809c1357f284f6344e0829f4ad5e.png" alt="VIP">
-              </div>
-            </div>
-          </div>
+          <div class="stat-card-value">{{ totalTeamSize }}</div>
         </div>
 
-        <!-- Stats Section -->
-        <div class="stats-container">
-          <!-- Commission Row -->
-          <div class="stat-row commission-card">
-            <span class="stat-label">Total komisi tim (terhitung 1-3)</span>
-            <span class="stat-value">{{ formatCurrency(totalCommission) }}</span>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <img src="/assets/images/51c612507498a1350e8a34d624b4f99146ecdfe9.png" alt="Icon" class="stat-card-icon">
+            <span class="stat-card-label">Total komisi saya</span>
           </div>
-
-          <!-- Detailed Stats Block -->
-          <div class="stats-block">
-            <!-- Stat Item 1 -->
-            <div class="stat-group">
-              <div class="stat-header">
-                <span class="stat-label">Total ukuran tim efektif (terhitung 1-3) :</span>
-                <span class="stat-sub-label">Total tim</span>
-              </div>
-              <div class="stat-values">
-                <span class="stat-number">{{ effectiveTeamSize }}</span>
-                <span class="stat-number">{{ totalTeamSize }}</span>
-              </div>
-              <div class="progress-bar-container">
-                <div class="progress-bg"></div>
-                <div class="progress-fill" :style="{ width: teamProgress + '%' }"></div>
-              </div>
-            </div>
-
-            <!-- Stat Item 2 -->
-            <div class="stat-group mt-15">
-              <div class="stat-header">
-                <span class="stat-label">Deposito tim Anda hari ini (terhitung 1-3) :</span>
-              </div>
-              <div class="stat-values">
-                <span class="stat-number">{{ formatCurrency(teamDepositToday) }}</span>
-              </div>
-              <div class="progress-bar-container">
-                <div class="progress-bg"></div>
-                <div class="progress-fill" :style="{ width: depositProgress + '%' }"></div>
-              </div>
-            </div>
-          </div>
+          <div class="stat-card-value">{{ formatCurrency(totalCommission) }}</div>
         </div>
-
-        <!-- Team List Section -->
-        <div class="team-list-section">
-          <h3 class="section-title">Ikhtisar team</h3>
-
-          <!-- Team Card 1 -->
-          <div class="team-card" v-for="team in teams" :key="team.id">
-            <div class="team-card-top">
-              <div class="team-icon">
-                <img src="/assets/image/cce62d9ede0d2eb5043f2e6d3fbdbf6eaa437582.png" alt="Team Icon">
-              </div>
-              <div class="team-info">
-                <h4 class="team-name">{{ team.name }}</h4>
-                <p class="team-stat">Team size: {{ team.size }}</p>
-                <p class="team-stat">Team effective: {{ team.effective }}</p>
-              </div>
-              <div class="team-action">
-                <a :href="'#/pages/invite/team/level/' + team.id" class="btn-detail" @click.prevent="viewDetail(team)">Detail</a>
-              </div>
-            </div>
-            <div class="divider"></div>
-            <p class="team-desc">{{ team.description }}</p>
-          </div>
-        </div>
-      </main>
-
-      <!-- Bottom Action -->
-      <div class="bottom-action">
-        <button class="btn-invite" @click="inviteMembers">
-          Undang anggota
-        </button>
       </div>
     </div>
+
+    <!-- Team Data Section -->
+    <div class="team-data-container">
+      <h2 class="team-data-title">Data singkat tim saya</h2>
+
+      <div v-for="team in teams" :key="team.id" class="team-card">
+        <div class="team-badge">Tim {{ team.id }}</div>
+        <div class="team-card-title">{{ team.description }}</div>
+        <div class="team-stats-grid">
+          <div class="team-stat-item">
+            <span class="team-stat-val">{{ team.effective }}</span>
+            <span class="team-stat-lbl">Tim aktif<br>saya</span>
+          </div>
+          <div class="team-stat-item">  
+            <span class="team-stat-val">{{ formatCurrency(team.deposit) }}</span>
+            <span class="team-stat-lbl">Isi ulang tim<br>saya</span>
+          </div>
+          <!-- <div class="team-stat-item">
+            <span class="team-stat-val">{{ formatCurrency(team.asset) }}</span>
+            <span class="team-stat-lbl">Aset tim<br>saya</span>
+          </div> -->
+          <div class="team-stat-item">
+            <span class="team-stat-val">{{ team.commissionPct }}%</span>
+            <span class="team-stat-lbl">Commision<br>precentage</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <router-link class="btn-primary" to="/profile/statistic">Detail tim saya</router-link>
+        <a class="btn-primary" @click.prevent="goToCommissionTrx">Detail komisi saya</a>
+      </div>
+    </div>
+
+    <FooterBar />
+    <LoadingSpinner :visible="isLoading" :overlay="true" message="" />
+    <ErrorModal v-model="showErrorModal" :message="errorMessage" />
   </div>
-  <LoadingSpinner :visible="isLoading" :overlay="true" message="" />
-  <ErrorModal v-model="showErrorModal" :message="errorMessage" />
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { avatarSrc } from '@/utils/avatar'
 import { authAPI } from '@/services/api'
+import FooterBar from '@/components/partials/FooterBar.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 
 const router = useRouter()
 
 const accountInfo = ref(null)
-const currentRank = ref(null)
-const currentTitle = ref(null)
 const downlineOverview = ref(null)
 const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 
-const displayUsername = computed(() => {
-  const d = accountInfo.value || {}
-  const username = String(d.full_name || d.username || d.phone || d.name || '').trim()
-  return username || 'Username'
-})
-
-const displayUid = computed(() => {
-  const d = accountInfo.value || {}
-  const uid = d.referral_code ?? d.id ?? d.user_id ?? null
-  if (uid === null || uid === undefined || uid === '') return '-'
-  return String(uid)
-})
-
-const vipText = computed(() => {
-  const title = String(currentTitle.value || '').trim()
-  if (title) return title
-  const n = Number(currentRank.value)
-  return Number.isFinite(n) ? `V${n}` : 'V0'
-})
-
 const toNumber = (value) => {
   const n = Number(String(value ?? 0).replace(/[^0-9.-]/g, ''))
   return Number.isFinite(n) ? n : 0
+}
+
+const formatCurrency = (value) => {
+  const num = toNumber(value)
+  if (num === 0) return 'Rp 0'
+  return 'Rp ' + new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(num)
 }
 
 const level1to3 = computed(() => {
@@ -171,26 +111,21 @@ const totalCommission = computed(() => {
   }, 0)
 })
 
-const effectiveTeamSize = computed(() => {
-  return level1to3.value.reduce((acc, l) => acc + Number(l?.active_member_count || 0), 0)
-})
-
 const totalTeamSize = computed(() => {
   return level1to3.value.reduce((acc, l) => acc + Number(l?.member_count || 0), 0)
 })
 
-const teamDepositToday = computed(() => {
-  return level1to3.value.reduce((acc, l) => acc + toNumber(l?.total_deposit_amount), 0)
-})
+const commissionRates = { 1: 33, 2: 2, 3: 1 }
 
 const teams = computed(() => {
   const desc = {
-    1: 'Anggota yang bergabung langsung melalui tautan undangan Anda.',
-    2: 'Anggota yang bergabung melalui undangan dari Tim Tingkat 1 Anda',
-    3: 'Anggota yang bergabung melalui undangan dari Tim Tingkat 2 Anda'
+    1: 'Tim yang Anda undang secara langsung',
+    2: 'Tim yang diundang oleh Tim 1 Anda',
+    3: 'Tim yang diundang oleh Tim 2 Anda'
   }
   const levels = level1to3.value
   const byLevel = (lvl) => levels.find((l) => Number(l?.level) === Number(lvl)) || null
+
   return [1, 2, 3].map((lvl) => {
     const l = byLevel(lvl)
     return {
@@ -198,66 +133,24 @@ const teams = computed(() => {
       name: `Team ${lvl}`,
       size: Number(l?.member_count || 0),
       effective: Number(l?.active_member_count || 0),
+      deposit: toNumber(l?.total_deposit_amount),
+      asset: toNumber(l?.total_investment_amount),
+      commissionPct: commissionRates[lvl] || 0,
       description: desc[lvl] || 'Ikhtisar tim.'
     }
   })
 })
 
-const teamProgress = computed(() => {
-  const total = Number(totalTeamSize.value || 0)
-  if (!total) return 0
-  return Math.min((Number(effectiveTeamSize.value || 0) / total) * 100, 100)
-})
+const inviteMembers = () => {
+  router.push('/share')
+}
 
-const depositProgress = computed(() => {
-  return Math.min((Number(teamDepositToday.value || 0) / 150000) * 100, 100)
-})
-
-const goBack = () => {
-  router.go(-1)
+const goToTeamDetail = () => {
+  router.push('/team/1')
 }
 
 const goToCommissionTrx = () => {
-  router.push('/pages/history/teams')
-}
-
-const viewDetail = (team) => {
-  // Navigate to team detail page
-  console.log('View detail for:', team.name)
-  router.push(`/pages/invite/team/level/${team.id}`)
-}
-
-const inviteMembers = () => {
-  router.push('/pages/invite/invite')
-}
-
-const formatCurrency = (value) => {
-  const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
-  if (!Number.isFinite(num)) return 'Rp 0'
-  return 'Rp ' + new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(num)
-}
-
-const fetchAccountInfo = async () => {
-  try {
-    const resp = await authAPI.getAccountInfo()
-    accountInfo.value = resp?.data || null
-  } catch (_) {
-    accountInfo.value = null
-  }
-}
-
-const fetchRankStatus = async () => {
-  try {
-    const resp = await authAPI.getRankStatus()
-    currentRank.value = resp?.data?.current_rank ?? null
-    currentTitle.value = resp?.data?.current_title ?? null
-  } catch (_) {
-    currentRank.value = null
-    currentTitle.value = null
-  }
+  router.push('/commission/history')
 }
 
 const extractErrorMessage = (err) => {
@@ -267,6 +160,15 @@ const extractErrorMessage = (err) => {
   if (data.detail) return String(data.detail)
   if (data.message) return String(data.message)
   return 'Gagal mengambil data'
+}
+
+const fetchAccountInfo = async () => {
+  try {
+    const resp = await authAPI.getAccountInfo()
+    accountInfo.value = resp?.data || null
+  } catch (_) {
+    accountInfo.value = null
+  }
 }
 
 const fetchDownlineOverview = async () => {
@@ -287,366 +189,220 @@ const fetchDownlineOverview = async () => {
 
 onMounted(() => {
   fetchAccountInfo()
-  fetchRankStatus()
   fetchDownlineOverview()
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-/* Layout & Container */
-body {
+.app-container {
   font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #0f0f1c;
-  color: #ffffff;
-  display: flex;
-  justify-content: center;
+  width: 100%;
+  max-width: 412px;
+  background-color: #f8f8f8;
+  position: relative;
   min-height: 100vh;
+  overflow-x: hidden;
+  padding-bottom: 60px;
+  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-}
-
-button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.app-container {
-  position: relative;
-  width: 100%;
-  max-width: 412px;
-  min-height: 100vh;
-  overflow-x: hidden;
-  background-color: #000;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: top center;
-  background-repeat: no-repeat;
-}
-
-.content-wrapper {
-  position: relative;
-  z-index: 1;
-  padding: 18px 10px 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
 /* Header */
-.app-header {
+.main-header {
+  position: relative;
+  padding: 24px 16px 16px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 20px;
-}
-
-.back-btn {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .page-title {
   font-size: 16px;
-  font-weight: 600;
-  margin: 0;
-  color: #fff;
-}
-
-.header-spacer {
-  width: 24px;
-}
-
-/* Main Card */
-.main-card {
-  background-color: #1d2138;
-  border-radius: 10px;
-  width: 100%;
-  padding: 20px 10px;
-  position: relative;
-  margin-bottom: 20px;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-}
-
-/* Benefit Tag */
-.benefit-tag {
-  position: absolute;
-  top: 18px;
-  left: 0;
-  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
-  padding: 6px 15px;
-  border-radius: 0 15px 15px 0;
-  display: inline-block;
-  text-decoration: none;
-}
-
-.benefit-tag span {
-  font-size: 12px;
-  color: #fff;
-}
-
-/* Profile Section */
-.profile-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 25px;
-  margin-top: 10px;
-}
-
-.avatar-container {
-  width: 56px;
-  height: 57px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-info {
-  text-align: center;
-}
-
-.username {
-  font-size: 14px;
-  margin: 0 0 4px 0;
-  font-weight: 600;
-  color: #fff;
-}
-
-.user-id {
-  font-size: 12px;
-  margin: 0 0 8px 0;
-  opacity: 0.9;
-  color: #fff;
-}
-
-.vip-badge {
-  display: inline-flex;
-  align-items: center;
-  background-color: #a296ff;
-  border-radius: 10px;
-  padding: 2px 8px;
-  gap: 4px;
-  box-shadow: inset 0px 4px 30px rgba(0, 0, 0, 0.3);
-}
-
-.vip-text {
-  font-size: 10px;
   font-weight: 700;
-  color: #301f80;
+  color: #000000;
 }
 
-.vip-icon img {
-  width: 16px;
-  height: 12px;
-}
-
-/* Stats Section */
-.stats-container {
+.invite-btn {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  background: none;
+  border: none;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-bottom: 25px;
-}
-
-.stat-row, .stats-block, .team-card {
-  background: linear-gradient(90deg, #100f2c 0%, #0f132e 48%, #0a1025 100%);
-  border-radius: 10px;
-  box-shadow: 0px 4px 4px rgba(158, 158, 158, 0.25);
-}
-
-.commission-card {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 15px;
+  cursor: pointer;
+  gap: 4px;
+  font-family: inherit;
 }
 
-.stat-label {
-  font-size: 11px;
-  color: #fff;
+.invite-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
-.stat-value {
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
+.invite-btn span {
+  font-size: 10px;
+  color: #000000;
+  text-align: center;
+  line-height: 1.2;
 }
 
-.stats-block {
-  padding: 15px;
+/* Overview Section */
+.overview-section {
+  padding: 16px;
 }
 
-.stat-group {
+.section-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+  margin-bottom: 12px;
+}
+
+.overview-cards {
+  display: flex;
+  gap: 12px;
+}
+
+.stat-card {
+  flex: 1;
+  background-color: rgba(0, 77, 67, 0.5);
+  border-radius: 5px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.mt-15 {
-  margin-top: 15px;
-}
-
-.stat-header {
+.stat-card-header {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 
-.stat-sub-label {
+.stat-card-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.stat-card-label {
   font-size: 11px;
-  color: #fff;
+  color: #ffffff;
 }
 
-.stat-values {
-  display: flex;
-  justify-content: space-between;
+.stat-card-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  padding-left: 24px;
 }
 
-.stat-number {
-  font-size: 12px;
+/* Team Data Section */
+.team-data-container {
+  background-color: #ffffff;
+  padding: 20px 16px 30px;
+  min-height: 500px;
+}
+
+.team-data-title {
+  font-size: 14px;
   font-weight: 600;
-  color: #fff;
-}
-
-.progress-bar-container {
-  position: relative;
-  height: 4px;
-  width: 100%;
-  margin-top: 4px;
-}
-
-.progress-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background-color: #746a9a;
-  border-radius: 15px;
-}
-
-.progress-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 31%, #9047e0 100%);
-  border-radius: 10px;
-}
-
-/* Team List Section */
-.team-list-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.section-title {
-  font-size: 12px;
-  margin: 0 0 5px 5px;
-  font-weight: 500;
-  color: #fff;
+  color: #004d43;
+  margin-bottom: 16px;
 }
 
 .team-card {
-  padding: 15px;
+  border: 0.5px solid rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  padding: 16px 5px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.team-badge {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  background-color: #004d43;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 0 5px 0 5px;
+}
+
+.team-card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #004d43;
+  margin-bottom: 16px;
+  padding-right: 60px;
+}
+
+.team-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0px, 1fr));
+  column-gap: 0px;
+  padding: 0 !important;
+  margin: 0 !important;
+  align-items: flex-start;
+}
+
+.team-stat-item {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  gap: 0px;
 }
 
-.team-card-top {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.team-icon {
-  width: 27px;
-  height: 26px;
-  flex-shrink: 0;
-}
-
-.team-info {
-  flex-grow: 1;
-}
-
-.team-name {
+.team-stat-val {
   font-size: 12px;
-  margin: 0 0 4px 0;
-  color: #fff;
+  font-weight: 700;
+  color: #000000;
 }
 
-.team-stat {
-  font-size: 11px;
-  margin: 2px 0;
-  opacity: 0.9;
-  color: #fff;
+.team-stat-lbl {
+  font-size: 9px;
+  color: #b2b2b2;
+  line-height: 1.2;
 }
 
-.btn-detail {
-  display: inline-block;
-  text-decoration: none;
-  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
-  color: #fff;
-  font-size: 10px;
-  padding: 4px 12px;
-  border-radius: 2px;
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
 }
 
-.divider {
-  height: 1px;
-  background-color: #746a9a;
+.btn-primary {
+  display: block;
   width: 100%;
-  opacity: 0.5;
-}
-
-.team-desc {
-  font-size: 10px;
-  color: #888;
-  margin: 0;
-  line-height: 1.3;
-}
-
-/* Bottom Action */
-.bottom-action {
-  width: 100%;
-  margin-top: 10px;
-}
-
-.btn-invite {
-  width: 100%;
-  height: 41px;
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 31%, #9047e0 100%);
-  border: 1px solid #746a9a;
-  border-radius: 10px;
-  color: #fff;
+  background-color: #004d43;
+  color: #ffffff;
+  text-align: center;
+  padding: 12px;
+  border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  cursor: pointer;
 }
 </style>
+
+

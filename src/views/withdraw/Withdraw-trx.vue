@@ -1,33 +1,54 @@
 <template>
-  <div class="app-screen">
-    <!-- Header -->
-    <header class="app-header">
-      <a class="back-button" href="#/pages/account/account">
-        <img src="/assets/image/178_1243.svg" alt="Back">
-      </a>
-      <h1 class="screen-title">Catatan menarik</h1>
-      <div class="header-spacer"></div>
-    </header>
-
-    <!-- Transaction List -->
-    <section class="transaction-list">
-      <div v-if="!isLoading && transactions.length === 0" class="empty-state">
-        <img src="/assets/image/empty.png" alt="No Data" class="empty-icon">
-
-      </div>
-      <article v-else v-for="transaction in transactions" :key="transaction.id" class="transaction-card">
-        <div class="card-content">
-          <div class="transaction-info">
-            <p :class="['transaction-status', transaction.statusClass]">{{ transaction.status }}</p>
-            <p class="transaction-date">{{ transaction.date }}</p>
-          </div>
-          <div class="transaction-amount">{{ formatCurrency(transaction.amount) }}</div>
-        </div>
-      </article>
-      <div v-if="transactions.length > 0 && hasMore" class="pagination-row">
-        <button class="load-more-btn" @click="loadMore" :disabled="isLoading">
-          Memuat lebih banyak
+  <div class="app-container">
+    <section id="section-header">
+      <header class="header-content">
+        <button class="back-button" @click="goBack" aria-label="Go back">
+          <img src="/assets/images/37_53.svg" alt="Back Icon">
         </button>
+        <h1 class="page-title">Riwayat penarikan</h1>
+      </header>
+    </section>
+
+    <section id="section-history-list">
+      <div v-if="!isLoading && transactions.length === 0" class="empty-state">
+        <p class="empty-text">Belum ada riwayat penarikan</p>
+      </div>
+
+      <div class="history-list">
+        <article v-for="transaction in transactions" :key="transaction.id" class="history-card">
+          <div class="card-date">Date trx: {{ transaction.date }}</div>
+          <div class="card-body">
+            <img
+              class="card-icon"
+              src="/assets/images/6654fac0bc0ae58a8a9019ca9e89e747fe3de1c2.png"
+              alt="Transaction Icon"
+            >
+            <div class="card-details">
+              <div class="details-top">
+                <div class="details-left">
+                  <h2 class="status-text">{{ transaction.status }}</h2>
+                  <div class="amount-text">{{ formatCurrency(transaction.amount) }}</div>
+                </div>
+                <span class="after-fee-text">{{ transaction.afterFeeText }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <div class="bank-info">{{ maskName(transaction.accountName) }}<br>{{ transaction.bankName }}</div>
+            <div class="account-info">{{ maskAccountNumber(transaction.accountNumber) }}<br>No. Rekening</div>
+          </div>
+        </article>
+      </div>
+
+      <div v-if="showPagination" class="pagination-row">
+        <PaginationBar
+          :page="currentPage"
+          :total-pages="totalPages"
+          :has-prev="hasPrev"
+          :has-next="hasNext"
+          :loading="isLoading"
+          @change="goToPage"
+        />
       </div>
     </section>
   </div>
@@ -36,11 +57,12 @@
 </template>
 
 <script setup>
-import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { withdrawalAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
+import PaginationBar from '@/components/partials/PaginationBar.vue'
 
 const router = useRouter()
 
@@ -48,12 +70,18 @@ const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 const transactions = ref([])
-const allTransactions = ref([])
 let refreshIntervalId = 0
 const pageSize = 20
-const hasMore = ref(true)
-const nextFetchPage = ref(1)
-const visibleCount = ref(pageSize)
+const currentPage = ref(1)
+const totalPages = ref(1)
+const hasNext = ref(false)
+const hasPrev = ref(false)
+
+const showPagination = computed(() => {
+  if (isLoading.value) return false
+  if (!transactions.value.length) return false
+  return hasNext.value || hasPrev.value || totalPages.value > 1
+})
 
 const goBack = () => {
   router.go(-1)
@@ -73,106 +101,112 @@ const formatDate = (dateString) => {
   if (!dateString) return '-'
   const d = new Date(dateString)
   if (Number.isNaN(d.getTime())) return '-'
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
-}
-
-const mapStatus = (status) => {
-  const s = String(status || '').toUpperCase()
-  if (s === 'COMPLETED' || s === 'SUCCESS' || s === 'PAID') return 'Pembayaran telah dilakukan'
-  if (s === 'PENDING' || s === 'UNPAID') return 'Menunggu pembayaran'
-  if (s === 'PROCESSING') return 'Sedang proses transfer'
-  if (s === 'FAILED' || s === 'EXPIRED' || s === 'CANCELLED' || s === 'REJECT' || s === 'REJECTED') return 'Dibatalkan'
-  return status || '-'
-}
-
-const mapStatusClass = (status) => {
-  const s = String(status || '').toUpperCase()
-  if (s === 'FAILED' || s === 'EXPIRED' || s === 'CANCELLED' || s === 'REJECT' || s === 'REJECTED') return 'status-yellow'
-  return 'status-purple'
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
 }
 
 const formatCurrency = (value) => {
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
   if (!Number.isFinite(num)) return 'Rp 0'
-  return '' + new Intl.NumberFormat('id-ID', {
+  return `Rp ${new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(num)
+  }).format(num)}`
 }
 
-const fetchPage = async (page) => {
-  isLoading.value = true
-  showErrorModal.value = false
-  errorMessage.value = ''
+const maskAccountNumber = (value) => {
+  const raw = String(value ?? '').trim()
+  if (!raw || raw === '-') return '-'
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length < 6) {
+    return raw.replace(/.(?=.{2})/g, '*')
+  }
+  const head = digits.slice(0, 2)
+  const tail = digits.slice(-2)
+  const masked = `${head}${'*'.repeat(Math.max(2, digits.length - 4))}${tail}`
+  return masked
+}
+
+const maskName = (value) => {
+  const raw = String(value ?? '').trim()
+  if (!raw || raw === '-') return '-'
+  const parts = raw.split(/\s+/).filter(Boolean)
+  const maskedParts = parts.map((p) => {
+    if (p.length <= 1) return '*'
+    if (p.length === 2) return `${p[0]}*`
+    return `${p[0]}${'*'.repeat(p.length - 2)}${p[p.length - 1]}`
+  })
+  return maskedParts.join(' ')
+}
+
+const mapStatus = (status) => {
+  const s = String(status || '').toUpperCase()
+  if (s === 'COMPLETED' || s === 'SUCCESS' || s === 'PAID') return 'Penarikan sudah terkirim'
+  if (s === 'PENDING' || s === 'UNPAID') return 'Permintaan penarikan'
+  if (s === 'PROCESSING') return 'Transfer berlangsung'
+  if (s === 'FAILED' || s === 'EXPIRED' || s === 'CANCELLED' || s === 'REJECT' || s === 'REJECTED') return 'Penarikan gagal'
+  return status || '-'
+}
+
+const normalizeTransactionsResponse = (data) => {
+  if (!data) return { results: [], count: 0, next: null, previous: null }
+  if (Array.isArray(data)) return { results: data, count: data.length, next: null, previous: null }
+  if (Array.isArray(data.results)) {
+    const c = Number(data.count || 0)
+    return { results: data.results, count: Number.isFinite(c) ? c : 0, next: data.next || null, previous: data.previous || null }
+  }
+  return { results: [], count: 0, next: null, previous: null }
+}
+
+const loadPage = async (page, { silent = false } = {}) => {
+  if (!silent) {
+    isLoading.value = true
+    showErrorModal.value = false
+    errorMessage.value = ''
+  }
   try {
-    const resp = await withdrawalAPI.getTransactions({ page, page_size: pageSize })
-    const data = resp?.data
-    const items = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : [])
-    const mapped = items.map((t) => ({
+    const resp = await withdrawalAPI.getTransactions({ page })
+    const paged = normalizeTransactionsResponse(resp?.data)
+    transactions.value = paged.results.map((t) => ({
       id: t.id ?? t.trx_id ?? `${t.created_at || ''}-${t.amount || ''}`,
       status: mapStatus(t.status),
       date: formatDate(t.created_at),
-      createdAtRaw: t.created_at || null,
       amount: t.amount,
-      statusClass: mapStatusClass(t.status)
+      afterFeeText: (() => {
+        const amountNum = typeof t.amount === 'string' ? parseFloat(String(t.amount).replace(/[^0-9.-]/g, '')) : Number(t.amount)
+        if (!Number.isFinite(amountNum)) return 'Setelah biaya: -'
+        const net = Math.max(0, amountNum * 0.9)
+        return `Setelah biaya: ${formatCurrency(net)}`
+      })(),
+      accountName: t.account_name || t.bank_account_name || '-',
+      bankName: t.bank_name || '-',
+      accountNumber: t.account_number || t.bank_account_number || '-'
     }))
-    return mapped
+    currentPage.value = Math.max(1, Number(page || 1))
+    hasNext.value = Boolean(paged.next)
+    hasPrev.value = Boolean(paged.previous)
+    totalPages.value = Math.max(1, Math.ceil((paged.count || 0) / pageSize))
   } catch (err) {
     errorMessage.value = extractErrorMessage(err)
     showErrorModal.value = true
-    return []
+    transactions.value = []
+    hasNext.value = false
+    hasPrev.value = false
+    totalPages.value = 1
+    currentPage.value = 1
   } finally {
-    isLoading.value = false
+    if (!silent) isLoading.value = false
   }
 }
 
-const mergeTransactions = (items) => {
-  if (!items.length) return false
-  const seen = new Set(allTransactions.value.map((x) => String(x.id)))
-  const append = items.filter((m) => !seen.has(String(m.id)))
-  if (!append.length) return false
-  const merged = [...allTransactions.value, ...append]
-  merged.sort((a, b) => new Date(b.createdAtRaw || 0).getTime() - new Date(a.createdAtRaw || 0).getTime())
-  allTransactions.value = merged
-  return true
-}
-
-const ensureBuffer = async (need) => {
-  let tries = 0
-  while (allTransactions.value.length < need && tries < 5) {
-    const items = await fetchPage(nextFetchPage.value)
-    const ok = mergeTransactions(items)
-    if (ok) nextFetchPage.value += 1
-    tries += 1
-    if (!ok) break
-  }
-  transactions.value = allTransactions.value.slice(0, need)
-  hasMore.value = allTransactions.value.length >= need
-}
-
-const fetchWithdrawTransactions = async () => {
-  transactions.value = []
-  allTransactions.value = []
-  hasMore.value = true
-  nextFetchPage.value = 1
-  visibleCount.value = pageSize
-  await ensureBuffer(visibleCount.value)
-}
-
-const loadMore = async () => {
-  if (isLoading.value || !hasMore.value) return
-  visibleCount.value += pageSize
-  await ensureBuffer(visibleCount.value)
+const goToPage = (page) => {
+  const p = Math.max(1, Number(page || 1))
+  loadPage(p)
 }
 
 const refreshFirstPage = async () => {
   if (isLoading.value) return
-  const items = await fetchPage(1)
-  const ok = mergeTransactions(items)
-  if (ok) {
-    transactions.value = allTransactions.value.slice(0, visibleCount.value)
-    hasMore.value = allTransactions.value.length >= visibleCount.value
-  }
+  if (currentPage.value !== 1) return
+  await loadPage(1, { silent: true })
 }
 
 const startAutoRefresh = () => {
@@ -189,12 +223,12 @@ const stopAutoRefresh = () => {
 }
 
 onMounted(() => {
-  fetchWithdrawTransactions()
+  loadPage(1)
   startAutoRefresh()
 })
 
 onActivated(() => {
-  fetchWithdrawTransactions()
+  loadPage(1)
   startAutoRefresh()
 })
 
@@ -208,176 +242,194 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-body {
+.app-container {
   font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #000000;
-  display: flex;
-  justify-content: center;
+  width: 100%;
+  max-width: 412px;
+  margin: 0 auto;
+  background-color: #f8f8f8;
   min-height: 100vh;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
-}
-
-h1, h2, h3, p {
   margin: 0;
+  padding: 0;
 }
 
-.app-screen {
+#section-history-list {
   width: 100%;
-  max-width: 412px;
-  min-height: 100vh;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  padding-bottom: 24px;
 }
 
-/* Header Styles */
-.app-header {
+/* Header */
+.header-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 20px 10px;
-  width: 100%;
+  justify-content: center;
+  padding: 24px 16px;
+  position: relative;
+  background-color: #f8f8f8;
 }
 
 .back-button {
-  background: none;
+  position: absolute;
+  left: 10px;
+  background: transparent;
   border: none;
-  padding: 0;
   cursor: pointer;
-  width: 24px;
-  height: 24px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.screen-title {
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
-  font-weight: 600;
+.back-button img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+.page-title {
   font-size: 16px;
-  line-height: 20px;
-  color: #FFFFFF;
-  text-align: center;
-  flex-grow: 1;
+  font-weight: 600;
+  color: #000000;
 }
 
-.header-spacer {
-  width: 24px; /* Balances the back button for centering */
-}
-
-/* List Styles */
-.transaction-list {
+/* History List */
+.history-list {
+  padding: 8px 16px 32px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px 10px;
-  width: 100%;
+  gap: 16px;
 }
 
 .empty-state {
-  width: 100%;
-  padding: 30px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.empty-icon {
-  width: 140px;
-  height: auto;
-  display: block;
-  opacity: 0.9;
+  padding: 40px 0;
+  text-align: center;
 }
 
 .empty-text {
+  color: #b2b2b2;
   font-size: 14px;
-  color: #a0a0a0;
 }
 
-.transaction-card {
-  background-color: #1d2138;
-  border-radius: 10px;
-  width: 100%;
-  min-height: 59px;
+.history-card {
+  background-color: #eeeeee;
+  border-radius: 20px;
+  padding: 16px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
 }
 
-.card-content {
+.card-date {
+  color: #004d43;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.card-body {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 12px 13px;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: flex-start;
 }
 
-.transaction-info {
+.card-icon {
+  width: 31px;
+  height: 26px;
+  object-fit: contain;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.card-details {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.transaction-status {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
+.details-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.details-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.status-text {
   font-size: 14px;
-  line-height: 17px;
+  color: #000000;
+  font-weight: 500;
+  line-height: 1.3;
 }
 
-.status-purple {
-  color: #a296ff;
-}
-
-.status-yellow {
-  color: #ffc156;
-}
-
-.transaction-date {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 15px;
-  color: #FFFFFF;
-}
-
-.transaction-amount {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 21px;
-  color: #FFFFFF;
+.after-fee-text {
+  font-size: 10px;
+  color: #004d43;
   text-align: right;
   white-space: nowrap;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.amount-text {
+  font-size: 14px;
+  color: #000000;
+  font-weight: 600;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.bank-info,
+.account-info {
+  font-size: 12px;
+  color: #000000;
+  line-height: 1.4;
+}
+
+.account-info {
+  text-align: right;
 }
 
 .pagination-row {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 10px;
+  padding: 0 16px 24px;
 }
 
 .load-more-btn {
   width: 100%;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #746a9a 0%, #272434 100%);
+  height: 40px;
+  border-radius: 20px;
+  background-color: #004d43;
   color: #ffffff;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 10px 0;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.load-more-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

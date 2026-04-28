@@ -1,21 +1,21 @@
-<template>
+<!-- <template>
   <div class="app-container voucher-page">
-    <!-- App Header Section -->
+   
     <section id="app-header" class="container">
       <header class="top-bar">
         <div class="back-button" @click="goBack">
-          <img src="/assets/image/138_1182.svg" alt="Back">
+          <img src="/assets/images/2023_1661.svg" alt="Back">
         </div>
         <h1 class="page-title">Menukarkan</h1>
       </header>
     </section>
 
-    <!-- Hero Section -->
+  
     <section id="hero-section" class="container">
       <div class="hero-content">
         <h2 class="hero-title">Kami punya hadiah untukmu!</h2>
         <div class="hero-image-wrapper">
-          <img src="/assets/image/352d87bf9296cd2556c3513ab2813d0f369e83b1.png" alt="Treasure Chest" class="hero-image">
+          <img src="/assets/images/da4151be78469acf27cc0da4d60d3f5fcefd602d.png" alt="Treasure Chest" class="hero-image">
         </div>
         <p class="hero-description">
           Silakan dapatkan kode penukaran dari halaman kegiatan terhubung. Aturan penukaran tunduk pada instruksi platform.
@@ -23,18 +23,17 @@
       </div>
     </section>
 
-    <!-- Redeem Card Section -->
+  
     <section id="redeem-card-section" class="container">
       <div class="card-wrapper">
-        <!-- Card Header (Frame 9) -->
+  
         <div class="card-header">
           <div class="diamond-icon">
-            <img src="/assets/image/bf8b81ef2600b30e06ec0a2ae89fa57be2e4397a.png" alt="Diamond">
+            <img src="/assets/images/da4151be78469acf27cc0da4d60d3f5fcefd602d.png" alt="Diamond">
           </div>
           <span class="header-text">Masukkan kode di bawah ini</span>
         </div>
-        
-        <!-- Card Body (Frame 10) -->
+
         <div class="card-body">
           <div class="input-container">
             <input 
@@ -51,7 +50,7 @@
       </div>
     </section>
 
-    <!-- History Section -->
+
     <section id="history-section" class="container">
       <div class="history-header">
         <h3 class="history-title">Pesanan 15 hari terakhir</h3>
@@ -65,7 +64,7 @@
       <div class="empty-state">
         <template v-if="transactions.length === 0">
           <div class="empty-image">
-            <img src="/assets/image/8eee4c7df2d3779f961f579ce95eec7a7c639622.png" alt="Empty Box">
+            <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Empty Box">
           </div>
           <p class="empty-text">Anda belum memiliki apapun</p>
         </template>
@@ -82,8 +81,8 @@
   </div>
   <LoadingSpinner :visible="isLoading" :overlay="true" message="" />
   <ErrorModal v-model="showErrorModal" :message="errorMessage" />
-  <VoucherSuccessModal v-model="showSuccessModal" :amount="claimedAmount" />
-</template>
+  <VoucherSuccessModal v-model="showSuccessModal" :amount="claimedAmount" :title="successTitle" />
+</template> -->
 
 <script setup>
 import { onMounted, ref } from 'vue'
@@ -100,6 +99,7 @@ const showErrorModal = ref(false)
 const errorMessage = ref('')
 const showSuccessModal = ref(false)
 const claimedAmount = ref(0)
+const successTitle = ref('Voucher berhasil diclaim')
 const transactions = ref([])
 
 const goBack = () => {
@@ -120,73 +120,61 @@ const formatDate = (iso) => {
   return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
 }
 
-const normalizeVoucherErrorMessage = (message) => {
-  const raw = String(message || '').trim()
-  if (!raw) return ''
-  const m = raw.toLowerCase()
-  const compact = m.replace(/\s+/g, '')
-
-  const isRateLimited =
-    m.includes('permintaan ini dibatasi') ||
-    compact.includes('permintaaninidibatasi') ||
-    m.includes('permintaan ini telah dibatasi') ||
-    compact.includes('permintaaninitelahdibatasi') ||
-    m.includes('terlalu banyak') ||
-    m.includes('too many') ||
-    m.includes('throttle') ||
-    m.includes('rate limit')
-  if (isRateLimited) return 'Jangan terlalu cepat. Anda dibatasi sementara'
-
-  const isEmpty = (
-    m.includes('tidak boleh kosong') ||
-    m.includes('wajib') ||
-    m.includes('required') ||
-    m.includes('blank') ||
-    m.includes('empty') ||
-    m.includes('harus diisi')
-  )
-  if (isEmpty) return 'Silakan isi kode terlebih dahulu.'
-
-  const isReused = (
-    m.includes('sudah digunakan') ||
-    m.includes('sudah dipakai') ||
-    m.includes('sudah ditukar') ||
-    m.includes('sudah diklaim') ||
-    m.includes('tidak dapat digunakan kembali') ||
-    m.includes('already used') ||
-    m.includes('already redeemed') ||
-    m.includes('already claimed') ||
-    m.includes('already') && (m.includes('redeem') || m.includes('claim') || m.includes('use'))
-  )
-  if (isReused) return 'Kode ini tidak dapat digunakan kembali.'
-
-  const isInvalid = (
-    m.includes('tidak valid') ||
-    m.includes('invalid') ||
-    m.includes('tidak ditemukan') ||
-    m.includes('not found') ||
-    m.includes('does not exist') ||
-    m.includes('incorrect') ||
-    m.includes('salah') ||
-    (m.includes('voucher') && (m.includes('tidak ditemukan') || m.includes('not found') || m.includes('invalid'))) ||
-    (m.includes('kode') && (m.includes('periksa') || m.includes('salah') || m.includes('tidak valid') || m.includes('tidak ditemukan') || m.includes('invalid')))
-  )
-  if (isInvalid) return 'Silakan periksa kembali kode yang Anda masukkan.'
-
-  return raw
-}
-
 const extractErrorMessage = (err) => {
   const data = err?.response?.data
   if (!data) return err?.message || 'Permintaan gagal, segarkan halaman'
-  if (typeof data === 'string') return normalizeVoucherErrorMessage(data)
-  if (data.detail) return normalizeVoucherErrorMessage(String(data.detail))
-  if (data.message) return normalizeVoucherErrorMessage(String(data.message))
-  const firstKey = Object.keys(data)[0]
-  const firstVal = data[firstKey]
-  if (Array.isArray(firstVal) && firstVal.length) return normalizeVoucherErrorMessage(String(firstVal[0]))
-  if (firstVal) return normalizeVoucherErrorMessage(String(firstVal))
-  return 'Permintaan gagal, segarkan halaman'
+  const normalizeText = (msg) => String(msg ?? '').trim()
+  const findAnyString = (v) => {
+    if (v === null || v === undefined) return ''
+    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return normalizeText(v)
+    if (Array.isArray(v)) {
+      for (const item of v) {
+        const found = findAnyString(item)
+        if (found) return found
+      }
+      return ''
+    }
+    if (typeof v === 'object') {
+      for (const key of Object.keys(v)) {
+        const found = findAnyString(v[key])
+        if (found) return found
+      }
+    }
+    return ''
+  }
+
+  const mapVoucherErrorToLabel = (message) => {
+    const raw = normalizeText(message)
+    if (!raw) return ''
+    const m = raw.toLowerCase()
+
+    if (m.includes('user invalid')) return 'Kode salah'
+    if (m.includes('voucher tidak ditemukan')) return 'Kode salah'
+    if (m.includes('nominal voucher tidak valid')) return 'Kode salah'
+
+    if (m.includes('kuota voucher harian telah habis')) return 'Kode habis'
+    if (m.includes('voucher telah mencapai batas penggunaan')) return 'Kode habis'
+    if (m.includes('anda sudah klaim voucher ini hari ini')) return 'Kode habis'
+    if (m.includes('voucher ini sudah digunakan oleh akun anda')) return 'Kode habis'
+
+    if (m.includes('voucher tidak aktif')) return 'Kode tidak aktif'
+    if (m.includes('voucher belum dapat diklaim')) return 'Kode tidak aktif'
+
+    if (m.includes('voucher sudah kedaluwarsa') || m.includes('kedaluwarsa')) return 'Kode expired'
+
+    return ''
+  }
+
+  const msg =
+    (typeof data === 'string' ? normalizeText(data) : '') ||
+      normalizeText(data?.error) ||
+      normalizeText(data?.detail) ||
+      normalizeText(data?.message) ||
+      findAnyString(data) ||
+      ''
+
+  const mapped = mapVoucherErrorToLabel(msg)
+  return mapped || msg || err?.message || 'Permintaan gagal, segarkan halaman'
 }
 
 const isVoucherTransaction = (t) => {
@@ -223,8 +211,9 @@ const handleRedeem = async () => {
   try {
     const resp = await voucherAPI.claim({ code })
     const data = resp?.data || {}
-    const amount = data?.amount ?? 0
-    claimedAmount.value = amount
+    const amountRaw = Number(data?.amount ?? 0)
+    claimedAmount.value = Number.isFinite(amountRaw) ? amountRaw : 0
+    successTitle.value = 'Berhasil menerima bonus'
     showSuccessModal.value = true
     voucherCode.value = ''
     await fetchTransactions()
@@ -254,7 +243,7 @@ onMounted(() => {
 
   font-family: 'Inter', sans-serif;
   background-color: #0f0f1e;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;

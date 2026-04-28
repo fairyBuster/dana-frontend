@@ -3,7 +3,7 @@
     <section id="section-header">
       <div class="header-container">
         <div class="header-content">
-          <img src="/assets/image/106_972.svg" alt="Back" class="back-icon" @click="router.back()">
+          <img src="/assets/images/2023_1661.svg" alt="Back" class="back-icon" @click="router.back()">
           <h1 class="header-title">Kata sandi dagang</h1>
         </div>
       </div>

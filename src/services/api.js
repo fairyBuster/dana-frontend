@@ -182,7 +182,7 @@ function attachAuthHeader(config) {
     const method = (config.method || 'get').toLowerCase()
     const path = String(config.url || '')
     const skipAuthPaths = [
-      '/auth/register',
+      '/register',
       '/auth/login',
       '/auth/jwt/login',
       '/auth/jwt/refresh',
@@ -206,6 +206,7 @@ function attachAuthHeader(config) {
 api.interceptors.request.use((config) => {
   try {
     if (!ENABLE_API_ENCODE) return config
+    if (config && config.__skipApiEncode) return config
     const url = config.url || ''
     // Ignore if already encoded
     if (url.includes('/api/enc/') || url.includes('/enc/')) return config
@@ -330,10 +331,10 @@ api.interceptors.response.use(
           localStorage.removeItem('auth_scheme')
           localStorage.removeItem('refresh_token')
           const currentPath = window.location.pathname
-          const authPaths = ['/pages/account/access', '/pages/account/register', '/pages/account/forgot-password', '/pages/account/terms']
+          const authPaths = ['/login', '/register', '/forgot-password', '/terms']
           const isAuthPath = authPaths.some(p => currentPath.startsWith(p))
           if (!isAuthPath) {
-            window.location.href = '/pages/account/access?session_expired=true'
+            window.location.href = '/login?session_expired=true'
           }
         }
       }
@@ -385,10 +386,10 @@ rootApi.interceptors.response.use(
           localStorage.removeItem('auth_scheme')
           localStorage.removeItem('refresh_token')
           const currentPath = window.location.pathname
-          const authPaths = ['/pages/account/access', '/pages/account/register', '/pages/account/forgot-password', '/pages/account/terms']
+          const authPaths = ['/login', '/register', '/forgot-password', '/terms']
           const isAuthPath = authPaths.some(p => currentPath.startsWith(p))
           if (!isAuthPath) {
-            window.location.href = '/pages/account/access?session_expired=true'
+            window.location.href = '/login?session_expired=true'
           }
         }
       }
@@ -448,10 +449,10 @@ rootApi.interceptors.response.use(
         localStorage.removeItem('auth_scheme')
         localStorage.removeItem('refresh_token')
         const currentPath = window.location.pathname
-        const authPaths = ['/pages/account/access', '/pages/account/register', '/pages/account/forgot-password', '/pages/account/terms']
+        const authPaths = ['/login', '/register', '/forgot-password', '/terms']
         const isAuthPath = authPaths.some(path => currentPath.startsWith(path))
         if (!isAuthPath) {
-          window.location.href = '/pages/account/access?session_expired=true'
+          window.location.href = '/login?session_expired=true'
         }
       }
     }
@@ -494,7 +495,7 @@ const clearClientCaches = async () => {
 
   // Arahkan ke login dan reload untuk reset state memori SPA
   try {
-    window.location.href = '/pages/account/access'
+    window.location.href = '/login'
     // Reload untuk memastikan komponen dan store di-reset total
     setTimeout(() => {
       try { window.location.reload() } catch (_) {}
@@ -504,7 +505,7 @@ const clearClientCaches = async () => {
 
 export const authAPI = {
   register: (userData) => {
-    return api.post('/auth/register/', userData)
+    return api.post('/register/', userData)
   },
   
   login: async (credentials) => {
@@ -579,14 +580,17 @@ export const authAPI = {
   getTopActiveLevel1: () => {
     return api.get('/auth/top-active-level1/')
   },
-  getDownlineOverview: () => {
-    return api.get('/auth/downline-overview/')
+  getDownlineOverview: (params = {}) => {
+    return api.get('/auth/downline-overview/', { params })
   },
   getSettings: () => {
     return api.get('/auth/settings/')
   },
   requestOTP: (phone) => {
     return api.post('/auth/request-otp/', { phone })
+  },
+  getInvestorsMonthly: (params = {}) => {
+    return api.get('/auth/investors/monthly/', { params, __skipApiEncode: true })
   }
 }
 
@@ -707,8 +711,8 @@ authAPI.getBalanceStatistics = (period = 'today') => {
 
 export const commissionAPI = {
   // Get downline members overview with commission statistics
-  getDownlineOverview: () => {
-    return api.get('/auth/downline-overview/')
+  getDownlineOverview: (params = {}) => {
+    return api.get('/auth/downline-overview/', { params })
   },
   // Get downline statistics per level (1-5)
   getDownlineStats: () => {
@@ -728,6 +732,20 @@ export const voucherAPI = {
   // GET /api/vouchers/ - List voucher aktif yang bisa diklaim
   getList: (params = {}) => {
     return api.get('/vouchers/', { params })
+  }
+}
+
+export const reviewAPI = {
+  getReviews: (params = {}) => {
+    return api.get('/reviews/', { params })
+  },
+  createReview: (formData) => {
+    return api.post('/reviews/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Accept': 'application/json'
+      }
+    })
   }
 }
 
@@ -947,3 +965,5 @@ export const withdrawalAPI = {
 }
 
 export default api
+
+

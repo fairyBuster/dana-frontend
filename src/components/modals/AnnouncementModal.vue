@@ -2,58 +2,23 @@
   <div v-if="modelValue" class="confirmation-screen" @click.self="close">
     <section id="section-popup">
       <div class="popup-overlay">
-        <div class="popup-card">
-          <div class="card-content">
-            <button class="close-btn" aria-label="Close" @click="close">
-              <img src="/assets/image/297_80.svg" alt="Close Icon">
-            </button>
+        <div class="popup-card" @click.stop>
+          <button class="close-btn" aria-label="Close" type="button" @click="close">
+            <img src="/assets/images/2038_167.svg" alt="Close Icon">
+          </button>
 
-            <div class="illustration">
-              <img src="/assets/image/9aedffe9b7183afd497c25e4ec70f2daa309daf8.png" alt="Consultation Illustration">
-            </div>
+          <img class="popup-image" src="/assets/images/popup.jpg" alt="Pengumuman">
 
-            <div class="text-wrapper">
-              <h2 class="title">Apakah Anda ingin melakukan konsultasi?</h2>
-              <p class="subtitle">
-                Dapatkan informasi program konservasi dan akses layanan resmi melalui kanal berikut.
-              </p>
-            </div>
-
-            <div class="button-group">
-              <a
-                :href="groupLink"
-                target="_blank"
-                rel="noopener"
-                class="action-btn"
-                @click="confirmClose"
-              >
-                <span class="btn-text">Tautan Grup Aset Finansial Nusantara</span>
-                <img
-                  class="btn-icon"
-                  src="/assets/image/b5f9b328fb147f1ae1397692ceadde02ed7b2688.png"
-                  alt="Telegram"
-                >
-              </a>
-              <a
-                :href="serviceLink"
-                target="_blank"
-                rel="noopener"
-                class="action-btn"
-                @click="confirmClose"
-              >
-                <span class="btn-text">Layanan Aset Finansial Nusantara</span>
-                <img
-                  class="btn-icon"
-                  src="/assets/image/b5f9b328fb147f1ae1397692ceadde02ed7b2688.png"
-                  alt="Telegram"
-                >
-              </a>
-          </div>
-          </div>
-
-          <div class="card-image">
-            <img src="/assets/image/8209441fe6353b0e3c7fc124481e2a3bf0db8d3d.png" alt="Ocerin Foundation Nature">
-          </div>
+          <a
+            class="cta-button"
+            :href="serviceLink"
+            target="_blank"
+            rel="noopener"
+            @click="confirmClose"
+            aria-label="Hubungi layanan pelanggan"
+          >
+            Hubungi layanan pelanggan
+          </a>
         </div>
       </div>
     </section>
@@ -61,7 +26,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { supportAPI } from '@/services/api'
 
 const props = defineProps({
@@ -77,21 +42,10 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'close'])
 
-const internalIndex = ref(props.startIndex)
-const pagesToShow = computed(() => (props.pages && props.pages.length > 0) ? props.pages : [props.message])
-const currentIndex = computed(() => internalIndex.value)
-const currentPageText = computed(() => pagesToShow.value[currentIndex.value] || '')
-
-const groupLink = ref(props.telegramUrl)
 const serviceLink = ref(props.telegramUrl)
-const telegramLabel = ref(props.telegramText)
-
-watch(() => props.modelValue, (val) => {
-  if (val) internalIndex.value = props.startIndex
-})
 
 watch(() => props.telegramUrl, (val) => {
-  groupLink.value = val
+  serviceLink.value = val
 })
 
 onMounted(async () => {
@@ -101,11 +55,6 @@ onMounted(async () => {
     const results = Array.isArray(data) ? data : (data.results || [])
     
     const normalizeUrl = (u) => String(u || '').replace(/[`"]/g, '').trim()
-
-    const group = results.find(link => link.platform === 'telegram' || link.id === 1)
-    if (group && group.url) {
-      groupLink.value = normalizeUrl(group.url)
-    }
 
     const service = results.find(link => link.title === 'Layanan Ocerin' || link.id === 4)
     if (service && service.url) {
@@ -141,127 +90,56 @@ const confirmClose = () => { close(); emit('close') }
 }
 
 .popup-card {
-  display: flex;
-  flex-direction: row;
-  width: 374px;
-  height: 274px;
-  background-color: transparent;
   position: relative;
-  overflow: visible;
+  width: 100%;
+  max-width: 374px;
+  border-radius: 16px;
+  overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.card-content {
-  width: 211px;
-  background-color: #f2f2f2;
-  position: relative;
-  padding: 0 12px;
-  box-sizing: border-box;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
 }
 
 .close-btn {
   position: absolute;
-  top: 14px;
-  left: 10px;
-  width: 20px;
-  height: 20px;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   border: none;
-  background: none;
+  background: rgba(0, 0, 0, 0.35);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
 }
 
-.close-icon {
-  width: 18px;
-  height: 18px;
-  color: #555555;
-}
-
-.illustration {
-  position: absolute;
-  top: -48px;
-  left: 41px;
-  width: 139px;
-  height: 138px;
-  pointer-events: none;
-}
-
-.illustration img {
-  width: 100%;
-  height: 100%;
+.close-btn img {
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 
-.text-wrapper {
-  margin-top: 75px;
-  position: relative;
+.popup-image {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
-.title {
-  font-family: 'Inter', sans-serif;
+.cta-button {
+  margin: 12px;
+  height: 44px;
+  border-radius: 14px;
+  background-color: #1f5b4a;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 700;
-  color: #000000;
-  margin: 0 0 5px 0;
-  line-height: 1.4;
-}
-
-.subtitle {
-  font-family: 'Inter', sans-serif;
-  font-size: 10px;
-  color: #a6a6a6;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.button-group {
-  margin-top: auto;
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.action-btn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  height: 37px;
-  background: linear-gradient(180deg, rgba(134, 166, 141, 1) 0%, rgba(166, 205, 139, 1) 100%);
-  border-radius: 10px;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  padding: 0 10px;
-  box-sizing: border-box;
+  justify-content: center;
   text-decoration: none;
-}
-
-.btn-text {
-  font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.btn-icon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-}
-
-.card-image {
-  width: 163px;
-  height: 274px;
-  overflow: hidden;
-}
-
-.card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 </style>

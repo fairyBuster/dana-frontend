@@ -28,7 +28,7 @@
       </div>
 
   
-      <button class="detail-btn" @click="router.push('/h5/missions/status/instructions')">Lihat detail dan aturan</button>
+      <button class="detail-btn" @click="router.push('/task/status/instructions')">Lihat detail dan aturan</button>
       <div class="agent-list">
         
       <LoadingSpinner v-if="loading" :visible="true" :overlay="true" :size="30" :color="'ffffff'" message="" />

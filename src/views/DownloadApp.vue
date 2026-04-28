@@ -22,7 +22,7 @@ import QRCode from 'qrcode'
 import { getFrontendUrl } from '@/utils/settings'
 
 const router = useRouter()
-const qrImage = ref('/assets/image/qr.png')
+const qrImage = ref('/assets/images/e84dbf746b992803a6abb783986d05ee77d5ec3c.png')
 
 const getApkUrl = () => {
   const base = getFrontendUrl()
@@ -34,7 +34,7 @@ onMounted(async () => {
   try {
     qrImage.value = await QRCode.toDataURL(getApkUrl(), { width: 320, margin: 2 })
   } catch (_) {
-    qrImage.value = '/assets/image/qr.png'
+    qrImage.value = '/assets/images/e84dbf746b992803a6abb783986d05ee77d5ec3c.png'
   }
 })
 </script>
@@ -57,7 +57,7 @@ onMounted(async () => {
   width: 100%;
   max-width: 100%;
   height: 100vh; /* Fixed height based on design */
-  background-image: url('/assets/image/2c91f0ccb5dd2bd3b105b9b38caef2901c90e8e9.png');
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

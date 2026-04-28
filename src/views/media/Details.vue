@@ -1,9 +1,9 @@
-<template>
+<!-- <template>
   <div class="media-detail-page">
     <section id="section-header">
       <div class="container">
         <header class="nav-header" @click="goBack">
-          <img src="/assets/image/48_833.svg" alt="Back" class="nav-icon">
+          <img src="/assets/images/2023_1661.svg" alt="Back" class="nav-icon">
           <span class="nav-text">Kembali ke beranda</span>
         </header>
       </div>
@@ -27,14 +27,14 @@
         <div class="footer-content">
           <p class="tagline">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
           <div class="footer-brand">
-            <img src="/assets/image/983276.png" alt="OT-SENT Logo" class="footer-logo">
+            <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Logo" class="footer-logo">
             <span class="copyright">© 2026 OT-SENT. All Rights Reserved</span>
           </div>
         </div>
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { computed } from 'vue'
@@ -48,7 +48,7 @@ const goBack = () => {
     router.go(-1)
     return
   }
-  router.push('/pages/account/media')
+  router.push('/media')
 }
 
 const article = computed(() => {
@@ -95,7 +95,7 @@ const article = computed(() => {
   margin: 0;
   padding: 0;
   background-color: #0F0B2E;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -228,3 +228,5 @@ const article = computed(() => {
   color: #ffffff;
 }
 </style>
+
+

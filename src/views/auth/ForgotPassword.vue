@@ -2,7 +2,7 @@
   <section id="header-section">
     <div class="header-container">
         <button class="back-button" @click="goBack">
-            <img src="/assets/image/33_20.svg" alt="Back" class="icon-back">
+            <img src="/assets/images/2023_1661.svg" alt="Back" class="icon-back">
         </button>
         <h1 class="page-title">Ubah kata sandi</h1>
     </div>
@@ -174,7 +174,7 @@ const handleReset = async () => {
     showSuccessModal.value = true
     
     setTimeout(() => {
-      router.push('/pages/account/access')
+      router.push('/login')
     }, 2000)
   } catch (error) {
     console.error('Change password error:', error.response?.data || error.message)
@@ -390,3 +390,5 @@ button {
         margin: 0;
     }
 </style>
+
+

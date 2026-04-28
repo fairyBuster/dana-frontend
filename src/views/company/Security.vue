@@ -1,11 +1,11 @@
-<template>
+<!-- <template>
   <div class="mobile-container">
-    <!-- Header Section -->
+
     <section id="section-header">
       <div class="header-wrapper">
         <header class="app-header">
           <div class="icon-container" @click="goBack">
-            <img src="/assets/image/174_707.svg" alt="Back" class="back-icon">
+            <img src="/assets/images/2023_1661.svg" alt="Back" class="back-icon">
           </div>
           <h1 class="page-title">Perjanjian Anggota</h1>
           <div class="spacer"></div>
@@ -13,12 +13,11 @@
       </div>
     </section>
 
-    <!-- Contract Section -->
     <section id="section-contract">
       <div class="contract-wrapper">
         <article class="contract-card">
           <div class="card-header">
-            <img src="/assets/image/464644.png" alt="Logo" class="company-logo">
+            <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Logo" class="company-logo">
             <div class="company-details">
               <h2 class="company-name"> Sentium Mapping Solution</h2>
               <p class="company-slogan">Intelligent Drone Mapping System<br>© 2026 All Rights Reserved</p>
@@ -60,13 +59,13 @@
               <p>Anggota: {{ memberId }}</p>
               <p>{{ currentDate }}</p>
             </div>
-            <img v-if="requiresContract && isAccepted" src="/assets/image/ot.png" alt="Stamp" class="contract-stamp">
+            <img v-if="requiresContract && isAccepted" src="/assets/images/d9b41d54b13e3f872bf656657234e30868c2d994.png" alt="Stamp" class="contract-stamp">
           </div>
         </article>
       </div>
     </section>
 
-    <!-- Footer Section -->
+
     <section v-if="requiresContract" id="section-footer">
       <div class="footer-wrapper">
         <button class="btn-contract" @click="acceptContract" :disabled="isAccepted || isSubmitting || isLoadingRank">
@@ -78,7 +77,7 @@
     <SuccessModal v-model="successModalOpen" :message="successMessage" />
     <ErrorModal v-model="errorModalOpen" :message="errorMessage" />
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
@@ -171,7 +170,7 @@ watch(
   () => successModalOpen.value,
   (open) => {
     if (!open && isAccepted.value) {
-      router.push('/pages/account/active')
+      router.push('/dashboard')
     }
   }
 )
@@ -197,7 +196,7 @@ body {
 .mobile-container {
   width: 100%;
   max-width: 412px;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -402,3 +401,5 @@ p, h1, h2, h3, h4, h5, h6 {
   opacity: 0.9;
 }
 </style>
+
+

@@ -1,19 +1,18 @@
-<template>
+<!-- <template>
   <section id="app-view">
     <div class="app-container">
       
-      <!-- Header Section -->
+
       <header class="app-header">
         <div class="header-nav">
-          <img src="/assets/images/146_394.svg" alt="Back" class="nav-icon" @click="goBack">
+          <img src="/assets/images/2055_403.svg" alt="Back" class="nav-icon" @click="goBack">
           <h1 class="nav-title">Profil Saya</h1>
         </div>
       </header>
 
-      <!-- Main Content Area -->
+
       <main class="main-content">
-        
-        <!-- Profile Card -->
+      
         <div class="profile-card">
           <div class="profile-card-content">
             <div class="profile-left">
@@ -24,12 +23,12 @@
               </div>
             </div>
             <div class="profile-right">
-              <!-- Verified Badge -->
+        
               <div class="badge badge-verified">
                 <span class="badge-text">Terverifikasi</span>
-                <img src="/assets/images/146_485.svg" alt="Check" class="badge-icon">
+                <img src="/assets/images/I2011_1097_497_5178.svg" alt="Check" class="badge-icon">
               </div>
-              <!-- Non-VIP Badge -->
+            
               <div class="badge badge-non-vip">
                 <span class="badge-text">Non-VIP</span>
               </div>
@@ -37,16 +36,16 @@
           </div>
         </div>
 
-        <!-- Account Info Section -->
+      
         <div class="account-section">
           <h2 class="section-title">Informasi Akun</h2>
           
           <div class="info-list-container">
             <div class="info-list-content">
-              <!-- Item 1: Nama Panggilan -->
+         
               <div class="list-item">
                 <div class="item-left">
-                  <img src="/assets/images/89468b0506a81c79501d125a38531de004102477.png" alt="Icon" class="item-icon">
+                  <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon" class="item-icon">
                   <span class="item-label">Nama Panggilan</span>
                 </div>
                 <div class="item-right">
@@ -59,10 +58,10 @@
                 </div>
               </div>
 
-              <!-- Item 2: Aset Saya -->
+              
               <div class="list-item" @click="goToAssets">
                 <div class="item-left">
-                  <img src="/assets/images/ea96ea70de6c5df19b391b77b1f9471fa2a9a039.png" alt="Icon" class="item-icon">
+                  <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon" class="item-icon">
                   <span class="item-label">Aset Saya</span>
                 </div>
                 <div class="item-right">
@@ -70,10 +69,9 @@
                 </div>
               </div>
 
-              <!-- Item 3: Registrasi Awal -->
               <div class="list-item">
                 <div class="item-left">
-                  <img src="/assets/images/f4967cabe7cf8467017f3388380b6a9f77232d91.png" alt="Icon" class="item-icon">
+                  <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon" class="item-icon">
                   <span class="item-label">Registrasi Awal</span>
                 </div>
                 <div class="item-right">
@@ -81,32 +79,32 @@
                 </div>
               </div>
 
-              <!-- Item 4: VIP -->
+    
               <div class="list-item" @click="goToVIP">
                 <div class="item-left">
-                  <img src="/assets/images/f9198d93c10b0c5fe8bdf89cd027a997bdc614fa.png" alt="Icon" class="item-icon">
+                  <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon" class="item-icon">
                   <span class="item-label">VIP</span>
                 </div>
                 <div class="item-right">
-                  <img src="/assets/images/146_456.svg" alt="Arrow" class="arrow-icon">
+                  <img src="/assets/images/2010_849.svg" alt="Arrow" class="arrow-icon">
                 </div>
               </div>
 
-              <!-- Item 5: Kartu Bank -->
+       
               <div class="list-item" @click="goToBankCards">
                 <div class="item-left">
-                  <img src="/assets/images/6d099bc7698a3a0b226527a7f05440a356d64721.png" alt="Icon" class="item-icon">
+                  <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon" class="item-icon">
                   <span class="item-label">Kartu Bank</span>
                 </div>
                 <div class="item-right">
-                  <img src="/assets/images/146_451.svg" alt="Arrow" class="arrow-icon">
+                  <img src="/assets/images/2010_849.svg" alt="Arrow" class="arrow-icon">
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Save Button -->
+      
         <div class="action-container">
           <button class="btn-save" @click="saveChanges">
             Simpan Perubahan Saya
@@ -118,7 +116,7 @@
   </section>
   <ChatBot v-model="showChatBot" />
   
-  <!-- Modals -->
+ 
   <SuccessModal 
     v-model="showSuccessModal" 
     :message="modalMessage" 
@@ -127,7 +125,7 @@
     v-model="showErrorModal" 
     :message="modalMessage" 
   />
-</template>
+</template> -->
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -158,15 +156,15 @@ const openChat = () => {
 }
 
 const goToAssets = () => {
-  router.push('/pages/account/panel')
+  router.push('/portfolio')
 }
 
 const goToVIP = () => {
-  router.push('/pages/benefits/premium')
+  router.push('/vp')
 }
 
 const goToBankCards = () => {
-  router.push('/pages/assets/bind')
+  router.push('/connect')
 }
 
 const saveChanges = async () => {
@@ -503,3 +501,5 @@ button {
   color: #ccc;
 }
 </style>
+
+

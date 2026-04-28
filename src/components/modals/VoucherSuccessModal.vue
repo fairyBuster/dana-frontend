@@ -4,7 +4,7 @@
       <div class="modal-card">
         <div class="modal-content">
           <h2 class="modal-title">{{ title || 'Parabéns pela conquista' }}</h2>
-          <img src="/assets/image/bf8b81ef2600b30e06ec0a2ae89fa57be2e4397a.png" alt="Diamond" class="modal-image">
+          <img src="/assets/images/da4151be78469acf27cc0da4d60d3f5fcefd602d.png" alt="Diamond" class="modal-image">
           <p class="modal-amount">Rp {{ formattedAmount }}</p>
         </div>
       

@@ -1,552 +1,286 @@
 <template>
-  <div class="screen-wrapper">
-    <!-- Header -->
-    <header class="app-header">
-      <div class="back-button" @click="goBack">
-        <img src="/assets/image/178_1148.svg" alt="Back" class="icon-back">
-      </div>
-      <h1 class="page-title">Pengaturan</h1>
-    </header>
-
-    <!-- Profile Settings Group -->
-    <div class="settings-group">
-      <!-- Row 1: Ubah avatar -->
-      <div class="settings-item" @click="showAvatarModal = true">
-        <span class="item-label">Ubah avatar</span>
-        <div class="item-right">
-          <img :src="avatarSrc" alt="Current Avatar" class="avatar-preview">
-          <img src="/assets/image/178_1153.svg" alt="Arrow" class="icon-arrow">
+  <div class="app-container">
+    <section id="section-header">
+      <header class="app-header">
+        <button class="back-button" type="button" @click="goBack" aria-label="Kembali">
+          <img src="/assets/images/2023_1661.svg" alt="Back Icon">
+        </button>
+        <div class="header-info">
+          <h1 class="greeting">Hai, {{ displayUsername }}</h1>
+          <p class="level-info">Level saat ini: <span class="level-badge">{{ currentLevel }}</span></p>
         </div>
-      </div>
+        <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Trivex Logo" class="header-logo">
+      </header>
+    </section>
 
-      <!-- Row 2: Nama panggilan -->
-      <div class="settings-item" @click="openNicknameModal">
-        <span class="item-label">Nama panggilan</span>
-        <div class="item-right">
-          <span class="item-value">{{ nickname }}</span>
-          <img src="/assets/image/178_1157.svg" alt="Arrow" class="icon-arrow">
+    <section id="section-profile-data">
+      <div class="data-card">
+        <div class="card-header">
+          <img src="/assets/images/28513e18289d675dfcb2092e17ef5f318ad3ee70.png" alt="Shield Icon" class="card-icon">
+          <h2 class="card-title">Data Saya</h2>
         </div>
-      </div>
-
-      <!-- Row 3: User ID -->
-      <div class="settings-item">
-        <span class="item-label">User ID</span>
-        <div class="item-right">
-          <span class="item-value">{{ userId }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Account Settings Group -->
-    <div class="settings-group">
-      <!-- Row 1: Kata sandi saya -->
-      <div class="settings-item" @click="changePassword">
-        <span class="item-label">Kata sandi saya</span>
-        <div class="item-right">
-          <img src="/assets/image/178_1164.svg" alt="Arrow" class="icon-arrow">
-        </div>
-      </div>
-
-      <!-- Row 2: Manajemen bank -->
-      <div class="settings-item" @click="manageBank">
-        <span class="item-label">Manajemen bank</span>
-        <div class="item-right">
-          <img src="/assets/image/178_1167.svg" alt="Arrow" class="icon-arrow">
-        </div>
-      </div>
-
-      <!-- Row 3: Akun -->
-      <div class="settings-item">
-        <span class="item-label">Akun</span>
-        <div class="item-right">
-          <span class="item-value">{{ accountNumber }}</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="action-button-container">
-      <button class="btn-gradient" @click="clearCache">
-        Bersihkan cache
-      </button>
-    </div>
-
-    <!-- Modal Overlay -->
-    <div v-if="showAvatarModal" class="modal-overlay" @click="showAvatarModal = false">
-      <div class="modal-card" @click.stop>
-        <h2 class="modal-title">Avatar</h2>
-        
-        <div class="avatar-grid">
-          <div 
-            v-for="(avatar, index) in avatarOptions" 
-            :key="index"
-            class="avatar-option"
-            @click="selectAvatar(avatar)"
-          >
-            <img :src="avatar" :alt="'Avatar Option ' + (index + 1)">
+        <div class="data-list">
+          <div class="data-item">
+            <div class="data-label">Username</div>
+            <div class="data-value">{{ displayUsername }}</div>
+          </div>
+          <div class="data-item">
+            <div class="data-label">Nomor ponsel</div>
+            <div class="data-value">{{ displayPhone }}</div>
+          </div>
+          <div class="data-item">
+            <div class="data-label">Atasan saya</div>
+            <div class="data-value">{{ supervisor }}</div>
+          </div>
+          <div class="data-item no-border">
+            <div class="data-label">Tanggal pendaftaran</div>
+            <div class="data-value">{{ joinDate }}</div>
           </div>
         </div>
-
-        <button class="btn-primary" @click="confirmAvatarChange">
-          Ubah avatar
-        </button>
       </div>
-    </div>
-
-    <div v-if="showPasswordModal" class="modal-overlay" @click="showPasswordModal = false">
-      <div class="modal-card" @click.stop>
-        <h2 class="modal-title">Ubah kata sandi</h2>
-
-        <div class="password-form">
-          <input
-            v-model="oldPassword"
-            type="password"
-            class="modal-input"
-            placeholder="Masukkan kata sandi lama"
-          >
-          <input
-            v-model="newPassword"
-            type="password"
-            class="modal-input"
-            placeholder="Masukkan kata sandi baru"
-          >
-          <input
-            v-model="confirmPassword"
-            type="password"
-            class="modal-input"
-            placeholder="Konfirmasi kata sandi baru Anda"
-          >
-        </div>
-
-        <button class="btn-primary btn-full" @click="savePasswordChange">
-          Simpan perubahan
-        </button>
-      </div>
-    </div>
-
-    <div v-if="showNicknameModal" class="modal-overlay" @click="showNicknameModal = false">
-      <div class="modal-card" @click.stop>
-        <h2 class="modal-title">Ubah nama panggilan</h2>
-
-        <div class="password-form">
-          <input
-            v-model="nicknameDraft"
-            type="text"
-            class="modal-input"
-            placeholder="Masukkan nama panggilan baru"
-          >
-        </div>
-
-        <button class="btn-primary btn-full" @click="saveNicknameChange">
-          Simpan perubahan
-        </button>
-      </div>
-    </div>
-
-    <SuccessModal v-model="successModalOpen" :message="successMessage" />
-    <ErrorModal v-model="errorModalOpen" :message="errorMessage" />
+    </section>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '@/services/api'
-import SuccessModal from '@/components/modals/SuccessModal.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
-import { avatarOptions, avatarSrc, setAvatar } from '@/utils/avatar'
 
 const router = useRouter()
-const showAvatarModal = ref(false)
-const showPasswordModal = ref(false)
-const showNicknameModal = ref(false)
-const selectedAvatar = ref('')
-const nickname = ref('username')
-const nicknameDraft = ref('')
-const userId = ref('-')
-const accountNumber = ref('-')
-const oldPassword = ref('')
-const newPassword = ref('')
-const confirmPassword = ref('')
-const phone = ref('')
-const currentUsername = ref('')
-const successModalOpen = ref(false)
-const errorModalOpen = ref(false)
-const successMessage = ref('')
-const errorMessage = ref('')
+const accountInfo = ref(null)
+const rankStatus = ref(null)
 
 const goBack = () => {
   router.go(-1)
 }
 
-const openNicknameModal = () => {
-  nicknameDraft.value = nickname.value
-  showNicknameModal.value = true
+const toNumber = (v) => {
+  const n = Number(String(v ?? '').replace(/[^0-9.-]/g, ''))
+  return Number.isFinite(n) ? n : 0
 }
 
-const extractErrorMessage = (err) => {
-  const data = err?.response?.data
-  if (!data) return err?.message || 'Permintaan gagal, segarkan halaman'
-  if (typeof data === 'string') return data
-  if (data.detail) return String(data.detail)
-  const firstKey = Object.keys(data)[0]
-  const firstVal = data[firstKey]
-  if (Array.isArray(firstVal) && firstVal.length) return String(firstVal[0])
-  if (firstVal) return String(firstVal)
-  return 'Permintaan gagal, segarkan halaman'
-}
+const displayUsername = computed(() => {
+  const d = accountInfo.value || {}
+  const username = String(d.username || d.full_name || d.name || '').trim()
+  return username || '-'
+})
 
-const saveNicknameChange = async () => {
-  const nextNickname = String(nicknameDraft.value || '').trim()
-  if (!nextNickname) {
-    errorMessage.value = 'Nama panggilan tidak boleh kosong.'
-    errorModalOpen.value = true
-    return
-  }
+const displayPhone = computed(() => {
+  const d = accountInfo.value || {}
+  const p = String(d.phone || d.phone_number || d.user_phone || '').trim()
+  if (!p) return '-'
+  const digits = p.replace(/\D/g, '')
+  if (digits.length <= 6) return p
+  const headLen = Math.min(4, Math.max(1, digits.length - 4))
+  const tailLen = 4
+  const head = digits.slice(0, headLen)
+  const tail = digits.slice(-tailLen)
+  const masked = `${head}${'*'.repeat(Math.max(0, digits.length - headLen - tailLen))}${tail}`
+  return p.startsWith('+') ? `+${masked}` : masked
+})
 
-  try {
-    const payload = {
-      username: nextNickname,
-      username: currentUsername.value || nickname.value || nextNickname
-    }
-    await authAPI.updateProfile(payload)
-    nickname.value = nextNickname
-    successMessage.value = 'Profil berhasil diperbarui'
-    successModalOpen.value = true
-    showNicknameModal.value = false
-  } catch (err) {
-    errorMessage.value = extractErrorMessage(err)
-    errorModalOpen.value = true
-  }
-}
+const currentLevel = computed(() => {
+  const d = rankStatus.value || {}
+  const title = String(d.current_title || '').trim()
+  if (title) return title
+  const n = toNumber(d.current_rank)
+  return Number.isFinite(n) ? `LV${n}` : 'LV0'
+})
 
-const changePassword = () => {
-  showPasswordModal.value = true
-}
+const supervisor = computed(() => {
+  const d = accountInfo.value || {}
+  const s = String(d.referral_by_phone || d.upline || d.parent_phone || d.referrer_phone || '').trim()
+  if (!s) return '-'
+  const digits = s.replace(/\D/g, '')
+  if (digits.length <= 6) return s
+  const headLen = Math.min(4, Math.max(1, digits.length - 4))
+  const tailLen = 4
+  const head = digits.slice(0, headLen)
+  const tail = digits.slice(-tailLen)
+  const masked = `${head}${'*'.repeat(Math.max(0, digits.length - headLen - tailLen))}${tail}`
+  return s.startsWith('+') ? `+${masked}` : masked
+})
 
-const manageBank = () => {
-  router.push('/pages/assets/bind')
-}
+const joinDate = computed(() => {
+  const raw = accountInfo.value?.created_at || null
+  if (!raw) return '-'
+  const d = new Date(raw)
+  if (Number.isNaN(d.getTime())) return '-'
+  return d.toLocaleString('id-ID', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).replace(/\./g, '/')
+})
 
-const selectAvatar = (avatar) => {
-  selectedAvatar.value = avatar
-}
-
-const confirmAvatarChange = () => {
-  setAvatar(selectedAvatar.value || avatarSrc.value)
-  showAvatarModal.value = false
-}
-
-const savePasswordChange = async () => {
-  const oldVal = oldPassword.value.trim()
-  const newVal = newPassword.value.trim()
-  const confirmVal = confirmPassword.value.trim()
-
-  if (!oldVal || !newVal || !confirmVal) {
-    errorMessage.value = 'Harap lengkapi semua field kata sandi.'
-    errorModalOpen.value = true
-    return
-  }
-
-  if (newVal !== confirmVal) {
-    errorMessage.value = 'Konfirmasi kata sandi baru tidak sama.'
-    errorModalOpen.value = true
-    return
-  }
-
-  try {
-    await authAPI.resetPassword({
-      phone: String(phone.value || '').trim(),
-      old_password: oldVal,
-      new_password: newVal
-    })
-    successMessage.value = 'Kata sandi berhasil diubah'
-    successModalOpen.value = true
-    showPasswordModal.value = false
-    oldPassword.value = ''
-    newPassword.value = ''
-    confirmPassword.value = ''
-  } catch (err) {
-    errorMessage.value = extractErrorMessage(err)
-    errorModalOpen.value = true
-  }
-}
-
-const clearCache = async () => {
-  try {
-    localStorage.clear()
-    sessionStorage.clear()
-  } catch (_) {}
-
-  try {
-    if (typeof caches !== 'undefined' && caches.keys) {
-      const keys = await caches.keys()
-      await Promise.all(keys.map((k) => caches.delete(k)))
-    }
-  } catch (_) {}
-
-  location.reload()
-}
-
-const loadAccountInfo = async () => {
+const fetchAccountInfo = async () => {
   try {
     const resp = await authAPI.getAccountInfo()
-    const p = resp?.data?.phone || ''
-    phone.value = p
-    accountNumber.value = p || '-'
-    currentUsername.value = resp?.data?.username || ''
-    nickname.value = resp?.data?.username || nickname.value
-    userId.value = String(resp?.data?.referral_code ?? userId.value)
-  } catch (_) {}
+    accountInfo.value = resp?.data || null
+  } catch (_) {
+    accountInfo.value = null
+  }
+}
+
+const fetchRankStatus = async () => {
+  try {
+    const resp = await authAPI.getRankStatus()
+    rankStatus.value = resp?.data || null
+  } catch (_) {
+    rankStatus.value = null
+  }
 }
 
 onMounted(() => {
-  loadAccountInfo()
+  Promise.all([fetchAccountInfo(), fetchRankStatus()])
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-body {
+.app-container {
   font-family: 'Inter', sans-serif;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
-  background-color: #050505;
-  display: flex;
-  justify-content: center;
+  max-width: 412px;
   min-height: 100vh;
+  background: linear-gradient(180deg, #0a4345 0%, #0b6563 100%);
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 * {
   box-sizing: border-box;
 }
 
-img {
-  display: block;
-  max-width: 100%;
+h1, h2, p {
+  margin: 0;
 }
 
-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  font-family: inherit;
-}
-
-/* Main Container */
-#app-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.screen-wrapper {
-  width: 100%;
-  max-width: 412px;
-  min-height: 100vh;
-  position: relative;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
-  padding-bottom: 40px;
-}
-
-/* Header */
+/* Header Section */
 .app-header {
   display: flex;
-  align-items: center;
-  padding: 21px 10px;
-  position: relative;
-  margin-bottom: 20px;
+  gap: 0px;
+  align-items: flex-start;
+  padding: 28px 10px;
 }
 
 .back-button {
-  width: 24px;
-  height: 24px;
+  width: 35px;
+  height: 35px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2;
-  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
-.page-title {
-  position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
+.back-button img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.greeting {
   color: #ffffff;
-  font-size: 16px;
+  font-size: 22px;
   font-weight: 600;
   margin: 0;
-  pointer-events: none;
+  line-height: 1.2;
 }
 
-/* Settings Groups */
-.settings-group {
-  background-color: #1d2138;
-  border-radius: 10px;
-  margin: 0 19px 12px 19px;
-  padding: 10px 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.settings-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 32px;
-  cursor: pointer;
-}
-
-.item-label {
-  color: #ffffff;
+.level-info {
+  color: rgba(255, 255, 255, 0.5);
   font-size: 14px;
+  margin: 0;
 }
 
-.item-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.item-value {
-  color: #afafaf;
-  font-size: 14px;
-}
-
-.avatar-preview {
-  width: 38px;
-  height: 39px;
-  object-fit: contain;
-}
-
-.icon-arrow {
-  width: 7px;
-  height: 12px;
-}
-
-/* Action Button */
-.action-button-container {
-  margin: 24px 18px;
-}
-
-.btn-gradient {
-  width: 100%;
-  height: 41px;
-  border-radius: 10px;
-  border: 1px solid #746a9a;
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 30%, #9047e0 100%);
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Modal Overlay */
-.modal-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(6, 5, 5, 0.5);
-  z-index: 100;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.modal-card {
-  width: 328px;
-  background-color: #1d2138;
-  border-radius: 10px;
-  padding: 13px 19px 20px 19px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  cursor: default;
-}
-
-.modal-title {
-  color: #ffffff;
+.level-badge {
+  color: #de6f00;
+  font-weight: 700;
   font-size: 16px;
-  font-weight: 500;
-  margin: 0 0 23px 0;
 }
 
-.avatar-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px 30px;
-  margin-bottom: 20px;
-  width: 100%;
-}
-
-.avatar-option {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.avatar-option img {
-  width: 55px;
-  height: 53px;
+.header-logo {
+  height: 32px;
   object-fit: contain;
-  cursor: pointer;
-  transition: transform 0.2s;
+  border-radius: 50px;
+  margin-left: auto;
 }
 
-.avatar-option img:hover {
-  transform: scale(1.05);
+/* Profile Data Section */
+#section-profile-data {
+  padding: 10px 20px 30px 20px;
+  flex: 1;
 }
 
-.btn-primary {
-  width: 244px;
-  height: 36px;
-  background-color: #746a9a;
-  border-radius: 5px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
+.data-card {
+  background-color: #eeeeee;
+  border-radius: 20px;
+  padding: 24px 20px;
+}
+
+.card-header {
   display: flex;
-  justify-content: center;
   align-items: center;
+  margin-bottom: 24px;
+  gap: 12px;
 }
 
-.btn-full {
-  width: 100%;
+.card-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
-.password-form {
-  width: 100%;
+.card-title {
+  color: #121212;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.data-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 18px;
 }
 
-.modal-input {
-  width: 100%;
-  height: 34px;
-  border-radius: 5px;
-  border: 1px solid #746a9a;
-  background-color: rgba(29, 33, 56, 0.75);
-  color: #ffffff;
-  padding: 0 12px;
+.data-item {
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(5, 5, 5, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.data-item.no-border {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.data-label {
   font-size: 12px;
-  outline: none;
+  color: #555555;
 }
 
-.modal-input::placeholder {
-  color: rgba(255, 255, 255, 0.55);
+.data-value {
+  font-size: 15px;
+  color: #121212;
+  font-weight: 600;
 }
 </style>

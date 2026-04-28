@@ -1,221 +1,128 @@
 <template>
   <div class="app-container">
-    <LoadingSpinner :visible="isLoading && !product" :overlay="true" message="Memuat data drone..." />
-    <!-- Header Section -->
-    <section id="header">
-      <div class="header-content">
-        <div class="icon-back" @click="goBack">
-          <img src="/assets/image/118_937.svg" alt="Back">
+    <LoadingSpinner :visible="isLoading && !product" :overlay="true" message="" />
+
+    <!-- Header -->
+    <section id="section-header">
+      <header class="app-header">
+        <button class="back-btn" @click="goBack" aria-label="Kembali">
+          <img src="/assets/images/2031_431.svg" alt="Back Icon">
+        </button>
+        <h1 class="header-title">Detail Aset Pembayaran</h1>
+      </header>
+    </section>
+
+    <!-- Product Info -->
+    <section id="section-product-info">
+      <div class="product-info">
+        <img class="product-icon" src="/assets/images/d8ec3d5fc11c15ebc75de9b67990d7f0d2d8eb0b.png" alt="Product Icon">
+        <div class="product-text">
+          <h2 class="product-title">{{ productTitle }}</h2>
+          <p class="product-subtitle">{{ product?.specifications || 'Spesifikasi produk' }}</p>
         </div>
-        <h1 class="page-title">{{ productTitle }}</h1>
       </div>
     </section>
 
-    <!-- Hero Section -->
-    <section id="hero">
-      <div class="hero-image-container">
-        <img v-if="productImage" :src="productImage" :alt="productTitle" class="hero-drone" @error="onImageError">
+    <!-- Chart -->
+    <section id="section-chart">
+      <div class="chart-container">
+        <div class="chart-card">
+          <svg
+            v-if="chartReady"
+            class="chart-img"
+            viewBox="0 0 300 120"
+            preserveAspectRatio="none"
+            aria-label="Grafik pertumbuhan aset"
+          >
+            <defs>
+              <linearGradient id="productChartFillGreen" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(21, 178, 92, 0.28)" />
+                <stop offset="100%" stop-color="rgba(21, 178, 92, 0)" />
+              </linearGradient>
+              <filter id="productChartShadowGreen" x="-20%" y="-40%" width="140%" height="200%">
+                <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#15B25C" flood-opacity="0.35" />
+              </filter>
+            </defs>
+            <path :d="chartAreaPath" fill="url(#productChartFillGreen)" />
+            <path :d="chartLinePath" stroke="#15B25C" stroke-width="3" fill="none" filter="url(#productChartShadowGreen)" />
+          </svg>
+          <img v-else class="chart-img" src="/assets/images/2031_435.svg" alt="Growth Chart">
+        </div>
+        <p class="chart-caption">Dana pertumbuhan aset 2026</p>
       </div>
     </section>
 
-    <!-- Status Section -->
-    <section id="status">
-      <h2 class="section-label">DRONE TERSEDIA</h2>
-      
-      <div class="drone-card">
-        <div class="drone-thumb">
-          <img v-if="productImage" :src="productImage" alt="Drone Thumbnail" @error="onImageError">
-        </div>
-        <div class="drone-details">
-          <h3 class="drone-name">{{ productTitle }}</h3>
-          <div class="badges">
-            <div class="badge badge-rent">
-              <span>Sewa</span>
+    <!-- Price Details -->
+    <section id="section-price-details">
+      <div class="price-container">
+        <div class="price-card-outer">
+          <div class="price-card-inner">
+            <div class="price-col-left">
+              <span class="price-label">Harga Beli</span>
+              <span class="price-value">{{ priceText }}</span>
+              <span class="price-return">Pengembalian: {{ profitPerDay }}/hari</span>
             </div>
-            <div class="badge badge-status">
-              <span>{{ availabilityText }}</span>
+            <div class="price-col-right">
+              <span class="price-limit">Maksimal pembelian: {{ purchaseLimitText }}</span>
+              <span class="price-due">Jatuh tempo: {{ dueDateText }}</span>
             </div>
           </div>
         </div>
       </div>
-
-      <div class="divider"></div>
     </section>
 
-    <!-- Stats Section -->
-    <section id="stats">
-      <h2 class="stats-title">Informasi drone</h2>
-      <div class="stats-grid">
-        <!-- Card 1 -->
-        <div class="stat-card">
-          <span class="stat-label">Masa pelayanan</span>
-          <span class="stat-value">{{ durationText }}</span>
-        </div>
-        <!-- Card 2 -->
-        <div class="stat-card">
-          <span class="stat-label">Estimasi sewa</span>
-          <span class="stat-value">{{ priceText }}</span>
-        </div>
-        <!-- Card 3 -->
-        <div class="stat-card">
-          <span class="stat-label">Kapasitas</span>
-          <span class="stat-value">{{ capacityText }}</span>
-        </div>
-        <!-- Card 4 -->
-        <div class="stat-card">
-          <span class="stat-label">Suku pokok</span>
-          <span class="stat-value">{{ profitText }}</span>
-        </div>
-        <!-- Card 5 -->
-        <div class="stat-card">
-          <span class="stat-label">Area pelayanan</span>
-          <span class="stat-value">{{ product?.golongan || '-' }}</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Terms Section -->
-    <section id="terms">
-      <h2 class="terms-title">Hak Pendapatan Suku Pokok Drone</h2>
-      <div class="terms-content">
-        <ol class="terms-sections">
-          <li class="terms-section">
-            <div class="terms-section-title">Pendahuluan</div>
-            <p class="terms-paragraph">
-              Dokumen ini menjelaskan mengenai hak pendapatan suku pokok drone dalam sistem operasional SENT. Setiap pengguna yang melakukan penyewaan atau kepemilikan hak operasional drone berhak memperoleh manfaat sesuai dengan ketentuan yang berlaku dalam platform.
-            </p>
-            <p class="terms-paragraph">
-              Suku pokok drone mengacu pada nilai dasar aset yang digunakan dalam kegiatan operasional pemetaan dan analisis berbasis teknologi kecerdasan buatan.
-            </p>
-          </li>
-
-          <li class="terms-section">
-            <div class="terms-section-title">Ketentuan Manfaat</div>
-            <p class="terms-paragraph">Pengguna yang memiliki hak atas suku pokok drone berhak memperoleh manfaat berupa:</p>
-            <ul class="terms-bullets">
-              <li>Pendapatan operasional berdasarkan aktivitas drone</li>
-              <li>Akses terhadap sistem pemantauan dan kontrol drone</li>
-              <li>Pembaruan sistem dan peningkatan performa berbasis AI</li>
-              <li>Dukungan teknis selama masa operasional</li>
-            </ul>
-            <p class="terms-paragraph">
-              Manfaat diberikan sesuai dengan tingkat produk (level drone) dan durasi penggunaan.
-            </p>
-          </li>
-
-          <li class="terms-section">
-            <div class="terms-section-title">Hasil yang Diharapkan</div>
-            <p class="terms-paragraph">Dengan kepemilikan hak suku pokok drone, pengguna diharapkan memperoleh:</p>
-            <ul class="terms-bullets">
-              <li>Pendapatan yang stabil dari aktivitas operasional</li>
-              <li>Efisiensi dalam pemanfaatan teknologi drone</li>
-              <li>Transparansi dalam pemantauan kinerja</li>
-              <li>Pengalaman penggunaan sistem berbasis AI yang terintegrasi</li>
-            </ul>
-          </li>
-
-          <li class="terms-section">
-            <div class="terms-section-title">Alokasi Dana</div>
-            <p class="terms-paragraph">Dana yang dialokasikan dalam sistem ini digunakan untuk:</p>
-            <ul class="terms-bullets">
-              <li>Operasional drone dan pemeliharaan perangkat</li>
-              <li>Pengembangan teknologi kecerdasan buatan</li>
-              <li>Infrastruktur sistem dan server</li>
-              <li>Pengelolaan data pemetaan dan analisis</li>
-            </ul>
-            <p class="terms-paragraph">
-              Alokasi dilakukan secara terstruktur untuk menjaga keberlangsungan sistem.
-            </p>
-          </li>
-
-          <li class="terms-section">
-            <div class="terms-section-title">Risiko dan Pengungkapan</div>
-            <p class="terms-paragraph">
-              Pengguna memahami bahwa terdapat risiko dalam penggunaan sistem, termasuk namun tidak terbatas pada:
-            </p>
-            <ul class="terms-bullets">
-              <li>Gangguan teknis atau operasional</li>
-              <li>Perubahan kondisi lingkungan (cuaca, sinyal, dll)</li>
-              <li>Fluktuasi hasil operasional</li>
-              <li>Risiko sistem atau jaringan</li>
-            </ul>
-            <p class="terms-paragraph">
-              Dengan ini pengguna menyatakan telah memahami dan menerima seluruh risiko yang ada.
-            </p>
-          </li>
-
-          <li class="terms-section">
-            <div class="terms-section-title">Kepemilikan dan Strategi Keluar</div>
-            <p class="terms-paragraph">
-              Hak atas suku pokok drone bersifat terbatas pada periode penggunaan yang telah ditentukan.
-            </p>
-            <p class="terms-paragraph">Pengguna memiliki opsi untuk:</p>
-            <ul class="terms-bullets">
-              <li>Mengakhiri penggunaan setelah periode selesai</li>
-              <li>Melanjutkan dengan pembaruan periode</li>
-              <li>Menghentikan partisipasi sesuai ketentuan sistem</li>
-            </ul>
-          </li>
-
-          <li class="terms-section">
-            <div class="terms-section-title">Hak dan Tanggung Jawab Pihak Penerima Suku Pokok</div>
-            <p class="terms-paragraph">Pengguna memiliki hak untuk:</p>
-            <ul class="terms-bullets">
-              <li>Mengakses informasi operasional secara transparan</li>
-              <li>Menerima manfaat sesuai ketentuan</li>
-              <li>Mendapatkan dukungan sistem</li>
-            </ul>
-            <p class="terms-paragraph">Pengguna juga bertanggung jawab untuk:</p>
-            <ul class="terms-bullets">
-              <li>Menggunakan sistem sesuai aturan</li>
-              <li>Tidak menyalahgunakan platform</li>
-              <li>Mematuhi kebijakan yang berlaku</li>
-            </ul>
-          </li>
-
-          <li class="terms-section">
-            <div class="terms-section-title">Kepatuhan Hukum dan Peraturan, Izin dan Persetujuan</div>
-            <p class="terms-paragraph">
-              SENT beroperasi dengan mengacu pada ketentuan hukum dan peraturan yang berlaku.
-            </p>
-            <p class="terms-paragraph">Pengguna dengan ini menyatakan:</p>
-            <ul class="terms-bullets">
-              <li>Menyetujui seluruh syarat dan ketentuan</li>
-              <li>Memahami kebijakan penggunaan sistem</li>
-              <li>Memberikan persetujuan atas pemrosesan data yang diperlukan</li>
-            </ul>
-          </li>
-        </ol>
-      </div>
-    </section>
-
-    <!-- Footer Section -->
-    <section id="footer">
-      <div class="footer-bg">
-        <div class="footer-content">
-          <div class="price-info">
-            <span class="price-label">Harga sewa</span>
-            <span class="price-value">{{ priceTextUpper }}</span>
+    <!-- Asset Info -->
+    <section id="section-asset-info">
+      <div class="asset-info-container">
+        <h3 class="asset-info-title">Informasi Aset</h3>
+        <div class="asset-info-list">
+          <div class="asset-info-row">
+            <span class="asset-info-label">Nama Aset</span>
+            <span class="asset-info-value">{{ product?.name || '-' }}</span>
           </div>
-          <button class="btn-pay" type="button" @click="openPurchaseModal" :disabled="isPurchasing">
-            Membayar dan menerima seluruh ketentuan
-          </button>
+          <div class="asset-info-row">
+            <span class="asset-info-label">Durasi</span>
+            <span class="asset-info-value">{{ durationText }}</span>
+          </div>
+          <div class="asset-info-row">
+            <span class="asset-info-label">Seri</span>
+            <span class="asset-info-value">{{ product?.golongan || '-' }}</span>
+          </div>
+          <div class="asset-info-row">
+            <span class="asset-info-label">Stock</span>
+            <span class="asset-info-value">{{ availabilityText }}</span>
+          </div>
         </div>
       </div>
     </section>
 
+    <!-- Footer -->
+    <section id="section-footer">
+      <footer class="app-footer">
+        <div class="terms-container">
+          <img class="terms-icon" src="/assets/images/d9b41d54b13e3f872bf656657234e30868c2d994.png" alt="Checkbox Icon">
+          <p class="terms-text">
+            Dengan melanjutkan proses ini, kamu menyetujui <router-link to="/terms" class="terms-highlight">Syarat & Ketentuan</router-link> yang berlaku
+          </p>
+        </div>
+        <button class="btn-primary" @click="openPurchaseModal" :disabled="isPurchasing">Bayar</button>
+      </footer>
+    </section>
+
+    <!-- Purchase Modal -->
     <teleport to="body">
       <div v-if="showPurchaseModal" class="purchase-modal-overlay" @click.self="showPurchaseModal = false">
         <div class="purchase-modal">
-          <div class="purchase-modal-title">Status</div>
-          <div class="purchase-modal-desc">Apakah akan membayar dan menerima seluruh ketentuan?</div>
+          <div class="purchase-modal-title">Pertanyaan</div>
+          <div class="purchase-modal-desc">Periksa sebelum melanjutkan apa sudah sesuai?</div>
           <div class="purchase-modal-actions">
-            <button type="button" class="purchase-btn cancel" @click="showPurchaseModal = false" :disabled="isPurchasing">Membatalkan</button>
-            <button type="button" class="purchase-btn ok" @click="confirmPurchase" :disabled="isPurchasing">OK</button>
+            <button type="button" class="purchase-btn cancel" @click="showPurchaseModal = false" :disabled="isPurchasing">Batal</button>
+            <button type="button" class="purchase-btn ok" @click="confirmPurchase" :disabled="isPurchasing">Setuju</button>
           </div>
         </div>
       </div>
     </teleport>
+
     <SuccessModal
       v-model="successModalOpen"
       :message="successMessage"
@@ -229,7 +136,6 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { productAPI } from '@/services/api'
-import { resolveImageUrl } from '@/utils/imageCache'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
@@ -238,7 +144,6 @@ const router = useRouter()
 const route = useRoute()
 
 const product = ref(null)
-const transparentPixel = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
 const isLoading = ref(false)
 const showPurchaseModal = ref(false)
 const isPurchasing = ref(false)
@@ -247,32 +152,6 @@ const errorModalOpen = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 const redirectInvestmentId = ref(null)
-const redirectInvestmentData = ref(null)
-
-const productBlobUrl = ref('')
-
-const fetchImageAsBlob = async (url) => {
-  if (!url) return
-  const resolved = resolveImageUrl(url)
-  try {
-    const resp = await fetch(resolved)
-    if (!resp.ok) throw new Error('Failed to fetch image')
-    const blob = await resp.blob()
-    const blobUrl = URL.createObjectURL(blob)
-    productBlobUrl.value = blobUrl
-  } catch (err) {
-    console.error('Error loading blob image:', err)
-  }
-}
-
-watch(
-  () => product.value?.image,
-  (url) => {
-    if (url) {
-      fetchImageAsBlob(url)
-    }
-  }
-)
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return null
@@ -284,31 +163,132 @@ const parseNumber = (value) => {
 const formatNumber = (value) => {
   const n = parseNumber(value)
   if (n === null) return '-'
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)
+  return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)
 }
 
-const productTitle = computed(() => product.value?.name || 'Drone')
-
-const productImage = computed(() => {
-  if (productBlobUrl.value) return productBlobUrl.value
-  const raw = String(product.value?.image || '').trim()
-  if (!raw) return ''
-  return String(resolveImageUrl(raw) || '').trim()
-})
-
-const onImageError = (e) => {
-  const el = e?.target
-  if (!el || !el.src) return
-  el.alt = ''
-  el.src = transparentPixel
-  el.style.opacity = '0'
+const seededRng = (seed) => {
+  let s = (Number(seed) || 0) >>> 0
+  return () => {
+    s = (1664525 * s + 1013904223) >>> 0
+    return s / 4294967296
+  }
 }
 
-const durationText = computed(() => {
-  const d = parseNumber(product.value?.duration)
-  if (d === null) return '-'
-  return `${d}D`
+const normalizeSeries = (raw) => {
+  const list = Array.isArray(raw) ? raw : []
+  const values = list
+    .map((x) => {
+      if (typeof x === 'number') return x
+      if (typeof x === 'string') return parseNumber(x)
+      if (x && typeof x === 'object') {
+        const v = x.value ?? x.amount ?? x.y ?? x.total ?? x.count
+        return parseNumber(v)
+      }
+      return null
+    })
+    .filter((v) => v !== null && Number.isFinite(Number(v)))
+    .map((v) => Number(v))
+  return values
+}
+
+const chartValues = computed(() => {
+  const p = product.value || {}
+  const candidates = [
+    p.growth,
+    p.growth_data,
+    p.growth_points,
+    p.chart,
+    p.chart_data,
+    p.chart_points,
+    p.points,
+    p.graph
+  ]
+  for (const c of candidates) {
+    const values = normalizeSeries(c)
+    if (values.length >= 2) return values.slice(-6)
+  }
+
+  const idSeed = Number(route.params.id || 0) || 0
+  const basePrice = parseNumber(p.price) ?? 0
+  const baseProfit = parseNumber(p.profit_rate) ?? (parseNumber(p.profit_random_min) ?? 0)
+  const base = Math.max(20, Math.round((basePrice / 100000) * 6 + (baseProfit / 10000) * 2))
+  const rand = seededRng(idSeed + Math.round(basePrice) + Math.round(baseProfit * 10))
+
+  const out = []
+  let cur = base
+  for (let i = 0; i < 6; i += 1) {
+    const step = Math.max(1, Math.round(base * (0.04 + rand() * 0.12)))
+    const dip = rand() < 0.22 ? Math.round(step * (0.6 + rand() * 0.6)) : 0
+    cur = Math.max(1, cur + step - dip)
+    out.push(cur)
+  }
+  return out
 })
+
+const chartPoints = computed(() => {
+  const values = chartValues.value
+  const w = 300
+  const h = 120
+  const padX = 8
+  const padTop = 12
+  const padBottom = 18
+  const innerW = w - padX * 2
+  const innerH = h - padTop - padBottom
+  const max = Math.max(1, ...values)
+  return values.map((v, idx) => {
+    const x = padX + (innerW * idx) / Math.max(1, values.length - 1)
+    const y = padTop + innerH * (1 - v / max)
+    return { x, y }
+  })
+})
+
+const chartLinePath = computed(() => {
+  const pts = chartPoints.value
+  if (pts.length < 2) return ''
+  const path = [`M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`]
+  for (let i = 0; i < pts.length - 1; i += 1) {
+    const p0 = pts[i - 1] || pts[i]
+    const p1 = pts[i]
+    const p2 = pts[i + 1]
+    const p3 = pts[i + 2] || p2
+    const cp1x = p1.x + (p2.x - p0.x) / 6
+    const cp1y = p1.y + (p2.y - p0.y) / 6
+    const cp2x = p2.x - (p3.x - p1.x) / 6
+    const cp2y = p2.y - (p3.y - p1.y) / 6
+    path.push(
+      `C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)} ${cp2x.toFixed(2)} ${cp2y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
+    )
+  }
+  return path.join(' ')
+})
+
+const chartAreaPath = computed(() => {
+  const pts = chartPoints.value
+  if (pts.length < 2) return ''
+  const baseY = 120 - 18
+  const path = [`M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`]
+  for (let i = 0; i < pts.length - 1; i += 1) {
+    const p0 = pts[i - 1] || pts[i]
+    const p1 = pts[i]
+    const p2 = pts[i + 1]
+    const p3 = pts[i + 2] || p2
+    const cp1x = p1.x + (p2.x - p0.x) / 6
+    const cp1y = p1.y + (p2.y - p0.y) / 6
+    const cp2x = p2.x - (p3.x - p1.x) / 6
+    const cp2y = p2.y - (p3.y - p1.y) / 6
+    path.push(
+      `C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)} ${cp2x.toFixed(2)} ${cp2y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
+    )
+  }
+  path.push(`L ${pts[pts.length - 1].x.toFixed(2)} ${baseY}`)
+  path.push(`L ${pts[0].x.toFixed(2)} ${baseY}`)
+  path.push('Z')
+  return path.join(' ')
+})
+
+const chartReady = computed(() => Boolean(product.value) && chartLinePath.value && chartAreaPath.value)
+
+const productTitle = computed(() => product.value?.name || 'Aset')
 
 const priceText = computed(() => {
   const p = parseNumber(product.value?.price)
@@ -316,36 +296,42 @@ const priceText = computed(() => {
   return `Rp ${formatNumber(p)}`
 })
 
-const priceTextUpper = computed(() => {
-  const p = parseNumber(product.value?.price)
-  if (p === null) return 'RP -'
-  return `RP ${formatNumber(p)}`
-})
-
-const capacityText = computed(() => {
-  const limit = parseNumber(product.value?.purchase_limit)
-  if (limit === null) return '1Ha'
-  return `${Math.max(1, Math.round(limit))}Ha`
-})
-
-const profitText = computed(() => {
+const profitPerDay = computed(() => {
   const profitType = String(product.value?.profit_type || '').toLowerCase()
   if (profitType === 'random') {
     const min = parseNumber(product.value?.profit_random_min)
-    const max = parseNumber(product.value?.profit_random_max)
-    if (min !== null && max !== null) return `Rp${formatNumber(min)} ~ Rp${formatNumber(max)}`
-    if (min !== null) return `Rp${formatNumber(min)} ~ Rp${formatNumber(min)}`
+    if (min !== null) return `Rp ${formatNumber(min)}`
   }
   const rate = parseNumber(product.value?.profit_rate)
-  if (rate !== null && rate > 0) return `Rp${formatNumber(rate)}`
-  return 'Rp-'
+  if (rate !== null && rate > 0) return `Rp ${formatNumber(rate)}`
+  return 'Rp -'
+})
+
+const durationText = computed(() => {
+  const d = parseNumber(product.value?.duration)
+  if (d === null) return '-'
+  return `${d} Hari`
+})
+
+const purchaseLimitText = computed(() => {
+  const limit = parseNumber(product.value?.purchase_limit)
+  if (limit === null) return '1'
+  return String(Math.max(1, Math.round(limit)))
+})
+
+const dueDateText = computed(() => {
+  const d = parseNumber(product.value?.duration)
+  if (d === null) return '-'
+  const due = new Date()
+  due.setDate(due.getDate() + d)
+  return `${String(due.getDate()).padStart(2, '0')}/${String(due.getMonth() + 1).padStart(2, '0')}/${due.getFullYear()}`
 })
 
 const availabilityText = computed(() => {
   const enabled = product.value?.stock_enabled
   const stock = parseNumber(product.value?.stock)
   if (enabled && stock !== null && stock <= 0) return 'Stok habis'
-  return 'Menunggu pelayanan'
+  return 'Tersedia'
 })
 
 const fetchProduct = async () => {
@@ -361,12 +347,6 @@ const fetchProduct = async () => {
     isLoading.value = false
   }
 }
-
-onBeforeUnmount(() => {
-  if (productBlobUrl.value) {
-    URL.revokeObjectURL(productBlobUrl.value)
-  }
-})
 
 watch(() => route.params.id, fetchProduct, { immediate: true })
 
@@ -425,10 +405,8 @@ const confirmPurchase = async () => {
       withdraw_pin: ''
     })
     const inv = resp?.data
-    // Gunakan id (PK) sebagai prioritas utama
     redirectInvestmentId.value = inv?.id ?? inv?.investment_id ?? null
-    redirectInvestmentData.value = inv || null
-    successMessage.value = 'Drone telah ditambahkan ke akun Anda.'
+    successMessage.value = 'Aset telah ditambahkan ke akun Anda.'
     successModalOpen.value = true
   } catch (err) {
     const data = err?.response?.data
@@ -442,93 +420,300 @@ const confirmPurchase = async () => {
 const handleSuccessConfirm = () => {
   const id = redirectInvestmentId.value
   redirectInvestmentId.value = null
-  redirectInvestmentData.value = null
   if (id) {
-    router.push(`/pages/account/panel/${id}`)
+    router.push(`/portfolio`)
     return
   }
-  router.push('/pages/account/panel')
+  router.push('/portfolio')
 }
+
+onBeforeUnmount(() => {
+  // cleanup if needed
+})
 </script>
+
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+.app-container {
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+  max-width: 412px;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 * {
   box-sizing: border-box;
-}
-
-body {
-  font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #000;
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-.app-container {
-  --primary-bg: #1d2138;
-  --text-white: #ffffff;
-  --text-gray: #adadad;
-  --text-light-gray: #c2c2c2;
-  --text-dim: #b7b7b7;
-  --accent-purple: #746a9a;
-  width: 100%;
-  max-width: 412px;
-  background-color: var(--primary-bg);
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: top center;
-  background-repeat: no-repeat;
-  position: relative;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 img {
-  display: block;
   max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 h1, h2, h3, p {
   margin: 0;
 }
 
-/* Header Section */
-#header {
-  padding: 13px 20px;
-  width: 100%;
-}
-
-.header-content {
+/* Header */
+.app-header {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
+  padding: 24px 16px;
+  position: relative;
 }
 
-.icon-back {
-  width: 24px;
-  height: 24px;
+.back-btn {
+  position: absolute;
+  left: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.page-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-white);
-  flex: 1;
-  text-align: center;
-  margin-right: 24px;
+.back-btn img {
+  width: 24px;
+  height: 24px;
 }
 
+.header-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+/* Product Info */
+.product-info {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 12px;
+}
+
+.product-icon {
+  width: 49px;
+  height: 49px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.product-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+.product-subtitle {
+  font-size: 12px;
+  color: #666666;
+  margin: 0;
+}
+
+/* Chart */
+.chart-container {
+  padding: 8px 0px;
+}
+
+.chart-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 24px 0px;
+  margin-bottom: 12px;
+}
+
+.chart-img {
+  width: 100%;
+  height: 150px;
+  display: block;
+}
+
+.chart-caption {
+  text-align: right;
+  font-size: 12px;
+  color: #000000;
+  margin: 0;
+}
+
+/* Price Details */
+.price-container {
+  padding: 0 16px 24px;
+}
+
+.price-card-outer {
+  background-color: #eeeeee;
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.price-card-inner {
+  background-color: #f8f8f8;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.price-col-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-label {
+  font-size: 12px;
+  color: #004d43;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.price-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 16px;
+}
+
+.price-return {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.price-col-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.price-limit, .price-due {
+  font-size: 10px;
+  color: #004d43;
+  font-weight: 600;
+}
+
+/* Asset Info */
+.asset-info-container {
+  padding: 0 16px 32px;
+  flex-grow: 1;
+}
+
+.asset-info-title {
+  font-size: 14px;
+  color: #004d43;
+  font-weight: 700;
+  margin-bottom: 16px;
+  margin-top: 0;
+}
+
+.asset-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.asset-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.asset-info-label {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.asset-info-value {
+  font-size: 12px;
+  color: #000000;
+  font-weight: 700;
+}
+
+/* Footer */
+#section-footer {
+  margin-top: auto;
+}
+
+.app-footer {
+  padding: 16px;
+  background-color: #f8f8f8;
+}
+
+.terms-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.terms-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.terms-text {
+  font-size: 12px;
+  color: #000000;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.terms-highlight {
+  color: #004d43;
+  font-weight: 600;
+}
+
+.btn-primary {
+  width: 100%;
+  background-color: #004d43;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  padding: 18px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  font-family: inherit;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #003831;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Purchase Modal */
 .purchase-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -539,49 +724,25 @@ h1, h2, h3, p {
 .purchase-modal {
   width: 100%;
   max-width: 320px;
-  background: #1d2138;
-  border-radius: 10px;
-  padding: 14px 14px 12px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
 }
 
 .purchase-modal-title {
   text-align: center;
-  font-size: 14px;
-  font-weight: 500;
-  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
   margin-bottom: 8px;
 }
 
 .purchase-modal-desc {
-  text-align: left;
-  font-size: 12px;
-  color: rgba(255,255,255,0.75);
-  line-height: 1.4;
-  margin-bottom: 12px;
-}
-
-.purchase-modal-input-wrap {
-  width: 100%;
-  margin-bottom: 10px;
-}
-
-.purchase-modal-input {
-  width: 100%;
-  height: 36px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(0,0,0,0.2);
-  color: #ffffff;
-  font-size: 12px;
-  padding: 0 12px;
-  outline: none;
-}
-
-.purchase-modal-error {
   text-align: center;
-  font-size: 11px;
-  color: rgba(255,120,120,0.95);
-  margin-bottom: 10px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+  line-height: 1.4;
+  margin-bottom: 16px;
 }
 
 .purchase-modal-actions {
@@ -592,273 +753,29 @@ h1, h2, h3, p {
 
 .purchase-btn {
   flex: 1;
-  height: 34px;
-  border-radius: 8px;
-  font-size: 12px;
+  height: 40px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
+  border: none;
 }
 
 .purchase-btn.cancel {
- background-color: #5d5d5d;
-  color: rgba(255,255,255,0.85);
+  background-color: #eeeeee;
+  color: #000000;
 }
 
 .purchase-btn.ok {
-  background: rgba(153,153,255,0.6);
+  background-color: #004d43;
   color: #ffffff;
 }
 
-/* Hero Section */
-#hero {
-  padding: 20px 0;
-  display: flex;
-  justify-content: center;
-}
-
-.hero-image-container {
-  width: 233px;
-  height: 155px;
-  position: relative;
-}
-
-.hero-drone {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* Status Section */
-#status {
-  padding: 0 20px;
-  margin-top: 20px;
-}
-
-.section-label {
-  font-size: 12px;
-  color: var(--text-gray);
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.drone-card {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.drone-thumb {
-  width: 120px;
-  height: 80px;
-  border-radius: 4px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.drone-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.drone-details {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-}
-
-.drone-name {
-  font-size: 14px;
-  color: var(--text-white);
-  font-weight: 600;
-}
-
-.badges {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 10px;
-  border-radius: 10px;
-  font-size: 10px;
-  color: var(--text-white);
-  height: 17px;
-}
-
-.badge-rent {
-  background: linear-gradient(90deg, #3f48c5 0%, #6135c4 30%, #9047e0 100%);
-  border: 1px solid var(--accent-purple);
-}
-
-.badge-status {
-  background-color: #1d2138;
-  border: 1px solid var(--accent-purple);
-  border-radius: 2px;
-}
-
-.divider {
-  height: 1px;
-  background-color: var(--accent-purple);
-  opacity: 0.3;
-  width: 100%;
-  margin-top: 10px;
-}
-
-/* Stats Section */
-#stats {
-  padding: 20px 20px;
-}
-
-.stats-title {
-  font-size: 14px;
-  color: var(--text-light-gray);
-  margin-bottom: 12px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.stat-card {
-  background: linear-gradient(180deg, rgba(15, 11, 46, 1) 0%, rgba(43, 27, 111, 1) 100%);
-  border-radius: 2px;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 57px;
-  box-shadow: inset 0px 4px 30px 0px rgba(0, 0, 0, 0.3);
-}
-
-.stat-label {
-  font-size: 10px;
-  color: var(--text-light-gray);
-  margin-bottom: 4px;
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 11px;
-  color: var(--text-white);
-  font-weight: 600;
-  text-align: center;
-}
-
-/* Terms Section */
-#terms {
-  padding: 0 20px 140px 20px;
-}
-
-.terms-title {
-  font-size: 14px;
-  color: var(--text-white);
-  margin-bottom: 12px;
-  font-weight: 600;
-}
-
-.terms-content {
-  font-size: 12px;
-  color: var(--text-dim);
-  line-height: 1.6;
-  text-align: justify;
-}
-
-.terms-sections {
-  margin: 0;
-  padding-left: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.terms-sections > li::marker {
-  color: rgba(255, 255, 255, 0.55);
-  font-weight: 600;
-}
-
-.terms-section-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.92);
-  margin-bottom: 6px;
-}
-
-.terms-paragraph {
-  margin: 0 0 8px;
-}
-
-.terms-paragraph:last-child {
-  margin-bottom: 0;
-}
-
-.terms-bullets {
-  margin: 6px 0 8px;
-  padding-left: 18px;
-}
-
-.terms-bullets li {
-  margin: 4px 0;
-}
-
-/* Footer Section */
-#footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  max-width: 412px;
-  z-index: 10;
-}
-
-.footer-bg {
-  background-color: #1d2138;
-  padding: 16px 20px 24px 20px;
-  border-top: 1px solid rgba(116, 106, 154, 0.2);
-}
-
-.footer-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.price-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.price-label {
-  font-size: 14px;
-  color: var(--text-white);
-}
-
-.price-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-white);
-}
-
-.btn-pay {
-  width: 100%;
-  background-color: #746a9a;
-  background: #746a9a;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 14px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: 'Inter', sans-serif;
+.purchase-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
+
+

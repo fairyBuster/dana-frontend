@@ -2,21 +2,20 @@
   <div class="app-container">
     <section id="section-header">
       <header class="app-header">
-        <div class="header-content">
-          <button type="button" class="back-button" @click="goBack">
-            <img src="/assets/image/132_171.svg" alt="Back" class="back-icon">
-          </button>
-          <h1 class="header-title">Berita</h1>
-        </div>
+        <button class="back-btn" @click="goBack" aria-label="Go back">
+          <img src="/assets/images/16_148.svg" alt="Back Icon">
+        </button>
+        <h1 class="page-title">Pemberitahuan</h1>
       </header>
     </section>
 
-    <section id="section-content">
-      <div class="content-container">
-        <h2 class="article-title">{{ article?.title || '-' }}</h2>
-        <div class="article-meta">{{ formatDate(article?.published_at || article?.updated_at) }}</div>
-        <div class="article-body" v-html="formattedBody"></div>
-      </div>
+    <section id="section-notification">
+      <article class="notification-card">
+        <div class="card-image-placeholder"></div>
+        <h2 class="card-title">{{ article?.title || '-' }}</h2>
+        <div class="card-meta">{{ formatDate(article?.published_at || article?.updated_at) }}</div>
+        <div class="card-text" v-html="formattedBody"></div>
+      </article>
     </section>
   </div>
 
@@ -43,10 +42,10 @@ const goBack = () => {
     if (window.history.length > 1) {
       router.back()
     } else {
-      router.push('/pages/account/news')
+      router.push('/news')
     }
   } catch (_) {
-    router.push('/pages/account/news')
+    router.push('/news')
   }
 }
 
@@ -66,10 +65,28 @@ const escapeHtml = (unsafe) => {
     .replace(/'/g, '&#039;')
 }
 
+const fixMojibake = (value) => {
+  const s = String(value || '')
+  if (!/[âÃ][\u0080-\u00BF]/.test(s)) return s
+  try {
+    const bytes = new Uint8Array(Array.from(s, (ch) => ch.charCodeAt(0) & 0xff))
+    return new TextDecoder('utf-8', { fatal: false }).decode(bytes)
+  } catch (_) {
+    return s
+  }
+}
+
 const formattedBody = computed(() => {
-  const raw = String(article.value?.body || '').replace(/\r\n/g, '\n').trim()
+  const raw = String(article.value?.body || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
   if (!raw) return ''
-  const clean = escapeHtml(raw.replace(/<[^>]*>?/gm, ''))
+  const normalized = fixMojibake(raw)
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/\u00a0/g, ' ')
+    .replace(/[–—•]/g, '-')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/\uFFFD/g, '-')
+  const clean = escapeHtml(normalized)
   return clean
     .split(/\n\s*\n/)
     .filter((p) => p.trim())
@@ -101,7 +118,6 @@ onMounted(() => {
   }
 })
 
-// Watch for route changes to handle navigation between related articles
 watch(() => route.params.id, (newId, oldId) => {
   if (newId && newId !== oldId) {
     fetchArticle(newId)
@@ -110,117 +126,117 @@ watch(() => route.params.id, (newId, oldId) => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+.app-container {
+  font-family: 'Inter', sans-serif;
+  margin: 0 auto;
+  padding: 0;
+  background-color: #f8f8f8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 412px;
+}
 
 * {
   box-sizing: border-box;
 }
 
-img {
-  max-width: 100%;
-  display: block;
+section {
+  width: 100%;
 }
 
 h1,
 h2,
-h3,
 p {
   margin: 0;
 }
 
-.app-container {
-  width: 100%;
-  max-width: 412px;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  min-height: 100vh;
-}
-
-#section-header {
-  padding-top: 13px;
-  padding-bottom: 10px;
-}
-
+/* Header Section */
 .app-header {
-  height: 44px;
   display: flex;
   align-items: center;
-  padding: 0 9px;
+  justify-content: center;
+  height: 60px;
   position: relative;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
   width: 100%;
 }
 
-.back-button {
+.back-btn {
+  position: absolute;
+  left: 7px;
   background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  width: 41px;
+  height: 41px;
 }
 
-.back-icon {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  z-index: 2;
+.back-btn img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
 }
 
-.header-title {
-  position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
+.page-title {
   font-size: 16px;
   font-weight: 600;
-  color: rgba(255,255,255,1);
-  pointer-events: none;
+  color: #000000;
+  text-align: center;
 }
 
-#section-content {
-  padding: 12px 14px 90px;
+/* Notification Section */
+#section-notification {
+  padding: 0 20px 24px;
 }
 
-.content-container {
+.notification-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  min-height: 375px;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.article-title {
+.card-image-placeholder {
+  background-color: #d9d9d9;
+  border-radius: 20px;
+  width: 100%;
+  height: 146px;
+}
+
+.card-title {
+  color: #004d43;
   font-size: 16px;
   font-weight: 700;
-  color: rgba(255,255,255,0.92);
-  line-height: 1.35;
+  line-height: 1.2;
 }
 
-.article-meta {
+.card-meta {
   font-size: 11px;
-  color: rgba(255,255,255,0.55);
+  color: rgba(0, 0, 0, 0.5);
 }
 
-.article-body {
-  font-size: 12px;
-  line-height: 1.65;
-  color: rgba(255,255,255,0.82);
-  text-align: justify;
+.card-text {
+  color: #000000;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
 }
 
-.article-body :deep(p) {
+.card-text :deep(p) {
   margin: 0 0 10px;
 }
 
-.article-body :deep(p:last-child) {
+.card-text :deep(p:last-child) {
   margin-bottom: 0;
 }
 </style>
+
+

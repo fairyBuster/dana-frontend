@@ -1,16 +1,16 @@
-<template>
+<!-- <template>
   <div class="solution-page">
-    <!-- Header Section -->
+   
     <section id="section-header">
       <header class="app-header">
         <button class="back-btn" @click="goBack">
-          <img src="/assets/image/82_1207.svg" alt="Back">
+          <img src="/assets/images/2023_1661.svg" alt="Back">
         </button>
         <h1 class="page-title">Produk dan Solusi</h1>
       </header>
     </section>
 
-    <!-- Hero Section -->
+    
     <section id="section-hero">
       <div class="hero-content">
         <h2 class="hero-title">Produk & Solusi OT-SENT</h2>
@@ -18,7 +18,7 @@
       </div>
     </section>
 
-    <!-- Products Section -->
+    
     <section id="section-products">
       <div class="section-label-container">
         <div class="gradient-pill">
@@ -27,19 +27,19 @@
       </div>
       
       <div class="card-list">
-        <!-- Card 1 -->
+       
         <article class="feature-card">
           <h3 class="card-title">AI Mapping Engine</h3>
           <p class="card-desc">Sistem pemetaan berbasis kecerdasan buatan untuk mengolah data udara menjadi visualisasi yang terstruktur dan mudah dipahami.</p>
         </article>
 
-        <!-- Card 2 -->
+       
         <article class="feature-card">
           <h3 class="card-title">Real-Time Monitoring</h3>
           <p class="card-desc">Pantau data secara langsung melalui sistem monitoring yang terintegrasi dalam platform OT-SENT.</p>
         </article>
 
-        <!-- Card 3 -->
+      
         <article class="feature-card">
           <h3 class="card-title">Data Analytics</h3>
           <p class="card-desc">Analisis data hasil pemetaan untuk mendapatkan insight yang relevan dan mendukung pengambilan keputusan.</p>
@@ -47,7 +47,7 @@
       </div>
     </section>
 
-    <!-- Solutions Section -->
+   
     <section id="section-solutions">
       <div class="section-label-container">
         <div class="gradient-pill">
@@ -56,40 +56,39 @@
       </div>
 
       <div class="solutions-grid">
-        <!-- Card 1 -->
+       
         <article class="solution-card">
           <h3 class="solution-title">Pemetaan Area</h3>
           <div class="solution-image">
-            <img src="/assets/image/21316c0607387d83d1660bf056e029b17ca4a47c.png" alt="Pemetaan Area">
+            <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Pemetaan Area">
           </div>
           <p class="solution-desc">Menyediakan solusi pemetaan area yang efisien menggunakan teknologi drone dan sistem AI.</p>
         </article>
 
-        <!-- Card 2 -->
         <article class="solution-card">
           <h3 class="solution-title">Monitoring Wilayah</h3>
           <div class="solution-image">
-            <img src="/assets/image/21d0425643cc74e914a7ce8e25c122e8fb4eb6d3.png" alt="Monitoring Wilayah">
+            <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Monitoring Wilayah">
           </div>
           <p class="solution-desc">Memantau kondisi wilayah secara real-time untuk mendukung pengawasan dan analisis data.</p>
         </article>
       </div>
     </section>
 
-    <!-- Footer Section -->
+ 
     <section id="section-footer">
       <div class="footer-container">
         <p class="powered-text">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
         <div class="footer-bottom">
           <div class="logo-wrapper">
-            <img src="/assets/image/983276.png" alt="OT-Sent Logo">
+            <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Logo">
           </div>
           <p class="copyright">© 2026 OT-SENT. All Rights Reserved</p>
         </div>
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { useRouter } from 'vue-router'
@@ -108,7 +107,7 @@ const goBack = () => {
   margin: 0 auto;
   padding: 0;
   background-color: #0f0b2e;
-  background-image: url('/assets/image/2800a66723e19a64dfa7a916b9f49c4077b15e71.png');
+  background-image: none;
   background-size: 100% auto;
   background-repeat: no-repeat;
   background-position: top center;
