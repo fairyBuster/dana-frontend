@@ -159,7 +159,7 @@ const confirmClose = () => { close(); emit('close') }
 .cta-button {
   height: 44px;
   border-radius: 14px;
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 700;
   display: flex;
   align-items: center;
