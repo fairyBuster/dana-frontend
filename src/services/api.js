@@ -153,6 +153,7 @@ const tryDecodeErrorData = (error) => {
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -166,6 +167,7 @@ const api = axios.create({
 // Instance untuk endpoint root (non-/api), misal /logout/
 const rootApi = axios.create({
   baseURL: ROOT_BASE_URL,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -505,7 +507,7 @@ const clearClientCaches = async () => {
 
 export const authAPI = {
   register: (userData) => {
-    return api.post('/register/', userData)
+    return api.post('/auth/register/', userData)
   },
   
   login: async (credentials) => {
@@ -965,5 +967,3 @@ export const withdrawalAPI = {
 }
 
 export default api
-
-

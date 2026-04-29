@@ -11,7 +11,18 @@
 
     <section id="section-notification">
       <article class="notification-card">
-        <div class="card-image-placeholder"></div>
+        <div class="card-image-placeholder">
+          <img
+            v-if="article?.image"
+            :src="resolveNewsImageUrl(article.image)"
+            :alt="article?.title || 'Gambar berita'"
+            class="card-hero-img"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+            @error="handleHeroError"
+          >
+        </div>
         <h2 class="card-title">{{ article?.title || '-' }}</h2>
         <div class="card-meta">{{ formatDate(article?.published_at || article?.updated_at) }}</div>
         <div class="card-text" v-html="formattedBody"></div>
@@ -29,6 +40,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { newsAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
+import { resolveImageUrl } from '@/utils/imageCache'
 
 const router = useRouter()
 const route = useRoute()
@@ -36,6 +48,18 @@ const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 const article = ref(null)
+
+const resolveNewsImageUrl = (rawUrl) => {
+  const s = String(rawUrl ?? '').trim()
+  if (!s) return ''
+  return resolveImageUrl(s)
+}
+
+const handleHeroError = (e) => {
+  const el = e?.target
+  if (!el) return
+  el.src = '/assets/images/2052_245.svg'
+}
 
 const goBack = () => {
   try {
@@ -211,6 +235,14 @@ p {
   height: 146px;
 }
 
+.card-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  display: block;
+}
+
 .card-title {
   color: #004d43;
   font-size: 16px;
@@ -238,5 +270,4 @@ p {
   margin-bottom: 0;
 }
 </style>
-
 

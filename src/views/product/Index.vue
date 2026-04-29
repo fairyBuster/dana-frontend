@@ -368,7 +368,7 @@ a {
   width: 48px;
   height: 48px;
   margin-right: 12px;
-  object-fit: contain;
+  object-fit: fill;
 }
 
 .card-title-group {

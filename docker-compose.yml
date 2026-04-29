@@ -7,3 +7,5 @@ services:
       - "80:80"
     container_name: frontend
     restart: unless-stopped
+    volumes:
+      - /var/log/caddy:/var/log/caddy

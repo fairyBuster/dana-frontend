@@ -39,9 +39,11 @@
         </div>
 
         <div class="info-notes">
-          <p>* Penyetoran diproses secara otomatis</p>
-          <p>* Simpan bukti pengisian untuk keperluan mendesak</p>
-          <p>* Penyetoran terbuka 24 jam</p>
+          <p>* Penyetoran isi ulang dilakukan secara otomatis</p>
+          <p>* Penyetoran isi ulang terbuka selama 24 jam</p>
+          <p>* Setelah berhasil melakukan setoran isi ulang, silakan segarkan halaman Anda</p>
+          <p>* Simpan bukti transaksi Anda demi keamanan atau validasi ketika dibutuhkan</p>
+          <p>* Transaksi aman dan terlindungi</p>
         </div>
       </div>
     </section>
@@ -381,5 +383,4 @@ p {
   cursor: not-allowed;
 }
 </style>
-
 

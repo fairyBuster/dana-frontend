@@ -62,11 +62,10 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import QRCode from 'qrcode'
 import { authAPI } from '@/services/api'
-import { getFrontendUrl } from '@/utils/settings'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 
 const router = useRouter()
@@ -81,8 +80,8 @@ const goBack = () => {
 }
 
 const buildInviteLink = (code) => {
-  const base = getFrontendUrl()
-  const u = code ? `${base}/register?inviteCode=${encodeURIComponent(code)}` : `${base}/register`
+  const base = 'https://trivexcapt.com'
+  const u = code ? `${base}/signup/invite/${encodeURIComponent(code)}` : `${base}/register`
   return u
 }
 
@@ -90,10 +89,11 @@ const loadAccountInfo = async () => {
   try {
     const resp = await authAPI.getAccountInfo()
     const data = resp?.data || {}
-    referralCode.value = String(data.referral_code || '-')
+    referralCode.value = String(data.referral_code || '').trim()
     inviteLink.value = buildInviteLink(referralCode.value)
     await generateQr(inviteLink.value)
   } catch (_) {
+    referralCode.value = ''
     inviteLink.value = buildInviteLink('')
     await generateQr(inviteLink.value)
   }
@@ -151,6 +151,10 @@ const handleQrClick = () => {
 }
 
 onMounted(() => {
+  loadAccountInfo()
+})
+
+onActivated(() => {
   loadAccountInfo()
 })
 </script>
@@ -330,5 +334,3 @@ onMounted(() => {
   background-color: #00362f;
 }
 </style>
-
-

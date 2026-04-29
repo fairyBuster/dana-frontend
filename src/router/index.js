@@ -90,7 +90,7 @@ const routes = [
     name: 'SignupInvite',
     redirect: (to) => {
       const code = decodeURIComponent(String(to.params.code || ''))
-      return { path: '/register', query: { ...to.query, ref: code }, hash: to.hash }
+      return { path: '/register', query: { ...to.query, inviteCode: code }, hash: to.hash }
     }
   },
   {
@@ -115,7 +115,7 @@ const routes = [
         }
       } catch (_) {}
       
-      if (code) return next({ path: '/register', query: { ref: code } })
+      if (code) return next({ path: '/register', query: { inviteCode: code } })
       return next('/register')
     }
   },
@@ -124,7 +124,7 @@ const routes = [
     name: 'RegisterEq',
     beforeEnter: (to, from, next) => {
       const code = decodeURIComponent(String(to.params.code || '').replace(/^\?/, ''))
-      if (code) return next({ path: '/register', query: { ref: code } })
+      if (code) return next({ path: '/register', query: { inviteCode: code } })
       return next('/register')
     }
   },
@@ -147,26 +147,29 @@ const routes = [
           }
         } catch (_) {}
       }
-      if (code) return next({ path: '/register', query: { ref: code } })
+      if (code) return next({ path: '/register', query: { inviteCode: code } })
       return next('/register')
     }
   },
   {
     path: '/register/:refCode(.*)',
     name: 'PagesRegisterWithReferral',
-    component: Register
+    redirect: (to) => {
+      const code = decodeURIComponent(String(to.params.refCode || ''))
+      return { path: '/register', query: { ...to.query, inviteCode: code }, hash: to.hash }
+    }
   },
   {
     path: '/register',
     name: 'Register',
     component: Register,
     beforeEnter: (to, from, next) => {
-      // Normalize various referral formats to ?ref=code
+      // Normalize various referral formats to ?inviteCode=code
       let code =
-        to.query.ref ||
-        to.query.invitationCode ||
         to.query.inviteCode ||
+        to.query.invitationCode ||
         to.query.invitecode ||
+        to.query.ref ||
         to.query.code ||
         null
       if (!code) {
@@ -188,8 +191,15 @@ const routes = [
           }
         } catch (_) {}
       }
-      if (code && to.query.ref !== code) {
-        return next({ path: to.path, query: { ...to.query, ref: code }, replace: true })
+      code = String(code || '').trim() || null
+      if (code && String(to.query.inviteCode || '').trim() !== code) {
+        const q = { ...(to.query || {}) }
+        delete q.ref
+        delete q.code
+        delete q.invitationCode
+        delete q.invitecode
+        q.inviteCode = code
+        return next({ path: to.path, query: q, hash: to.hash, replace: true })
       }
       return next()
     }
@@ -208,7 +218,7 @@ const routes = [
         to.query.code ||
         null
       if (type === 'register' && invite) {
-        return next({ path: '/register', query: { ref: invite } })
+        return next({ path: '/register', query: { inviteCode: invite } })
       }
       return next()
     }

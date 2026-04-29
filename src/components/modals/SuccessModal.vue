@@ -11,6 +11,8 @@
 </template>
 
 <script setup>
+import { onDeactivated } from 'vue'
+
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   title: { type: String, default: 'Informasi' },
@@ -23,23 +25,26 @@ const close = () => {
   emit('update:modelValue', false)
   emit('confirm')
 }
+
+onDeactivated(() => {
+  if (props.modelValue) emit('update:modelValue', false)
+})
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
 .modal-overlay {
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
   background-color: rgba(0, 0, 0, 0.25);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  padding: 16px;
+  padding: calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
 }
 
 .modal-card {

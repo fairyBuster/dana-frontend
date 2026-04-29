@@ -65,9 +65,9 @@
       <div class="info-container">
         <ul class="rules-list">
           <li>Minimal penarikan 35.000</li>
-          <li>Maksimal pengiriman 24 jam</li>
-          <li>Biaya pengiriman 10% dipotong secara langsung</li>
-          <li>Pengiriman penarikan setiap hari</li>
+          <li>Penarikan terbuka dalam waktu 24 jam setiap hari tanpa hari libur meskipun akhir pekan atau hari libur nasional</li>
+          <li>Biaya pengiriman operasional 10%</li>
+          <li>Transaksi penarikan otomatis yang dikirim melalui saluran pembayaran Trivex</li>
         </ul>
 
         <div class="terms-container">
@@ -806,5 +806,4 @@ section {
   align-items: center;
 }
 </style>
-
 

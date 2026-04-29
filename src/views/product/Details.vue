@@ -15,7 +15,14 @@
     <!-- Product Info -->
     <section id="section-product-info">
       <div class="product-info">
-        <img class="product-icon" src="/assets/images/d8ec3d5fc11c15ebc75de9b67990d7f0d2d8eb0b.png" alt="Product Icon">
+        <img
+          class="product-icon"
+          :src="getProductImage(product)"
+          :alt="productTitle"
+          loading="lazy"
+          decoding="async"
+          @error="handleProductImageError"
+        >
         <div class="product-text">
           <h2 class="product-title">{{ productTitle }}</h2>
           <p class="product-subtitle">{{ product?.specifications || 'Spesifikasi produk' }}</p>
@@ -46,7 +53,7 @@
             <path :d="chartAreaPath" fill="url(#productChartFillGreen)" />
             <path :d="chartLinePath" stroke="#15B25C" stroke-width="3" fill="none" filter="url(#productChartShadowGreen)" />
           </svg>
-          <img v-else class="chart-img" src="/assets/images/2031_435.svg" alt="Growth Chart">
+       
         </div>
         <p class="chart-caption">Dana pertumbuhan aset 2026</p>
       </div>
@@ -139,6 +146,7 @@ import { productAPI } from '@/services/api'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
+import { resolveImageUrl } from '@/utils/imageCache'
 
 const router = useRouter()
 const route = useRoute()
@@ -152,6 +160,20 @@ const errorModalOpen = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 const redirectInvestmentId = ref(null)
+
+const fallbackProductImage = ''
+
+const getProductImage = (p) => {
+  const raw = String(p?.image || '').trim()
+  const resolved = raw ? resolveImageUrl(raw) : ''
+  return resolved || fallbackProductImage
+}
+
+const handleProductImageError = (e) => {
+  const el = e?.target
+  if (!el) return
+  el.src = fallbackProductImage
+}
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return null
@@ -777,5 +799,3 @@ h1, h2, h3, p {
   cursor: not-allowed;
 }
 </style>
-
-

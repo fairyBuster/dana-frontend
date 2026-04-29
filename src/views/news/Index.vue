@@ -54,28 +54,7 @@ import { useRouter } from 'vue-router'
 import { newsAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
-
-const BACKEND_ORIGIN = (() => {
-  const rawEnv = String(import.meta?.env?.VITE_BACKEND_URL || '').trim()
-  const rawProxy = String(import.meta?.env?.VITE_PROXY_TARGET || '').trim()
-  const rawApi = String(import.meta?.env?.VITE_API_URL || '').trim()
-  const candidates = [rawEnv, rawProxy, rawApi].filter(Boolean)
-  let raw = candidates[0] || ''
-  if (!raw) return 'https://backend.scagerwebsite.uk'
-  if (raw.length >= 2) {
-    const first = raw[0]
-    const last = raw[raw.length - 1]
-    if ((first === '`' && last === '`') || (first === '"' && last === '"') || (first === "'" && last === "'")) {
-      raw = raw.slice(1, -1).trim()
-    }
-  }
-  if (!/^https?:\/\//.test(raw)) return 'https://backend.scagerwebsite.uk'
-  try {
-    return new URL(raw).origin
-  } catch (_) {
-    return 'https://backend.scagerwebsite.uk'
-  }
-})()
+import { resolveImageUrl } from '@/utils/imageCache'
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -99,16 +78,7 @@ const viewDetails = (articleId) => {
 const resolveNewsImageUrl = (rawUrl) => {
   const s = String(rawUrl ?? '').trim()
   if (!s) return ''
-  if (/^https?:\/\//i.test(s)) return s
-  if (s.startsWith('/media/') || s.startsWith('media/')) {
-    const path = s.startsWith('/') ? s : `/${s}`
-    return `${BACKEND_ORIGIN}${path}`
-  }
-  if (s.startsWith('/')) {
-    const origin = window?.location?.origin || ''
-    return origin ? `${origin}${s}` : s
-  }
-  return s
+  return resolveImageUrl(s)
 }
 
 const handleThumbError = (e) => {
@@ -321,5 +291,4 @@ h1, h2, p {
   opacity: 0.6;
 }
 </style>
-
 

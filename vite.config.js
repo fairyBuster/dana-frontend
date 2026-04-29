@@ -51,7 +51,7 @@ export default defineConfig(async ({ mode }) => {
       port: 5174,
       host: true,
       // Allow dev server to be accessed via specified hosts
-      allowedHosts: ['localhost:8000','localhost:5174','frontend.scagerwebsite.uk'],
+      allowedHosts: ['localhost:8000','localhost:5174','drashcloudsafer.online','trivexcapt.com','trivxcapt.com'],
       proxy: {
         '/api': {
           target: proxyTarget,

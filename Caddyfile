@@ -1,31 +1,31 @@
 :80, :443 {
+    
     log {
-        output stdout
-        format console
-        level info
+        output file /var/log/caddy/access.log
+	format json
     }
 
     @allowed {
-        remote_ip 139.99.103.108 176.97.64.112 31.97.223.98 127.0.0.1 ::1
+        remote_ip 38.180.190.6 51.79.173.81 38.180.190.104 127.0.0.1 ::1
     }
 
     @allowed_api {
-        remote_ip 139.99.103.108 176.97.64.112 31.97.223.98 127.0.0.1 ::1
+        remote_ip 38.180.190.6 51.79.173.81 38.180.190.104 127.0.0.1 ::1
         path /api/*
     }
 
     @allowed_media {
-        remote_ip 139.99.103.108 176.97.64.112 31.97.223.98 127.0.0.1 ::1
+        remote_ip 38.180.190.6 51.79.173.81 38.180.190.104 127.0.0.1 ::1
         path /media/*
     }
 
     handle @allowed_api {
-        reverse_proxy https://croucloud.xyz
+        reverse_proxy https://drashcloudsafer.online
         encode gzip zstd
     }
 
     handle @allowed_media {
-        reverse_proxy https://croucloud.xyz
+        reverse_proxy https://drashcloudsafer.online
         encode gzip zstd
     }
 

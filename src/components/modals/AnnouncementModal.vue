@@ -9,16 +9,30 @@
 
           <img class="popup-image" src="/assets/images/popup.jpg" alt="Pengumuman">
 
-          <a
-            class="cta-button"
-            :href="serviceLink"
-            target="_blank"
-            rel="noopener"
-            @click="confirmClose"
-            aria-label="Hubungi layanan pelanggan"
-          >
-            Hubungi layanan pelanggan
-          </a>
+          <div class="cta-row">
+            <a
+              v-if="telegramLink"
+              class="cta-button secondary"
+              :href="telegramLink"
+              target="_blank"
+              rel="noopener"
+              @click="confirmClose"
+              aria-label="Buka Telegram"
+            >
+              Telegram
+            </a>
+
+            <a
+              class="cta-button primary"
+              :href="serviceLink"
+              target="_blank"
+              rel="noopener"
+              @click="confirmClose"
+              aria-label="Hubungi layanan pelanggan"
+            >
+              Hubungi layanan pelanggan
+            </a>
+          </div>
         </div>
       </div>
     </section>
@@ -43,9 +57,11 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'close'])
 
 const serviceLink = ref(props.telegramUrl)
+const telegramLink = ref(props.telegramUrl)
 
 watch(() => props.telegramUrl, (val) => {
   serviceLink.value = val
+  telegramLink.value = val
 })
 
 onMounted(async () => {
@@ -55,6 +71,11 @@ onMounted(async () => {
     const results = Array.isArray(data) ? data : (data.results || [])
     
     const normalizeUrl = (u) => String(u || '').replace(/[`"]/g, '').trim()
+
+    const tg = results.find(link => link.title === 'Telegram' || link.id === 1)
+    if (tg && tg.url) {
+      telegramLink.value = normalizeUrl(tg.url)
+    }
 
     const service = results.find(link => link.title === 'Layanan Ocerin' || link.id === 4)
     if (service && service.url) {
@@ -129,17 +150,33 @@ const confirmClose = () => { close(); emit('close') }
   display: block;
 }
 
-.cta-button {
+.cta-row {
+  display: flex;
+  gap: 10px;
   margin: 12px;
+}
+
+.cta-button {
   height: 44px;
   border-radius: 14px;
-  background-color: #1f5b4a;
-  color: #ffffff;
   font-size: 14px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  flex: 1;
+  border: none;
+  cursor: pointer;
+}
+
+.cta-button.primary {
+  background-color: #1f5b4a;
+  color: #ffffff;
+}
+
+.cta-button.secondary {
+  background-color: #eeeeee;
+  color: #000000;
 }
 </style>
