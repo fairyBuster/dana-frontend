@@ -138,6 +138,7 @@ const transactions = computed(() => {
     return {
       id: phone || username || String(i + 1),
       amount: m?.total_deposit_amount ?? '0',
+      total_deposit_amount: m?.total_deposit_amount ?? '0',
       date: formatDate(rawDate),
       description: username || '-',
       note: hasHigherOrder ? 'Teman anda memiliki pesanan lebih tinggi' : '',
