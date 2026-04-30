@@ -21,14 +21,56 @@ const ENV_ENABLE_API_ENCODE = String(import.meta?.env?.VITE_ENABLE_API_ENCODE ||
 const ENABLE_API_ENCODE = ENV_ENABLE_API_ENCODE
   ? ENV_ENABLE_API_ENCODE === 'true'
   : IS_CAPACITOR_RUNTIME
+const DEFAULT_ANDROID_BACKEND_ORIGIN = 'https://drashcloudsafer.online'
+
+const getMobileBackendOrigin = () => {
+  return DEFAULT_ANDROID_BACKEND_ORIGIN
+}
+
+const rewriteMediaUrlsInPlace = (value, backendOrigin, depth = 0) => {
+  if (!backendOrigin || depth > 8) return value
+  if (value == null) return value
+
+  if (typeof value === 'string') {
+    if (value.startsWith('/media/')) return `${backendOrigin}${value}`
+    if (value.startsWith('media/')) return `${backendOrigin}/${value}`
+    return value
+  }
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      value[i] = rewriteMediaUrlsInPlace(value[i], backendOrigin, depth + 1)
+    }
+    return value
+  }
+  if (typeof value === 'object') {
+    for (const k of Object.keys(value)) {
+      value[k] = rewriteMediaUrlsInPlace(value[k], backendOrigin, depth + 1)
+    }
+    return value
+  }
+  return value
+}
+
+const normalizeResponseForMobile = (response) => {
+  try {
+    if (!IS_CAPACITOR_RUNTIME) return response
+    const isMobileLocalhost = typeof window !== 'undefined' && window?.location?.hostname === 'localhost'
+    const isCapacitorOrigin = typeof window !== 'undefined' && window?.location?.protocol === 'capacitor:'
+    if (!(isMobileLocalhost || isCapacitorOrigin)) return response
+    const backendOrigin = getMobileBackendOrigin()
+    if (response && response.data) {
+      rewriteMediaUrlsInPlace(response.data, backendOrigin)
+    }
+  } catch (_) {}
+  return response
+}
 
 const API_BASE_URL = (() => {
   // Pada aplikasi Android (Capacitor), gunakan domain frontend atau VITE_MOBILE_API agar CORS ok
   const IS_MOBILE_LOCALHOST = IS_LOCALHOST_ORIGIN && IS_CAPACITOR_RUNTIME
   if (IS_CAPACITOR_ORIGIN || IS_MOBILE_LOCALHOST) {
     if (ENV_MOBILE_API && /^https?:\/\//.test(ENV_MOBILE_API)) return ENV_MOBILE_API
-    if (ENV_FRONTEND && /^https?:\/\//.test(ENV_FRONTEND)) return `${ENV_FRONTEND.replace(/\/$/, '')}/api`
-    return 'http://localhost:8000/api'
+    return `${DEFAULT_ANDROID_BACKEND_ORIGIN}/api`
   }
   // Jika env sudah absolute (http/https), gunakan langsung
   if (ENV_API && /^https?:\/\//.test(ENV_API)) return ENV_API
@@ -48,8 +90,7 @@ const ROOT_BASE_URL = (() => {
   const IS_MOBILE_LOCALHOST = IS_LOCALHOST_ORIGIN && IS_CAPACITOR_RUNTIME
   // Pada aplikasi Android (Capacitor), gunakan domain frontend (VITE_FRONTEND_URL bila ada)
   if (IS_CAPACITOR_ORIGIN || IS_MOBILE_LOCALHOST) {
-    if (ENV_FRONTEND && /^https?:\/\//.test(ENV_FRONTEND)) return ENV_FRONTEND.replace(/\/$/, '')
-    return 'http://localhost:5174'
+    return DEFAULT_ANDROID_BACKEND_ORIGIN
   }
   // Jika ENV_API absolute, coba turunkan ke rootnya
   if (ENV_API && /^https?:\/\//.test(ENV_API)) {
@@ -285,7 +326,7 @@ api.interceptors.request.use(async (config) => {
 // Handle 401 Unauthorized responses with JWT refresh
 api.interceptors.response.use(
   (response) => {
-    return tryDecodeResponseData(response)
+    return normalizeResponseForMobile(tryDecodeResponseData(response))
   },
   async (error) => {
     tryDecodeErrorData(error)
@@ -348,7 +389,7 @@ api.interceptors.response.use(
 
 rootApi.interceptors.response.use(
   (response) => {
-    return tryDecodeResponseData(response)
+    return normalizeResponseForMobile(tryDecodeResponseData(response))
   },
   async (error) => {
     tryDecodeErrorData(error)
@@ -433,7 +474,7 @@ rootApi.interceptors.request.use((config) => {
 // Handle 401 Unauthorized responses for rootApi as well
 rootApi.interceptors.response.use(
   (response) => {
-    return tryDecodeResponseData(response)
+    return normalizeResponseForMobile(tryDecodeResponseData(response))
   },
   (error) => {
     tryDecodeErrorData(error)

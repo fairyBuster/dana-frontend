@@ -23,16 +23,26 @@ const ENV = import.meta.env || {}
 const RUNTIME_ORIGIN = typeof window !== 'undefined' ? window.location.origin : ''
 const FRONTEND_URL = ENV.VITE_FRONTEND_URL || RUNTIME_ORIGIN || 'https://www.ccvoltasein.com'
 const BACKEND_URL = ENV.VITE_BACKEND_URL || ''
+const API_URL = ENV.VITE_API_URL || ''
+const DEFAULT_ANDROID_BACKEND_ORIGIN = 'https://drashcloudsafer.online'
 const IS_DEV = !!ENV.DEV
 const IS_PROD = !!ENV.PROD
 
 // Derive host/origin
 let FRONTEND_ORIGIN = FRONTEND_URL
 let BACKEND_HOST = BACKEND_URL
+let BACKEND_ORIGIN = ''
 try {
   FRONTEND_ORIGIN = new URL(FRONTEND_URL).origin
   BACKEND_HOST = new URL(BACKEND_URL).hostname
 } catch (_) {}
+try {
+  if (BACKEND_URL && /^https?:\/\//.test(BACKEND_URL)) BACKEND_ORIGIN = new URL(BACKEND_URL).origin
+} catch (_) {}
+try {
+  if (!BACKEND_ORIGIN && API_URL && /^https?:\/\//.test(API_URL)) BACKEND_ORIGIN = new URL(API_URL).origin
+} catch (_) {}
+if (!BACKEND_ORIGIN) BACKEND_ORIGIN = 'https://drashcloudsafer.online'
 
 export function resolveImageUrl(rawUrl) {
   let normalized = String(rawUrl ?? '').trim()
@@ -54,11 +64,31 @@ export function resolveImageUrl(rawUrl) {
       normalized = normalized.slice(1, -1).trim()
     }
   }
+  if (normalized.startsWith('data:') || normalized.startsWith('blob:')) return normalized
+
+  const IS_CAPACITOR_RUNTIME = typeof window !== 'undefined' && !!window.Capacitor
+  const IS_CAPACITOR_ORIGIN = typeof window !== 'undefined' && window?.location?.protocol === 'capacitor:'
+  const IS_MOBILE_LOCALHOST = typeof window !== 'undefined' && window?.location?.hostname === 'localhost'
+  const IS_MOBILE = IS_CAPACITOR_RUNTIME && (IS_CAPACITOR_ORIGIN || IS_MOBILE_LOCALHOST)
+  const effectiveBackendOrigin = IS_MOBILE ? DEFAULT_ANDROID_BACKEND_ORIGIN : BACKEND_ORIGIN
+
   try {
     // Handle relative paths (e.g., /media/..)
     if (/^\/.+/.test(normalized)) {
-      // Pastikan absolute ke origin frontend (bukan localhost) agar domain backend tersembunyi
+      if (IS_MOBILE) {
+        if (normalized.startsWith('/media/')) return `${effectiveBackendOrigin}${normalized}`
+        if (normalized.startsWith('/assets/')) return `${currentFrontendOrigin}${normalized}`
+      }
       return `${currentFrontendOrigin}${normalized}`
+    }
+
+    if (normalized.startsWith('media/')) {
+      if (IS_MOBILE) return `${effectiveBackendOrigin}/${normalized}`
+      return `${currentFrontendOrigin}/${normalized}`
+    }
+
+    if (IS_MOBILE && /^[^/\\]+\\.(png|jpe?g|webp|gif|svg)$/i.test(normalized)) {
+      return `${effectiveBackendOrigin}/media/products/${normalized}`
     }
 
     const u = new URL(normalized)
@@ -68,7 +98,9 @@ export function resolveImageUrl(rawUrl) {
     // Selalu rute path media ke origin frontend agar tidak menampilkan host backend
     // Berlaku untuk URL apa pun yang memiliki path /media, terlepas dari host-nya.
     if (u.pathname.startsWith('/media')) {
-      // Gunakan domain frontend sehingga Network panel tidak menampilkan domain backend
+      if (IS_MOBILE) {
+        return `${effectiveBackendOrigin}${u.pathname}${u.search}`
+      }
       return `${currentFrontendOrigin}${u.pathname}${u.search}`
     }
 

@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.android.abbot',
+  appId: 'com.apps.blackdragon',
   appName: 'Abbot',
   webDir: 'dist',
   // Mode offline/local: muat aset build Vite dari folder dist
