@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div v-if="modelValue" class="modal-overlay" @click="close">
       <div class="modal-card" role="dialog" aria-modal="true" @click.stop>
-        <p class="modal-message">{{ message || 'Permintaan gagal, segarkan halaman' }}</p>
+        <p class="modal-message">{{ displayedMessage }}</p>
         <div class="modal-divider"></div>
         <button type="button" class="modal-btn" @click="close">Mengerti</button>
       </div>
@@ -11,15 +11,37 @@
 </template>
 
 <script setup>
-import { onDeactivated } from 'vue'
+import { computed, onDeactivated } from 'vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   title: { type: String, default: 'Informasi' },
-  message: { type: String, default: 'Permintaan gagal, segarkan halaman' }
+  message: { type: String, default: '' }
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+const OFFLINE_MESSAGE = 'Jaringan Anda terputus. Segarkan halaman atau keluar akun untuk terhubung ulang.'
+
+const displayedMessage = computed(() => {
+  const raw = String(props.message || '').trim()
+  if (!raw) return OFFLINE_MESSAGE
+
+  const lower = raw.toLowerCase()
+  const looksLikeNetwork =
+    lower === 'network error' ||
+    lower.includes('networkerror') ||
+    lower.includes('err_network') ||
+    lower.includes('failed to fetch') ||
+    lower.includes('load failed') ||
+    lower.includes('econnaborted') ||
+    lower.includes('timeout') ||
+    lower.includes('tidak mendapatkan koneksi') ||
+    lower.includes('koneksi') && lower.includes('terputus') ||
+    lower.includes('offline')
+
+  return looksLikeNetwork ? OFFLINE_MESSAGE : raw
+})
 
 const close = () => {
   emit('update:modelValue', false)

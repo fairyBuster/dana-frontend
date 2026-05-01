@@ -78,10 +78,10 @@
             <img src="/assets/images/1be34f61fca8018ee484cfa57216986588de26b2.png" alt="Kartu undangan">
             <span>Kartu<br>undangan</span>
           </router-link>
-          <router-link to="/download-app" class="action-item">
+          <a href="/assets/android/trivex.apk" download="trivex.apk" class="action-item">
             <img src="/assets/images/6a724b73fb2c46483c7c2b348fcdc144d1a30b46.png" alt="Aplikasi kami">
             <span>Aplikasi kami</span>
-          </router-link>
+          </a>
           <router-link to="/informations/options" class="action-item">
             <img src="/assets/images/334cb4459143d492b5a8194e9812907fd3771af9.png" alt="Riwayat transaksi">
             <span>Riwayat<br>transaksi</span>

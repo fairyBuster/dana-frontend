@@ -184,8 +184,12 @@ const tryDecodeErrorData = (error) => {
       lower.includes('rate limit')
     if (isRateLimited && error?.response) {
       error.response.data = {
-        detail: 'Jangan terlalu cepat. Anda dibatasi sementara',
-        message: 'Jangan terlalu cepat. Anda dibatasi sementara'
+        code: 'rate_limited',
+        detail: 'Jangan terlalu cepat, mohon tunggu sebentar',
+        wait_seconds: Number(data?.wait_seconds ?? null),
+        scope: data?.scope ?? null,
+        path: data?.path ?? null,
+        method: data?.method ?? null
       }
     }
   } catch (_) {}
