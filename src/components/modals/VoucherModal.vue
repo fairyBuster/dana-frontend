@@ -1,30 +1,32 @@
 <template>
-  <div v-if="modelValue" id="section-voucher-modal" @click.self="close">
-    <div class="app-container">
-      <div class="modal-card">
-        <button class="close-btn" aria-label="Close modal" @click="close" :disabled="isSubmitting">
-          <span class="close-icon" aria-hidden="true">×</span>
-        </button>
+  <div v-if="modelValue" id="section-modal" @click.self="close">
+    <div class="modal-container">
+      <div class="card">
+        <img src="/assets/image/8012db260f446873704d1419f8621c9af984cc9e.png" alt="Envelope" class="envelope-img">
 
-        <div class="coins-illustration">
-          <img src="/assets/images/da4151be78469acf27cc0da4d60d3f5fcefd602d.png" class="coin coin-side" alt="Coin">
-          <img src="/assets/images/da4151be78469acf27cc0da4d60d3f5fcefd602d.png" class="coin coin-center" alt="Large Coin">
-          <img src="/assets/images/da4151be78469acf27cc0da4d60d3f5fcefd602d.png" class="coin coin-side" alt="Coin">
+        <div class="card-header">
+          <p class="description">You are about to claim your envelope. Get code for redeem your envelope.</p>
         </div>
 
-        <div class="input-container">
+        <div class="input-box">
           <input
             ref="codeInput"
             v-model="code"
             type="text"
-            class="voucher-input"
-            :placeholder="placeholder || 'Masukkan kode voucher disini'"
+            class="code-input"
+            :placeholder="placeholder || '---'"
+            @keyup.enter="submit"
           >
         </div>
 
-        <button class="submit-button" type="button" @click="submit" :disabled="isSubmitting">
-          {{ isSubmitting ? 'Memproses...' : (submitText || 'Tukar kode') }}
-        </button>
+        <div class="actions">
+          <button class="btn btn-claim" type="button" @click="submit" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Processing...' : (submitText || 'Claim') }}
+          </button>
+          <button class="btn btn-home" type="button" @click="close" :disabled="isSubmitting">
+            Back home
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -41,8 +43,8 @@ import SuccessModal from '@/components/modals/SuccessModal.vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
-  placeholder: { type: String, default: 'Masukkan kode voucher disini' },
-  submitText: { type: String, default: 'Tukar kode' }
+  placeholder: { type: String, default: '---' },
+  submitText: { type: String, default: 'Claim' }
 })
 
 const emit = defineEmits(['update:modelValue', 'submit'])
@@ -82,7 +84,7 @@ const formatRupiah = (value) => {
 
 const extractErrorMessage = (err) => {
   const data = err?.response?.data
-  if (!data) return err?.message || 'Gagal klaim voucher'
+  if (!data) return err?.message || 'Failed to claim voucher'
   const normalizeText = (msg) => String(msg ?? '').trim()
   const findAnyString = (v) => {
     if (v === null || v === undefined) return ''
@@ -108,19 +110,19 @@ const extractErrorMessage = (err) => {
     if (!raw) return ''
     const m = raw.toLowerCase()
 
-    if (m.includes('user invalid')) return 'Kode salah'
-    if (m.includes('voucher tidak ditemukan')) return 'Kode salah'
-    if (m.includes('nominal voucher tidak valid')) return 'Kode salah'
+    if (m.includes('user invalid')) return 'Wrong code'
+    if (m.includes('voucher tidak ditemukan')) return 'Wrong code'
+    if (m.includes('nominal voucher tidak valid')) return 'Wrong code'
 
-    if (m.includes('kuota voucher harian telah habis')) return 'Kode habis'
-    if (m.includes('voucher telah mencapai batas penggunaan')) return 'Kode habis'
-    if (m.includes('anda sudah klaim voucher ini hari ini')) return 'Kode habis'
-    if (m.includes('voucher ini sudah digunakan oleh akun anda')) return 'Kode habis'
+    if (m.includes('kuota voucher harian telah habis')) return 'Code used up'
+    if (m.includes('voucher telah mencapai batas penggunaan')) return 'Code used up'
+    if (m.includes('anda sudah klaim voucher ini hari ini')) return 'Code used up'
+    if (m.includes('voucher ini sudah digunakan oleh akun anda')) return 'Code used up'
 
-    if (m.includes('voucher tidak aktif')) return 'Kode tidak aktif'
-    if (m.includes('voucher belum dapat diklaim')) return 'Kode tidak aktif'
+    if (m.includes('voucher tidak aktif')) return 'Code inactive'
+    if (m.includes('voucher belum dapat diklaim')) return 'Code inactive'
 
-    if (m.includes('voucher sudah kedaluwarsa') || m.includes('kedaluwarsa')) return 'Kode expired'
+    if (m.includes('voucher sudah kedaluwarsa') || m.includes('kedaluwarsa')) return 'Code expired'
 
     return ''
   }
@@ -134,7 +136,7 @@ const extractErrorMessage = (err) => {
       ''
 
   const mapped = mapVoucherErrorToLabel(msg)
-  return mapped || msg || err?.message || 'Gagal klaim voucher'
+  return mapped || msg || err?.message || 'Failed to claim voucher'
 }
 
 const submit = async () => {
@@ -146,7 +148,7 @@ const submit = async () => {
 
   const raw = String(code.value || '').trim()
   if (!raw) {
-    errorMessage.value = 'Masukkan kode voucher terlebih dahulu'
+    errorMessage.value = 'Please enter a voucher code first'
     showErrorModal.value = true
     return
   }
@@ -156,7 +158,7 @@ const submit = async () => {
     const resp = await voucherAPI.claim({ code: raw })
     const data = resp?.data || {}
     const claimed = parseNumber(data.claimed_amount ?? data.amount ?? data.value ?? 0)
-    successMessage.value = `Berhasil menerima bonus ${formatRupiah(claimed)}`
+    successMessage.value = `Successfully received bonus ${formatRupiah(claimed)}`
     showSuccessModal.value = true
     emit('submit', raw)
     emit('update:modelValue', false)
@@ -176,164 +178,155 @@ const submit = async () => {
   padding: 0;
 }
 
-#section-voucher-modal {
+#section-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(55, 55, 55, 0.95);
+  background-color: #7d7d7d;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 20px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.app-container {
-  width: 100%;
+.modal-container {
   max-width: 412px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  position: relative;
-  padding: 0 27px;
-}
-
-.modal-card {
   width: 100%;
-  max-width: 359px;
-  background-color: #ffffff;
-  border-radius: 20px;
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
+  justify-content: center;
 }
 
-.close-btn {
+.card {
+  position: relative;
+  width: 343px;
+  background-color: #f9f9fc;
+  border-radius: 10px;
+  padding-top: 17px;
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.envelope-img {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  background: none;
-  border: none;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.close-btn img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.close-icon {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #000000;
-  font-size: 22px;
-  line-height: 1;
-}
-
-.coins-illustration {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 30px;
-  margin-bottom: 40px;
-  position: relative;
-}
-
-.coin {
-  object-fit: contain;
-}
-
-.coin-side {
-  width: 38px;
-  height: 39px;
+  top: -31px;
+  left: 0;
+  width: 125px;
+  height: 117px;
+  object-fit: cover;
   z-index: 1;
 }
 
-.coin-center {
-  width: 66px;
-  height: 67px;
-  z-index: 2;
-  margin: 0 -6px;
-  transform: translateY(-7px);
-}
-
-.input-container {
-  padding: 0 20px;
-  margin-bottom: 45px;
+.card-header {
+  width: 100%;
+  padding-right: 9px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
-.voucher-input {
-  width: 100%;
-  max-width: 291px;
-  border: none;
-  background: transparent;
-  text-align: center;
-  font-size: 15px;
+.description {
+  width: 209px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
   color: #000000;
-  outline: none;
-  font-family: inherit;
+  font-weight: 500;
+  z-index: 2;
 }
 
-.voucher-input::placeholder {
-  color: rgba(0, 0, 0, 0.5);
-}
-
-.submit-button {
-  width: 100%;
-  height: 55px;
-  background-color: transparent;
-  border: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.21);
-  color: #004d43;
-  font-size: 16px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
+.input-box {
+  width: 307px;
+  height: 64px;
+  margin-top: 22px;
+  background-color: #ffffff;
+  border: 1px solid #ebebeb;
+  border-radius: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background-color 0.2s ease;
 }
 
-.submit-button:disabled {
-  opacity: 0.6;
+.code-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  letter-spacing: 4px;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.code-input::placeholder {
+  font-size: 17px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.3);
+  letter-spacing: 4px;
+}
+
+.actions {
+  width: 330px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn {
+  width: 162px;
+  height: 44px;
+  border-radius: 30px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.submit-button:hover {
-  background-color: rgba(0, 0, 0, 0.03);
+.btn-claim {
+  background: linear-gradient(90deg, #4085e1 0%, #2757b7 100%);
 }
 
-.submit-button:active {
-  background-color: rgba(0, 0, 0, 0.06);
+.btn-home {
+  background-color: #0cb300;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 380px) {
-  .app-container {
-    padding: 0 16px;
+@media (max-width: 360px) {
+  .card {
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
-  .modal-card {
+  .input-box, .actions {
     width: 100%;
+  }
+
+  .btn {
+    width: 48%;
   }
 }
 </style>

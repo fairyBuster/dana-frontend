@@ -1,32 +1,57 @@
 <template>
   <div class="app-container">
+    <!-- Header -->
     <section id="section-header">
-      <header class="app-header">
-        <button class="back-button" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/17_14.svg" alt="Back">
+      <header class="header">
+        <a href="/profile" class="back-btn" aria-label="Go to profile">
+          <img src="/assets/image/181_194.svg" alt="Back" class="icon-back">
+        </a>
+        <button type="button" ref="menuAnchorEl" class="header-title-group" @click.stop="toggleRecordMenu">
+          <h1 class="header-title">{{ currentRecordLabel }}</h1>
+          <img
+            src="/assets/image/4252_211.svg"
+            alt="Dropdown"
+            class="icon-dropdown"
+            :class="{ open: recordMenuOpen }"
+          >
+          <div v-if="recordMenuOpen" class="record-menu" @click.stop>
+            <button
+              v-for="item in recordMenuItems"
+              :key="item.key"
+              type="button"
+              class="record-menu-item"
+              :class="{ active: item.key === currentRecordKey }"
+              @click.stop="selectRecord(item)"
+            >
+              {{ item.label }}
+            </button>
+          </div>
         </button>
-        <h1 class="page-title">Riwayat isi ulang</h1>
+        <div class="header-spacer"></div>
       </header>
     </section>
 
-    <section id="section-transaction-list">
-      <div v-if="!isLoading && transactions.length === 0" class="empty-state">
-        <p class="empty-text">Belum ada riwayat isi ulang</p>
+    <!-- Record List -->
+    <section id="section-record-list">
+      <div class="table-header">
+        <div class="col-status">Status</div>
+        <div class="col-amount">Amount</div>
+        <div class="col-type">Type</div>
       </div>
 
-      <div class="transaction-list">
-        <article v-for="transaction in transactions" :key="transaction.id" class="transaction-card">
-          <div class="transaction-date">Date trx: {{ transaction.date }}</div>
-          <div class="transaction-details">
-            <div class="transaction-icon">
-              <img src="/assets/images/cde3277fa2769528c9be71b8b0840666c070bbdb.png" alt="Transaction Icon">
-            </div>
-            <div class="transaction-info">
-              <p class="transaction-type">Isi ulang</p>
-              <p class="transaction-amount">{{ formatCurrency(transaction.amount) }}</p>
-            </div>
+      <div v-if="!isLoading && transactions.length === 0" class="empty-state">
+   
+      </div>
+
+      <div class="record-list">
+        <div v-for="transaction in transactions" :key="transaction.id" class="record-item">
+          <div class="col-status status-success">Succeed</div>
+          <div class="col-amount amount">{{ transaction.amount }}</div>
+          <div class="col-type type-info">
+            <div class="type-name">{{ transaction.title }}</div>
+            <div class="type-date">{{ transaction.date }}</div>
           </div>
-        </article>
+        </div>
       </div>
 
       <div v-if="showPagination" class="pagination-row">
@@ -46,14 +71,15 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { depositAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const transactions = ref([])
 const isLoading = ref(false)
@@ -75,9 +101,57 @@ const goBack = () => {
   router.go(-1)
 }
 
+const recordMenuOpen = ref(false)
+const menuAnchorEl = ref(null)
+
+const recordMenuItems = [
+  { key: 'recharge', label: 'Record recharge', to: '/dep/history' },
+  { key: 'mining', label: 'Mining record', to: '/portfolio/history' },
+  { key: 'payout', label: 'Payout record', to: '/flow/history' },
+  { key: 'purchase', label: 'Purchase record', to: '/orders' },
+  { key: 'commission', label: 'Commision friend', to: '/commission/history' },
+  { key: 'other', label: 'Other record', to: '/trx' }
+]
+
+const currentRecordKey = computed(() => {
+  const p = String(route.path || '')
+  if (p.startsWith('/dep')) return 'recharge'
+  if (p.startsWith('/portfolio')) return 'mining'
+  if (p.startsWith('/flow')) return 'payout'
+  if (p.startsWith('/orders')) return 'purchase'
+  if (p.startsWith('/commission')) return 'commission'
+  return 'other'
+})
+
+const currentRecordLabel = computed(() => {
+  const found = recordMenuItems.find((x) => x.key === currentRecordKey.value)
+  return found?.label || 'Other record'
+})
+
+const toggleRecordMenu = () => {
+  recordMenuOpen.value = !recordMenuOpen.value
+}
+
+const closeRecordMenu = () => {
+  recordMenuOpen.value = false
+}
+
+const selectRecord = (item) => {
+  closeRecordMenu()
+  if (item?.to) router.push(item.to)
+}
+
+const onDocumentClick = (e) => {
+  if (!recordMenuOpen.value) return
+  const anchor = menuAnchorEl.value
+  const target = e?.target
+  if (anchor && target && anchor.contains(target)) return
+  closeRecordMenu()
+}
+
 const extractErrorMessage = (err) => {
   const data = err?.response?.data
-  if (!data) return err?.message || 'Permintaan gagal, segarkan halaman'
+  if (!data) return err?.message || 'Request failed, please refresh the page'
   if (typeof data === 'string') return data
   if (data.detail) return String(data.detail)
   if (data.message) return String(data.message)
@@ -85,7 +159,7 @@ const extractErrorMessage = (err) => {
   const firstVal = data[firstKey]
   if (Array.isArray(firstVal) && firstVal.length) return String(firstVal[0])
   if (firstVal) return String(firstVal)
-  return 'Permintaan gagal, segarkan halaman'
+  return 'Request failed, please refresh the page'
 }
 
 const pad2 = (n) => String(n).padStart(2, '0')
@@ -93,16 +167,16 @@ const formatDateTime = (value) => {
   if (!value) return '-'
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return String(value)
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}.${pad2(d.getMinutes())}`
 }
 
-const formatCurrency = (value) => {
+const formatUSD = (value) => {
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
-  if (!Number.isFinite(num)) return 'Rp 0'
-  return `Rp ${new Intl.NumberFormat('id-ID', {
+  if (!Number.isFinite(num)) return '$0'
+  return '$' + new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(num)}`
+  }).format(num)
 }
 
 const normalizeTransactionsResponse = (data) => {
@@ -118,7 +192,9 @@ const normalizeTransactionsResponse = (data) => {
 const mapTitle = (t) => {
   const desc = String(t?.description || '').trim()
   if (desc) return desc
-  return 'Isi ulang'
+  const channel = String(t?.payment_method || t?.channel || t?.payment_channel || '').trim()
+  if (channel) return channel
+  return 'Recharge'
 }
 
 const loadPage = async (page) => {
@@ -136,7 +212,7 @@ const loadPage = async (page) => {
       id: t?.id ?? t?.trx_id ?? `${t?.created_at || ''}-${t?.amount || ''}`,
       title: mapTitle(t),
       date: formatDateTime(t?.created_at),
-      amount: t?.amount
+      amount: formatUSD(t?.amount)
     }))
     currentPage.value = Math.max(1, Number(page || 1))
     hasNext.value = Boolean(paged.next)
@@ -157,10 +233,19 @@ const goToPage = (page) => {
 
 onMounted(() => {
   loadPage(1)
+  document.addEventListener('click', onDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
   margin: 0 auto;
@@ -170,59 +255,147 @@ onMounted(() => {
   width: 100%;
   max-width: 412px;
   position: relative;
-  box-sizing: border-box;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: inherit;
+h1, p {
+  margin: 0;
 }
 
-#section-transaction-list {
-  width: 100%;
-  padding-bottom: 24px;
-}
-
-/* Header Section */
+/* Header */
 #section-header {
   width: 100%;
 }
 
-.app-header {
+.header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 86px;
+  justify-content: space-between;
+  padding: 18px 16px;
   position: relative;
-  padding: 0 15px;
+  min-height: 60px;
 }
 
-.back-button {
-  position: absolute;
-  left: 7px;
-  background: none;
+.back-btn {
+  background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 20px;
+  height: 20px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.back-button img {
-  width: 41px;
-  height: 41px;
-  object-fit: contain;
+.icon-back {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
-.page-title {
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+.icon-dropdown {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.icon-dropdown.open {
+  transform: rotate(180deg);
+}
+
+.record-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  z-index: 50;
+}
+
+.record-menu-item {
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  text-align: left;
   font-size: 16px;
+  color: #000000;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.record-menu-item + .record-menu-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.record-menu-item.active {
+  font-weight: 700;
+}
+
+.header-spacer {
+  width: 20px;
+}
+
+/* Record List */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 5px;
+  margin: 10px 15px;
+  padding: 10px 15px;
+}
+
+.table-header > div {
+  font-size: 13px;
   font-weight: 700;
   color: #000000;
 }
 
-/* Transaction List */
+.col-status {
+  flex: 1;
+  text-align: left;
+}
+
+.col-amount {
+  flex: 1;
+  text-align: center;
+}
+
+.col-type {
+  flex: 1.2;
+  text-align: right;
+}
+
 .empty-state {
   padding: 40px 0;
   text-align: center;
@@ -233,63 +406,46 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.transaction-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0px;
-  padding: 0 15px 14px;
+.record-list {
+  padding: 0 15px;
 }
 
-.transaction-card {
-  background-color: #eeeeee;
-  border-radius: 20px;
-  padding: 5px 16px;
+.record-item {
   display: flex;
-  flex-direction: column;
-}
-
-.transaction-date {
-  color: #004d43;
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.transaction-details {
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  padding: 16px 15px;
+  border-bottom: 1px dotted #999;
 }
 
-.transaction-icon {
-  width: 32px;
-  height: 30px;
-  flex-shrink: 0;
+.status-success {
+  color: #0cb300;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.transaction-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.amount {
+  color: #010101;
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.transaction-info {
+.type-info {
   display: flex;
   flex-direction: column;
-  gap: 0px;
+  gap: 4px;
 }
 
-.transaction-type,
-.transaction-amount {
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 14px;
-  font-weight: 500;
+.type-name {
+  color: #010101;
+  font-size: 13px;
+  font-weight: 600;
 }
-.transaction-amount {
-    color: rgba(0, 0, 0, 0.5);
-  font-size: 14px;
-  font-weight: 500;
-  margin-top: -10px;
+
+.type-date {
+  color: rgba(1, 1, 1, 0.4);
+  font-size: 11px;
+  font-weight: 400;
 }
 
 .pagination-row {
@@ -298,23 +454,5 @@ onMounted(() => {
   justify-content: center;
   margin-top: 0px;
   padding: 0 15px;
-}
-
-.load-more-btn {
-  width: 100%;
-  height: 40px;
-  border-radius: 20px;
-  background-color: #004d43;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.load-more-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 </style>

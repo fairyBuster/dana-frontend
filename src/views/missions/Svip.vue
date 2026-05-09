@@ -1,63 +1,67 @@
 <template>
   <div class="app-container">
+    <!-- Header -->
     <section id="section-header">
-      <div class="section-inner">
-        <header class="header-content">
-          <button class="back-button" type="button" @click="goBack" aria-label="Kembali">
-            <img src="/assets/images/2023_1661.svg" alt="Back Icon">
-          </button>
-          <div class="user-info">
-            <h1 class="greeting">Hai, {{ displayUsername }}</h1>
-            <div class="level-status">
-              <span class="level-label">Level saat ini:</span>
-              <span class="level-value">{{ currentLevel }}</span>
-            </div>
+      <header class="header">
+        <button class="back-btn" @click="goBack" aria-label="Go back">
+          <img src="/assets/image/4249_729.svg" alt="">
+        </button>
+        <h1 class="title">Very Important Person</h1>
+      </header>
+    </section>
+
+    <!-- Tier Cards (horizontal scroll) -->
+    <section id="section-tiers">
+      <div class="tiers-container">
+        <div
+          v-for="(level, idx) in rankLevels"
+          :key="level.rank"
+          class="tier-card"
+        >
+          <img :src="getTierBg(level.rank)" alt="LV Background" class="tier-bg">
+          <div class="tier-content">
+            <div class="tier-name" :class="getTierNameClass(idx)">{{ level.title || `LV${level.rank}` }}</div>
+            <div class="tier-desc" :class="getTierDescClass(idx)">{{ getTierDesc(level) }}</div>
           </div>
-          <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Trivex Logo" class="logo">
-        </header>
+        </div>
       </div>
     </section>
 
-    <section id="section-level-list">
-      <div class="section-inner">
-        <div class="level-cards-container">
-          <div
-            v-for="level in rankLevels"
-            :key="level.rank"
-            class="level-card"
-            :class="{ 'current-rank': level.is_current_rank, 'locked': !level.is_unlocked }"
-          >
-            <div class="card-header">
-              <img src="/assets/images/35c8b6a18c2ca182842dd2334e0d97ca5f0a270c.png" alt="Level Icon" class="level-icon">
-              <div class="level-title-group">
-                <span class="level-subtitle">Level anggota</span>
-                <span class="level-title">{{ level.title }}</span>
-              </div>
-              <div v-if="level.is_current_rank" class="current-badge">Level Anda</div>
+    <!-- Progress Banner -->
+    <section id="section-progress">
+      <div class="progress-banner">
+        <img src="/assets/image/d0e10a0dbf286808cb8fb9c02f1cd15da31de7e1.png" alt="Progress Background" class="progress-bg">
+        <div class="progress-content">
+          <div class="progress-level">{{ currentLevel }}</div>
+          <div class="progress-track">
+            <span class="progress-label">Your Progress</span>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" :style="{ width: progressPercent + '%' }"></div>
+              <div class="progress-bar-dot" :style="{ left: progressPercent + '%' }"></div>
             </div>
-            <div class="card-body">
-              <div class="requirement-item">
-                <p class="requirement">Syarat isi ulang: Rp {{ formatCurrency(level.deposit_self_total_required) }}</p>
-                <div class="progress-bar-container">
-                  <div class="progress-bar" :style="{ width: Math.min(100, (toNumber(level.user_progress_deposit_self_total) / toNumber(level.deposit_self_total_required)) * 100) + '%' }"></div>
-                </div>
-                <p class="progress-text">Progres: Rp {{ formatCurrency(level.user_progress_deposit_self_total) }} / Rp {{ formatCurrency(level.deposit_self_total_required) }}</p>
-              </div>
-
-              <div v-if="toNumber(level.downlines_total_required) > 0" class="requirement-item">
-                <p class="requirement">Syarat total bawahan: {{ level.downlines_total_required }}</p>
-                <p class="progress-text">Progres: {{ level.user_progress_downlines_total }} / {{ level.downlines_total_required }}</p>
-              </div>
-
-              <div v-if="toNumber(level.missions_required_total) > 0" class="requirement-item">
-                <p class="requirement">Syarat total misi: {{ level.missions_required_total }}</p>
-                <p class="progress-text">Progres: {{ level.user_progress_missions }} / {{ level.missions_required_total }}</p>
-              </div>
-            </div>
-            <div class="card-footer" v-if="!level.is_unlocked">
-              <span class="lock-status">Belum Terbuka</span>
-            </div>
+            <span class="progress-value">{{ progressCurrent }}/{{ progressTotal }}</span>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Content Card -->
+    <section id="section-content">
+      <div class="content-card">
+        <div v-for="(level, idx) in rankLevels" :key="'c-' + level.rank" class="content-row">
+          <p class="content-text-bold">{{ level.title || `LV${level.rank}` }}</p>
+          <p class="content-text-regular">
+            <span>Recharge: ${{ formatUSD(level.deposit_self_total_required) }}</span>
+            <template v-if="toNumber(level.downlines_total_required) > 0">
+              <span class="content-sep">|</span>
+              <span>Referrals: {{ level.downlines_total_required }}</span>
+            </template>
+            <template v-if="toNumber(level.missions_required_total) > 0">
+              <span class="content-sep">|</span>
+              <span>Missions: {{ level.missions_required_total }}</span>
+            </template>
+          </p>
+          <div v-if="idx < rankLevels.length - 1" class="content-divider"></div>
         </div>
       </div>
     </section>
@@ -83,7 +87,7 @@ const goBack = () => {
 
 const displayUsername = computed(() => {
   const d = accountInfo.value || {}
-  const username = String(d.username || d.username || d.phone || d.name || '').trim()
+  const username = String(d.username || d.phone || d.name || '').trim()
   return username || 'Username'
 })
 
@@ -96,24 +100,56 @@ const toNumber = (value) => {
 
 const currentLevel = computed(() => {
   const d = rankStatus.value || {}
-  const title = String(d.current_title || '').trim()
-  if (title) return title
-  const n = toNumber(d.current_rank)
+  const n = Math.floor(toNumber(d.current_rank))
   return Number.isFinite(n) ? `LV${n}` : 'LV0'
 })
 
-const currentDeposit = computed(() => {
+const progressPercent = computed(() => {
+  const d = rankStatus.value || {}
+  const current = toNumber(d.deposit_self_total)
+  const nextLevel = rankLevels.value.find(l => !l.is_current_rank && l.is_unlocked) || rankLevels.value[0]
+  if (!nextLevel) return 0
+  const required = toNumber(nextLevel.deposit_self_total_required)
+  if (required <= 0) return 0
+  return Math.min(100, (current / required) * 100)
+})
+
+const progressCurrent = computed(() => {
   const d = rankStatus.value || {}
   return toNumber(d.deposit_self_total)
 })
 
-const formatCurrency = (value) => {
-  const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
-  if (!Number.isFinite(num)) return '0'
-  return new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(num)
+const progressTotal = computed(() => {
+  const nextLevel = rankLevels.value.find(l => !l.is_current_rank && l.is_unlocked) || rankLevels.value[0]
+  if (!nextLevel) return 0
+  return toNumber(nextLevel.deposit_self_total_required)
+})
+
+const formatUSD = (value) => {
+  const num = toNumber(value)
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(num)
+}
+
+const getTierBg = (rank) => {
+  const n = Math.floor(toNumber(rank))
+  const clamped = Math.min(8, Math.max(1, Number.isFinite(n) ? n : 1))
+  return `/assets/image/lv${clamped}.png`
+}
+
+const getTierNameClass = (idx) => {
+  return idx % 2 === 0 ? 'tier-name-lv1' : 'tier-name-lv2'
+}
+
+const getTierDescClass = (idx) => {
+  return idx % 2 === 0 ? 'tier-desc-lv1' : 'tier-desc-lv2'
+}
+
+const getTierDesc = (level) => {
+  const referrals = toNumber(level.downlines_total_required)
+  if (referrals > 0) return `Unlock by inviting ${referrals} members`
+  const deposit = toNumber(level.deposit_self_total_required)
+  if (deposit > 0) return `Unlock by recharging $${formatUSD(deposit)}`
+  return `Level ${level.rank}`
 }
 
 const fetchAccountInfo = async () => {
@@ -137,7 +173,43 @@ const fetchRankStatus = async () => {
 const fetchRankLevels = async () => {
   try {
     const resp = await authAPI.getRankLevels()
-    rankLevels.value = Array.isArray(resp?.data) ? resp.data : []
+    const raw = Array.isArray(resp?.data) ? resp.data : []
+    const byRank = new Map()
+    for (const item of raw) {
+      const rank = Math.floor(toNumber(item?.rank))
+      if (!Number.isFinite(rank) || rank < 1 || rank > 8) continue
+      const prev = byRank.get(rank)
+      if (!prev) {
+        byRank.set(rank, item)
+        continue
+      }
+      const prevReq = toNumber(prev?.deposit_self_total_required)
+      const nextReq = toNumber(item?.deposit_self_total_required)
+      if (nextReq >= prevReq) {
+        byRank.set(rank, item)
+      }
+    }
+
+    const normalized = []
+    for (let r = 1; r <= 8; r += 1) {
+      const level = byRank.get(r)
+      if (level) {
+        normalized.push(level)
+      } else {
+        normalized.push({
+          rank: r,
+          title: `LV${r}`,
+          deposit_self_total_required: 0,
+          deposit_self_total: 0,
+          downlines_total_required: 0,
+          missions_required_total: 0,
+          is_unlocked: false,
+          is_current_rank: false
+        })
+      }
+    }
+
+    rankLevels.value = normalized
   } catch (_) {
     rankLevels.value = []
   }
@@ -180,47 +252,43 @@ onActivated(() => {
 </script>
 
 <style scoped>
-.app-container {
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(180deg, #0a4345 0%, #0b6563 100%);
-  min-height: 100vh;
-  color: #ffffff;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 * {
   box-sizing: border-box;
 }
 
-h1, h2, p {
+.app-container {
+  margin: 0 auto;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f8f8f8;
+  max-width: 412px;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+h1, p {
   margin: 0;
 }
 
-.section-inner {
-  width: 100%;
-  max-width: 412px;
-  margin: 0 auto;
-  padding: 0 10px;
-}
-
-/* Header Section */
+/* Header */
 #section-header {
-  padding-top: 28px;
-  padding-bottom: 40px;
+  width: 100%;
 }
 
-.header-content {
+.header {
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  position: relative;
+  padding: 0 16px;
 }
 
-.back-button {
-  width: 35px;
-  height: 35px;
+.back-btn {
+  position: absolute;
+  left: 16px;
   background: none;
   border: none;
   padding: 0;
@@ -228,180 +296,213 @@ h1, h2, p {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  margin-top: 2px;
 }
 
-.back-button img {
-  width: 35px;
-  height: 35px;
-  object-fit: contain;
+.back-btn img {
+  width: 20px;
+  height: 20px;
 }
 
-.user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-
-.greeting {
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
   margin: 0;
-  color: #ffffff;
-  font-size: 22px;
-  font-weight: 600;
+}
+
+/* Tiers */
+#section-tiers {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.tiers-container {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tiers-container::-webkit-scrollbar {
+  display: none;
+}
+
+.tier-card {
+  position: relative;
+  width: 184px;
+  height: 116px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tier-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 0;
+}
+
+.tier-content {
+  display: none;
+}
+
+.tier-name {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
   line-height: 1.2;
 }
 
-.level-status {
+.tier-desc {
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.tier-name-lv1 { color: #a96a04; }
+.tier-desc-lv1 { color: #965e06; }
+.tier-name-lv2 { color: #fd627b; }
+.tier-desc-lv2 { color: #c4001f; }
+
+/* Progress */
+#section-progress {
+  width: 100%;
+  padding: 16px;
+}
+
+.progress-banner {
+  position: relative;
+  width: 100%;
+  height: 87px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.progress-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.progress-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-left: 102px;
+  padding-top: 18px;
+  padding-right: 16px;
+}
+
+.progress-level {
+  color: #747474;
+  font-size: 14px;
+  font-weight: 800;
+  font-style: italic;
+  margin-bottom: 9px;
+  margin-left: 3px;
+  line-height: 1;
+}
+
+.progress-track {
+  background-color: rgba(56, 53, 53, 0.4);
+  border-radius: 20px;
+  height: 22px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  padding: 0 10px;
+  gap: 8px;
+  width: 100%;
+  max-width: 211px;
 }
 
-.level-label {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 12px;
-}
-
-.level-value {
-  color: #de6f00;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.logo {
-  width: 100px;
-  height: 32px;
-  object-fit: contain;
-  border-radius: 50px;
-  margin-left: auto;
-}
-
-/* Level List Section */
-#section-level-list {
-  padding-bottom: 40px;
-}
-
-.level-cards-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.level-card {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  padding: 18px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.level-card.current-rank {
-  background: linear-gradient(135deg, rgba(222, 111, 0, 0.3) 0%, rgba(255, 255, 255, 0.15) 100%);
-  border: 1px solid rgba(222, 111, 0, 0.5);
-}
-
-.level-card.locked {
-  opacity: 0.8;
-  filter: grayscale(0.5);
-}
-
-.current-badge {
-  background-color: #de6f00;
+.progress-label, .progress-value {
   color: #ffffff;
   font-size: 10px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: 700;
-  margin-left: auto;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.level-icon {
-  width: 39px;
-  height: 39px;
-  object-fit: contain;
-}
-
-.level-title-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.level-subtitle {
-  color: #ffffff;
-  font-size: 11px;
-  opacity: 0.9;
-}
-
-.level-title {
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.requirement-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.requirement {
-  margin: 0;
-  color: #ffffff;
-  font-size: 12px;
-  line-height: 1.4;
-  opacity: 0.9;
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 .progress-bar-container {
-  width: 100%;
-  height: 6px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-  overflow: hidden;
-  margin: 4px 0;
+  flex: 1;
+  height: 9px;
+  position: relative;
 }
 
-.progress-bar {
+.progress-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100%;
-  background-color: #de6f00;
-  border-radius: 3px;
+  background-color: #144cdf;
+  border-radius: 20px;
   transition: width 0.3s ease;
 }
 
-.progress-text {
+.progress-bar-dot {
+  position: absolute;
+  top: 0;
+  width: 9px;
+  height: 9px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: left 0.3s ease;
+}
+
+/* Content Card */
+#section-content {
+  width: 100%;
+  padding: 0 16px 24px 16px;
+}
+
+.content-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.25);
+  min-height: 539px;
+  padding: 12px 13px;
+  width: 100%;
+}
+
+.content-row {
+  padding: 8px 0;
+}
+
+.content-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  margin-top: 10px;
+}
+
+.content-text-bold {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 2px 0;
+  line-height: 1.2;
+}
+
+.content-text-regular {
+  font-size: 12px;
+  font-weight: 400;
+  color: #000000;
   margin: 0;
-  color: #ffbd7b;
-  font-size: 10px;
-  font-weight: 600;
+  line-height: 1.2;
 }
 
-.card-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 10px;
-  text-align: center;
-}
-
-.lock-status {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 600;
+.content-sep {
+  margin: 0 6px;
+  color: rgba(0, 0, 0, 0.45);
 }
 </style>

@@ -1,37 +1,57 @@
 <template>
   <section id="section-bottom-nav">
-    <nav class="bottom-nav">
-      <div class="nav-item" @click="router.push('/dashboard')">
-        <img src="/assets/images/9bd968cf4388b3b4f98768e90ff8dd48cf3495e2.png" alt="Beranda">
-        <span>Beranda</span>
-      </div>
+    <nav class="bottom-nav-container">
+      <router-link to="/dashboard" class="nav-item" :class="{ active: isActive('/dashboard') }">
+        <img
+          src="/assets/image/ffe25a591934a7a193bade6d431223b8869d2cde.png"
+          alt="Home"
+          class="nav-icon"
+          :class="{ 'opacity-low': !isActive('/dashboard') }"
+        >
+        <span class="nav-text">Home</span>
+      </router-link>
 
-      <div class="nav-item" @click="router.push('/products')">
-        <img src="/assets/images/207e560f180b76b0854064260f96e2253a2ed528.png" alt="Aset">
-        <span>Aset</span>
-      </div>
+      <router-link to="/about" class="nav-item" :class="{ active: isActive('/about') }">
+        <img
+          src="/assets/image/3cb24173dc41742eccf595898ca2eed035661785.png"
+          alt="About Us"
+          class="nav-icon"
+          :class="{ 'opacity-low': !isActive('/about') }"
+        >
+        <span class="nav-text">About Us</span>
+      </router-link>
 
-      <div class="nav-item" @click="router.push('/team')">
-        <img src="/assets/images/9bb433d49093e2d7e23e42971f557a6232bb765a.png" alt="Tim saya">
-        <span>Tim saya</span>
-      </div>
+      <router-link to="/profile" class="nav-item" :class="{ active: isActive('/profile') }">
+        <img
+          src="/assets/image/48b8a39f7811095779bfc9811422446819d34f1b.png"
+          alt="Mine"
+          class="nav-icon"
+          :class="{ 'opacity-low': !isActive('/profile') }"
+        >
+        <span class="nav-text">Mine</span>
+      </router-link>
 
-      <div class="nav-item" @click="router.push('/review')">
-        <img src="/assets/images/30491638758f2796ab4abfc3db533d56fea87fe8.png" alt="Ulasan">
-        <span>Ulasan</span>
-      </div>
-
-      <div class="nav-item" @click="router.push('/profile')">
-        <img src="/assets/images/c2181bb9dc191a06e4c3fa49d8e6808c026ef06c.png" alt="Akun">
-        <span>Akun</span>
-      </div>
+      <router-link to="/products" class="nav-item" :class="{ active: isActive('/products') }">
+        <img
+          src="/assets/image/fd891e27e827c0f21ddb395edbc24cfd61c092dc.png"
+          alt="Shop"
+          class="nav-icon"
+          :class="{ 'opacity-low': !isActive('/products') }"
+        >
+        <span class="nav-text">Shop</span>
+      </router-link>
     </nav>
   </section>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-const router = useRouter()
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const isActive = (basePath) => {
+  const p = String(route.path || '')
+  return p === basePath || p.startsWith(`${basePath}/`)
+}
 </script>
 
 <style scoped>
@@ -42,36 +62,48 @@ const router = useRouter()
   transform: translateX(-50%);
   width: 100%;
   max-width: 412px;
-  background-color: #ffffff;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  z-index: 1000;
+  z-index: 100;
 }
 
-.bottom-nav {
+.bottom-nav-container {
   display: flex;
   justify-content: space-around;
-  padding: 12px 0 16px;
+  align-items: center;
+  height: 48px;
+  background-color: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  cursor: pointer;
+  justify-content: center;
   text-decoration: none;
+  color: #000000;
+  width: 25%;
+  gap: 4px;
 }
 
-.nav-item img {
+.nav-icon {
   width: 20px;
   height: 20px;
+  object-fit: contain;
 }
 
-.nav-item span {
+.nav-icon.opacity-low {
+  opacity: 0.2;
+}
+
+.nav-text {
   font-size: 10px;
-  color: #004d43;
+  line-height: 1;
+}
+
+.nav-item.active .nav-text {
   font-weight: 700;
 }
 </style>
+
 
 

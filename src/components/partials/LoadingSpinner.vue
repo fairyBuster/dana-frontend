@@ -6,7 +6,10 @@
     aria-busy="true"
   >
     <div class="spinner-box">
-      <div class="custom-loader"></div>
+      <div class="lds-spinner" aria-hidden="true">
+        <div></div><div></div><div></div><div></div><div></div><div></div>
+        <div></div><div></div><div></div><div></div><div></div><div></div>
+      </div>
       <p v-if="message" class="spinner-message">{{ message }}</p>
     </div>
   </div>
@@ -26,6 +29,56 @@ const { visible, overlay, containerClass, message } = toRefs(props)
 </script>
 
 <style scoped>
+.lds-spinner,
+.lds-spinner div,
+.lds-spinner div:after {
+  box-sizing: border-box;
+}
+
+.lds-spinner {
+  --spinner-size: 28px;
+  color: #ffffff;
+  display: inline-block;
+  position: relative;
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+}
+
+.lds-spinner div {
+  transform-origin: calc(var(--spinner-size) / 2) calc(var(--spinner-size) / 2);
+  animation: lds-spinner 1.2s linear infinite;
+}
+
+.lds-spinner div:after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: calc(var(--spinner-size) * 0.04);
+  left: calc(var(--spinner-size) * 0.46);
+  width: calc(var(--spinner-size) * 0.08);
+  height: calc(var(--spinner-size) * 0.22);
+  border-radius: 20%;
+  background: currentColor;
+}
+
+.lds-spinner div:nth-child(1) { transform: rotate(0deg); animation-delay: -1.1s; }
+.lds-spinner div:nth-child(2) { transform: rotate(30deg); animation-delay: -1s; }
+.lds-spinner div:nth-child(3) { transform: rotate(60deg); animation-delay: -0.9s; }
+.lds-spinner div:nth-child(4) { transform: rotate(90deg); animation-delay: -0.8s; }
+.lds-spinner div:nth-child(5) { transform: rotate(120deg); animation-delay: -0.7s; }
+.lds-spinner div:nth-child(6) { transform: rotate(150deg); animation-delay: -0.6s; }
+.lds-spinner div:nth-child(7) { transform: rotate(180deg); animation-delay: -0.5s; }
+.lds-spinner div:nth-child(8) { transform: rotate(210deg); animation-delay: -0.4s; }
+.lds-spinner div:nth-child(9) { transform: rotate(240deg); animation-delay: -0.3s; }
+.lds-spinner div:nth-child(10) { transform: rotate(270deg); animation-delay: -0.2s; }
+.lds-spinner div:nth-child(11) { transform: rotate(300deg); animation-delay: -0.1s; }
+.lds-spinner div:nth-child(12) { transform: rotate(330deg); animation-delay: 0s; }
+
+@keyframes lds-spinner {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 .spinner-overlay {
   display: flex;
   flex-direction: column;
@@ -40,6 +93,7 @@ const { visible, overlay, containerClass, message } = toRefs(props)
   z-index: 1050;
   display: grid;
   place-items: center;
+  pointer-events: none;
 }
 
 .is-inline {
@@ -48,44 +102,27 @@ const { visible, overlay, containerClass, message } = toRefs(props)
 }
 
 .spinner-box {
-  background-color: #222222;
+  background-color: #3D3D3D;
   border-radius: 10px;
 
-  width: 250px;
-  max-width: 180px;
-  min-height: 60px;
-  padding: 18px 20px;
+  width: 180px;
+  max-width: 150px;
+  min-height: 150px;
+  padding: 14px 16px;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-}
-
-.custom-loader {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  padding: 3px;
-  background:
-    conic-gradient(from 135deg at top, #ffffff 90deg, #0000 0) 0 calc(50% - 2px) / 8.5px 4.25px,
-    radial-gradient(farthest-side at bottom left, #0000 calc(100% - 3px), #ffffff calc(100% - 2.5px) 99%, #0000) top right / 50% 50% content-box content-box,
-    radial-gradient(farthest-side at top, #0000 calc(100% - 3px), #ffffff calc(100% - 2.5px) 99%, #0000) bottom / 100% 50% content-box content-box;
-  background-repeat: no-repeat;
-  animation: s1 1s infinite linear;
+  gap: 8px;
+  pointer-events: auto;
 }
 
 .spinner-message {
   margin: 0;
-  font-size: 12px;
+  font-size: 10px;
+  line-height: 1.2;
   color: #ffffff;
   text-align: center;
-  font-weight: 500;
-}
-
-@keyframes s1 {
-  100% {
-    transform: rotate(1turn);
-  }
+  font-weight: 400;
 }
 </style>

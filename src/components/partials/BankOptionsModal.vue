@@ -1,305 +1,197 @@
 <template>
   <div v-if="visible" class="bank-selector-overlay" @click.self="emitClose">
-    <section id="bank-selector-section">
-      <div class="mobile-container">
-        <div class="bottom-sheet">
-          <div class="sheet-handle" />
-           <header class="sheet-header">
-            
-            <button type="button" class="sheet-action sheet-action--primary" @click="confirmSelection">Pilih</button>
-          </header>
-
-          <div class="picker-wrapper">
-            <div class="picker-surface">
-              <div class="picker-indicator"></div>
-              <div ref="scrollEl" class="picker" @scroll="onScroll">
-                <ul class="picker-list">
-                  <li v-for="(opt, idx) in allOptions" :key="String(opt.id)" class="picker-row">
-                    <button
-                      type="button"
-                      class="picker-item"
-                      :class="{ active: isSelected(opt) }"
-                      @click="selectAndScroll(idx)"
-                    >
-                      {{ opt.name }}
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="bank-selector-sheet" role="dialog" aria-modal="true">
+      <div class="bank-selector-search">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z" />
+        </svg>
+        <input
+          v-model="query"
+          type="search"
+          class="search-input"
+          placeholder="Search bank"
+          autocomplete="off"
+        >
       </div>
-    </section>
+
+      <ul ref="listEl" class="bank-list">
+        <li v-for="bank in banksFiltered" :key="String(bank.id)" class="bank-row">
+          <button
+            type="button"
+            class="bank-button"
+            :class="{ active: isSelected(bank) }"
+            :data-id="bank.id"
+            @click="select(bank)"
+          >
+            <span class="bank-name">{{ bank.name }}</span>
+
+            <svg v-if="isSelected(bank)" class="check-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
   bankOptions: { type: Array, default: () => [] },
   selectedBankId: { type: [Number, String, null], default: null },
-  nullLabel: { type: String, default: 'null' }
+  nullLabel: { type: String, default: 'Choose bank' }
 })
+
 const emit = defineEmits(['close', 'select'])
 
-const scrollEl = ref(null)
-const internalSelectedId = ref(null)
+const query = ref('')
+const listEl = ref(null)
 
 const allOptions = computed(() => {
   return [{ id: null, name: props.nullLabel }, ...props.bankOptions]
 })
 
-const rowHeight = 36
-let rafId = 0
+const banksFiltered = computed(() => {
+  const q = String(query.value || '').trim().toLowerCase()
+  const list = allOptions.value
+  if (!q) return list
+  return list.filter((b) => {
+    const name = String(b.name || '').toLowerCase()
+    return name.includes(q)
+  })
+})
 
 const emitClose = () => {
   emit('close')
 }
 
-const syncScrollToSelected = async () => {
-  await nextTick()
-  const el = scrollEl.value
-  if (!el) return
-  const idx = allOptions.value.findIndex((x) => String(x.id) === String(internalSelectedId.value))
-  const index = idx >= 0 ? idx : 0
-  el.scrollTo({ top: index * rowHeight, behavior: 'auto' })
+const isSelected = (bank) => {
+  return String(props.selectedBankId ?? '') === String(bank?.id ?? '')
 }
 
-const onScroll = () => {
-  if (rafId) return
-  rafId = window.requestAnimationFrame(() => {
-    rafId = 0
-    const el = scrollEl.value
-    if (!el) return
-    const index = Math.max(0, Math.min(allOptions.value.length - 1, Math.round(el.scrollTop / rowHeight)))
-    internalSelectedId.value = allOptions.value[index]?.id ?? null
-  })
-}
-
-const isSelected = (opt) => String(internalSelectedId.value ?? '') === String(opt?.id ?? '')
-
-const selectAndScroll = (idx) => {
-  const list = allOptions.value
-  const next = list[idx]
-  if (!next) return
-  internalSelectedId.value = next?.id ?? null
-  const el = scrollEl.value
-  if (!el) return
-  el.scrollTo({ top: Math.max(0, idx) * rowHeight, behavior: 'smooth' })
-}
-
-const confirmSelection = () => {
-  const chosen = allOptions.value.find((x) => String(x.id) === String(internalSelectedId.value)) || allOptions.value[0]
-  emit('select', chosen)
+const select = (bank) => {
+  emit('select', bank)
   emitClose()
 }
 
-watch(
-  () => props.visible,
-  (v) => {
-    if (!v) return
-    internalSelectedId.value = props.selectedBankId ?? null
-    syncScrollToSelected()
+watch(() => props.visible, (newVal) => {
+  if (newVal) {
+    query.value = ''
+    nextTick(() => {
+      const id = String(props.selectedBankId ?? '')
+      const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '')
+      const target = listEl.value?.querySelector?.(`[data-id="${safeId}"]`)
+      target?.scrollIntoView?.({ block: 'center' })
+    })
   }
-)
-
-watch(
-  () => props.selectedBankId,
-  (v) => {
-    internalSelectedId.value = v ?? null
-    if (props.visible) syncScrollToSelected()
-  }
-)
-
-watch(
-  () => props.bankOptions,
-  () => {
-    if (props.visible) syncScrollToSelected()
-  },
-  { deep: true }
-)
-
-onBeforeUnmount(() => {
-  if (rafId) window.cancelAnimationFrame(rafId)
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-* {
-  box-sizing: border-box;
-}
-
 .bank-selector-overlay {
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(2px);
-  z-index: 2000;
+  background-color: rgba(0, 0, 0, 0.25);
+  z-index: 2050;
   display: flex;
   align-items: flex-end;
-}
-
-#bank-selector-section {
-  width: 100%;
-  display: flex;
   justify-content: center;
+  padding: 0;
 }
 
-.mobile-container {
+.bank-selector-sheet {
   width: 100%;
   max-width: 412px;
- 
-  min-height: 250px;
+  background: #ffffff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  overflow: hidden;
+  height: 50vh;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+}
+
+.bank-selector-search {
+  padding: 12px;
   position: relative;
-  overflow: hidden;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.bottom-sheet {
-  background-color: #f8f8f8;
+.search-icon {
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  fill: rgba(0, 0, 0, 0.45);
+}
+
+.search-input {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  font-family: 'Inter', sans-serif;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  padding: 0 12px 0 40px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
 }
 
-.sheet-handle {
-  width: 42px;
-  height: 5px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.18);
-  margin: 10px auto 6px;
+.bank-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  flex: 1;
 }
 
-.sheet-header {
-  height: 56px;
+.bank-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.bank-button {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px 8px;
-  background-color: transparent;
-}
-
-.sheet-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #000000;
-  text-align: center;
-  flex: 1;
-}
-
-.sheet-action {
-  background: rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 0 12px;
+  cursor: pointer;
   font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.7);
-  cursor: pointer;
-  height: 34px;
-  min-width: 96px;
-  border-radius: 14px;
+  color: #000000;
+  transition: background-color 0.2s ease;
 }
 
-.sheet-action--primary {
-  background: #004d43;
-  border-color: #004d43;
-  color: #ffffff;
+.bank-button:active {
+  background-color: #f8f9fa;
 }
 
-.picker-wrapper {
-  width: 100%;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding: 4px 16px 16px;
-}
-
-.picker-surface {
-  width: 100%;
-  background: #eeeeee;
-  border-radius: 20px;
-  position: relative;
-  overflow: hidden;
-}
-
-.picker {
-  width: 100%;
-  height: 168px;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: none;
-}
-
-.picker::-webkit-scrollbar {
-  display: none;
-}
-
-.picker-list {
-  list-style: none;
-  margin: 0;
-  padding: 66px 0;
-}
-
-.picker-row {
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  scroll-snap-align: center;
-}
-
-.picker-item {
-  width: 100%;
-  max-width: 260px;
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: rgba(0, 0, 0, 0.6);
+.bank-name {
   font-size: 14px;
-  font-weight: 500;
-  text-align: center;
   line-height: 18px;
-  opacity: 0.42;
-  transition: opacity 0.12s ease, color 0.12s ease, font-weight 0.12s ease, transform 0.12s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.picker-item.active {
-  opacity: 1;
-  color: #004d43;
-  font-weight: 700;
-  transform: scale(1.02);
+.bank-button.active .bank-name {
+  font-weight: 600;
+  color: #1b46f5;
 }
 
-.picker-indicator {
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  right: 12px;
-  height: 36px;
-  transform: translateY(-50%);
-  border-radius: 14px;
-  background: rgba(0, 77, 67, 0.08);
-  border: 1px solid rgba(0, 77, 67, 0.12);
-  pointer-events: none;
+.check-icon {
+  width: 18px;
+  height: 18px;
+  color: #1b46f5;
 }
 </style>

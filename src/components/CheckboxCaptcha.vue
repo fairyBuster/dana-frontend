@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="checkbox-captcha-container">
     <div class="captcha-box" :class="{ 'verified': isVerified }" @click="verify">
       <div class="checkbox-wrapper">
@@ -21,7 +21,7 @@
       </div>
     </div>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { ref } from 'vue'

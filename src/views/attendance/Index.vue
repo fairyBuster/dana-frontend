@@ -1,91 +1,64 @@
 <template>
   <div class="app-container">
+    <!-- Header -->
     <section id="section-header">
-      <div class="section-container">
-        <header class="app-header">
-          <button class="back-button" @click="goBack" aria-label="Go back">
-            <img src="/assets/images/2023_1661.svg" alt="Back Icon">
-          </button>
-          <h1 class="page-title">Hadiah harian</h1>
-        </header>
-      </div>
+      <header class="site-header">
+        <img src="/assets/image/4168_122.svg" alt="Back" class="back-icon" @click="goBack">
+        <h1 class="header-title">Daily sign</h1>
+      </header>
     </section>
 
-    <section id="section-summary">
-      <div class="section-container">
-        <div class="summary-wrapper">
-          <div class="summary-card">
-            <div class="summary-item">
-              <span class="summary-value">{{ totalClaimCountText }} Hari</span>
-              <span class="summary-label">Total berhasil absen</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-              <span class="summary-value">{{ formatCurrency(totalEarned) }}</span>
-              <span class="summary-label">Total rupiah absen</span>
-            </div>
-          </div>
+    <!-- Hero -->
+    <section id="section-hero">
+      <div class="hero-content">
+        <h2 class="main-title">Daily Journey</h2>
+        <p class="subtitle">Stay consistent and move forward</p>
+
+        <div class="progress-card">
+          <span>Progres: {{ streakCount }} / {{ cycleDays }} Days</span>
         </div>
       </div>
     </section>
 
-    <section id="section-calendar">
-      <div class="section-container">
-        <div class="calendar-wrapper">
-          <div class="calendar-card">
-            <div class="calendar-header">
-              <div class="calendar-icon-bg">
-                <img src="/assets/images/da35b1bd478095c4d10f2741cad43f6fbf632e97.png" alt="Calendar Icon" class="calendar-icon">
-              </div>
-              <p class="calendar-subtitle">{{ canClaimToday ? 'Silakan absen untuk hari ini' : 'Anda sudah absen hari ini' }}</p>
-            </div>
+    <!-- Journey Map -->
+    <section id="section-journey">
+      <div class="journey-map">
+        <img src="/assets/image/4168_137.svg" class="journey-path" alt="Journey Path">
 
-            <div class="calendar-grid">
-              <button
-                v-for="item in visibleDayItems"
-                :key="item.day"
-                type="button"
-                class="day-item"
-                :class="{ checked: item.checked, special: item.special, claimable: item.claimable }"
-                :disabled="isClaiming || !item.claimable"
-                @click="handleDayClick(item)"
-              >
-                <img class="day-icon" :src="item.checked ? checkedIconSrc : gemIconSrc" alt="Day Icon">
-                <div class="day-label">{{ item.label }}</div>
-              </button>
-            </div>
-
-            <button
-              v-if="dayItems.length > collapsedCount"
-              type="button"
-              class="toggle-calendar-btn"
-              @click="toggleCalendarView"
+        <div
+          v-for="(node, index) in journeyNodes"
+          :key="node.day"
+          class="node-group"
+          :class="`node-${node.day}`"
+          @click="handleDayClick(node)"
+        >
+          <div class="node-circle-wrap" :class="{ 'is-checked': node.checked }">
+            <img
+              :src="node.checked ? activeNodeIcon : inactiveNodeIcons[index] || inactiveNodeIcons[0]"
+              class="node-circle"
+              :alt="`Day ${node.day}`"
             >
-              {{ showAllDays ? 'Tampilkan sedikit' : 'Tampilkan semua' }}
-            </button>
+            <span class="node-text" :class="{ 'is-checked': node.checked }">{{ node.day }}</span>
           </div>
+          <span class="node-label">Day {{ node.day }}</span>
         </div>
       </div>
     </section>
 
-    <section id="section-rules">
-      <div class="section-container">
-        <div class="rules-wrapper">
-          <div class="rules-card">
-            <h2 class="rules-title">Petunjuk absen</h2>
-            <div class="rules-text">
-              <p>Masuk setiap hari untuk mendapatkan hadiah.</p>
-              <p>Jika pengumpulannya terganggu, maka akan diterbitkan kembali dari pengumpulan pertama.</p>
-              <p>Pengguna harus masuk sekali sehari dan hadiah akan masuk secara real-time.</p>
-              <p>Hadiah mengikuti distribusi sistem dan tampilan platform.</p>
-              <p>Jika ditemukan kecurangan, platform berhak membatalkan partisipasi dan hadiah.</p>
-              <p>Platform berhak atas interpretasi akhir acara ini.</p>
-            </div>
-          </div>
-        </div>
+    <!-- Footer -->
+    <section id="section-footer">
+      <div class="footer-container">
+        <button
+          class="btn-primary"
+          :disabled="!canClaimToday || isClaiming"
+          @click="handleCheckIn"
+        >
+          {{ isClaiming ? 'Claiming...' : 'Claim Reward' }}
+        </button>
       </div>
     </section>
   </div>
+
   <LoadingSpinner :visible="isLoading" :overlay="true" message="" />
   <ErrorModal v-model="showErrorModal" :message="errorMessage" />
   <SuccessModal v-model="showSuccessModal" :message="successMessage" />
@@ -94,7 +67,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { attendanceAPI } from '@/services/api'
+import { attendanceAPI, authAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
@@ -104,8 +77,16 @@ const goBack = () => {
   router.go(-1)
 }
 
-const checkedIconSrc = '/assets/images/d4eaa5839a5872cc4c32f292c0feaee334e99300.png'
-const gemIconSrc = '/assets/images/da4151be78469acf27cc0da4d60d3f5fcefd602d.png'
+const activeNodeIcon = '/assets/image/4168_164.svg'
+const inactiveNodeIcons = [
+  '/assets/image/4168_164.svg',
+  '/assets/image/4168_141.svg',
+  '/assets/image/4168_149.svg',
+  '/assets/image/4168_161.svg',
+  '/assets/image/4168_138.svg',
+  '/assets/image/4168_147.svg',
+  '/assets/image/4168_144.svg'
+]
 
 const isLoading = ref(false)
 const isClaiming = ref(false)
@@ -116,8 +97,7 @@ const successMessage = ref('')
 
 const settings = ref(null)
 const status = ref(null)
-const showAllDays = ref(false)
-const collapsedCount = 14
+const rankStatus = ref(null)
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return 0
@@ -163,7 +143,7 @@ const formatCurrency = (value) => {
   const n = parseNumber(value)
   const hasFraction = Math.abs(n % 1) > 1e-9
   return new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: hasFraction ? 0 : 0,
+    minimumFractionDigits: 0,
     maximumFractionDigits: hasFraction ? 2 : 0
   }).format(n)
 }
@@ -174,7 +154,7 @@ const formatRupiah = (value) => {
 
 const extractErrorMessage = (err) => {
   const data = err?.response?.data
-  if (!data) return err?.message || 'Permintaan gagal, segarkan halaman'
+  if (!data) return err?.message || 'Request failed, please refresh'
   if (typeof data === 'string') return data
   if (data.detail) return String(data.detail)
   if (data.message) return String(data.message)
@@ -182,14 +162,14 @@ const extractErrorMessage = (err) => {
   const firstVal = data[firstKey]
   if (Array.isArray(firstVal) && firstVal.length) return String(firstVal[0])
   if (firstVal) return String(firstVal)
-  return 'Permintaan gagal, segarkan halaman'
+  return 'Request failed, please refresh'
 }
 
 const cycleDays = computed(() => {
   const fromStatus = parseNumber(status.value?.cycle_days)
   if (fromStatus > 0) return fromStatus
   const fromSettings = parseNumber(settings.value?.daily_cycle_days)
-  return fromSettings > 0 ? fromSettings : 20
+  return fromSettings > 0 ? fromSettings : 7
 })
 
 const cycleDay = computed(() => {
@@ -204,18 +184,6 @@ const streakCount = computed(() => {
   return n >= 0 ? n : 0
 })
 
-const totalClaimCount = computed(() => {
-  const d = status.value || {}
-  const n = parseNumber(d.total_claim_count ?? d.total_claimed_count ?? d.claim_count ?? d.total_count ?? 0)
-  return n >= 0 ? n : 0
-})
-const totalClaimCountText = computed(() => String(totalClaimCount.value))
-
-const totalEarned = computed(() => {
-  const d = status.value || {}
-  return parseNumber(d.total_claimed_amount ?? d.total_earned ?? d.total_reward ?? d.total_amount ?? 0)
-})
-
 const canClaimToday = computed(() => {
   const d = status.value || {}
   const raw = d.can_claim_today ?? d.can_claim ?? d.claimable ?? null
@@ -225,45 +193,46 @@ const canClaimToday = computed(() => {
   return true
 })
 
-const getDayAmount = (day) => {
+const totalClaimCount = computed(() => {
+  const d = status.value || {}
+  const n = parseNumber(d.total_claim_count ?? d.total_claimed_count ?? d.claim_count ?? d.total_count ?? 0)
+  return n >= 0 ? n : 0
+})
+
+const totalEarned = computed(() => {
+  const d = status.value || {}
+  return parseNumber(d.total_claimed_amount ?? d.total_earned ?? d.total_reward ?? d.total_amount ?? 0)
+})
+
+const currentRankNumber = computed(() => {
+  const d = rankStatus.value || {}
+  const n = parseNumber(d.current_rank ?? d.rank ?? d.level ?? 0)
+  const int = Math.floor(n)
+  return int > 0 ? int : 0
+})
+
+const rankRewardAmount = computed(() => {
   const s = settings.value || {}
-  const rewards = s.daily_rewards || {}
-  const key = String(day)
-  if (Object.prototype.hasOwnProperty.call(rewards, key)) return parseNumber(rewards[key])
-  if (Object.prototype.hasOwnProperty.call(rewards, day)) return parseNumber(rewards[day])
-  const fixed = parseNumber(s.fixed_amount)
-  return fixed || 0
-}
+  const type = String(s.reward_type || '').toLowerCase()
+  if (type !== 'rank') return 0
+  const map = s.rank_rewards || {}
+  const key = String(currentRankNumber.value || '')
+  const raw = map?.[key] ?? map?.[String(parseNumber(key))] ?? 0
+  return parseNumber(raw)
+})
 
-const getDayLabel = (day) => {
-  return `${day} Hari`
-}
-
-const dayItems = computed(() => {
-  const total = cycleDays.value
-  const nextClaimDay = canClaimToday.value && cycleDay.value < total ? cycleDay.value + 1 : null
+const journeyNodes = computed(() => {
+  const total = Math.min(cycleDays.value, 7)
   const out = []
   for (let d = 1; d <= total; d += 1) {
     out.push({
       day: d,
-      label: getDayLabel(d),
-      amountText: formatCurrency(getDayAmount(d)),
       checked: d <= cycleDay.value,
-      claimable: nextClaimDay !== null && d === nextClaimDay,
-      special: d === total
+      claimable: canClaimToday.value && d === cycleDay.value + 1
     })
   }
   return out
 })
-
-const visibleDayItems = computed(() => {
-  if (showAllDays.value) return dayItems.value
-  return dayItems.value.slice(0, collapsedCount)
-})
-
-const toggleCalendarView = () => {
-  showAllDays.value = !showAllDays.value
-}
 
 const fetchSettings = async () => {
   try {
@@ -299,20 +268,32 @@ const fetchSettings = async () => {
   }
 }
 
+const fetchRankStatus = async () => {
+  try {
+    const resp = await authAPI.getRankStatus()
+    return resp?.data || null
+  } catch (_) {
+    return null
+  }
+}
+
 const fetchAttendance = async () => {
   isLoading.value = true
   showErrorModal.value = false
   errorMessage.value = ''
   try {
-    const [streakResp, setData] = await Promise.all([
+    const [streakResp, setData, rankData] = await Promise.all([
       attendanceAPI.getStreak(),
-      fetchSettings()
+      fetchSettings(),
+      fetchRankStatus()
     ])
     settings.value = setData || null
     status.value = streakResp?.data || null
+    rankStatus.value = rankData || null
   } catch (err) {
     settings.value = null
     status.value = null
+    rankStatus.value = null
     errorMessage.value = extractErrorMessage(err)
     showErrorModal.value = true
   } finally {
@@ -330,7 +311,7 @@ const handleCheckIn = async () => {
     const data = res?.data || {}
     const streakResp = await attendanceAPI.getStreak()
     status.value = streakResp?.data || null
-    const claimedAmount = parseNumber(
+    let claimedAmount = parseNumber(
       data.claimed_amount ??
         data.log?.amount ??
         data.amount ??
@@ -339,15 +320,19 @@ const handleCheckIn = async () => {
         data.bonus ??
         0
     )
+    if (claimedAmount <= 0) {
+      const expected = rankRewardAmount.value
+      if (expected > 0) claimedAmount = expected
+    }
     const streakAfter = parseNumber(data.streak ?? data.log?.streak_count ?? streakCount.value)
-    const baseMsg = String(data.message || 'Klaim absensi berhasil').trim()
+    const baseMsg = String(data.message || 'Check-in successful').trim()
     const nextClaimDate = data.next_claim_date ? String(data.next_claim_date) : ''
 
-    let msg = baseMsg || 'Klaim absensi berhasil'
-    if (claimedAmount > 0) msg += `! Anda mendapatkan ${formatRupiah(claimedAmount)}.`
+    let msg = baseMsg || 'Check-in successful'
+    if (claimedAmount > 0) msg += `! You received ${formatRupiah(claimedAmount)}.`
     else msg += '!'
-    if (streakAfter > 0) msg += ` Streak: ${streakAfter} hari.`
-    if (nextClaimDate) msg += ` Klaim berikutnya: ${nextClaimDate}.`
+    if (streakAfter > 0) msg += ` Streak: ${streakAfter} days.`
+    if (nextClaimDate) msg += ` Next claim: ${nextClaimDate}.`
     successMessage.value = msg
     showSuccessModal.value = true
   } catch (err) {
@@ -358,8 +343,8 @@ const handleCheckIn = async () => {
   }
 }
 
-const handleDayClick = async (item) => {
-  if (!item?.claimable) return
+const handleDayClick = async (node) => {
+  if (!node?.claimable) return
   await handleCheckIn()
 }
 
@@ -369,252 +354,212 @@ onMounted(() => {
 </script>
 
 <style scoped>
-body {
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f8f8f8;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 * {
   box-sizing: border-box;
 }
 
+h1, h2, h3, p {
+  margin: 0;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
-  max-width: 412px;
   margin: 0 auto;
-  width: 100%;
-  background-color: #f8f8f8;
+  padding: 0;
+  max-width: 100%;
   min-height: 100vh;
+  background-image: url('/assets/image/c8d68c05ae1ea16072599c761dd2bec2540b74f4.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #f5f7ff;
+  position: relative;
+  overflow-x: hidden;
+  color: #000000;
 }
 
 /* Header */
-.app-header {
+.site-header {
   display: flex;
   align-items: center;
-  padding: 20px 16px;
+  padding: 20px 20px 0;
   position: relative;
-  height: 64px;
-}
-
-.back-button {
-  background: none;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  position: absolute;
-  left: 8px;
-  display: flex;
-  align-items: center;
   justify-content: center;
 }
 
-.back-button img {
-  width: 35px;
-  height: 35px;
-  object-fit: contain;
+.back-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  position: absolute;
+  left: 20px;
 }
 
-.page-title {
-  flex: 1;
-  text-align: center;
+.header-title {
+  margin-left: 0;
   font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Hero */
+.hero-content {
+  text-align: center;
+  padding-top: 32px;
+}
+
+.main-title {
+  font-size: 28px;
   font-weight: 700;
-  color: #000000;
-  margin: 0;
+  letter-spacing: -0.5px;
 }
 
-/* Summary */
-.summary-wrapper {
-  padding: 8px 16px 16px 16px;
-}
-
-.summary-card {
-  background-color: #eeeeee;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  padding: 16px 0;
-}
-
-.summary-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.summary-value {
-  color: #004d43;
+.subtitle {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 400;
+  margin-top: 7px;
+  color: #1a1a1a;
 }
 
-.summary-label {
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 11px;
-}
-
-.summary-divider {
-  width: 1px;
-  height: 36px;
-  background-color: rgba(0, 0, 0, 0.15);
-}
-
-/* Calendar */
-.calendar-wrapper {
-  padding: 0 16px 16px 16px;
-}
-
-.calendar-card {
-  background-color: #ffffff;
-  border-radius: 20px;
-  padding: 20px 16px;
-}
-
-.calendar-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.calendar-icon-bg {
-  width: 36px;
-  height: 36px;
-  background-color: #e8f5e9;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.calendar-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
-.calendar-subtitle {
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 13px;
-  margin: 0;
-}
-
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 12px 8px;
-  margin-bottom: 8px;
-}
-
-.toggle-calendar-btn {
-  width: 100%;
-  height: 44px;
-  margin-top: 10px;
-  border-radius: 20px;
-  background-color: #004d43;
-  border: 1px solid #004d43;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.toggle-calendar-btn:active {
-  opacity: 0.85;
-}
-
-.day-item {
-  position: relative;
+.progress-card {
+  width: 324px;
   height: 50px;
-  width: 100%;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  background-color: #eeeeee;
-  overflow: hidden;
-  border: none;
-  padding: 0;
-  cursor: default;
-}
-
-.day-item.checked {
-  background-color: rgba(0, 77, 67, 0.3);
-}
-
-.day-item.claimable {
-  cursor: pointer;
-  outline: 2px solid rgba(0, 77, 67, 0.35);
-  outline-offset: 2px;
-}
-
-.day-item:disabled {
-  cursor: default;
-}
-
-.day-icon {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-.day-label {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 15px;
-  background-color: #004d43;
-  color: #ffffff;
-  font-size: 8px;
-  font-weight: 700;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  margin: 39px auto 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.day-item.checked .day-label {
-  background-color: rgba(255, 255, 255, 0.2);
+.progress-card span {
+  font-size: 14px;
+  font-weight: 600;
 }
 
-/* Rules */
-.rules-wrapper {
-  padding: 0 16px 24px 16px;
+/* Journey Map */
+.journey-map {
+  position: relative;
+  height: 420px;
+  margin-top: 32px;
 }
 
-.rules-card {
-  background-color: #ffffff;
-  border-radius: 20px;
-  padding: 20px 16px;
+.journey-path {
+  position: absolute;
+  top: 25px;
+  left: 50px;
+  width: 330px;
+  height: 370px;
 }
 
-.rules-title {
-  color: #004d43;
-  font-size: 13px;
+.node-group {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.node-circle-wrap {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+
+.node-circle {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.node-text {
+  position: absolute;
+  left: 50%;
+  top: var(--node-center-y, 50%);
+  transform: translate(-50%, -50%);
+  color: #144cdf;
+  font-size: 24px;
   font-weight: 700;
-  margin: 0 0 12px 0;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 2;
 }
 
-.rules-text {
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 11px;
-  line-height: 1.6;
+.node-text.is-checked {
+  color: #ffffff;
 }
 
-.rules-text p {
-  margin: 0 0 8px 0;
+.node-circle-wrap.is-checked {
+  --node-center-y: 44.3%;
 }
 
-.rules-text p:last-child {
-  margin-bottom: 0;
+.node-label {
+  position: absolute;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Node 1 */
+.node-1 .node-circle-wrap { top: 0px; left: 33px; width: 62px; height: 62px; }
+.node-1 .node-label { top: 72px; left: 32px; }
+
+/* Node 2 */
+.node-2 .node-circle-wrap { top: 0px; left: 253px; width: 50px; height: 49px; }
+.node-2 .node-label { top: 54px; left: 244px; }
+
+/* Node 3 */
+.node-3 .node-circle-wrap { top: 100px; left: 340px; width: 50px; height: 49px; }
+.node-3 .node-label { top: 120px; left: 280px; }
+
+/* Node 4 */
+.node-4 .node-circle-wrap { top: 195px; left: 307px; width: 50px; height: 49px; }
+.node-4 .node-label { top: 267px; left: 307px; }
+
+/* Node 5 */
+.node-5 .node-circle-wrap { top: 186px; left: 167px; width: 50px; height: 49px; }
+.node-5 .node-label { top: 244px; left: 161px; }
+
+/* Node 6 */
+.node-6 .node-circle-wrap { top: 322px; left: 30px; width: 50px; height: 49px; }
+.node-6 .node-label { top: 380px; left: 13px; }
+
+/* Node 7 */
+.node-7 .node-circle-wrap { top: 346px; left: 319px; width: 50px; height: 49px; }
+.node-7 .node-label { top: 395px; left: 317px; }
+
+/* Footer */
+.footer-container {
+  padding-top: 34px;
+  padding-bottom: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #4085e1 0%, #2757b7 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  padding: 14px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

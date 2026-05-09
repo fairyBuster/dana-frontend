@@ -1,10 +1,9 @@
 <template>
   <Teleport to="body">
     <div v-if="modelValue" class="modal-overlay" @click="close">
-      <div class="modal-card" role="dialog" aria-modal="true" @click.stop>
+      <div class="modal-card" role="dialog" aria-modal="true" @click.stop="close">
+        <img src="/assets/image/check.png" alt="" class="modal-icon">
         <p class="modal-message">{{ message || 'Pendaftaran akun sudah selesai. Silakan masuk akun sekarang.' }}</p>
-        <div class="modal-divider"></div>
-        <button type="button" class="modal-btn" @click="close">Mengerti</button>
       </div>
     </div>
   </Teleport>
@@ -49,44 +48,32 @@ onDeactivated(() => {
 
 .modal-card {
   width: 100%;
-  max-width: 320px;
-  background-color: #ffffff;
-  border-radius: 14px;
+  max-width: 180px;
+  background-color: #262626;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
+  align-items: center;
   font-family: 'Inter', sans-serif;
+  padding: 24px 16px;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.modal-icon {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
 }
 
 .modal-message {
-  color: #000000;
+  color: #ffffff;
   font-size: 14px;
   line-height: 1.4;
   margin: 0;
   text-align: center;
-  padding: 22px 20px;
-}
-
-.modal-divider {
-  height: 1px;
-  width: 100%;
-  background-color: #e6e6e6;
-}
-
-.modal-btn {
-  width: 100%;
-  height: 48px;
-  background: transparent;
-  border: none;
-  color: #004d43;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.modal-btn:active {
-  background-color: rgba(0, 0, 0, 0.04);
+  padding: 0;
 }
 </style>

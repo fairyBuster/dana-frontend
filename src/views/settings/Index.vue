@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="app-container">
     <section id="section-header">
       <header class="app-header">
@@ -40,7 +40,7 @@
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'

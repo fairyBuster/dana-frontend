@@ -3,53 +3,86 @@
     <!-- Header -->
     <section id="section-header">
       <header class="app-header">
-        <button class="back-icon" @click="goBack" aria-label="Back">
-          <img src="/assets/images/18_153.svg" alt="Back">
+        <a href="/profile" class="btn-back" aria-label="Go to profile">
+          <img src="/assets/image/4252_221.svg" alt="Back Icon">
+        </a>
+        <button type="button" ref="menuAnchorEl" class="header-title-group" @click.stop="toggleRecordMenu">
+          <h1 class="header-title">{{ currentRecordLabel }}</h1>
+          <img
+            src="/assets/image/4252_239.svg"
+            alt="Dropdown Icon"
+            class="header-dropdown-icon"
+            :class="{ open: recordMenuOpen }"
+          >
+          <div v-if="recordMenuOpen" class="record-menu" @click.stop>
+            <button
+              v-for="item in recordMenuItems"
+              :key="item.key"
+              type="button"
+              class="record-menu-item"
+              :class="{ active: item.key === currentRecordKey }"
+              @click.stop="selectRecord(item)"
+            >
+              {{ item.label }}
+            </button>
+          </div>
         </button>
-        <h1 class="header-title">Riwayat keuntungan</h1>
       </header>
     </section>
 
-    <!-- History List -->
-    <section id="section-history-list">
-      <div v-if="transactions.length === 0 && !isLoading" class="empty-state">
-        <p class="empty-text">Belum ada riwayat transaksi</p>
-      </div>
-
-      <div class="history-list">
-        <div v-for="transaction in transactions" :key="transaction.id" class="history-card">
-          <div class="card-date">Date trx: {{ transaction.date }}</div>
-          <div class="card-body">
-            <img src="/assets/images/51c612507498a1350e8a34d624b4f99146ecdfe9.png" alt="Transaction Icon" class="card-icon">
-            <div class="card-info">
-              <div class="card-title">{{ transaction.title }}</div>
-              <div class="card-amount">{{ transaction.amount }}</div>
-            </div>
-          </div>
+    <!-- Record List -->
+    <section id="section-record-list">
+      <div class="record-content">
+        <!-- Table Header -->
+        <div class="table-header">
+          <div class="th-col th-status">Status</div>
+          <div class="th-col th-amount">Amount</div>
+          <div class="th-col th-type">Type</div>
         </div>
-      </div>
 
-      <div v-if="showPagination" class="pagination-row">
-        <PaginationBar
-          :page="currentPage"
-          :total-pages="totalPages"
-          :has-prev="hasPrev"
-          :has-next="hasNext"
-          :loading="isLoading"
-          @change="goToPage"
-        />
+        <!-- Empty State -->
+        <div v-if="transactions.length === 0 && !isLoading" class="empty-state">
+          <p class="empty-text">No mining records yet</p>
+        </div>
+
+        <!-- Record List -->
+        <div class="record-list">
+          <template v-for="(transaction, idx) in transactions" :key="transaction.id">
+            <div class="record-item">
+              <div class="td-col td-status">Succeed</div>
+              <div class="td-col td-amount">{{ transaction.amount }}</div>
+              <div class="td-col td-type">
+                <span class="type-name">{{ transaction.title }}</span>
+                <span class="type-date">{{ transaction.date }}</span>
+              </div>
+            </div>
+            <hr v-if="idx < transactions.length - 1" class="record-divider">
+          </template>
+        </div>
+
+        <div v-if="showPagination" class="pagination-row">
+          <PaginationBar
+            :page="currentPage"
+            :total-pages="totalPages"
+            :has-prev="hasPrev"
+            :has-next="hasNext"
+            :loading="isLoading"
+            @change="goToPage"
+          />
+        </div>
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { transactionAPI } from '@/services/api'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const transactions = ref([])
 const isLoading = ref(false)
@@ -65,18 +98,70 @@ const showPagination = computed(() => {
   return hasNext.value || hasPrev.value || totalPages.value > 1
 })
 
+const goBack = () => {
+  router.go(-1)
+}
+
+const recordMenuOpen = ref(false)
+const menuAnchorEl = ref(null)
+
+const recordMenuItems = [
+  { key: 'recharge', label: 'Record recharge', to: '/dep/history' },
+  { key: 'mining', label: 'Mining record', to: '/portfolio/history' },
+  { key: 'payout', label: 'Payout record', to: '/flow/history' },
+  { key: 'purchase', label: 'Purchase record', to: '/orders' },
+  { key: 'commission', label: 'Commision friend', to: '/commission/history' },
+  { key: 'other', label: 'Other record', to: '/trx' }
+]
+
+const currentRecordKey = computed(() => {
+  const p = String(route.path || '')
+  if (p.startsWith('/dep')) return 'recharge'
+  if (p.startsWith('/portfolio')) return 'mining'
+  if (p.startsWith('/flow')) return 'payout'
+  if (p.startsWith('/orders')) return 'purchase'
+  if (p.startsWith('/commission')) return 'commission'
+  return 'other'
+})
+
+const currentRecordLabel = computed(() => {
+  const found = recordMenuItems.find((x) => x.key === currentRecordKey.value)
+  return found?.label || 'Other record'
+})
+
+const toggleRecordMenu = () => {
+  recordMenuOpen.value = !recordMenuOpen.value
+}
+
+const closeRecordMenu = () => {
+  recordMenuOpen.value = false
+}
+
+const selectRecord = (item) => {
+  closeRecordMenu()
+  if (item?.to) router.push(item.to)
+}
+
+const onDocumentClick = (e) => {
+  if (!recordMenuOpen.value) return
+  const anchor = menuAnchorEl.value
+  const target = e?.target
+  if (anchor && target && anchor.contains(target)) return
+  closeRecordMenu()
+}
+
 const pad2 = (n) => String(n).padStart(2, '0')
 const formatDateTime = (value) => {
   if (!value) return '-'
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return String(value)
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}.${pad2(d.getMinutes())}`
 }
 
-const formatCurrency = (value) => {
+const formatUSD = (value) => {
   const num = Number(value || 0)
-  if (!Number.isFinite(num)) return 'Rp 0'
-  return 'Rp ' + new Intl.NumberFormat('id-ID', {
+  if (!Number.isFinite(num)) return '$0'
+  return '$' + new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(num)
@@ -96,8 +181,8 @@ const mapToTransaction = (t) => {
   return {
     id: t?.id ?? t?.trx_id ?? `${t?.created_at || ''}-${t?.amount || ''}`,
     date: formatDateTime(t?.created_at),
-    title: t?.product_name || t?.description || 'Keuntungan dari nama produk',
-    amount: formatCurrency(t?.amount || t?.profit_amount || 0)
+    title: t?.product_name || t?.description || 'Mining profit',
+    amount: formatUSD(t?.amount || t?.profit_amount || 0)
   }
 }
 
@@ -126,16 +211,21 @@ const goToPage = (page) => {
   loadPage(p)
 }
 
-const goBack = () => {
-  router.go(-1)
-}
-
 onMounted(() => {
   loadPage(1)
+  document.addEventListener('click', onDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
   width: 100%;
@@ -143,130 +233,147 @@ onMounted(() => {
   margin: 0 auto;
   background-color: #f8f8f8;
   min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-h1, h2, h3, p {
+h1, p {
   margin: 0;
 }
 
 /* Header */
 #section-header {
-  width: 100%;
-  max-width: 412px;
-  margin: 0 auto;
-  background-color: #f8f8f8;
+  min-height: 60px;
 }
 
 .app-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 16px;
   position: relative;
-  height: 70px;
-  width: 100%;
+  background-color: #f8f8f8;
 }
 
-.back-icon {
+.btn-back {
   position: absolute;
-  left: 7px;
-  top: 21px;
-  width: 41px;
-  height: 41px;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  width: 20px;
+  height: 20px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.back-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.btn-back img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .header-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 31px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #000000;
-  line-height: 20px;
-  white-space: nowrap;
+  margin: 0;
+  line-height: 1.2;
 }
 
-/* History List */
-#section-history-list {
+.header-dropdown-icon {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.15s ease;
+}
+
+.header-dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.record-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  z-index: 50;
+}
+
+.record-menu-item {
   width: 100%;
-  max-width: 412px;
-  margin: 0 auto;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 16px;
+  color: #000000;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.record-menu-item + .record-menu-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.record-menu-item.active {
+  font-weight: 700;
+}
+
+/* Record List */
+#section-record-list {
+  min-height: calc(100vh - 60px);
+}
+
+.record-content {
+  padding: 8px 15px 20px 15px;
   background-color: #f8f8f8;
-  padding: 0 13px 20px 13px;
-  min-height: calc(100vh - 86px);
 }
 
-.history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.table-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
 }
 
-.history-card {
-  background-color: #eeeeee;
-  border-radius: 20px;
-  padding: 15px 16px 10px 16px;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+.th-col {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
 }
 
-.card-date {
-  color: #004d43;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 20px;
-  margin-bottom: 9px;
+.th-status {
+  text-align: left;
 }
 
-.card-body {
-  display: flex;
-  align-items: flex-start;
+.th-amount {
+  text-align: center;
 }
 
-.card-icon {
-  width: 31px;
-  height: 28px;
-  object-fit: contain;
-  margin-right: 15px;
-  margin-top: 2px;
-  flex-shrink: 0;
-}
-
-.card-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.card-title {
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
-.card-amount {
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 20px;
-  margin-top: -1px;
+.th-type {
+  text-align: right;
 }
 
 .empty-state {
@@ -279,28 +386,66 @@ h1, h2, h3, p {
   font-size: 14px;
 }
 
+.record-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.record-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  align-items: center;
+  padding: 8px 12px;
+}
+
+.td-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.td-status {
+  color: #0cb300;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.td-amount {
+  color: #010101;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.td-type {
+  align-items: flex-end;
+  text-align: right;
+  gap: 2px;
+}
+
+.type-name {
+  color: #010101;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.type-date {
+  color: rgba(1, 1, 1, 0.4);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.record-divider {
+  border: none;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.3);
+  margin: 4px 12px;
+  width: calc(100% - 24px);
+}
+
 .pagination-row {
   width: 100%;
   display: flex;
   justify-content: center;
   margin-top: 16px;
-}
-
-.load-more-btn {
-  width: 100%;
-  height: 40px;
-  border-radius: 20px;
-  background-color: #004d43;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.load-more-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 </style>

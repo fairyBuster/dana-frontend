@@ -1,205 +1,480 @@
 <template>
   <div class="app-container">
-    <!-- Header Section -->
-    <section id="section-header">
-      <header class="main-header">
-        <div class="top-bar">
-          <router-link class="user-pill" to="/settings">
-            <div class="user-info">
-              <span class="greeting">Hai, {{ username }}</span>
-              <span class="phone">{{ phoneDisplay }}</span>
-            </div>
-            <img src="/assets/images/2010_761.svg" alt="Dropdown" class="icon-dropdown">
-          </router-link>
-          <router-link to="/news" class="notification-area">
-            <div class="notification-icon-wrapper">
-              <img src="/assets/images/cb42829baac29d56fa551a762cf2ae5608e0f23c.png" alt="Notification">
-            </div>
-            <span class="notification-text">Pemberitahuan</span>
-          </router-link>
-        </div>
-
-        <div class="balance-container">
-          <div class="main-balance-area">
-            <div class="balance-label-row">
-              <span class="label-text">Saldo Utama</span>
-              <img src="/assets/images/2013_1238.svg" alt="Toggle Visibility" class="icon-eye" @click="toggleBalanceVisibility">
-            </div>
-            <div class="main-amount">{{ balanceDisplay }}</div>
+    <!-- Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <img src="/assets/image/Logo01.png" alt="Logo" class="logo">
+        <span class="hidden-text" translate="no" data-no-translate="true">{{ isBalanceVisible ? phone : maskedPhone }}</span>
+        <img
+          :src="isBalanceVisible ? 'https://api.iconify.design/mdi/eye.svg?color=%230073FF' : 'https://api.iconify.design/mdi/eye-off.svg?color=%230073FF'"
+          alt="Eye"
+          class="icon-eye"
+          @click="toggleBalanceVisibility"
+        >
+      </div>
+      <div class="header-right">
+        <a href="/assets/android/trivex.apk" download="trivex.apk">
+          <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
+        </a>
+        <div ref="langWrapEl" class="lang-wrap">
+          <button
+            ref="langBtnEl"
+            type="button"
+            class="lang-btn"
+            aria-label="Language"
+            :aria-expanded="langMenuOpen ? 'true' : 'false'"
+            @click.stop="toggleLangMenu"
+          >
+            <img src="/assets/image/4028_592.svg" alt="Globe" class="icon-globe">
+          </button>
+          <div v-if="langMenuOpen" class="lang-menu" @click.stop>
+            <button type="button" class="lang-item" style="border-top: none;" @click="changeLanguage('en')">English</button>
+            <button type="button" class="lang-item" @click="changeLanguage('id')">Indonesia</button>
           </div>
-          <div class="today-balance-area">
-            <span class="label-text">Saldo hari ini</span>
-            <span class="today-amount">{{ todayBalanceDisplay }}</span>
-          </div>
         </div>
+      </div>
+    </header>
 
-        <div class="action-buttons">
-          <button class="btn-primary" @click="goToDeposit">Deposito</button>
-          <button class="btn-secondary" @click="goToWithdraw">Tarik Uang</button>
-        </div>
-      </header>
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+      <img src="/assets/image/52aad9cf689ec4ad84ac7de1bc77dda058088e02.png" alt="Hero Banner">
     </section>
 
-    <!-- Spacer Section -->
-    <section id="section-spacer">
-      <img src="/assets/images/image 85.png" alt="Spacer" class="icon-spacer">
-    </section>
-
-    <!-- Menu Section -->
-    <section id="section-menu">
-      <div class="menu-section-wrapper">
-        <div class="announcement-bar">
-          <img src="/assets/images/13_158.svg" alt="Speaker" class="icon-speaker">
-          <div class="announcement-marquee" aria-label="Selamat datang di TRIVEX">
-            <div class="marquee-track">
-              <span class="announcement-text">Selamat datang di TRIVEX</span>
-                  </div>
-          </div>
-        </div>
-
-        <div class="quick-actions-grid">
-          <router-link to="/dep" class="action-item">
-            <img src="/assets/images/c1cce73b33fa2a2b6bc94e7f2b82bd66e20b9fa9.png" alt="Deposito">
-            <span>Deposito</span>
-          </router-link>
-          <router-link to="/flow" class="action-item">
-            <img src="/assets/images/d634ba55ee38309526b6d657b8e1a5a382ef7c60.png" alt="Tarik dana">
-            <span>Tarik dana</span>
-          </router-link>
-          <router-link to="/about" class="action-item">
-            <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Tentang kami">
-            <span>Tentang kami</span>
-          </router-link>
-          <router-link to="/support" class="action-item">
-            <img src="/assets/images/a45539f924d91cd414fa3d9c7ba05b2beb121149.png" alt="Layanan umum">
-            <span>Layanan umum</span>
-          </router-link>
-          <router-link to="/share" class="action-item">
-            <img src="/assets/images/1be34f61fca8018ee484cfa57216986588de26b2.png" alt="Kartu undangan">
-            <span>Kartu<br>undangan</span>
-          </router-link>
-          <a href="/assets/android/trivex.apk" download="trivex.apk" class="action-item">
-            <img src="/assets/images/6a724b73fb2c46483c7c2b348fcdc144d1a30b46.png" alt="Aplikasi kami">
-            <span>Aplikasi kami</span>
-          </a>
-          <router-link to="/informations/options" class="action-item">
-            <img src="/assets/images/334cb4459143d492b5a8194e9812907fd3771af9.png" alt="Riwayat transaksi">
-            <span>Riwayat<br>transaksi</span>
-          </router-link>
-          <router-link to="/sign" class="action-item">
-            <img src="/assets/images/942258d392b49b3593405d1bc54bedbd3b192e38.png" alt="Hadiah harian">
-            <span>Hadiah<br>harian</span>
-          </router-link>
+    <!-- Notice -->
+    <section class="notice-bar">
+      <img src="/assets/image/4089_249.svg" alt="Volume Icon">
+      <div class="notice-marquee">
+        <div class="notice-marquee-track">
+          <span class="notice-text">Urgent notice about AVR account</span>
         </div>
       </div>
     </section>
 
-    <!-- Banners Section -->
-    <section id="section-banners">
-      <div class="voucher-banner" @click="openVoucherModal">
-        <div class="banner-text-content">
-          <h3 class="banner-title">Memiliki voucher?</h3>
-          <p class="banner-subtitle">Tukar kode voucher Anda disini</p>
+    <!-- Active Assets -->
+    <section class="active-assets">
+      <div class="assets-card">
+        <div class="card-header">
+          <h2>Currently Active</h2>
+          <img
+            :src="isActiveAssetsVisible ? 'https://api.iconify.design/mdi/eye.svg?color=%230073FF' : 'https://api.iconify.design/mdi/eye-off.svg?color=%230073FF'"
+            alt="Eye Icon"
+            class="card-eye"
+            @click="toggleActiveAssetsVisibility"
+          >
         </div>
-      </div>
-      
-      <div class="portfolio-banner" @click="goToPortfolio">
-        <div class="banner-text-content">
-          <h3 class="banner-title">Periksa portofolio saya</h3>
-          <p class="banner-subtitle">Kembangkan asetmu di TRIVEX sekarang!</p>
+        <p class="subtitle">Monitor and manage your active assets</p>
+
+        <div class="assets-list">
+          <div class="asset-item">
+            <img src="/assets/image/aa28bcde8ac527e890849db55646811a1317c33b.png" alt="Coin Icon">
+            <span class="amount">{{ activeBalanceText }}</span>
+          </div>
+          <div class="asset-item">
+            <img src="/assets/image/fee3f6a5edc515a6b9f31e5028f69dd361e33f15.png" alt="Robot Icon">
+            <div class="asset-text">
+              <span class="count">{{ activeCountText }}</span>
+              
+            </div>
+          </div>
+          <span class="label" style="font-size: 12px;">Assets</span>
         </div>
-        <button class="btn-icon-round">
-          <img src="/assets/images/2010_761.svg" alt="Arrow">
-        </button>
+
+        <button class="btn-start" @click="goToMining">Start</button>
+
+        <img src="/assets/image/42bef0878ebebe8f0f21dd07dc75448235b97fad.png" alt="3D Vault" class="vault-image">
       </div>
     </section>
 
-    <!-- Chart Section -->
-    <section id="section-chart">
-      <div class="chart-section-wrapper">
-        <div class="partners-logos">
-          <img src="/assets/images/image 61 (2).png" alt="Bappebti" class="logo-bappebti">
-          <img src="/assets/images/a648e454f7e6e93caec0f833a59b7dcec155605e.png" alt="OJK" class="logo-ojk">
+    <!-- Track Funds -->
+    <section class="track-funds">
+      <div class="track-card" @click="goToPortfolio">
+        <div class="track-text">
+          <h3>Stay on Track</h3>
+          <p>Keep your progress moving forward</p>
+        </div>
+        <img src="/assets/image/bdf7586ea609229c9a92b2fa57542fdec9653c52.png" alt="Clipboard" class="clipboard-img">
+        <img src="/assets/image/4044_150.svg" alt="Arrow" class="icon-arrow-right arrow-bottom-right">
+      </div>
+
+      <div class="funds-card">
+        <div class="fund-row" @click="goToWithdraw">
+          <div class="fund-info">
+            <div class="fund-label">
+              <span>Available funds</span>
+              <img
+                :src="isFundsVisible ? 'https://api.iconify.design/mdi/eye.svg?color=%230073FF' : 'https://api.iconify.design/mdi/eye-off.svg?color=%230073FF'"
+                alt="Eye"
+                class="fund-eye"
+                @click.stop="toggleFundsVisibility"
+              >
+            </div>
+            <span class="fund-amount">{{ availableFundsText }}</span>
+          </div>
+          <img src="/assets/image/4044_150.svg" alt="Arrow" class="icon-arrow-right arrow-large">
         </div>
 
-        <div class="chart-card">
-          <div class="chart-image-container">
-            <svg
-              v-if="chartReady"
-              class="main-chart-img"
-              viewBox="0 0 300 120"
-              preserveAspectRatio="none"
-              aria-label="Grafik investor bulanan"
-            >
-              <defs>
-                <linearGradient id="chartFillGreen" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="rgba(21, 178, 92, 0.28)" />
-                  <stop offset="100%" stop-color="rgba(21, 178, 92, 0)" />
-                </linearGradient>
-                <filter id="chartShadowGreen" x="-20%" y="-40%" width="140%" height="200%">
-                  <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#15B25C" flood-opacity="0.35" />
-                </filter>
-              </defs>
-              <path :d="chartAreaPath" fill="url(#chartFillGreen)" />
-              <path :d="chartLinePath" stroke="#15B25C" stroke-width="3" fill="none" filter="url(#chartShadowGreen)" />
-            </svg>
-            <img v-else src="/assets/images/2012_1128.svg" alt="Chart" class="main-chart-img">
-          </div>
-          <div class="chart-x-axis">
-            <span v-for="m in chartMonthLabels" :key="m">{{ m }} </span>
-          </div>
-        </div>
+        <div class="fund-divider"></div>
 
-        <div class="chart-footer">
-          <span class="chart-title">{{ chartTitle }}</span>
+        <div class="fund-row" @click="goToDeposit">
+          <div class="fund-info">
+            <div class="fund-label">
+              <span>Recharge funds</span>
+              <img
+                :src="isFundsVisible ? 'https://api.iconify.design/mdi/eye.svg?color=%230073FF' : 'https://api.iconify.design/mdi/eye-off.svg?color=%230073FF'"
+                alt="Eye"
+                class="fund-eye"
+                @click.stop="toggleFundsVisibility"
+              >
+            </div>
+            <span class="fund-amount">{{ rechargeFundsText }}</span>
+          </div>
+          <img src="/assets/image/4044_141.svg" alt="Arrow" class="icon-arrow-right arrow-large">
+        </div>
+      </div>
+    </section>
+
+    <!-- Action Grid -->
+    <section class="action-grid">
+      <router-link to="/rules" class="action-item">
+        <div class="icon-box">
+          <img src="/assets/image/guide.png" alt="Recharge">
+        </div>
+        <span class="action-label">Guide</span>
+      </router-link>
+      <router-link to="/dep" class="action-item">
+        <div class="icon-box">
+          <img src="/assets/image/recharge.png" alt="Payout">
+        </div>
+        <span class="action-label">Recharge</span>
+      </router-link>
+      <router-link to="/flow" class="action-item">
+        <div class="icon-box">
+          <img src="/assets/image/payout.png" alt="Mining">
+        </div>
+        <span class="action-label">Payout</span>
+      </router-link>
+      <router-link to="/share" class="action-item">
+        <div class="icon-box">
+          <img src="/assets/image/invite.png" alt="Missions">
+        </div>
+        <span class="action-label">Invite friends</span>
+      </router-link>
+   
+    </section>
+
+    <!-- Daily Sign In -->
+    <section class="daily-signin" @click="goToSignIn">
+      <img src="/assets/image/daily1.png" alt="Daily Sign" class="signin-icon">
+      <div class="signin-content">
+        <h3>Daily Sign-in</h3>
+        <p>Sign in daily to earn rewards and bonuses</p>
+      </div>
+      <button class="btn-sign">
+        <img src="/assets/image/btn.png" alt="Sign" class="btn-bg">
+        <span class="btn-text">Sign</span>
+      </button>
+    </section>
+
+  
+
+    <!-- News Section -->
+    <section class="news-section">
+      <div class="news-header">
+        <h3>See updated now</h3>
+        <router-link to="/news" class="more-link">
+          more details here
+          <img src="/assets/image/4044_138.svg" alt="Arrow">
+        </router-link>
+      </div>
+      <div class="news-card">
+        <div class="accent-line"></div>
+        <div class="news-text">
+          <h4>{{ newsTitle }}</h4>
+          <p>{{ newsBodyShort }}</p>
+        </div>
+        <div class="news-image-box"></div>
+      </div>
+    </section>
+    <section class="market-section">
+      <div class="market-header">
+        <h3>Market</h3>
+       
+      </div>
+
+      <div v-if="marketError" class="market-state market-error">{{ marketError }}</div>
+      <div v-else-if="marketLoading && marketItems.length === 0" class="market-state">Loading market...</div>
+
+      <div v-else class="market-grid">
+        <div v-for="item in marketItems" :key="item.id" class="market-card">
+          <div class="market-row">
+            <div class="market-left">
+              <div class="market-symbol">{{ item.symbol }}</div>
+              <div class="market-name">{{ item.name }}</div>
+            </div>
+            <div class="market-right">
+              <div class="market-price">${{ formatMarketPrice(item.priceUsd) }}</div>
+              <div class="market-change" :class="item.change24h >= 0 ? 'pos' : 'neg'">
+                {{ formatChange(item.change24h) }}
+              </div>
+              <svg
+                v-if="item.sparkline && item.sparkline.length > 1"
+                class="market-sparkline"
+                viewBox="0 0 100 30"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <polyline
+                  :points="sparklinePoints(item.sparkline)"
+                  fill="none"
+                  :class="item.change24h >= 0 ? 'pos' : 'neg'"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </div>
+  
+
+  <button type="button" class="voucher-fab" aria-label="Open voucher" @click="openVoucherModal">
+    <img src="/assets/image/gift.png" alt="Voucher" class="voucher-fab-img">
+  </button>
+
+ 
+
   <VoucherModal v-model="isVoucherModalOpen" @submit="handleVoucherSubmit" />
-  <AnnouncementModal v-model="isAnnouncementOpen" />
+
   <FooterBar />
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onBeforeUnmount, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import FooterBar from '@/components/partials/FooterBar.vue'
 import VoucherModal from '@/components/modals/VoucherModal.vue'
 import AnnouncementModal from '@/components/modals/AnnouncementModal.vue'
-import { authAPI } from '@/services/api'
+import { authAPI, newsAPI } from '@/services/api'
+import { setLanguage } from '@/i18n'
 
 const router = useRouter()
+const { locale } = useI18n()
 
 const username = ref('Username')
 const phone = ref('+•••••••')
 const mainBalance = ref(0)
 const todayBalance = ref(0)
+const activeAssetCount = ref(0)
 const isBalanceVisible = ref(false)
+const isActiveAssetsVisible = ref(true)
+const isFundsVisible = ref(true)
 const isVoucherModalOpen = ref(false)
 const isAnnouncementOpen = ref(false)
-const investorsMonthly = ref([])
-const chartMonthLabels = ref(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'])
-const isChartLoading = ref(false)
 
-const phoneDisplay = computed(() => phone.value)
+const newsTitle = ref('')
+const newsBody = ref('')
 
-const balanceDisplay = computed(() => {
-  if (isBalanceVisible.value) {
-    return `Rp ${new Intl.NumberFormat('id-ID').format(mainBalance.value)}`
-  }
-  return 'Rp *******'
+const marketLoading = ref(false)
+const marketError = ref('')
+const marketItems = ref([])
+
+const newsBodyShort = computed(() => {
+  const text = String(newsBody.value || '').replace(/\s+/g, ' ').trim()
+  if (!text) return ''
+  const MAX_LEN = 90
+  if (text.length <= MAX_LEN) return text
+  return `${text.slice(0, MAX_LEN).trimEnd()}...`
 })
 
-const todayBalanceDisplay = computed(() => {
-  if (isBalanceVisible.value) {
-    return `Rp${new Intl.NumberFormat('id-ID').format(todayBalance.value)}`
+const maskPhoneAll = (raw) => {
+  const p = String(raw || '').trim()
+  if (!p) return '**********'
+  const digits = p.replace(/\D/g, '')
+  if (!digits) return '**********'
+  const masked = '*'.repeat(digits.length)
+  return p.startsWith('+') ? `+${masked}` : masked
+}
+
+const maskedPhone = computed(() => maskPhoneAll(phone.value))
+
+const langMenuOpen = ref(false)
+const langWrapEl = ref(null)
+const langBtnEl = ref(null)
+
+const toggleLangMenu = () => {
+  langMenuOpen.value = !langMenuOpen.value
+}
+
+const changeLanguage = (lang) => {
+  setLanguage(lang)
+  locale.value = lang
+  langMenuOpen.value = false
+}
+
+const onDocumentClick = (event) => {
+  if (!langMenuOpen.value) return
+  const target = event.target
+  if (langWrapEl.value?.contains(target) || langBtnEl.value?.contains(target)) return
+  langMenuOpen.value = false
+}
+
+const pickFirstText = (obj, keys) => {
+  for (const key of keys) {
+    const v = obj?.[key]
+    if (typeof v === 'string' && v.trim()) return v.trim()
   }
-  return 'Rp*******'
+  return ''
+}
+
+const fetchNews = async () => {
+  try {
+    const res = await newsAPI.getNews({ page: 1, page_size: 1 })
+    const data = res?.data
+    const list = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : [])
+    const first = list[0]
+    if (!first) return
+
+    const title = pickFirstText(first, ['title', 'name', 'headline'])
+    const body = pickFirstText(first, ['summary', 'excerpt', 'description', 'content', 'body', 'text'])
+
+    if (title) newsTitle.value = title
+    if (body) newsBody.value = body
+  } catch (_) {}
+}
+
+const MARKET_COINS = [
+  { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin' },
+  { id: 'ethereum', symbol: 'ETH', name: 'Ethereum' },
+  { id: 'dogecoin', symbol: 'DOGE', name: 'Dogecoin' },
+  { id: 'solana', symbol: 'SOL', name: 'Solana' },
+  { id: 'ripple', symbol: 'XRP', name: 'XRP' },
+  { id: 'cardano', symbol: 'ADA', name: 'Cardano' }
+]
+
+const formatMarketPrice = (value) => {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '0'
+  const opts = n >= 1
+    ? { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+    : { minimumFractionDigits: 4, maximumFractionDigits: 8 }
+  return new Intl.NumberFormat('en-US', opts).format(n)
+}
+
+const formatChange = (value) => {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '0%'
+  const sign = n > 0 ? '+' : ''
+  return `${sign}${n.toFixed(2)}%`
+}
+
+const sparklinePoints = (values) => {
+  const arr = Array.isArray(values) ? values.map(Number).filter(Number.isFinite) : []
+  if (arr.length <= 1) return ''
+  const width = 100
+  const height = 30
+  const pad = 1
+  let min = Number.POSITIVE_INFINITY
+  let max = Number.NEGATIVE_INFINITY
+  for (const v of arr) {
+    if (v < min) min = v
+    if (v > max) max = v
+  }
+  const range = max - min || 1
+  const stepX = width / (arr.length - 1)
+  const usableH = height - pad * 2
+  return arr.map((v, i) => {
+    const x = i * stepX
+    const y = height - pad - ((v - min) / range) * usableH
+    return `${x.toFixed(2)},${y.toFixed(2)}`
+  }).join(' ')
+}
+
+const fetchMarket = async () => {
+  marketLoading.value = true
+  marketError.value = ''
+  try {
+    const ids = MARKET_COINS.map(c => c.id).join(',')
+    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${encodeURIComponent(ids)}&order=market_cap_desc&per_page=${MARKET_COINS.length}&page=1&sparkline=true&price_change_percentage=24h`
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    })
+    if (!res.ok) {
+      if (res.status === 429) throw new Error('Terlalu banyak request, coba lagi sebentar')
+      throw new Error('Gagal ambil data market')
+    }
+    const data = await res.json()
+    const list = Array.isArray(data) ? data : []
+    const byId = {}
+    for (const row of list) {
+      const id = String(row?.id || '')
+      if (id) byId[id] = row
+    }
+    const next = MARKET_COINS.map((coin) => {
+      const row = byId[coin.id] || {}
+      const spark = row?.sparkline_in_7d?.price
+      return {
+        id: coin.id,
+        symbol: coin.symbol,
+        name: coin.name,
+        priceUsd: Number(row?.current_price ?? NaN),
+        change24h: Number(row?.price_change_percentage_24h ?? NaN),
+        sparkline: Array.isArray(spark) ? spark : []
+      }
+    }).filter((x) => Number.isFinite(x.priceUsd))
+    marketItems.value = next
+    if (next.length === 0) marketError.value = 'Data market kosong'
+  } catch (err) {
+    marketError.value = String(err?.message || 'Gagal ambil data market')
+  } finally {
+    marketLoading.value = false
+  }
+}
+
+const balanceDisplay = computed(() => {
+  return `$${new Intl.NumberFormat('en-US').format(mainBalance.value)}`
 })
 
 const toggleBalanceVisibility = () => {
   isBalanceVisible.value = !isBalanceVisible.value
+}
+
+const formatUSD = (value) => {
+  const n = Number(String(value ?? '').replace(/[^0-9.-]/g, ''))
+  if (!Number.isFinite(n) || n === 0) return '0'
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(n)
+}
+
+const activeBalanceText = computed(() => {
+  if (!isActiveAssetsVisible.value) return '$**********'
+  return `$${formatUSD(mainBalance.value)}`
+})
+
+const activeCountText = computed(() => {
+  if (!isActiveAssetsVisible.value) return '***'
+  return String(activeAssetCount.value ?? 0)
+})
+
+const toggleActiveAssetsVisibility = () => {
+  isActiveAssetsVisible.value = !isActiveAssetsVisible.value
+}
+
+const availableFundsText = computed(() => {
+  if (!isFundsVisible.value) return '$**********'
+  return `$${formatUSD(mainBalance.value)}`
+})
+
+const rechargeFundsText = computed(() => {
+  if (!isFundsVisible.value) return '$**********'
+  return `$${formatUSD(todayBalance.value)}`
+})
+
+const toggleFundsVisibility = () => {
+  isFundsVisible.value = !isFundsVisible.value
 }
 
 const toAmount = (value) => {
@@ -230,146 +505,6 @@ const fetchAccountInfo = async () => {
   }
 }
 
-const formatYYYYMM = (date) => {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  return `${y}-${m}`
-}
-
-const getLastMonths = (count = 6) => {
-  const end = new Date()
-  end.setDate(1)
-  const months = []
-  for (let i = count - 1; i >= 0; i -= 1) {
-    const d = new Date(end)
-    d.setMonth(d.getMonth() - i)
-    months.push(formatYYYYMM(d))
-  }
-  return months
-}
-
-const monthLabel = (yyyyMm) => {
-  const [y, m] = String(yyyyMm || '').split('-')
-  const mm = Number(m || 0)
-  const date = new Date(Number(y || 2000), Math.max(0, mm - 1), 1)
-  const label = date.toLocaleString('en-US', { month: 'short' })
-  return label.replace('.', '')
-}
-
-const chartTitle = computed(() => {
-  const labels = chartMonthLabels.value || []
-  const list = investorsMonthly.value || []
-  
-  if (labels.length === 0 || list.length === 0) {
-    return 'Data investor 6 bulan terakhir'
-  }
-  
-  // Ambil tahun dari data bulan (format YYYY-MM)
-  const startYear = list[0].month.split('-')[0]
-  const endYear = list[list.length - 1].month.split('-')[0]
-  const yearDisplay = endYear || startYear
-
-  return `Data investor ${labels[0]} - ${labels[labels.length - 1]} ${yearDisplay}`
-})
-
-const fetchInvestorsMonthly = async () => {
-  isChartLoading.value = true
-  try {
-    // Panggil API tanpa start/end tetap untuk mendapatkan data terbaru dari server
-    const resp = await authAPI.getInvestorsMonthly()
-    const points = Array.isArray(resp?.data?.points) ? resp.data.points : []
-    
-    // Ambil maksimal 6 data terakhir (sliding window)
-    const lastSixPoints = points.slice(-6)
-    
-    // Update data investor dan label bulan berdasarkan respon API
-    investorsMonthly.value = lastSixPoints.map((p) => ({
-      month: String(p?.month || ''),
-      total_investors: Number(p?.total_investors || 0)
-    }))
-    
-    chartMonthLabels.value = lastSixPoints.map((p) => monthLabel(p.month))
-  } catch (_) {
-    investorsMonthly.value = []
-    chartMonthLabels.value = []
-  } finally {
-    isChartLoading.value = false
-  }
-}
-
-const chartValues = computed(() => {
-  const list = investorsMonthly.value || []
-  if (list.length > 0) return list.map((p) => Number(p?.total_investors || 0))
-  return [0, 0, 0, 0, 0, 0]
-})
-
-const chartPoints = computed(() => {
-  const values = chartValues.value
-  const count = values.length
-  const w = 300
-  const h = 120
-  const padX = 8
-  const padTop = 12
-  const padBottom = 18
-  const innerW = w - padX * 2
-  const innerH = h - padTop - padBottom
-  const max = Math.max(1, ...values)
-  
-  return values.map((v, idx) => {
-    const x = padX + (innerW * idx) / Math.max(1, count - 1)
-    const y = padTop + innerH * (1 - v / max)
-    return { x, y }
-  })
-})
-
-const chartLinePath = computed(() => {
-  const pts = chartPoints.value
-  if (!pts.length) return ''
-  if (pts.length < 2) return ''
-  const path = [`M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`]
-  for (let i = 0; i < pts.length - 1; i += 1) {
-    const p0 = pts[i - 1] || pts[i]
-    const p1 = pts[i]
-    const p2 = pts[i + 1]
-    const p3 = pts[i + 2] || p2
-    const cp1x = p1.x + (p2.x - p0.x) / 6
-    const cp1y = p1.y + (p2.y - p0.y) / 6
-    const cp2x = p2.x - (p3.x - p1.x) / 6
-    const cp2y = p2.y - (p3.y - p1.y) / 6
-    path.push(
-      `C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)} ${cp2x.toFixed(2)} ${cp2y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
-    )
-  }
-  return path.join(' ')
-})
-
-const chartAreaPath = computed(() => {
-  const pts = chartPoints.value
-  if (!pts.length) return ''
-  const baseY = 120 - 18
-  if (pts.length < 2) return ''
-  const path = [`M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`]
-  for (let i = 0; i < pts.length - 1; i += 1) {
-    const p0 = pts[i - 1] || pts[i]
-    const p1 = pts[i]
-    const p2 = pts[i + 1]
-    const p3 = pts[i + 2] || p2
-    const cp1x = p1.x + (p2.x - p0.x) / 6
-    const cp1y = p1.y + (p2.y - p0.y) / 6
-    const cp2x = p2.x - (p3.x - p1.x) / 6
-    const cp2y = p2.y - (p3.y - p1.y) / 6
-    path.push(
-      `C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)} ${cp2x.toFixed(2)} ${cp2y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
-    )
-  }
-  path.push(`L ${pts[pts.length - 1].x.toFixed(2)} ${baseY}`)
-  path.push(`L ${pts[0].x.toFixed(2)} ${baseY}`)
-  path.push('Z')
-  return path.join(' ')
-})
-
-const chartReady = computed(() => !isChartLoading.value && (investorsMonthly.value || []).length > 0)
-
 const goToDeposit = () => {
   router.push('/dep')
 }
@@ -379,7 +514,15 @@ const goToWithdraw = () => {
 }
 
 const goToPortfolio = () => {
+  router.push('/task')
+}
+
+const goToMining = () => {
   router.push('/portfolio')
+}
+
+const goToSignIn = () => {
+  router.push('/sign')
 }
 
 const openVoucherModal = () => {
@@ -393,243 +536,207 @@ const handleVoucherSubmit = () => {
 onMounted(() => {
   isAnnouncementOpen.value = true
   fetchAccountInfo()
-  fetchInvestorsMonthly()
+  fetchNews()
+  fetchMarket()
+  document.addEventListener('click', onDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 
 <style scoped>
-.app-container {
-  font-family: 'Inter', sans-serif;
-  width: 100%;
-  max-width: 412px;
-  background-color: #f8f8f8;
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
-  margin: 0 auto;
-}
-
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-h1, h2, h3, h4, h5, h6, p {
+p, h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-/* Header Section */
-.main-header {
-  background-color: #f8f8f8;
-  padding: 20px 20px 15px;
-}
-
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 25px;
-}
-
-.user-pill {
-  background-color: #004d43;
-  border-radius: 25px;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.greeting {
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.phone {
-  color: #ffffff;
-  font-size: 10px;
-  opacity: 0.9;
-}
-
-.icon-dropdown {
-  width: 24px;
-  height: 24px;
-  rotate: 270deg;
-}
-
-.notification-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+a {
   text-decoration: none;
 }
 
-.notification-icon-wrapper {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.icon-arrow-right {
+  transform: rotate(90deg);
 }
 
-.notification-icon-wrapper img {
-  width: 24px;
-  height: 24px;
+.app-container {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f8f8;
+  max-width: 413px;
+  position: relative;
+  min-height: 100vh;
+  padding-bottom: 68px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.voucher-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 88px;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 1200;
+}
+
+.voucher-fab-img {
+  width: 56px;
+  height: 56px;
   object-fit: contain;
+  display: block;
 }
 
-.notification-text {
-  font-size: 10px;
-  color: #000000;
-}
-
-.balance-container {
+/* Header */
+.top-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 25px;
+  align-items: center;
+  padding: 16px 20px;
+  background: #f8f8f8;
 }
 
-.main-balance-area {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.balance-label-row {
+.header-left, .header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.label-text {
-  font-size: 10px;
-  color: #000000;
+.logo {
+  width: 34px;
+  height: 36px;
+  object-fit: cover;
+}
+
+.hidden-text {
+  
+  font-size: 16px;
+  color: #000;
+  letter-spacing: 1px;
+  
 }
 
 .icon-eye {
   width: 16px;
-  height: 16px;
+  height: 15px;
   cursor: pointer;
 }
 
-.main-amount {
-  font-size: 18px;
-  font-weight: 700;
-  color: #de9400;
+.icon-download {
+  width: 23px;
+  height: 23px;
+  cursor: pointer;
 }
 
-.today-balance-area {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  text-align: right;
+.icon-globe {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
 }
 
-.today-amount {
-  font-size: 12px;
-  font-weight: 600;
-  color: #4e733f;
+.lang-wrap {
+  position: relative;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 15px;
-}
-
-.btn-primary {
-  flex: 1;
-  background-color: #004d43;
-  color: #ffffff;
+.lang-btn {
+  background: transparent;
   border: none;
-  border-radius: 20px;
-  padding: 10px 0;
-  font-size: 12px;
-  font-weight: 500;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-secondary {
-  flex: 1;
-  background-color: transparent;
-  color: rgba(0, 0, 0, 0.5);
-  border: 1px solid #004d43;
-  border-radius: 20px;
-  padding: 10px 0;
-  font-size: 12px;
-  font-weight: 500;
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #ffffff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  min-width: 140px;
+  z-index: 2000;
 }
 
-/* Spacer Section */
-#section-spacer {
+.lang-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 10px 12px;
+  border-top: 1px solid #000;
+  font-size: 12px;
+  font-weight: 400;
+  color: #000000;
+  cursor: pointer;
+
+  font-family: inherit;
+}
+
+.lang-item:hover {
+  background: rgba(33, 77, 243, 0.08);
+}
+
+/* Hero Banner */
+.hero-banner {
   width: 100%;
 }
 
-.icon-spacer,
-.grey-icon-spacer {
+.hero-banner img {
   width: 100%;
   height: auto;
   display: block;
-  object-fit: cover;
-  max-height: 140px;
 }
 
-/* Menu Section */
-.menu-section-wrapper {
-  background-color: #f8f8f8;
-  padding-top: 15px;
-}
-
-.announcement-bar {
+/* Notice */
+.notice-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 20px 20px;
+  gap: 8px;
+  padding: 10px 10px;
+  background: #f8f8f8;
 }
 
-.icon-speaker {
-  width: 24px;
-  height: 24px;
+.notice-bar img {
+  width: 20px;
+  height: 20px;
 }
 
-.announcement-text {
-  color: #004d43;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.announcement-marquee {
+.notice-marquee {
   flex: 1;
-  min-width: 0;
   overflow: hidden;
-  white-space: nowrap;
 }
 
-.marquee-track {
+.notice-marquee-track {
   display: inline-block;
+  white-space: nowrap;
   padding-left: 100%;
-  animation: announcement-marquee 12s linear infinite;
+  animation: notice-scroll 12s linear infinite;
 }
 
-.marquee-gap {
-  color: rgba(0, 77, 67, 0.6);
-  font-size: 14px;
-  font-weight: 600;
+.notice-text {
+  color: #0073ff;
+  margin-bottom: 3px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-@keyframes announcement-marquee {
+@keyframes notice-scroll {
   0% {
     transform: translateX(0);
   }
@@ -638,158 +745,596 @@ button {
   }
 }
 
-.quick-actions-grid {
+@media (prefers-reduced-motion: reduce) {
+  .notice-marquee-track {
+    padding-left: 0;
+    animation: none;
+  }
+}
+
+/* Active Assets */
+.active-assets {
+  padding: 0 12px 1px;
+}
+
+.assets-card {
+  background: #ffffff;
+  border-radius: 5px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-header h2 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #000;
+}
+
+.card-header img {
+  width: 16px;
+  height: 16px;
+}
+
+.card-eye {
+  cursor: pointer;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #000;
+  margin-top: 4px;
+  margin-bottom: 20px;
+}
+
+.assets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.asset-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.asset-item img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+.asset-item .amount {
+  font-size: 25px;
+  font-weight: 700;
+  color: #000;
+}
+
+.asset-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.asset-text .count {
+  font-size: 25px;
+  margin-top: 5px;
+  font-weight: 700;
+  color: #000;
+  line-height: 1;
+}
+
+.asset-text .label {
+  font-size: 8px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.btn-start {
+  background-color: #1b46f5;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 0;
+  width: 140px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  display: block;
+}
+
+.vault-image {
+  position: absolute;
+  right: -10px;
+  bottom: 1px;
+  width: 205px;
+  margin-bottom: -30px;
+  height: auto;
+  z-index: 1;
+}
+
+/* Track Funds */
+.track-funds {
+  display: flex;
+  gap: 10px;
+   margin-top: 10px;
+  padding: 0 12px 12px;
+}
+
+.track-card {
+  flex: 1;
+  background: linear-gradient(180deg, rgba(125, 198, 183, 0.47) 0%, rgba(168, 228, 219, 0.47) 100%);
+  border-radius: 12px;
+  padding: 18px 14px;
+  position: relative;
+  overflow: hidden;
+  min-height: 150px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.track-text {
+  position: relative;
+  z-index: 2;
+  top: -40px;
+  text-align: right;
+  width: 100%;
+}
+
+.track-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 0px;
+  color: #000000;
+  line-height: 1.1;
+}
+
+.track-card p {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.7);
+  line-height: 1.25;
+  max-width: 170px;
+  margin: 0 auto;
+}
+
+.clipboard-img {
+  position: absolute;
+  bottom: -18px;
+  left: -30px;
+  width: 155px;
+  height: auto;
+  z-index: 1;
+}
+
+.arrow-bottom-right {
+  position: absolute;
+  right: 14px;
+  top: 70%;
+  transform: translateY(-50%);
+  width: 35px;
+  height: 35px;
+}
+
+.funds-card {
+ 
+  flex: 1.2;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.fund-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 14px 14px;
+}
+
+.fund-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fund-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #000;
+}
+
+.fund-label img {
+  width: 16px;
+  height: 15px;
+}
+
+.fund-eye {
+  cursor: pointer;
+}
+
+.fund-amount {
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+}
+
+.arrow-large {
+  width: 35px;
+  height: 35px;
+  rotate: 270deg;
+}
+
+.fund-divider {
+  height: 1px;
+  background-color: #000000;
+  opacity: 0.2;
+  margin: 0 14px;
+  width: 100%;
+}
+
+/* Action Grid */
+.action-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  row-gap: 20px;
-  padding: 0 10px 20px;
+  gap: 10px;
+  padding: 12px;
 }
 
 .action-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-decoration: none;
   gap: 8px;
+  text-decoration: none;
 }
 
-.action-item img {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-}
-
-.action-item span {
-  color: #000000;
-  font-size: 10px;
-  text-align: center;
-  line-height: 1.2;
-}
-
-/* Banners Section */
-.voucher-banner {
-  background-image: url('/assets/images/eb0223403093bc6b599eb51e245dac92caa46ad3.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  padding: 25px 20px;
-  min-height: 143px;
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-}
-
-.portfolio-banner {
-  background: linear-gradient(90deg, #4e733f 0%, #60995b 100%);
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 80px;
-  cursor: pointer;
-}
-
-.banner-text-content {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.banner-title {
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.banner-subtitle {
-  color: #ffffff;
-  font-size: 12px;
-  opacity: 0.9;
-}
-
-.btn-icon-round {
-  width: 44px;
-  height: 44px;
-  background-color: #004d43;
-  border-radius: 50%;
-  border: none;
-  rotate: 270deg;
+.icon-box {
+  width: 74px;
+  height: 71px;
+  background-color: #ffffff;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 0px;
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-shrink: 0;
 }
 
-.btn-icon-round img {
-  width: 24px;
-  height: 24px;
+.icon-box img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
 }
 
-/* Chart Section */
-.chart-section-wrapper {
-  background-color: #f8f8f8;
-  padding-bottom: 80px;
+.action-label {
+  font-size: 12px;
+  color: #000;
+  text-align: center;
 }
 
-.partners-logos {
+/* Daily Sign In */
+.daily-signin {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  gap: 15px;
-  padding: 15px 20px;
+  padding: 16px;
+  margin: 0 12px 12px;
+  background-color: transparent;
+  cursor: pointer;
 }
 
-.logo-bappebti {
-  height: 34px;
-  width: auto;
-  object-fit: contain;
+.signin-icon {
+  width: 64px;
+  height: 74px;
+  margin-right: 12px;
 }
 
-.logo-ojk {
-  height: 34px;
-  width: auto;
-  object-fit: contain;
+.signin-content {
+  flex: 1;
 }
 
-.chart-card {
-  background-color: #ffffff;
-  border-radius: 10px;
-  margin: 0px;
-
-
+.signin-content h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 4px;
 }
 
-.chart-image-container {
+.signin-content p {
+  font-size: 10px;
+  color: #333;
+  line-height: 1.3;
+}
+
+.btn-sign {
+  position: relative;
+  width: 113px;
+  height: 35px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: inherit;
+}
+
+.btn-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  margin-bottom: 15px;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 18px;
 }
 
-.main-chart-img {
-  width: 100%;
-  height: 150px;
-  display: block;
+.btn-text {
+  position: relative;
+  z-index: 1;
+  color: #000;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.chart-x-axis {
+/* Voucher Banner */
+.voucher-banner-section {
+  padding: 0 12px 12px;
+}
+
+.voucher-banner {
+  background: linear-gradient(90deg, #1b46f5 0%, #2757b7 100%);
+  border-radius: 5px;
+  padding: 16px 20px;
   display: flex;
   justify-content: space-between;
-  padding: 0 8px;
+  align-items: center;
+  cursor: pointer;
 }
 
-.chart-x-axis span {
-  font-size: 10px;
-  color: #000000;
+.voucher-content h3 {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 
-.chart-footer {
+.voucher-content p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+}
+
+.voucher-arrow {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
+/* News Section */
+.news-section {
+  padding: 0 12px 20px;
+}
+
+.news-header {
   display: flex;
-  justify-content: flex-end;
-  padding: 15px 20px 20px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 4px;
 }
 
-.chart-title {
-  font-size: 10px;
+.news-header h3 {
+  font-size: 15px;
+  font-weight: 500;
+  color: #000;
+}
+
+.more-link {
+  font-size: 12px;
+  color: #747474;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+}
+
+.more-link img {
+  width: 12px;
+  height: 12px;
+}
+
+.news-card {
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding: 16px;
+  display: flex;
+  position: relative;
+  min-height: 92px;
+}
+
+.accent-line {
+  width: 6px;
+  background-color: #1b46f5;
+  border-radius: 2px;
+  margin-right: 25px;
+  margin-left: -15px;
+  margin-top: -10px;
+  height: 40px;
+  margin-top: 0px;
+}
+
+.news-text {
+  flex: 1;
+  padding-right: 120px;
+}
+
+.news-text h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 6px;
+}
+
+.news-text p {
+  font-size: 11px;
+  color: #000;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-image-box {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 110px;
+  height: 64px;
+  background-color: #d9d9d9;
+  border-radius: 2px;
+}
+
+/* Market */
+.market-section {
+  padding: 0 12px 20px;
+}
+
+.market-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.market-header h3 {
+  font-size: 15px;
+  font-weight: 500;
+  color: #000;
+}
+
+.market-refresh {
+  border: none;
+  background: rgba(27, 70, 245, 0.1);
+  color: #1b46f5;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.market-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.market-state {
+  background: #ffffff;
+  border-radius: 5px;
+  padding: 14px 16px;
+  font-size: 12px;
+  color: #747474;
+}
+
+.market-error {
+  color: #c91d1d;
+}
+
+.market-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.market-card {
+  background: #ffffff;
+  border-radius: 5px;
+  padding: 14px 14px;
+}
+
+.market-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.market-left {
+  min-width: 0;
+}
+
+.market-symbol {
+  font-size: 13px;
+  font-weight: 800;
   color: #000000;
+}
+
+.market-name {
+  font-size: 11px;
+  color: #747474;
+  margin-top: 3px;
+}
+
+.market-right {
+  text-align: right;
+}
+
+.market-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.market-change {
+  font-size: 11px;
+  margin-top: 3px;
+  font-weight: 700;
+}
+
+.market-change.pos {
+  color: #0f9d58;
+}
+
+.market-change.neg {
+  color: #c91d1d;
+}
+
+.market-sparkline {
+  width: 86px;
+  height: 22px;
+  margin-top: 6px;
+}
+
+.market-sparkline polyline {
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.market-sparkline polyline.pos {
+  stroke: #0f9d58;
+}
+
+.market-sparkline polyline.neg {
+  stroke: #c91d1d;
 }
 </style>
-

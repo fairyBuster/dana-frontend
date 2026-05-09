@@ -1,45 +1,47 @@
 <template>
   <div class="app-container">
     <!-- Header Section -->
-    <section id="section-header" class="app-section">
-      <header class="header">
+    <section id="section-header" class="section-container">
+      <header class="app-header">
         <button class="back-button" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/16_127.svg" alt="Back Icon">
+          <img src="/assets/image/204_54.svg" alt="" aria-hidden="true">
         </button>
-        <h1 class="page-title">Pemberitahuan</h1>
+        <h1 class="header-title">News currently</h1>
       </header>
     </section>
 
-    <!-- Notifications Section -->
-    <section id="section-notifications" class="app-section">
-      <div v-if="articles.length === 0 && !isLoading" class="empty-state">
-        <p class="empty-text">Belum ada berita</p>
-      </div>
+    <!-- News List Section -->
+    <section id="section-news-list" class="section-container">
+      <div class="news-list-wrapper">
+        <div v-if="articles.length === 0 && !isLoading" class="empty-state">
+          <p class="empty-text">No news yet</p>
+        </div>
 
-      <div v-else class="notification-list">
-        <article 
-          v-for="article in articles" 
-          :key="article.id" 
-          class="notification-card"
-          @click="viewDetails(article.id)"
-        >
-          <div class="card-text-content">
-            <h2 class="card-title">{{ article.title || 'Judul berita' }}</h2>
-            <p class="card-description">{{ getSnippet(article.body) }}</p>
-          </div>
-          <div class="card-thumbnail">
-            <img
-              v-if="article?.image"
-              :src="resolveNewsImageUrl(article.image)"
-              :alt="article.title || 'Gambar berita'"
-              class="card-thumb-img"
-              loading="lazy"
-              decoding="async"
-              referrerpolicy="no-referrer"
-              @error="handleThumbError"
-            >
-          </div>
-        </article>
+        <div v-else class="news-list">
+          <article
+            v-for="article in articles"
+            :key="article.id"
+            class="news-card"
+            @click="viewDetails(article.id)"
+          >
+            <div class="news-image-placeholder">
+              <img
+                v-if="article?.image"
+                :src="resolveNewsImageUrl(article.image)"
+                :alt="article.title || 'News image'"
+                class="news-thumb-img"
+                loading="lazy"
+                decoding="async"
+                referrerpolicy="no-referrer"
+                @error="handleThumbError"
+              >
+            </div>
+            <div class="news-content">
+              <h2 class="news-title">{{ article.title || 'News title' }}</h2>
+              <p class="news-desc">{{ getSnippet(article.body) }}</p>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
   </div>
@@ -105,8 +107,8 @@ const getSnippet = (text = '') => {
   const normalized = fixMojibake(noHtml)
     .replace(/\u00a0/g, ' ')
     .replace(/[–—•]/g, '-')
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
+    .replace(/[""]/g, '"')
+    .replace(/['']/g, "'")
     .replace(/\uFFFD/g, '-')
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
@@ -117,17 +119,17 @@ const getSnippet = (text = '') => {
 
   const firstParagraph = lines[0] || ''
   const cleanText = firstParagraph || lines.join(' ')
-  if (!cleanText) return 'Isi berita'
+  if (!cleanText) return 'News content'
   return cleanText.length > 110 ? `${cleanText.slice(0, 110)}...` : cleanText
 }
 
 const extractErrorMessage = (err) => {
   const data = err?.response?.data
-  if (!data) return err?.message || 'Gagal mengambil berita'
+  if (!data) return err?.message || 'Failed to fetch news'
   if (typeof data === 'string') return data
   if (data.detail) return String(data.detail)
   if (data.message) return String(data.message)
-  return 'Gagal mengambil berita'
+  return 'Failed to fetch news'
 }
 
 const fetchNews = async (page = 1) => {
@@ -153,25 +155,27 @@ onMounted(() => {
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
   background-color: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-.app-section {
+.section-container {
   width: 100%;
   max-width: 412px;
   margin: 0 auto;
-  background-color: #f8f8f8;
 }
 
 h1, h2, p {
@@ -179,27 +183,27 @@ h1, h2, p {
 }
 
 /* Header Section */
-.header {
+.app-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 5px 10px;
+  padding: 20px 10px;
   position: relative;
-  height: 60px;
+  justify-content: center;
 }
 
 .back-button {
-  position: absolute;
-  left: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 41px;
-  height: 41px;
-  background: transparent;
+  background: none;
   border: none;
   padding: 0;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  position: absolute;
+  left: 10px;
 }
 
 .back-button img {
@@ -208,75 +212,84 @@ h1, h2, p {
   object-fit: contain;
 }
 
-.page-title {
+.header-title {
+  margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #000000;
-  margin: 0;
   line-height: 1.2;
+  text-align: center;
 }
 
-/* Notifications Section */
-.notification-list {
-  padding: 0 14px 24px;
+/* News List Section */
+.news-list-wrapper {
+  padding: 10px;
+}
+
+.news-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.notification-card {
-  background-color: #ffffff;
-  border-radius: 20px;
-  padding: 18px 16px;
+.news-card {
+  background-color: rgba(255, 255, 255, 0.47);
+  border: 1px solid #ffffff;
+  border-radius: 5px;
+  padding: 12px 11px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 105px;
+  gap: 8px;
+  width: 100%;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.card-text-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-  padding-right: 16px;
+.news-card:hover {
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
-.card-title {
-  color: #004d43;
-  font-size: 15px;
-  font-weight: 700;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.card-description {
-  color: #000000;
-  font-size: 13px;
-  font-weight: 400;
-  margin: 0;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.card-thumbnail {
+.news-image-placeholder {
   background-color: #d9d9d9;
-  border-radius: 20px;
-  width: 126px;
-  height: 70px;
+  border-radius: 2px;
+  width: 110px;
+  height: 64px;
   flex-shrink: 0;
   overflow: hidden;
 }
 
-.card-thumb-img {
+.news-thumb-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.news-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+.news-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1.2;
+}
+
+.news-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.3;
+  color: #000000;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Empty State */
@@ -291,4 +304,3 @@ h1, h2, p {
   opacity: 0.6;
 }
 </style>
-

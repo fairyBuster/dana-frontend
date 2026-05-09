@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="slider-captcha-container" :class="{ 'verified': isVerified }">
     <div class="slider-track">
       <div class="slider-text" :style="{ opacity: isVerified ? 0 : 1 }">Geser untuk verifikasi</div>
@@ -14,7 +14,7 @@
       <div class="slider-fill" :style="{ width: thumbPosition + 'px' }"></div>
     </div>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'

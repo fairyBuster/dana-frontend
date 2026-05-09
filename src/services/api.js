@@ -731,6 +731,10 @@ export const investmentAPI = {
   claimProfit: (investmentId) => {
     return api.post('/investments/claim-profit/', { investment_id: investmentId })
   },
+  // Claim profit for all eligible active investments in one request
+  claimProfitAll: () => {
+    return api.post('/investments/claim-profit-all/', {})
+  },
   claimPrincipal: (investmentId) => {
     return api.post('/investments/claim-principal/', { investment_id: investmentId })
   },

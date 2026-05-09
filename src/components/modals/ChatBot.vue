@@ -1,8 +1,8 @@
-<template>
+<!-- <template>
   <Teleport to="body">
     <div v-if="modelValue" class="chatbot-overlay" @click.self="close">
       <div class="chatbot-container">
-        <!-- Header -->
+      
         <header class="chatbot-header">
           <img src="/assets/images/6a724b73fb2c46483c7c2b348fcdc144d1a30b46.png" alt="Bot Avatar" class="header-avatar">
           <h1 class="header-title">Selamat datang di<br>TRIVEX!</h1>
@@ -13,7 +13,7 @@
           </button>
         </header>
 
-        <!-- Messages -->
+ 
         <div class="chatbot-messages" ref="chatBody">
           <div class="message bot-message">
             <img src="/assets/images/6a724b73fb2c46483c7c2b348fcdc144d1a30b46.png" alt="Bot Avatar" class="message-avatar">
@@ -40,7 +40,7 @@
           </div>
         </div>
 
-        <!-- Input -->
+        
         <div class="chatbot-input-area">
           <input
             type="text"
@@ -60,7 +60,7 @@
       </div>
     </div>
   </Teleport>
-</template>
+</template> -->
 
 <script setup>
 import { ref, computed, onUnmounted, nextTick, watch } from 'vue'

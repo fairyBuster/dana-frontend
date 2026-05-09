@@ -2,78 +2,81 @@
   <div class="app-container">
     <!-- Header -->
     <section id="section-header">
-      <header class="app-header">
-        <button class="back-button" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/17_110.svg" alt="Back Icon">
+      <header class="header">
+        <button class="back-btn" @click="goBack" aria-label="Go back">
+          <img src="/assets/image/168_753.svg" alt="Back">
         </button>
-        <h1 class="header-title">Kartu Undangan</h1>
+        <h1 class="header-title">Invite friends</h1>
       </header>
     </section>
 
-    <!-- Referral Info -->
-    <section id="section-referral-info">
-      <p class="referral-desc">
-        Kamu bisa ajak temanmu daftar di TRIVEX dengan menggunakan kode undanganmu! Dapatkan komisi hingga 36% dari tiap transaksi teman.
-      </p>
-      <div class="qr-wrapper">
-        <img :src="qrImageSrc" alt="QR Code" class="qr-image" @click="handleQrClick">
-      </div>
-      <p class="qr-instruction">
-        Scan QR untuk mengundang lebih cepat
-      </p>
-    </section>
-
-    <!-- Referral Codes -->
-    <section id="section-referral-codes">
-      <div class="code-group">
-        <label class="code-label">Referral</label>
-        <div class="code-box">
-          <span class="code-text">{{ referralCode || '-' }}</span>
-          <div class="copy-icon-wrapper" @click="copyCode">
-            <img src="/assets/images/18_128.svg" alt="Copy" class="icon-layer-1">
-            <img src="/assets/images/18_128 copy.svg" alt="" class="icon-layer-2">
-          </div>
-        </div>
-      </div>
-
-      <div class="code-group">
-        <label class="code-label">Referral Link</label>
-        <div class="code-box">
-          <span class="code-text">{{ inviteLink }}</span>
-          <div class="copy-icon-wrapper" @click="copyLink">
-            <img src="/assets/images/18_132.svg" alt="Copy" class="icon-layer-1">
-            <img src="/assets/images/18_132 copy.svg" alt="" class="icon-layer-2">
-          </div>
+    <!-- QR Code -->
+    <section id="section-qrcode">
+      <div class="qr-container">
+        <p class="qr-instruction">Long press the QR code to save to the phone album</p>
+       
+        <div class="qr-image-wrapper" :class="qrStyle === 'card' ? 'is-card' : ''">
+          <div ref="qrEl" class="qr-render" @click="handleQrClick"></div>
         </div>
       </div>
     </section>
 
-    <!-- Footer -->
-    <section id="section-footer">
-      <button class="btn-invite" @click="handleShare">Mulai mengundang</button>
+    <!-- Invite Links -->
+    <section id="section-invite-links">
+      <div class="links-container">
+        <div class="link-box">
+          <span class="link-label">Invite code</span>
+          <span class="link-value code-value">{{ referralCode || '-' }}</span>
+          <button class="copy-btn" aria-label="Copy invite code" @click="copyCode">
+            <img src="/assets/image/1cc75236b99b7283315da53f09fb85a865206d41.png" alt="Copy">
+          </button>
+        </div>
+        <div class="link-box">
+          <span class="link-value url-value" translate="no" data-no-translate="true">{{ inviteLink }}</span>
+          <button class="copy-btn" aria-label="Copy link" @click="copyLink">
+            <img src="/assets/image/1cc75236b99b7283315da53f09fb85a865206d41.png" alt="Copy">
+          </button>
+        </div>
+      </div>
     </section>
 
-    <SuccessModal
-      v-model="successModalOpen"
-      :message="successMessage"
-      @confirm="successModalOpen = false"
-    />
+    <!-- Article -->
+    <section id="section-article">
+      <div class="article-container">
+        <h2 class="article-title">Referral Program</h2>
+        <p class="article-text">
+          You can invite your friends to join TRIVEX using your invite code! Earn commission up to 36% from each friend's transaction. Share your referral code or link and start earning today.
+        </p>
+        <div class="article-placeholder"></div>
+        <p class="article-text">
+          The more friends you invite, the more you earn. Your commission is automatically calculated and added to your balance in real-time. There is no limit to the number of friends you can invite.<br>
+          Start sharing now and grow your network with TRIVEX!
+        </p>
+      </div>
+    </section>
   </div>
+
+  <SuccessModal
+    v-model="successModalOpen"
+    :message="successMessage"
+    @confirm="successModalOpen = false"
+  />
 </template>
 
 <script setup>
 import { onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import QRCode from 'qrcode'
 import { authAPI } from '@/services/api'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 
 const router = useRouter()
 const referralCode = ref('')
 const inviteLink = ref('')
-const qrImageSrc = ref('/assets/images/e84dbf746b992803a6abb783986d05ee77d5ec3c.png')
+const qrStyle = ref('card')
 const successModalOpen = ref(false)
 const successMessage = ref('')
+const qrEl = ref(null)
+let qrInstance = null
 
 const goBack = () => {
   router.go(-1)
@@ -103,20 +106,43 @@ const generateQr = async (value) => {
   const text = String(value || '').trim()
   if (!text) return
   try {
-    qrImageSrc.value = await QRCode.toDataURL(text, {
+    const Ctor = window?.QRCodeStyling
+    if (!Ctor || !qrEl.value) return
+
+    const options = {
       width: 280,
-      margin: 1,
-      errorCorrectionLevel: 'M',
-      color: { dark: '#004d43', light: '#ffffff' }
-    })
+      height: 280,
+      type: 'canvas',
+      data: text,
+      margin: 0,
+      qrOptions: { errorCorrectionLevel: 'H' },
+      backgroundOptions: { color: '#e9f0ff' },
+      dotsOptions: { color: '#1b46f5', type: 'dots' },
+      cornersSquareOptions: { color: '#1b46f5', type: 'extra-rounded' },
+      cornersDotOptions: { color: '#1b46f5', type: 'dot' }
+    }
+
+    if (!qrInstance) {
+      qrInstance = new Ctor(options)
+      qrEl.value.innerHTML = ''
+      qrInstance.append(qrEl.value)
+      return
+    }
+
+    qrInstance.update(options)
   } catch (_) {
-    qrImageSrc.value = '/assets/images/e84dbf746b992803a6abb783986d05ee77d5ec3c.png'
+    if (qrEl.value) qrEl.value.innerHTML = ''
   }
+}
+
+const setQrStyle = async (style) => {
+  qrStyle.value = style
+  if (inviteLink.value) await generateQr(inviteLink.value)
 }
 
 const copyLink = () => {
   navigator.clipboard.writeText(inviteLink.value).then(() => {
-    successMessage.value = 'Link berhasil disalin'
+    successMessage.value = 'Copy'
     successModalOpen.value = true
   }).catch(err => {
     console.error('Failed to copy link:', err)
@@ -125,25 +151,11 @@ const copyLink = () => {
 
 const copyCode = () => {
   navigator.clipboard.writeText(referralCode.value).then(() => {
-    successMessage.value = 'Kode berhasil disalin'
+    successMessage.value = 'Code copied successfully'
     successModalOpen.value = true
   }).catch(err => {
     console.error('Failed to copy code:', err)
   })
-}
-
-const handleShare = () => {
-  if (navigator.share) {
-    navigator.share({
-      title: 'Undang Pengguna TRIVEX',
-      text: `Bergabunglah dengan TRIVEX menggunakan kode undangan saya: ${referralCode.value}`,
-      url: inviteLink.value
-    }).catch(err => {
-      console.log('Share canceled:', err)
-    })
-  } else {
-    copyLink()
-  }
 }
 
 const handleQrClick = () => {
@@ -160,6 +172,12 @@ onActivated(() => {
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
   width: 100%;
@@ -175,162 +193,223 @@ onActivated(() => {
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
+section {
+  width: 100%;
 }
 
-/* Header */
-#section-header {
-  padding: 20px 16px 10px 16px;
-}
-
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  height: 41px;
-}
-
-.back-button {
-  position: absolute;
-  left: -8px;
-  background: none;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.back-button img {
-  width: 35px;
-  height: 35px;
-  object-fit: contain;
-}
-
-.header-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0;
-}
-
-/* Referral Info */
-#section-referral-info {
-  padding: 16px;
-}
-
-.referral-desc {
-  font-size: 13px;
-  line-height: 1.5;
-  color: #000000;
-  margin: 0 0 24px 0;
-}
-
-.qr-wrapper {
-  margin-bottom: 24px;
-}
-
-.qr-image {
-  width: 140px;
-  height: 135px;
-  border-radius: 20px;
-  border: 1px solid #004d43;
-  object-fit: cover;
+img {
+  max-width: 100%;
   display: block;
 }
 
-.qr-instruction {
-  font-size: 13px;
+button {
+  font-family: inherit;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 13px 2px;
+  position: relative;
+  min-height: 48px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.header-title {
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
   font-weight: 700;
   color: #000000;
   margin: 0;
 }
 
-/* Referral Codes */
-#section-referral-codes {
-  padding: 16px;
+/* QR Code */
+.qr-container {
+  padding-top: 37px;
+  padding-left: 26px;
+  padding-right: 26px;
+  text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  align-items: center;
 }
 
-.code-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.code-label {
+.qr-instruction {
   font-size: 14px;
-  font-weight: 700;
   color: #000000;
+  margin-bottom: 23px;
+  line-height: 1.4;
+  max-width: 305px;
 }
 
-.code-box {
+.qr-style-row {
+  display: inline-flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.qr-style-btn {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(27, 70, 245, 0.35);
+  background: rgba(255, 255, 255, 0.7);
+  color: #000000;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.qr-style-btn.active {
+  border-color: #1b46f5;
+  background: rgba(27, 70, 245, 0.1);
+  color: #1b46f5;
+}
+
+.qr-image-wrapper {
+  width: 152px;
+  height: 152px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+}
+
+.qr-image-wrapper.is-card {
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.qr-render {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.qr-render :deep(canvas),
+.qr-render :deep(svg),
+.qr-render :deep(img) {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 6px;
+}
+
+/* Invite Links */
+.links-container {
+  padding-top: 27px;
+  padding-left: 26px;
+  padding-right: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.link-box {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  border: 1px solid rgba(0, 0, 0, 0.21);
-  border-radius: 10px;
-  padding: 14px 12px;
-  background-color: transparent;
-  height: 49px;
+  background-color: rgba(255, 255, 255, 0.47);
+  border: 1px solid #1b46f5;
+  border-radius: 20px;
+  padding: 0 8px 0 15px;
+  height: 45px;
 }
 
-.code-text {
+.link-label {
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.5);
+  color: #000000;
+  font-weight: 600;
+}
+
+.link-value {
+  color: #1b46f5;
+  font-weight: 600;
+}
+
+.code-value {
+  font-size: 16px;
+  margin-left: auto;
+  margin-right: 6px;
+}
+
+.url-value {
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding-right: 12px;
+  flex: 1;
+  margin-right: 6px;
 }
 
-.copy-icon-wrapper {
-  position: relative;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.icon-layer-1, .icon-layer-2 {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 100%;
-  max-height: 100%;
-}
-
-/* Footer */
-#section-footer {
-  padding: 16px;
-  margin-top: 16px;
-  padding-bottom: 32px;
-}
-
-.btn-invite {
-  width: 100%;
-  height: 58px;
-  background-color: #004d43;
-  color: #ffffff;
+.copy-btn {
+  background: none;
   border: none;
-  border-radius: 20px;
-  font-size: 16px;
-  font-weight: 700;
   cursor: pointer;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: inherit;
-  transition: background-color 0.2s ease;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
-.btn-invite:hover {
-  background-color: #00362f;
+.copy-btn img {
+  width: 10px;
+  height: 10px;
+  object-fit: contain;
+}
+
+/* Article */
+.article-container {
+  padding-top: 27px;
+  padding-left: 26px;
+  padding-right: 26px;
+  padding-bottom: 40px;
+}
+
+.article-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.article-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #000000;
+  margin-bottom: 10px;
+  text-align: justify;
+}
+
+.article-placeholder {
+  background-color: #d9d9d9;
+  border-radius: 2px;
+  height: 158px;
+  width: 100%;
+  margin-bottom: 9px;
 }
 </style>

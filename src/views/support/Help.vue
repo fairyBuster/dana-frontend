@@ -1,6 +1,6 @@
-<template>
+<!-- <template>
   <div class="help-page">
-    <!-- Header Section -->
+    
     <section id="section-header">
       <div class="main-container">
         <header class="site-header">
@@ -13,11 +13,11 @@
       </div>
     </section>
 
-    <!-- FAQ Section -->
+
     <section id="section-faq">
       <div class="main-container">
         
-        <!-- Card 1: Akun dan Akses -->
+        
         <div class="card">
           <div class="card-header">
             <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="User Icon" class="card-icon">
@@ -33,7 +33,7 @@
           </div>
         </div>
 
-        <!-- Card 2: Penggunaan Layanan -->
+     
         <div class="card">
           <div class="card-header">
             <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Drone Icon" class="card-icon">
@@ -49,7 +49,7 @@
           </div>
         </div>
 
-        <!-- Card 3: Data dan Monitoring -->
+    
         <div class="card">
           <div class="card-header">
             <img src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Chart Icon" class="card-icon">
@@ -68,7 +68,7 @@
       </div>
     </section>
 
-    <!-- Contact Section -->
+  
     <section id="section-contact">
       <div class="main-container">
         <div class="contact-wrapper">
@@ -79,7 +79,7 @@
       </div>
     </section>
 
-    <!-- Chat Modal Section -->
+   
     <teleport to="body">
       <div v-if="chatOpen" class="chat-modal-overlay" @click.self="closeChat">
         <div class="chat-modal">
@@ -120,7 +120,7 @@
       </div>
     </teleport>
 
-    <!-- Footer Section -->
+   
     <section id="section-footer">
       <div class="main-container">
         <div class="footer-content">
@@ -133,7 +133,7 @@
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'

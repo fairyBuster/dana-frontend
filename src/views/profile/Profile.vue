@@ -1,161 +1,258 @@
 <template>
-  <div class="app-wrapper">
+  <div class="app-container">
+    <!-- Header -->
     <section id="section-header">
-      <div class="header-container">
-        <div class="user-info">
-          <h1 class="username">Hai, {{ displayUsername }}</h1>
-          <div class="user-meta">
-            <span class="reff-label">Reff ID: <span class="reff-val">{{ displayUid }}</span></span>
-            <div class="divider-vert"></div>
-            <span class="phone">{{ displayPhone }}</span>
+      <div class="header-content">
+        <div class="user-profile">
+          <div class="avatar-wrapper">
+            <img src="/assets/image/4195_135.svg" class="avatar-bg" alt="Avatar Background">
+            <img src="/assets/image/Logo02.png" class="avatar-img" alt="Logo">
+          </div>
+          <div class="user-details">
+            <div class="uid-row">
+              <span class="uid-text">
+                UID:
+                <span v-if="showUidPlaceholder" class="uid-placeholder"></span>
+                <span v-else class="uid-value">{{ displayUid }}</span>
+              </span>
+              <img
+                src="/assets/image/4182_140.svg"
+                class="copy-icon"
+                :class="{ disabled: showUidPlaceholder }"
+                alt="Copy UID"
+                @click="copyUid"
+              >
+            </div>
+            <span class="site-text">Site: AVR Mining</span>
           </div>
         </div>
-        <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Trivex Logo" class="header-logo">
+        <img src="/assets/image/4200_222.svg" class="logout-icon" alt="Logout" @click="handleLogout">
       </div>
     </section>
 
-    <section id="section-referral">
-      <div class="referral-card">
-        <div class="ref-row" @click="router.push('/vp')">
-          <img src="/assets/images/35c8b6a18c2ca182842dd2334e0d97ca5f0a270c.png" alt="Level Icon" class="ref-icon">
-          <div class="ref-content">
-            <div class="ref-title">Level anggota</div>
-            <div class="ref-value">{{ vipText }}</div>
+    <!-- Wallet -->
+    <section id="section-wallet">
+      <div class="balance-card">
+        <div class="balance-info">
+          <div class="balance-label-row">
+            <span class="label-text">Available</span>
+            <button
+              type="button"
+              ref="currencyAnchorEl"
+              class="currency-selector"
+              @click.stop="toggleCurrencyMenu"
+            >
+              <span class="currency-text">{{ currency }}</span>
+              <img src="/assets/image/4195_147.svg" class="arrow-down" alt="Select Currency">
+              <div v-if="currencyMenuOpen" class="currency-menu" @click.stop>
+                <button
+                  v-for="opt in currencyOptions"
+                  :key="opt.value"
+                  type="button"
+                  class="currency-menu-item"
+                  :class="{ active: opt.value === currency }"
+                  @click.stop="selectCurrency(opt.value)"
+                >
+                  {{ opt.label }}
+                </button>
+              </div>
+            </button>
           </div>
-          <img src="/assets/images/2038_126.svg" alt="Arrow Right" class="ref-arrow">
+          <div class="balance-amount">{{ isBalanceVisible ? balanceCurrencyText : maskedBalanceText }}</div>
         </div>
-        <div class="ref-divider"></div>
-        <div class="ref-row" @click="router.push('/share')">
-          <img src="/assets/images/99155724c1b89458bc852e2a45ac1027d8bfda23.png" alt="Referral Icon" class="ref-icon">
-          <div class="ref-content">
-            <div class="ref-title">Program Referral</div>
-            <div class="ref-value">Berikan tautan undangan Anda</div>
-          </div>
-          <img src="/assets/images/2038_167.svg" alt="Arrow Right" class="ref-arrow">
-        </div>
+        <img src="/assets/image/2009e2edfb1a4a5ac8e1c8bf45271524e72442d9.png" class="wallet-img" alt="Wallet Illustration">
       </div>
-    </section>
-
-    <section id="section-asset">
-      <div class="asset-card">
-        <div class="asset-header">
-          <div class="asset-title-wrap">
-            <img src="/assets/images/581d456ba831527e9d5b0cbe542825e6c12d42e1.png" alt="Asset Icon" class="asset-main-icon">
-            <span class="asset-main-title">Total Aset Saya</span>
-            <img src="/assets/images/2039_329.svg" alt="Toggle Visibility" class="asset-eye-icon" @click="isBalanceVisible = !isBalanceVisible">
-          </div>
-          <div class="asset-badges">
-            <img src="/assets/images/image 61 (2).png" alt="Bappebti Logo" class="badge-bappebti">
-            <img src="/assets/images/a648e454f7e6e93caec0f833a59b7dcec155605e.png" alt="SK Logo" class="badge-sk">
-          </div>
+      <div class="stats-container">
+        <div class="stat-item">
+          <span class="stat-label">Recharge balance</span>
+          <span class="stat-value">{{ balanceDepositCurrencyText }}</span>
         </div>
-
-        <div class="asset-list">
-          <div class="asset-item" @click="router.push('/flow')">
-            <div class="asset-info">
-              <div class="asset-label">Saldo Utama</div>
-              <div class="asset-val">{{ isBalanceVisible ? balanceText : 'Rp********' }}</div>
-            </div>
-            <img src="/assets/images/2038_144.svg" alt="Arrow Right" class="asset-arrow">
-          </div>
-          <div class="asset-divider"></div>
-
-          <div class="asset-item" @click="router.push('/dep')">
-            <div class="asset-info">
-              <div class="asset-label">Saldo Deposito</div>
-              <div class="asset-val">{{ isBalanceVisible ? balanceDepositText : 'Rp********' }}</div>
-            </div>
-            <img src="/assets/images/2038_149.svg" alt="Arrow Right" class="asset-arrow">
-          </div>
-          <div class="asset-divider"></div>
-
-          <div class="asset-item" @click="router.push('/portfolio/history')">
-            <div class="asset-info">
-              <div class="asset-label">Saldo Titip</div>
-              <div class="asset-val">{{ isBalanceVisible ? totalIncomeText : 'Rp********' }}</div>
-            </div>
-            <img src="/assets/images/2038_155.svg" alt="Arrow Right" class="asset-arrow">
-          </div>
-          <div class="asset-divider"></div>
-
-          <div class="asset-item" @click="router.push('/flow/history')">
-            <div class="asset-info">
-              <div class="asset-label">Total Penarikan Sukses</div>
-              <div class="asset-val">{{ isBalanceVisible ? todayTotalIncomeText : 'Rp********' }}</div>
-            </div>
-            <img src="/assets/images/2038_161.svg" alt="Arrow Right" class="asset-arrow">
-          </div>
+        <div class="stat-item">
+          <span class="stat-label">Today's</span>
+          <span class="stat-value">{{ todayIncomeCurrencyText }}</span>
         </div>
       </div>
     </section>
 
-    <section id="section-menu">
-      <div class="menu-container">
-        <div class="security-notice">
-          <img src="/assets/images/a876a13410d4439d34944ad319f54081e6d9ecf9.png" alt="Security Shield" class="sec-icon">
-          <p class="sec-text">Data Anda dilindungi dengan sistem enkripsi dan protokol keamanan SSL untuk menjaga kerahasiaan dan keamanan informasi.</p>
+    <!-- Navigation -->
+    <section id="section-navigation">
+      <div class="tabs-container">
+        <div class="tab active" @click="activeTab = 'account'">
+          <div v-if="activeTab === 'account'" class="tab-indicator"></div>
+          <span>Account</span>
+          <div v-if="activeTab === 'account'" class="tab-underline"></div>
         </div>
-
-        <div class="menu-list">
-          <div class="menu-item" @click="router.push('/settings')">
-            <img src="/assets/images/28513e18289d675dfcb2092e17ef5f318ad3ee70.png" alt="Data Saya" class="menu-icon">
-            <span class="menu-label">Data Saya</span>
-            <img src="/assets/images/2039_173.svg" alt="Arrow Right" class="menu-arrow">
-          </div>
-          <div class="menu-divider"></div>
-
-          <div class="menu-item" @click="router.push('/connect')">
-            <img src="/assets/images/d41cb37f383e118edae5c6a973ae9f86b1382288.png" alt="Tambah Rekening" class="menu-icon">
-            <span class="menu-label">Tambah Rekening</span>
-            <img src="/assets/images/2039_179.svg" alt="Arrow Right" class="menu-arrow">
-          </div>
-          <div class="menu-divider"></div>
-
-          <div class="menu-item" @click="router.push('/settings/change-password')">
-            <img src="/assets/images/fcd9fe1e45be040eb1fd3a3e8ca65794171b72a5.png" alt="Keamanan Akun" class="menu-icon">
-            <span class="menu-label">Keamanan Akun</span>
-            <img src="/assets/images/2039_186.svg" alt="Arrow Right" class="menu-arrow">
-          </div>
-          <div class="menu-divider"></div>
-
-          <div class="menu-item" @click="router.push('/support/platform')">
-            <img src="/assets/images/dbf0ca110a19eb0771d0f64fec6d8bbad1c44406.png" alt="Pusat Bantuan" class="menu-icon">
-            <span class="menu-label">Pusat Bantuan</span>
-            <img src="/assets/images/2039_193.svg" alt="Arrow Right" class="menu-arrow">
-          </div>
-          <div class="menu-divider"></div>
-
-          <div class="menu-item" @click="router.push('/task')">
-            <img src="/assets/images/df083f3660cadeed4ff1250b110dd29ba5b04bfa.png" alt="Tugas Berhadiah" class="menu-icon">
-            <span class="menu-label">Tugas Berhadiah-Undang Teman</span>
-            <img src="/assets/images/2039_312.svg" alt="Arrow Right" class="menu-arrow">
-          </div>
-          <div class="menu-divider"></div>
-
-          <div class="menu-item" @click="router.push('/portfolio')">
-            <img src="/assets/images/d0494c7e58523da03bf49ec763727b638b172bd1.png" alt="Portofolio Saya" class="menu-icon">
-            <span class="menu-label">Portofolio Saya</span>
-            <img src="/assets/images/2040_335.svg" alt="Arrow Right" class="menu-arrow">
-          </div>
+        <div class="tab" :class="{ active: activeTab === 'settings' }" @click="activeTab = 'settings'">
+          <div v-if="activeTab === 'settings'" class="tab-indicator"></div>
+          <span>Settings</span>
+          <div v-if="activeTab === 'settings'" class="tab-underline"></div>
         </div>
-
-        <button class="btn-logout" @click="router.push('/login')">Keluar</button>
+        <div class="tab" :class="{ active: activeTab === 'more' }" @click="activeTab = 'more'">
+          <div v-if="activeTab === 'more'" class="tab-indicator"></div>
+          <span>More</span>
+          <div v-if="activeTab === 'more'" class="tab-underline"></div>
+        </div>
       </div>
+
+      <ul v-if="activeTab === 'account'" class="menu-list">
+        <li class="menu-item" @click="router.push('/sign')">
+          <div class="menu-left">
+            <img src="/assets/image/a89d4d597bbcfa2080814db6f2b22dc98cc2aa65.png" class="menu-icon" alt="Sign in">
+            <span class="menu-text">Sign in</span>
+          </div>
+          <img src="/assets/image/4200_180.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item readonly">
+          <div class="menu-left">
+            <img src="/assets/image/f9741da13cb7ba61137fbfae1bfdafaa779d6375.png" class="menu-icon" alt="Identity account">
+            <span class="menu-text">Email</span>
+          </div>
+          <span v-if="showEmailPlaceholder" class="menu-value-placeholder"></span>
+          <span v-else class="menu-value">{{ displayEmail }}</span>
+        </li>
+        <li class="menu-item" @click="router.push('/vp')">
+          <div class="menu-left">
+            <img src="/assets/image/c77f7559be360dd336d02cac1b1feb037dbf2473.png" class="menu-icon" alt="My VIP">
+            <span class="menu-text">My VIP</span>
+          </div>
+          <div class="menu-right">
+            <span v-if="showVipPlaceholder" class="menu-value-placeholder"></span>
+            <span v-else class="menu-value">{{ vipText }}</span>
+            <img src="/assets/image/4200_191.svg" class="menu-arrow" alt="Arrow Right">
+          </div>
+        </li>
+        <li class="menu-item" @click="router.push('/dep/history')">
+          <div class="menu-left">
+            <img src="/assets/image/b7f92aac3d47e07c483ba586f4ae265e804616e5.png" class="menu-icon" alt="Record Transaction">
+            <span class="menu-text">Record Transaction</span>
+          </div>
+          <img src="/assets/image/4200_200.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="router.push('/team')">
+          <div class="menu-left">
+            <img src="/assets/image/9801361d06ddf02bf17ce55932f161747ec5d791.png" class="menu-icon" alt="Your Community">
+            <span class="menu-text">Your Community</span>
+          </div>
+          <img src="/assets/image/4200_210.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="router.push('/about')">
+          <div class="menu-left">
+            <img src="/assets/image/95222c8971643839be1f21df87741382dab85559.png" class="menu-icon" alt="Company Community">
+            <span class="menu-text">Company Community</span>
+          </div>
+          <img src="/assets/image/4200_216.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="handleKycClick">
+          <div class="menu-left">
+            <img src="/assets/image/85bcea1b2cc4669b33e6a90d1ea50f45593297fa.png" class="menu-icon" alt="Complete Verification">
+            <span class="menu-text">Complete Verification</span>
+          </div>
+          <img src="/assets/image/4200_226.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+      </ul>
+
+      <ul v-if="activeTab === 'settings'" class="menu-list">
+        <li class="menu-item" @click="router.push('/connect')">
+          <div class="menu-left">
+            <img src="/assets/image/f9741da13cb7ba61137fbfae1bfdafaa779d6375.png" class="menu-icon" alt="My Data">
+            <span class="menu-text">Bind Payout Account</span>
+          </div>
+          <img src="/assets/image/4200_180.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="router.push('/settings/change-password')">
+          <div class="menu-left">
+            <img src="/assets/image/85bcea1b2cc4669b33e6a90d1ea50f45593297fa.png" class="menu-icon" alt="Add Bank Account">
+            <span class="menu-text">Change Password</span>
+          </div>
+          <img src="/assets/image/4200_191.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="showUsernameModal = true">
+          <div class="menu-left">
+            <img src="/assets/image/usr.png" class="menu-icon" alt="Account Security">
+            <span class="menu-text">Username</span>
+          </div>
+          <img src="/assets/image/4200_200.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="router.push('/settings')">
+          <div class="menu-left">
+            <img src="/assets/image/cache.png" class="menu-icon" alt="Account Security">
+            <span class="menu-text">Delete Cache</span>
+          </div>
+          <img src="/assets/image/4200_200.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+      </ul>
+
+      <ul v-if="activeTab === 'more'" class="menu-list">
+        <li class="menu-item" @click="router.push('/support/platform')">
+          <div class="menu-left">
+            <img src="/assets/image/help.png" class="menu-icon" alt="Help Center">
+            <span class="menu-text">Help Center</span>
+          </div>
+          <img src="/assets/image/4200_210.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="router.push('/portfolio')">
+          <div class="menu-left">
+            <img src="/assets/image/my-mining.png" class="menu-icon" alt="Rewarded Tasks">
+            <span class="menu-text">My Mining</span>
+          </div>
+          <img src="/assets/image/4200_216.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="router.push('/settings/device-info')">
+          <div class="menu-left">
+            <img src="/assets/image/detail.png" class="menu-icon" alt="My Portfolio">
+            <span class="menu-text">Detail Information</span>
+          </div>
+          <img src="/assets/image/4200_226.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="router.push('/sign')">
+          <div class="menu-left">
+            <img src="/assets/image/daily.png" class="menu-icon" alt="Help Center">
+            <span class="menu-text">Daily Sign In</span>
+          </div>
+          <img src="/assets/image/4200_210.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="router.push('/solution')">
+          <div class="menu-left">
+            <img src="/assets/image/customer.png" class="menu-icon" alt="Rewarded Tasks">
+            <span class="menu-text">Customer Agreement</span>
+          </div>
+          <img src="/assets/image/4200_216.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+        <li class="menu-item" @click="router.push('/privacy')">
+          <div class="menu-left">
+            <img src="/assets/image/privacy.png" class="menu-icon" alt="My Portfolio">
+            <span class="menu-text">Privacy Policy</span>
+          </div>
+          <img src="/assets/image/4200_226.svg" class="menu-arrow" alt="Arrow Right">
+        </li>
+      </ul>
     </section>
   </div>
 
   <FooterBar />
-</template>
+    <ErrorModal v-model="showErrorModal" :message="errorMessage" />
+    <EditUsernameModal 
+      v-model="showUsernameModal" 
+      :current-username="accountInfo?.username || ''" 
+      @success="handleUsernameUpdate"
+    />
+  </template>
 
 <script setup>
-import { computed, onActivated, onMounted, ref } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import FooterBar from '../../components/partials/FooterBar.vue'
-import { avatarSrc } from '@/utils/avatar'
+import ErrorModal from '@/components/modals/ErrorModal.vue'
+import EditUsernameModal from '@/components/modals/EditUsernameModal.vue'
 import { authAPI } from '@/services/api'
 
 const router = useRouter()
 const isBalanceVisible = ref(false)
+const activeTab = ref('account')
+const currency = ref('USD')
+const currencyMenuOpen = ref(false)
+const currencyAnchorEl = ref(null)
+const usdToIdrRate = ref(17000)
 
 const accountInfo = ref(null)
 const currentRank = ref(null)
@@ -165,46 +262,135 @@ const todayStats = ref(null)
 const isRefreshing = ref(false)
 const lastRefreshedAt = ref(0)
 
-const displayUsername = computed(() => {
-  const d = accountInfo.value || {}
-  const username = String(d.username || d.full_name || d.name || '').trim()
-  return username || ''
-})
+const showErrorModal = ref(false)
+const errorMessage = ref('')
+const showUsernameModal = ref(false)
 
-const displayUid = computed(() => {
+const handleKycClick = () => {
+  errorMessage.value = 'KYC is not active'
+  showErrorModal.value = true
+}
+
+const handleUsernameUpdate = (newUsername) => {
+  if (accountInfo.value) {
+    accountInfo.value.username = newUsername
+  }
+}
+
+const rawUid = computed(() => {
   const d = accountInfo.value || {}
   const uid = d.referral_code ?? d.id ?? d.user_id ?? null
-  if (uid === null || uid === undefined || uid === '') return '-'
-  return String(uid)
+  if (uid === null || uid === undefined || uid === '') return null
+  return uid
 })
 
-const displayPhone = computed(() => {
+const showUidPlaceholder = computed(() => rawUid.value === null)
+
+const displayUid = computed(() => {
+  if (rawUid.value === null) return ''
+  return String(rawUid.value)
+})
+
+const rawPhone = computed(() => {
   const d = accountInfo.value || {}
   const p = String(d.phone || d.phone_number || d.user_phone || '').trim()
-  return p || '-'
+  return p || null
+})
+
+const showPhonePlaceholder = computed(() => rawPhone.value === null)
+
+const displayPhone = computed(() => {
+  if (rawPhone.value === null) return ''
+  return String(rawPhone.value)
+})
+
+const rawEmail = computed(() => {
+  const d = accountInfo.value || {}
+  const e = String(d.email || d.user_email || d.mail || '').trim()
+  return e || null
+})
+
+const showEmailPlaceholder = computed(() => rawEmail.value === null)
+
+const displayEmail = computed(() => {
+  if (rawEmail.value === null) return ''
+  return String(rawEmail.value)
+})
+
+const showVipPlaceholder = computed(() => {
+  const title = String(currentTitle.value || '').trim()
+  if (title) return false
+  return currentRank.value === null || currentRank.value === undefined || currentRank.value === ''
 })
 
 const vipText = computed(() => {
+  if (showVipPlaceholder.value) return ''
   const title = String(currentTitle.value || '').trim()
   if (title) return title
   const r = currentRank.value
-  if (r === null || r === undefined || r === '') return 'LV0'
+  if (r === null || r === undefined || r === '') return '0'
   const n = Number(r)
-  return Number.isFinite(n) ? `LV${n}` : String(r)
+  return Number.isFinite(n) ? String(n) : String(r)
 })
 
 const toNumber = (v) => {
   const n = Number(String(v ?? 0).replace(/[^0-9.-]/g, ''))
   return Number.isFinite(n) ? n : 0
 }
-const formatIDR = (v) => {
-  return 'Rp ' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(toNumber(v))
+
+const formatUSD = (v) => {
+  return '$' + new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(toNumber(v))
 }
 
-const balanceText = computed(() => formatIDR(balanceStats.value?.balance))
-const balanceDepositText = computed(() => formatIDR(balanceStats.value?.balance_deposit))
-const totalIncomeText = computed(() => formatIDR(balanceStats.value?.balance_hold))
-const todayTotalIncomeText = computed(() => formatIDR(todayStats.value?.total_withdraw_completed))
+const formatIDR = (v) => {
+  return 'Rp' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(toNumber(v))
+}
+
+const maskedBalanceText = computed(() => (currency.value === 'IDR' ? 'Rp********' : '$********'))
+
+const applyCurrency = (usdValue) => {
+  if (currency.value === 'IDR') return formatIDR(toNumber(usdValue) * usdToIdrRate.value)
+  return formatUSD(usdValue)
+}
+
+const balanceCurrencyText = computed(() => applyCurrency(balanceStats.value?.balance))
+const balanceDepositCurrencyText = computed(() => applyCurrency(balanceStats.value?.balance_deposit))
+const todayIncomeCurrencyText = computed(() => applyCurrency(todayStats.value?.total_income))
+
+const currencyOptions = computed(() => [
+  { value: 'USD', label: 'USD' },
+  { value: 'IDR', label: 'IDR' }
+])
+
+const toggleCurrencyMenu = () => {
+  currencyMenuOpen.value = !currencyMenuOpen.value
+}
+
+const closeCurrencyMenu = () => {
+  currencyMenuOpen.value = false
+}
+
+const selectCurrency = (val) => {
+  currency.value = val === 'IDR' ? 'IDR' : 'USD'
+  closeCurrencyMenu()
+}
+
+const onDocumentClick = (e) => {
+  if (!currencyMenuOpen.value) return
+  const anchor = currencyAnchorEl.value
+  const target = e?.target
+  if (anchor && target && anchor.contains(target)) return
+  closeCurrencyMenu()
+}
+
+const copyUid = () => {
+  if (showUidPlaceholder.value) return
+  navigator.clipboard.writeText(displayUid.value).catch(() => {})
+}
+
+const handleLogout = () => {
+  router.push('/login')
+}
 
 const fetchAccountInfo = async () => {
   try {
@@ -262,6 +448,7 @@ const refreshProfileData = async () => {
 
 onMounted(() => {
   refreshProfileData()
+  document.addEventListener('click', onDocumentClick)
 })
 
 onActivated(() => {
@@ -269,295 +456,379 @@ onActivated(() => {
   if (now - lastRefreshedAt.value < 300) return
   refreshProfileData()
 })
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
+})
 </script>
 
 <style scoped>
-.app-wrapper {
-  font-family: 'Inter', sans-serif;
+* {
+  box-sizing: border-box;
+}
+
+.app-container {
   margin: 0 auto;
   padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f8f8f8;
   max-width: 412px;
   min-height: 100vh;
-  background: linear-gradient(180deg, #0A4345 0%, #0B6563 100%);
   position: relative;
-  display: flex;
-  flex-direction: column;
+  padding-bottom: 68px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   overflow-x: hidden;
 }
 
-* {
-  box-sizing: border-box;
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 h1, h2, h3, p {
   margin: 0;
 }
 
-/* Header Section */
-.header-container {
-  padding: 24px 20px;
+/* Header */
+#section-header {
+  padding: 25px 20px 15px;
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
 }
 
-.username {
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.user-meta {
+.user-profile {
   display: flex;
   align-items: center;
-  font-size: 12px;
+  gap: 12px;
 }
 
-.reff-label {
-  color: rgba(255, 255, 255, 0.5);
+.avatar-wrapper {
+  position: relative;
+  width: 31px;
+  height: 29px;
 }
 
-.reff-val {
-  color: #ffffff;
+.avatar-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
-.divider-vert {
-  width: 1px;
-  height: 12px;
-  background-color: #ffffff;
-  margin: 0 8px;
-}
-
-.phone {
-  color: #ffffff;
-}
-
-.header-logo {
-  height: 24px;
-  border-radius: 50px;
+.avatar-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 95px;
+  height: 47px;
   object-fit: contain;
 }
 
-/* Referral Section */
-#section-referral {
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.uid-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uid-text {
+  font-size: 16px;
+  color: #000;
+  font-weight: 500;
+}
+
+.uid-placeholder {
+  display: inline-block;
+  width: 92px;
+  height: 18px;
+  background: #f6f0dd;
+  border-radius: 8px;
+  margin-left: 0px;
+  vertical-align: middle;
+}
+
+.uid-value {
+  margin-left: 6px;
+}
+
+.copy-icon {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.copy-icon.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.site-text {
+  font-size: 12px;
+  color: #737373;
+}
+
+.logout-icon {
+  width: 26px;
+  height: 31px;
+  cursor: pointer;
+}
+
+/* Wallet */
+#section-wallet {
   padding: 0 20px;
 }
 
-.referral-card {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  padding: 16px;
+.balance-card {
+  background: linear-gradient(90deg, #f1faf9 0%, #f8fbfb 50%, #f1fbf9 100%);
+  border: 1px solid #ededed;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: visible;
 }
 
-.ref-row {
+.balance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 2;
+}
+
+.balance-label-row {
   display: flex;
   align-items: center;
+  gap: 10px;
+}
+
+.label-text {
+  font-size: 14px;
+  color: #000;
+}
+
+.currency-selector {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  position: relative;
+  z-index: 3;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.ref-icon {
-  width: 32px;
-  height: 32px;
-  margin-right: 12px;
-}
-
-.ref-content {
-  flex-grow: 1;
-}
-
-.ref-title {
-  color: #ffffff;
+.currency-text {
   font-size: 12px;
-  margin-bottom: 4px;
+  color: #767676;
 }
 
-.ref-value {
-  color: #ffffff;
+.arrow-down {
+  width: 14px;
+  height: 14px;
+  transform: rotate(270deg);
+}
+
+.currency-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 140px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  z-index: 9999;
+}
+
+.currency-menu-item {
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  text-align: left;
   font-size: 14px;
-  font-weight: 700;
-}
-
-.ref-arrow {
-  width: 24px;
-  height: 24px;
-}
-
-.ref-divider {
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.2);
-  margin: 12px 0;
-}
-
-/* Asset Section */
-#section-asset {
-  padding: 20px 20px 0;
-}
-
-.asset-card {
-  background-color: #eeeeee;
-  border-radius: 16px;
-  padding: 16px;
-}
-
-.asset-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.asset-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.asset-main-icon {
-  width: 24px;
-  height: 24px;
-}
-
-.asset-main-title {
-  color: rgba(18, 18, 18, 0.6);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.asset-eye-icon {
-  width: 16px;
-  height: 16px;
+  color: #000000;
   cursor: pointer;
+  font-family: inherit;
 }
 
-.asset-badges {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.currency-menu-item + .currency-menu-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.badge-bappebti {
-  height: 16px;
-  object-fit: contain;
-}
-
-.badge-sk {
-  height: 16px;
-  object-fit: contain;
-}
-
-.asset-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  cursor: pointer;
-}
-
-.asset-info {
-  flex-grow: 1;
-}
-
-.asset-label {
-  color: #121212;
-  font-size: 14px;
-  margin-bottom: 4px;
-}
-
-.asset-val {
-  color: #121212;
-  font-size: 14px;
+.currency-menu-item.active {
   font-weight: 700;
 }
 
-.asset-arrow {
-  width: 24px;
-  height: 24px;
+.balance-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000;
+  margin-top: 4px;
 }
 
-.asset-divider {
-  height: 1px;
-  background-color: rgba(5, 5, 5, 0.1);
-  margin: 4px 0;
+.wallet-img {
+  width: 296px;
+  height: 66px;
+  object-fit: contain;
+  z-index: 1;
 }
 
-/* Menu Section */
-#section-menu {
-  flex-grow: 1;
-  margin-top: 24px;
-  background-color: #f8f8f8;
-  border-radius: 24px 24px 0 0;
-  padding: 24px 20px 80px;
+.stats-container {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  padding: 20px 10px;
 }
 
-.security-notice {
+.stat-item {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 24px;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.sec-icon {
-  width: 20px;
+.stat-label {
+  font-size: 14px;
+  color: #000;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000;
+}
+
+/* Navigation */
+#section-navigation {
+  padding: 10px 0;
+}
+
+.tabs-container {
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 35px;
+  margin-bottom: 15px;
+}
+
+.tab {
+  font-size: 14px;
+  color: #686868;
+  cursor: pointer;
+  position: relative;
+  padding: 5px 0;
+}
+
+.tab.active {
+  color: #000;
+  font-weight: 500;
+}
+
+.tab-indicator {
+  position: absolute;
+  left: -11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
   height: 20px;
-  flex-shrink: 0;
+  background-color: #1b46f5;
 }
 
-.sec-text {
-  color: #121212;
-  font-size: 10px;
-  line-height: 1.4;
-  opacity: 0.7;
+.tab-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #000;
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
 }
 
 .menu-item {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
+  padding: 16px 28px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.menu-item.readonly {
+  cursor: default;
+}
+
+.menu-item.readonly:active {
+  background-color: transparent;
+}
+
+.menu-item:active {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.menu-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .menu-icon {
-  width: 28px;
-  height: 28px;
-  margin-right: 16px;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
-.menu-label {
-  flex-grow: 1;
-  color: #121212;
+.menu-text {
   font-size: 14px;
-  font-weight: 700;
+  color: #000;
+}
+
+.menu-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-value {
+  font-size: 14px;
+  color: #686868;
+}
+
+.menu-value-placeholder {
+  display: inline-block;
+  width: 96px;
+  height: 16px;
+  background: #f6f0dd;
+  border-radius: 8px;
 }
 
 .menu-arrow {
-  width: 24px;
-  height: 24px;
-}
-
-.menu-divider {
-  height: 1px;
-  background-color: rgba(5, 5, 5, 0.1);
-}
-
-.btn-logout {
-  width: 100%;
-  margin-top: 32px;
-  padding: 14px;
-  border-radius: 24px;
-  background: linear-gradient(90deg, #4e733f 0%, #60995b 100%);
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  transition: opacity 0.2s;
-}
-
-.btn-logout:active {
-  opacity: 0.8;
+  width: 18px;
+  height: 18px;
+  transform: rotate(0deg);
 }
 </style>
-
-

@@ -1,168 +1,209 @@
 <template>
-  <section id="register-page">
-    <!-- Header Section -->
-    <section id="section-header">
-      <div class="container">
-        <header class="app-header">
-          <button class="icon-btn back-btn" @click.prevent="router.push('/')" aria-label="Go back">
-            <img src="/assets/images/8_18.svg" alt="Back">
-          </button>
-          <router-link to="/login" class="login-link">Masuk</router-link>
-        </header>
+  <div class="app-container">
+    <!-- Top Bar Section -->
+    <section id="section-topbar">
+      <div class="topbar-container">
+        <div class="topbar-icons">
+          <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
+          <div ref="langWrapEl" class="lang-wrap">
+            <button
+              ref="langBtnEl"
+              type="button"
+              class="lang-btn"
+              aria-label="Language"
+              :aria-expanded="langMenuOpen ? 'true' : 'false'"
+              @click.stop="toggleLangMenu"
+            >
+              <img src="/assets/image/4255_215.svg" alt="Language" class="icon-globe">
+            </button>
+            <div v-if="langMenuOpen" class="lang-menu" @click.stop>
+              <button type="button" class="lang-item" @click="changeLanguage('en')">English</button>
+              <button type="button" class="lang-item" @click="changeLanguage('id')">Indonesia</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- Hero Section -->
     <section id="section-hero">
-      <div class="container">
+      <div class="hero-container">
         <div class="hero-content">
-          <h1 class="main-title">Daftar ke TRIVEX</h1>
-          <p class="subtitle">Buat akun untuk mulai memiliki aset masa depan. Lengkapi kotak di bawah ini.</p>
+          <img src="/assets/image/Logo01.png" alt="AVR Logo" class="hero-logo">
+          <div class="hero-text">
+            <h1 class="hero-title">{{ ui.heroTitle }}</h1>
+            <p class="hero-subtitle">{{ ui.heroSubtitle }}</p>
+          </div>
         </div>
+        <!-- <router-link to="/register" class="hero-link">
+          {{ ui.heroLink }}
+          <img src="/assets/image/4255_218.svg" alt="Arrow Right" class="icon-arrow-right">
+        </router-link> -->
       </div>
     </section>
 
     <!-- Form Section -->
     <section id="section-form">
-      <div class="container">
+      <div class="form-container">
         <form class="registration-form" @submit.prevent="handleRegister">
-          <!-- Username -->
-          <div class="form-group">
-            <label for="username">Username</label>
-            <div class="input-container">
-              <input 
-                type="text" 
-                id="username" 
-                v-model="formData.username"
-                placeholder="Buat username"
-              >
-            </div>
-          </div>
 
-          <!-- Telepon -->
+          <!-- Phone -->
           <div class="form-group">
-            <label for="phone">Telepon</label>
-            <div class="input-container">
-              <span class="input-prefix">(+62)</span>
-              <input 
-                type="tel" 
-                id="phone" 
+            <label>{{ ui.phoneLabel }}</label>
+            <div class="input-wrapper">
+              <button type="button" class="country-code" @click="showCountrySelector = true">
+              
+                <img
+                  v-if="selectedCountry.flagUrl"
+                  :src="selectedCountry.flagUrl"
+                  :alt="selectedCountry.name + ' flag'"
+                  class="country-flag-img"
+                >
+                
+             
+                <span>+{{ selectedCountry.dialCode }}</span>
+                <img src="/assets/image/4255_184.svg" alt="Chevron Down" class="country-chevron">
+              </button>
+              <input
+                type="tel"
                 v-model="formData.phone"
-                placeholder="Masukkan nomor telepon"
+                :placeholder="ui.phonePlaceholder"
                 @blur="checkPhoneError"
                 @focus="clearPhoneError"
               >
             </div>
           </div>
 
-          <!-- Kata sandi -->
+          <!-- Email -->
           <div class="form-group">
-            <label for="password">Kata sandi</label>
-            <div class="input-container">
-              <input 
-                :type="passwordFieldType" 
-                id="password" 
+            <label>{{ ui.emailLabel }}</label>
+            <div class="input-wrapper">
+              <input
+                type="email"
+                v-model="formData.email"
+                :placeholder="ui.emailPlaceholder"
+              >
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label>{{ ui.passwordLabel }}</label>
+            <div class="input-wrapper has-icon">
+              <img src="/assets/image/f51b62d18e83856386037eeaceb597d4f4226181.png" alt="Lock" class="input-icon-left">
+              <input
+                :type="passwordFieldType"
                 v-model="formData.password"
-                placeholder="Tambahkan kata sandi"
+                :placeholder="ui.passwordPlaceholder"
               >
-              <button type="button" class="suffix-btn" @click="togglePasswordVisibility" aria-label="Toggle password visibility">
-                <img :src="passwordFieldType === 'password' ? '/assets/images/8_54.svg' : '/assets/images/8_56.svg'" alt="Show password">
+              <button
+                type="button"
+                class="password-toggle"
+                :aria-label="passwordFieldType === 'password' ? 'Show password' : 'Hide password'"
+                @click="togglePasswordVisibility"
+              >
+                <img
+                  :src="passwordFieldType === 'password'
+                    ? 'https://api.iconify.design/mdi/eye.svg?color=%237B7474'
+                    : 'https://api.iconify.design/mdi/eye-off.svg?color=%237B7474'"
+                  alt=""
+                  class="input-icon-right"
+                >
               </button>
             </div>
           </div>
 
-          <!-- Konfirmasi kata sandi -->
+          <!-- Confirm Password -->
           <div class="form-group">
-            <label for="confirm-password">Konfirmasi kata sandi</label>
-            <div class="input-container">
-              <input 
-                :type="password2FieldType" 
-                id="confirm-password" 
+            <label>{{ ui.confirmPasswordLabel }}</label>
+            <div class="input-wrapper has-icon">
+              <img src="/assets/image/f51b62d18e83856386037eeaceb597d4f4226181.png" alt="Lock" class="input-icon-left">
+              <input
+                :type="password2FieldType"
                 v-model="formData.password2"
-                placeholder="Masukkan ulang kata sandi"
+                :placeholder="ui.confirmPasswordPlaceholder"
               >
-              <button type="button" class="suffix-btn" @click="togglePassword2Visibility" aria-label="Toggle password visibility">
-                <img :src="password2FieldType === 'password' ? '/assets/images/8_54.svg' : '/assets/images/8_56.svg'" alt="Show password">
+              <button
+                type="button"
+                class="password-toggle"
+                :aria-label="password2FieldType === 'password' ? 'Show password' : 'Hide password'"
+                @click="togglePassword2Visibility"
+              >
+                <img
+                  :src="password2FieldType === 'password'
+                    ? 'https://api.iconify.design/mdi/eye.svg?color=%237B7474'
+                    : 'https://api.iconify.design/mdi/eye-off.svg?color=%237B7474'"
+                  alt=""
+                  class="input-icon-right"
+                >
               </button>
             </div>
           </div>
 
-          <!-- Password Requirements -->
-          <div class="password-rules">
-            <p class="rules-desc">Pastikan password unik tidak mudah ditebak untuk menjaga keamanan akun kamu!</p>
-            <div class="rules-grid">
-              <div class="rule-item">
-                <div class="custom-checkbox" :class="{ checked: passwordRules.minLength }">
-                  <img v-if="passwordRules.minLength" src="/assets/images/I2011_1097_497_5178.svg" alt="Checked">
-                </div>
-                <span>Minimal 8 karakter</span>
-              </div>
-              <div class="rule-item">
-                <div class="custom-checkbox" :class="{ checked: passwordRules.hasUpperLower }">
-                  <img v-if="passwordRules.hasUpperLower" src="/assets/images/I2011_1100_497_5178.svg" alt="Checked">
-                </div>
-                <span>Huruf besar & kecil</span>
-              </div>
-              <div class="rule-item">
-                <div class="custom-checkbox" :class="{ checked: passwordRules.hasNumber }">
-                  <img v-if="passwordRules.hasNumber" src="/assets/images/I2011_1099_497_5178.svg" alt="Checked">
-                </div>
-                <span>Mengandung angka</span>
-              </div>
-              <div class="rule-item">
-                <div class="custom-checkbox" :class="{ checked: passwordRules.hasSpecial }">
-                  <img v-if="passwordRules.hasSpecial" src="/assets/images/I2011_1101_497_5178.svg" alt="Checked">
-                </div>
-                <span>Spesial karakter, cth: !@#</span>
-              </div>
+          <!-- Signature / Username -->
+          <div class="form-group">
+            <label>{{ ui.signatureLabel }}</label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                v-model="formData.username"
+                :placeholder="ui.signaturePlaceholder"
+              >
             </div>
           </div>
 
-          <!-- Referral kode -->
-          <div class="form-group">
-            <label for="referral">Referral kode</label>
-            <div class="input-container">
-              <input 
-                type="text" 
-                id="referral" 
+          <!-- Referral Code Toggle -->
+          <div class="referral-toggle" @click="showReferral = !showReferral">
+            <span>{{ ui.referralToggle }}</span>
+            <img src="/assets/image/4255_222.svg" alt="Toggle">
+          </div>
+
+          <!-- Referral Code Input (shown when toggled) -->
+          <div class="form-group" v-if="showReferral">
+            <label>{{ ui.referralLabel }}</label>
+            <div class="input-wrapper">
+              <input
+                type="text"
                 v-model="formData.referralCode"
-                placeholder="Masukkan referral ID teman"
+                :placeholder="ui.referralPlaceholder"
+                required
               >
-              <button type="button" class="suffix-btn scan-btn" aria-label="Scan QR code">
-                <img src="/assets/images/8dbda20f098f87f8eea6903d791f4e6ad206695b.png" alt="Scan">
-              </button>
-            </div>
-            <p class="input-helper">Pastikan referral ID yang dimasukkan sudah benar.</p>
-          </div>
-
-          <!-- Captcha -->
-          <div class="form-group">
-            <label for="captcha">Captcha</label>
-            <div class="input-container">
-              <input 
-                type="text" 
-                id="captcha" 
-                v-model="formData.captcha"
-                placeholder="Masukkan kode Captcha"
-              >
-              <button type="button" class="text-action-btn" @click="refreshCaptcha">Minta kode</button>
             </div>
           </div>
 
-          <!-- Terms and Conditions -->
-          <div class="terms-container">
-            <div class="custom-checkbox align-top" @click="isTermsAccepted = !isTermsAccepted">
-              <img v-if="isTermsAccepted" src="/assets/images/I2011_1098_497_5178.svg" alt="Checked">
+          <!-- Terms Checkbox -->
+          <div class="terms-checkbox">
+            <div class="checkbox-custom" @click="isTermsAccepted = !isTermsAccepted">
+              <div class="checkbox-bg" :class="{ active: isTermsAccepted }"></div>
+              <img v-if="isTermsAccepted" src="/assets/image/a84c69a218ab38138fa855a6c1a8a8dfc114da81.png" alt="Check" class="checkbox-mark">
             </div>
-            <p class="terms-text">Pastikan Anda telah membaca keseluruhan <router-link to="/terms" class="terms-link">Syarat dan Ketentuan</router-link>, <router-link to="/privacy" class="terms-link">Kebijakan Privasi</router-link> sebelum melanjutkan pendaftaran</p>
+            <p class="terms-text">
+              {{ ui.agreementPrefix }}
+              <router-link to="/solution">{{ ui.customerAgreement }}</router-link>,
+              <router-link to="/terms">{{ ui.termsOfService }}</router-link>
+              {{ ui.andWord }}
+              <router-link to="/privacy">{{ ui.privacyPolicy }}</router-link>
+            </p>
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" class="submit-button" :disabled="isLoading">
+          <button type="submit" class="btn-primary" :disabled="isLoading">
             <LoadingSpinner v-if="isLoading" :visible="true" message="" />
-            <span v-else>Mulai akun</span>
+            <span v-else>{{ ui.signUp }}</span>
           </button>
         </form>
+      </div>
+    </section>
+
+    <!-- Footer Section -->
+    <section id="section-footer">
+      <div class="footer-container">
+        <div class="footer-links">
+          <span>{{ ui.alreadyHaveAccount }}</span> <router-link to="/login">{{ ui.signIn }}</router-link>
+        </div>
+        <div class="footer-copyright">
+          &copy; 2026 AVR System. All rights reserved.
+        </div>
       </div>
     </section>
 
@@ -175,22 +216,194 @@
       v-model="showSuccessModal"
       :message="successMessage || 'Your account has been created.'"
     />
-  </section>
+    <CountrySelector
+      v-model:show="showCountrySelector"
+      :selectedCountry="selectedCountry"
+      @select="handleSelectCountry"
+    />
+  </div>
 </template>
 
 <script setup>
-import { ref, reactive, watch, computed } from 'vue'
+import { ref, reactive, watch, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { setLanguage } from '../../i18n'
 import { authAPI } from '../../services/api'
+import CountrySelector from '../../components/CountrySelector.vue'
 import ErrorModal from '../../components/modals/ErrorModal.vue'
 import SuccessModal from '../../components/modals/SuccessModal.vue'
 import LoadingSpinner from '../../components/partials/LoadingSpinner.vue'
 
 const router = useRouter()
 const route = useRoute()
+const { locale } = useI18n()
+
+const EN_UI = Object.freeze({
+  heroTitle: 'Join AVR and access advanced AI system features!',
+  heroSubtitle: 'Join thousands of users and experience smart AI-powered resource management',
+  heroLink: 'Sign up to console with email',
+  phoneLabel: 'Phone',
+  phonePlaceholder: 'Mobile phone number',
+  emailLabel: 'Email',
+  emailPlaceholder: 'Please enter email',
+  passwordLabel: 'Password',
+  passwordPlaceholder: 'Please enter password',
+  confirmPasswordLabel: 'Confirm password',
+  confirmPasswordPlaceholder: 'Please re-enter password',
+  signatureLabel: 'Signature',
+  signaturePlaceholder: 'Please enter username',
+  referralToggle: "Referrer's Referral Code",
+  referralLabel: 'Referral Code',
+  referralPlaceholder: 'Enter referral code',
+  agreementPrefix: 'I have read and agree to the',
+  customerAgreement: 'Customer Agreement',
+  termsOfService: 'Terms of Service',
+  andWord: 'and',
+  privacyPolicy: 'Privacy Policy',
+  signUp: 'Sign up',
+  alreadyHaveAccount: 'Already have account?',
+  signIn: 'Sign in'
+})
+
+const ID_UI_FALLBACK = Object.freeze({
+  heroTitle: 'Bergabung dengan AVR dan akses fitur sistem AI canggih!',
+  heroSubtitle: 'Bergabunglah dengan ribuan pengguna dan rasakan manajemen sumber daya berbasis AI yang cerdas',
+  heroLink: 'Daftar ke konsol dengan email',
+  phoneLabel: 'Nomor',
+  phonePlaceholder: 'Nomor ponsel',
+  emailLabel: 'Email',
+  emailPlaceholder: 'Silakan masukkan email',
+  passwordLabel: 'Kata sandi',
+  passwordPlaceholder: 'Silakan masukkan kata sandi',
+  confirmPasswordLabel: 'Konfirmasi kata sandi',
+  confirmPasswordPlaceholder: 'Silakan masukkan ulang kata sandi',
+  signatureLabel: 'Nama pengguna',
+  signaturePlaceholder: 'Silakan masukkan nama pengguna',
+  referralToggle: 'Kode Referral Pengundang',
+  referralLabel: 'Kode Referral',
+  referralPlaceholder: 'Masukkan kode referral',
+  agreementPrefix: 'Saya telah membaca dan menyetujui',
+  customerAgreement: 'Perjanjian Pelanggan',
+  termsOfService: 'Ketentuan Layanan',
+  andWord: 'dan',
+  privacyPolicy: 'Kebijakan Privasi',
+  signUp: 'Daftar',
+  alreadyHaveAccount: 'Sudah punya akun?',
+  signIn: 'Masuk'
+})
+
+const ui = ref({ ...EN_UI })
+
+const MT_BASE_URL = String(import.meta?.env?.VITE_MT_API_URL || '').replace(/\/$/, '')
+const MT_API_KEY = String(import.meta?.env?.VITE_MT_API_KEY || localStorage.getItem('mt_api_key') || '').trim()
+const mtUrl = (path) => (MT_BASE_URL ? `${MT_BASE_URL}${path}` : path)
+const mtCacheKey = (target) => `mt_cache_v1_${target}`
+
+const getMtCache = (target) => {
+  try {
+    return JSON.parse(localStorage.getItem(mtCacheKey(target)) || '{}') || {}
+  } catch (_) {
+    return {}
+  }
+}
+
+const setMtCache = (target, cacheObj) => {
+  try {
+    localStorage.setItem(mtCacheKey(target), JSON.stringify(cacheObj))
+  } catch (_) {}
+}
+
+const mtTranslateMany = async (texts, target, source = 'en') => {
+  const unique = Array.from(new Set((texts || []).map((t) => String(t || '')))).filter(Boolean)
+  if (!unique.length) return new Map()
+
+  const cache = getMtCache(target)
+  const out = new Map()
+  const missing = []
+
+  for (const t of unique) {
+    if (cache[t]) {
+      out.set(t, cache[t])
+    } else {
+      missing.push(t)
+    }
+  }
+
+  if (!missing.length) return out
+
+  const params = new URLSearchParams()
+  for (const t of missing) params.append('q', t)
+  params.append('source', source)
+  params.append('target', target)
+  params.append('format', 'text')
+  if (MT_API_KEY) params.append('api_key', MT_API_KEY)
+
+  const resp = await fetch(mtUrl('/translate'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params
+  })
+  if (!resp.ok) throw new Error(`translate_failed_${resp.status}`)
+
+  const data = await resp.json()
+  const translated = data?.translatedText
+  const translatedList = Array.isArray(translated) ? translated : (typeof translated === 'string' ? [translated] : [])
+
+  if (translatedList.length === 1 && missing.length > 1) {
+    for (const t of missing) {
+      cache[t] = cache[t] || ''
+      out.set(t, cache[t])
+    }
+    setMtCache(target, cache)
+    return out
+  }
+
+  if (translatedList.length !== missing.length) {
+    throw new Error('translate_shape_mismatch')
+  }
+
+  for (let i = 0; i < missing.length; i += 1) {
+    const srcText = missing[i]
+    const trText = String(translatedList[i] ?? '')
+    if (trText) {
+      cache[srcText] = trText
+      out.set(srcText, trText)
+    }
+  }
+
+  setMtCache(target, cache)
+  return out
+}
+
+const applyUiLanguage = async (lang) => {
+  if (lang === 'en') {
+    ui.value = { ...EN_UI }
+    return
+  }
+  if (lang !== 'id') {
+    ui.value = { ...EN_UI }
+    return
+  }
+
+  try {
+    const keys = Object.keys(EN_UI)
+    const sourceTexts = keys.map((k) => EN_UI[k])
+    const map = await mtTranslateMany(sourceTexts, 'id', 'en')
+    const next = {}
+    for (const k of keys) {
+      const translated = map.get(EN_UI[k])
+      next[k] = translated || ID_UI_FALLBACK[k] || EN_UI[k]
+    }
+    ui.value = next
+  } catch (_) {
+    ui.value = { ...ID_UI_FALLBACK }
+  }
+}
 
 const formData = reactive({
   username: '',
+  email: '',
   phone: '',
   password: '',
   password2: '',
@@ -200,7 +413,6 @@ const formData = reactive({
 
 const passwordFieldType = ref('password')
 const password2FieldType = ref('password')
-
 const isLoading = ref(false)
 const successMessage = ref('')
 const generalError = ref('')
@@ -209,6 +421,34 @@ const showSuccessModal = ref(false)
 const isPhoneError = ref(false)
 const isTermsAccepted = ref(false)
 const generatedCaptcha = ref('')
+const showReferral = ref(false)
+const showCountrySelector = ref(false)
+const selectedCountry = ref({ name: 'Indonesia', code: 'ID', dialCode: '62', flag: '🇮🇩' })
+
+const langMenuOpen = ref(false)
+const langWrapEl = ref(null)
+const langBtnEl = ref(null)
+
+const toggleLangMenu = () => {
+  langMenuOpen.value = !langMenuOpen.value
+}
+
+const changeLanguage = (lang) => {
+  setLanguage(lang)
+  locale.value = lang
+  langMenuOpen.value = false
+}
+
+const onDocumentClick = (event) => {
+  if (!langMenuOpen.value) return
+  const target = event.target
+  if (langWrapEl.value?.contains(target) || langBtnEl.value?.contains(target)) return
+  langMenuOpen.value = false
+}
+
+const handleSelectCountry = (country) => {
+  selectedCountry.value = country
+}
 
 // Password validation rules
 const passwordRules = computed(() => {
@@ -256,7 +496,8 @@ const formatPhoneNumber = () => {
     phoneNumber = phoneNumber.replace(/[^\d]/g, '')
     if (!phoneNumber) return ''
     if (phoneNumber.startsWith('0')) phoneNumber = phoneNumber.substring(1)
-    phoneNumber = `+62${phoneNumber}`
+    const dialCode = String(selectedCountry.value?.dialCode || '62').replace(/[^\d]/g, '')
+    phoneNumber = `+${dialCode}${phoneNumber}`
   }
   return phoneNumber
 }
@@ -282,7 +523,26 @@ watch(
   ],
   ([refCode, codeQuery, inviteCode, invitationCode, invitecode, refParam]) => {
     const code = String(refCode || codeQuery || inviteCode || invitationCode || invitecode || refParam || '').trim()
-    if (code && formData.referralCode !== code) formData.referralCode = code
+    if (code && formData.referralCode !== code) {
+      formData.referralCode = code
+      showReferral.value = true
+    }
+  },
+  { immediate: true }
+)
+
+onMounted(() => {
+  document.addEventListener('click', onDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
+})
+
+watch(
+  () => locale.value,
+  (lang) => {
+    applyUiLanguage(lang)
   },
   { immediate: true }
 )
@@ -293,40 +553,34 @@ const handleRegister = async () => {
   
   // Basic validation
   if (!formData.username.trim() || !formData.phone.trim() || !formData.password || !formData.password2) {
-    generalError.value = 'Mohon lengkapi seluruh data pengisian yang diperlukan.'
+    generalError.value = 'Please fill in all required fields.'
+    showErrorModal.value = true
+    return
+  }
+
+  if (showReferral.value && !String(formData.referralCode || '').trim()) {
+    generalError.value = 'Referral code is required.'
     showErrorModal.value = true
     return
   }
 
   if (formData.password !== formData.password2) {
-    generalError.value = 'Pastikan kata sandi dan konfirmasi sama.'
-    showErrorModal.value = true
-    return
-  }
-
-  if (!generatedCaptcha.value) {
-    generalError.value = 'Silakan tekan "Minta kode" untuk mendapatkan captcha'
-    showErrorModal.value = true
-    return
-  }
-
-  if (!String(formData.captcha || '').trim()) {
-    generalError.value = 'Captcha harus diisi'
-    showErrorModal.value = true
-    return
-  }
-
-  if (String(formData.captcha).trim().toUpperCase() !== String(generatedCaptcha.value).toUpperCase()) {
-    generalError.value = 'Captcha tidak sesuai'
+    generalError.value = 'Passwords do not match.'
     showErrorModal.value = true
     return
   }
 
   if (!isTermsAccepted.value) {
-    generalError.value = 'Persetujuan terhadap Syarat dan Ketentuan diperlukan sebelum melanjutkan.'
+    generalError.value = 'Please agree to the Customer Agreement, Terms of Service and Privacy Policy.'
     showErrorModal.value = true
     return
   }
+
+  // Auto-generate captcha for submission
+  if (!generatedCaptcha.value) {
+    refreshCaptcha()
+  }
+  formData.captcha = generatedCaptcha.value
   
   isLoading.value = true
   
@@ -334,19 +588,19 @@ const handleRegister = async () => {
     // Format phone number with country code
     const phoneNumber = formatPhoneNumber()
     if (!phoneNumber) {
-      generalError.value = 'Nomor ponsel harus berupa angka'
+      generalError.value = 'Phone number must be numeric'
       showErrorModal.value = true
       return
     }
 
     const rand = Math.random().toString(36).slice(2, 10)
-    const emailGenerated = `user.${rand}@trivex.local`
+    const emailToUse = formData.email?.trim() || `user.${rand}@avr.local`
     const fullNameGenerated = `User ${rand}`
     
     const payload = {
       username: formData.username.trim(),
       phone: phoneNumber,
-      email: emailGenerated,
+      email: emailToUse,
       full_name: fullNameGenerated,
       password: formData.password,
       password2: formData.password2,
@@ -357,7 +611,7 @@ const handleRegister = async () => {
     
     const response = await authAPI.register(payload)
     
-    successMessage.value = 'Pendaftaran berhasil! Silakan login untuk melanjutkan.'
+    successMessage.value = 'Successfully'
     showSuccessModal.value = true
     
     setTimeout(() => {
@@ -374,15 +628,11 @@ const handleRegister = async () => {
       const rawFallbackCompact = rawFallbackLower.replace(/\s+/g, '')
       const isRateLimited =
         status === 429 ||
-        rawFallbackLower.includes('permintaan ini dibatasi') ||
-        rawFallbackCompact.includes('permintaaninidibatasi') ||
-        rawFallbackLower.includes('dibatasi') ||
-        rawFallbackLower.includes('terlalu banyak') ||
+        rawFallbackLower.includes('rate limit') ||
         rawFallbackLower.includes('too many') ||
-        rawFallbackLower.includes('throttle') ||
-        rawFallbackLower.includes('rate limit')
+        rawFallbackLower.includes('throttle')
       if (isRateLimited) {
-        generalError.value = 'Terlalu banyak percobaan. Silakan coba kembali dalam beberapa saat.'
+        generalError.value = 'Too many attempts. Please try again later.'
         showErrorModal.value = true
         return
       }
@@ -391,28 +641,22 @@ const handleRegister = async () => {
         const usernameErrors = Array.isArray(errorData.username) ? errorData.username : [errorData.username]
         const usernameMessage = usernameErrors.map((x) => String(x || '')).join(' ').toLowerCase()
         const isAlreadyTaken =
-          usernameMessage.includes('sudah ada') ||
-          usernameMessage.includes('sudah digunakan') ||
           usernameMessage.includes('already') ||
           usernameMessage.includes('exists')
         generalError.value = isAlreadyTaken
-          ? 'Username/nomor sudah terdaftar. Silakan gunakan username lain.'
-          : 'Format data tidak valid. Periksa kembali input Anda.'
+          ? 'Username already taken. Please choose another.'
+          : 'Invalid data format. Please check your input.'
       } else if (errorData.phone) {
-        generalError.value = 'Nomor telepon sudah digunakan. Gunakan nomor lain atau login.'
+        generalError.value = 'Phone number already in use. Use a different number or login.'
+      } else if (errorData.email) {
+        generalError.value = 'Email already in use. Use a different email or login.'
       } else if (errorData.referral_code || errorData.referralCode) {
-        const referralErrors = errorData.referral_code || errorData.referralCode
-        const referralMessage = Array.isArray(referralErrors) ? referralErrors.join(' ') : String(referralErrors)
-        if (referralMessage.toLowerCase().includes('batas undang harian tercapai')) {
-          generalError.value = 'Kode undangan telah mencapai batas. Silakan coba kembali besok'
-        } else {
-          generalError.value = 'Pastikan kode undangan yang Anda masukkan benar.'
-        }
+        generalError.value = 'Invalid referral code. Please check and try again.'
       } else {
-        generalError.value = 'Format data tidak valid. Periksa kembali input Anda.'
+        generalError.value = 'Invalid data format. Please check your input.'
       }
     } else {
-      generalError.value = 'Tidak mendapatkan koneksi. Silakan periksa koneksi Anda dan coba beberapa saat lagi.'
+      generalError.value = 'No connection. Please check your network and try again.'
     }
     
     showErrorModal.value = true
@@ -422,297 +666,402 @@ const handleRegister = async () => {
 }
 </script>
 
-
-
 <style scoped>
-#register-page {
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f8f8f8;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
-}
-
 * {
   box-sizing: border-box;
 }
 
-.container {
-  width: 100%;
-  max-width: 412px;
+.app-container {
+  font-family: 'Inter', sans-serif;
+  max-width: 100%;
   margin: 0 auto;
-  padding-left: 20px;
-  padding-right: 20px;
+  background-color: #fefefe;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
-button, input {
+a {
+  text-decoration: none;
+}
+
+input {
   font-family: inherit;
 }
 
-/* Header Section */
-.app-header {
+/* Top Bar Section */
+.topbar-container {
+  padding: 20px 35px 10px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 10px;
-  padding-bottom: 20px;
+  justify-content: flex-end;
+  min-height: auto;
 }
 
-.icon-btn {
-  background: none;
+.topbar-icons {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.icon-download,
+.icon-globe {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.lang-wrap {
+  position: relative;
+}
+
+.lang-btn {
+  background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.back-btn img {
-  width: 34px;
-  height: 34px;
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  min-width: 140px;
+  z-index: 2000;
 }
 
-.login-link {
-  color: #4ca455;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 17px;
+.lang-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+  cursor: pointer;
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.lang-item:hover {
+  background: rgba(33, 77, 243, 0.08);
 }
 
 /* Hero Section */
+.hero-container {
+  padding: 10px 20px;
+  min-height: auto;
+}
+
 .hero-content {
-  margin-bottom: 10px;
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  align-items: flex-start;
 }
 
-.main-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0 0 12px 0;
+.hero-logo {
+  width: 56px;
+  height: 58px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
-.subtitle {
-  font-size: 14px;
+.hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-title {
+  font-size: 18px;
   font-weight: 700;
   color: #000000;
-  line-height: 1.4;
   margin: 0;
+  line-height: 1.3;
+}
+
+.hero-subtitle {
+  font-size: 12px;
+  color: #494747;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.hero-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #0073ff;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.icon-arrow-right {
+  width: 16px;
+  height: 16px;
 }
 
 /* Form Section */
+.form-container {
+  padding: 0px 20px 0;
+  min-height: auto;
+}
+
 .registration-form {
   display: flex;
   flex-direction: column;
-  padding-bottom: 40px;
+  gap: 16px;
 }
 
 .form-group {
-  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 8px;
 }
 
 .form-group label {
   font-size: 14px;
-  font-weight: 700;
   color: #000000;
+  font-weight: 500;
 }
 
-.input-container {
+.input-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  border: 1px solid rgba(0, 0, 0, 0.21);
-  border-radius: 10px;
-  padding: 14px 16px;
-  background-color: transparent;
-  gap: 10px;
-  transition: border-color 0.2s ease;
-  height: 45px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  height: 43px;
+  padding: 0 15px;
 }
 
-.input-container:focus-within {
-  border-color: #004d43;
-}
-
-.input-container input {
+.input-wrapper input {
   flex: 1;
-  border: none;
   background: transparent;
-  font-size: 14px;
-  color: #000000;
+  border: none;
   outline: none;
+  font-size: 14px;
+  color: #000;
   width: 100%;
 }
 
-.input-container input::placeholder {
-  color: rgba(0, 0, 0, 0.5);
+.input-wrapper input::placeholder {
+  color: rgba(0, 0, 0, 0.37);
 }
 
-.input-prefix {
-  font-size: 14px;
-  color: #000000;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.suffix-btn {
-  background: none;
+.country-code {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 10px;
+  font-size: 13px;
+  color: #000;
+  background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.suffix-btn img {
-  width: 20px;
-  height: 20px;
-}
-
-.scan-btn img {
-  width: 22px;
-  height: 22px;
-  opacity: 0.5;
-}
-
-.input-helper {
-  font-size: 10px;
-  color: #000000;
-  margin: 4px 0 0 0;
-}
-
-.text-action-btn {
-  background: none;
-  border: none;
-  color: #000000;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  padding: 0;
+  font-family: inherit;
   white-space: nowrap;
 }
 
-/* Password Rules */
-.password-rules {
-  margin-bottom: 10px;
+.country-code img {
+  width: 12px;
+  height: 12px;
 }
 
-.rules-desc {
-  font-size: 10px;
-  color: #000000;
-  margin: 0 0 12px 0;
-  line-height: 1.4;
+.country-code span {
+  line-height: 1;
 }
 
-.rules-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px 8px;
+.country-chevron {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  display: block;
 }
 
-.rule-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  color: #1a1a1a;
-}
-
-.rule-item .custom-checkbox {
-  width: 16px;
+.country-code::after {
+  content: '';
+  width: 1px;
   height: 16px;
-  background-color: #d9d9d9;
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  border-radius: 5.5px;
-  display: flex;
-  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.1);
+  margin-left: 8px;
+}
+
+.country-flag {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.country-flag-img {
+  width: 18px;
+  height: 12px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.input-icon-left {
+  width: 16px;
+  margin-right: 10px;
+  opacity: 0.7;
+}
+
+.input-icon-right {
+  width: 20px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.password-toggle {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
-  flex-shrink: 0;
-}
-
-.rule-item .custom-checkbox.checked {
-  background-color: #004d43;
-  border-color: #004d43;
-}
-
-.rule-item .custom-checkbox img {
-  width: 10px;
-  height: 10px;
-}
-
-/* Terms Container */
-.terms-container {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  align-items: flex-start;
-}
-
-.custom-checkbox {
+  justify-content: center;
+  position: relative;
   width: 20px;
   height: 20px;
-  background-color: #004d43;
-  border-radius: 5.5px;
+  flex: 0 0 auto;
+}
+
+/* Referral Toggle */
+.referral-toggle {
   display: flex;
-  justify-content: center;
+  background: none;
   align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #000;
+  cursor: pointer;
+  margin-top: 5px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.referral-toggle img {
+  width: 20px;
+}
+
+/* Terms Checkbox */
+.terms-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.checkbox-custom {
+  position: relative;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
+  margin-top: 2px;
   cursor: pointer;
 }
 
-.custom-checkbox.align-top {
-  margin-top: 2px;
+.checkbox-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #d9d9d9;
+  border-radius: 50%;
+  transition: background-color 0.2s;
 }
 
-.custom-checkbox img {
+.checkbox-bg.active {
+  background-color: #1b46f5;
+}
+
+.checkbox-mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 10px;
   height: 10px;
+  z-index: 1;
 }
 
 .terms-text {
-  font-size: 10px;
-  color: #1a1a1a;
+  font-size: 14px;
+  color: #000;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
-.terms-link {
-  color: #004d43;
-  font-weight: 900;
+.terms-text a {
+  color: #0073ff;
+  text-decoration: none;
 }
 
 /* Submit Button */
-.submit-button {
-  width: 100%;
-  background-color: #004d43;
+.btn-primary {
+  background-color: #1b46f5;
   color: #ffffff;
   border: none;
-  border-radius: 20px;
-  padding: 16px;
+  border-radius: 5px;
+  height: 53px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  text-align: center;
-  transition: background-color 0.2s ease;
-  height: 45px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 10px;
+  transition: background-color 0.2s;
 }
 
-.submit-button:hover {
-  background-color: #003831;
+.btn-primary:hover {
+  background-color: #1538c4;
 }
 
-.submit-button:disabled {
+.btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Footer Section */
+.footer-container {
+  padding: 30px 35px 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+  min-height: 200px;
+}
+
+.footer-links {
+  font-size: 13px;
+  color: #000;
+  margin-top: 10px;
+}
+
+.footer-links a {
+  color: #0073ff;
+  text-decoration: none;
+}
+
+.footer-copyright {
+  font-size: 12px;
+  color: #000;
+  
+  margin-top: auto;
+}
 </style>
-
-

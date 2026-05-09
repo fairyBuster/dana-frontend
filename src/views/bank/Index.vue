@@ -1,86 +1,63 @@
 <template>
   <div class="app-container">
+    <!-- Header -->
     <section id="section-header">
-      <header class="top-header">
-        <img src="/assets/images/2011_986.svg" alt="Back" class="back-icon" @click="goBack">
-        <h1 class="header-title">Tambah Rekening</h1>
+      <header class="app-header">
+        <button class="back-button" @click="goBack" aria-label="Go back">
+          <img src="/assets/image/330_224.svg" alt="Back">
+        </button>
+        <h1 class="header-title">Bind Account</h1>
       </header>
     </section>
 
-    <section id="section-info-banner">
-      <div class="banner-container">
-        <p class="banner-text">Pastikan nama pemilik rekening sudah sesuai dengan milik Anda.</p>
-      </div>
-    </section>
+    <!-- Account Options -->
+    <section id="section-account-options">
+      <div class="cards-container">
+        <!-- IDR Card -->
+        <div class="account-card">
+          <div class="card-tag tag-idr">IDR</div>
+          <div class="card-content">
+            <img src="/assets/image/d85fb29e4e19dd899589dbf989e615ca933f1f52.png" alt="Rp Icon" class="card-icon">
+            <div class="card-text">
+              <h2 class="card-title">Bind IDR Bank Account</h2>
+              <p class="card-desc">Bind your Indonesian bank account to withdraw IDR funds.</p>
+            </div>
+          </div>
+          <button class="btn btn-idr" @click="router.push('/connect/add')">Submit New</button>
+        </div>
 
-    <section id="section-account-details">
-      <div class="account-card" v-if="userBank">
-        <h2 class="card-label">Data Rekening</h2>
-        <p class="account-number">{{ userBank.account_number || '-' }}</p>
-        <p class="bank-name">{{ userBank.bank_name || userBank.bank_code || '-' }}</p>
-        <p class="owner-name">{{ userBank.account_name || '-' }}</p>
-      </div>
-      <div class="account-card" v-else>
-        <h2 class="card-label">Data Rekening</h2>
-        <p class="account-number">-</p>
-        <p class="bank-name">Belum ada rekening terdaftar</p>
-        <p class="owner-name">-</p>
-      </div>
-
-      <div class="add-btn-container" v-if="!userBank">
-        <button class="btn-add" @click="router.push('/connect/add')">
-          Tambah Rekening Baru
-        </button>
+        <!-- USDT Card -->
+        <div class="account-card">
+          <div class="card-tag tag-usdt">USDT</div>
+          <div class="card-content">
+            <img src="/assets/image/65dd62c6e1300473a49c744e825c21008d000875.png" alt="USDT Icon" class="card-icon">
+            <div class="card-text">
+              <h2 class="card-title">Bind USDT Wallet</h2>
+              <p class="card-desc">Bind your USDT wallet address to withdraw USDT funds.</p>
+            </div>
+          </div>
+          <button class="btn btn-usdt" @click="router.push('/connect/add')">Submit New</button>
+        </div>
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { bankAPI } from '@/services/api'
 
 const router = useRouter()
-const userBank = ref(null)
 
 const goBack = () => {
   router.go(-1)
 }
-
-const normalizeBanksResponse = (data) => {
-  if (!data) return []
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data.results)) return data.results
-  return []
-}
-
-const fetchUserBanks = async () => {
-  try {
-    const resp = await bankAPI.getUserBanks()
-    const list = normalizeBanksResponse(resp?.data)
-    const chosen = list.find((b) => b?.is_default) || list[0] || null
-    if (chosen) {
-      userBank.value = {
-        id: chosen.id,
-        account_number: chosen.account_number || '-',
-        account_name: chosen.account_name || '-',
-        bank_name: chosen.bank_name || chosen.bank_code || '-',
-        bank_code: chosen.bank_code || '',
-        is_default: chosen.is_default || false
-      }
-    }
-  } catch (_) {
-    userBank.value = null
-  }
-}
-
-onMounted(() => {
-  fetchUserBanks()
-})
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
   margin: 0 auto;
@@ -88,153 +65,143 @@ onMounted(() => {
   max-width: 412px;
   min-height: 100vh;
   background-color: #f8f8f8;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
 h1, h2, p {
   margin: 0;
 }
 
-section {
-  max-width: 412px;
-  margin: 0 auto;
-  background-color: #f8f8f8;
-  width: 100%;
+img {
+  max-width: 100%;
+  display: block;
 }
 
-/* Header Section */
-#section-header {
-  height: 60px;
-  position: relative;
-}
-
-.top-header {
-  height: 100%;
+/* Header */
+.app-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 10px;
-  box-sizing: border-box;
+  padding: 16px 10px;
+  position: relative;
+  background-color: #f8f8f8;
 }
 
-.back-icon {
-  position: absolute;
-  left: 5px;
-  top: 15px;
-  width: 41px;
-  height: 41px;
+.back-button {
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
+  position: absolute;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #000000;
-  line-height: 20px;
+  margin: 0;
 }
 
-/* Info Banner Section */
-#section-info-banner {
-  margin-top: 20px;
-  padding-left: 21px;
-  padding-right: 6px;
-  box-sizing: border-box;
-}
-
-.banner-container {
-  background: linear-gradient(90deg, rgba(209, 233, 226, 1) 0%, rgba(209, 233, 226, 1) 42.79%, rgba(223, 239, 233, 1) 68.27%, rgba(214, 235, 229, 1) 82.69%, rgba(232, 244, 239, 1) 100%);
-  border-radius: 20px;
-  width: 100%;
-  max-width: 385px;
-  height: 54px;
+/* Account Options */
+.cards-container {
+  padding: 10px 10px;
   display: flex;
-  align-items: center;
-  padding: 0 12px;
-  box-sizing: border-box;
-}
-
-.banner-text {
-  font-size: 13px;
-  font-weight: 400;
-  color: #000000;
-  line-height: 22px;
-}
-
-/* Account Details Section */
-#section-account-details {
-  padding: 14px 21px 6px 21px;
-  box-sizing: border-box;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .account-card {
-  background-color: #eeeeee;
-  border-radius: 20px;
-  width: 100%;
-  max-width: 385px;
-  padding: 19px 15px;
-  box-sizing: border-box;
+  background-color: #ffffff;
+  border: 1px solid #f4f4f4;
+  border-radius: 5px;
+  padding: 36px 16px 16px 16px;
+  position: relative;
+}
+
+.card-tag {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  padding: 4px 8px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tag-idr {
+  background-color: #1b46f5;
+}
+
+.tag-usdt {
+  background-color: #1ba27a;
+}
+
+.card-content {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.card-text {
   display: flex;
   flex-direction: column;
+  gap: 6px;
+  padding-top: 2px;
 }
 
-.card-label {
-  font-size: 13px;
-  font-weight: 400;
-  color: #004d43;
-  margin: 0 0 12px 0;
-  line-height: 17px;
-}
-
-.account-number {
+.card-title {
   font-size: 16px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0 0 11px 0;
-  line-height: 17px;
-}
-
-.bank-name {
-  font-size: 13px;
-  font-weight: 400;
-  color: #000000;
-  margin: 0 0 5px 0;
-  line-height: 17px;
-}
-
-.owner-name {
-  font-size: 13px;
   font-weight: 400;
   color: #000000;
   margin: 0;
-  line-height: 17px;
 }
 
-.add-btn-container {
-  margin-top: 24px;
+.card-desc {
+  font-size: 12px;
+  color: #737373;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.btn-add {
+.btn {
   width: 100%;
-  background-color: #004d43;
-  color: #ffffff;
+  padding: 12px;
   border: none;
-  border-radius: 20px;
-  padding: 15px;
-  font-size: 16px;
-  font-weight: 700;
+  border-radius: 5px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.2s ease;
   font-family: inherit;
 }
 
-.btn-add:active {
-  opacity: 0.8;
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn-idr {
+  background-color: #1b46f5;
+}
+
+.btn-usdt {
+  background-color: #1ba27a;
 }
 </style>
-
-

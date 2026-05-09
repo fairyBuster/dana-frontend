@@ -1,65 +1,104 @@
 <template>
   <div class="app-container">
+    <!-- Header Section -->
     <section id="section-header">
-      <header class="site-header">
-        <button class="back-button" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/17_14.svg" alt="Back Icon">
+      <header class="header">
+        <button class="back-btn" @click="goBack" aria-label="Go back">
+          <img src="/assets/image/179_107.svg" alt="Back">
         </button>
-        <h1 class="page-title">Deposito</h1>
+        <h1 class="header-title">Recharge</h1>
       </header>
     </section>
 
-    <section id="section-deposit-form">
-      <div class="form-container">
-        <div class="input-group">
-          <label class="input-label">Nominal Pengisian</label>
-          <div class="input-wrapper">
-            <span class="input-prefix">Rp</span>
-            <input 
-              type="text" 
-              class="amount-input" 
-              :value="displayAmount"
-              @input="formatInput"
-              placeholder="0"
-            >
-          </div>
-          <p v-if="showWarning" class="warning-message">Minimal transaksi Rp 50.000,00</p>
-        </div>
-
-        <div class="quick-amounts-grid">
-          <button 
-            v-for="option in quickAmounts" 
-            :key="option.value"
-            class="amount-option"
-            :class="{ selected: selectedAmount === option.value }"
-            @click="selectAmount(option.value)"
-          >
-            {{ option.label }}
-          </button>
-        </div>
-
-        <div class="info-notes">
-          <p>* Penyetoran isi ulang dilakukan secara otomatis</p>
-          <p>* Penyetoran isi ulang terbuka selama 24 jam</p>
-          <p>* Setelah berhasil melakukan setoran isi ulang, silakan segarkan halaman Anda</p>
-          <p>* Simpan bukti transaksi Anda demi keamanan atau validasi ketika dibutuhkan</p>
-          <p>* Transaksi aman dan terlindungi</p>
+    <!-- Channel Recharge Section -->
+    <section id="section-channel-recharge">
+      <h2 class="section-title">Choose channel recharge</h2>
+      <div class="channel-cards">
+        <div
+          v-for="channel in channels"
+          :key="channel.id"
+          class="channel-card"
+          :class="{ active: selectedChannel === channel.id }"
+          @click="selectedChannel = channel.id"
+        >
+          <div v-if="selectedChannel === channel.id" class="badge">{{ channel.badge || 'OK' }}</div>
+          <img :src="channel.icon" :alt="channel.label" class="card-icon">
+          <span class="card-label">{{ channel.label }}</span>
         </div>
       </div>
     </section>
 
-    <section id="section-footer">
-      <div class="footer-container">
-        <div class="terms-condition">
-          <img src="/assets/images/d9b41d54b13e3f872bf656657234e30868c2d994.png" alt="Agree Icon" class="terms-icon">
-          <p class="terms-text">
-            Dengan melanjutkan proses ini, kamu menyetujui <router-link to="/terms" class="text-highlight">Syarat & Ketentuan</router-link> yang berlaku
-          </p>
+    <!-- Choose Channel Section -->
+    <section id="section-choose-channel">
+      <h2 class="section-title">Choose channel</h2>
+      <div class="payment-method-card">
+        <div class="payment-info">
+          <div class="payment-name">Payment methods {{ currentChannelLabel }}</div>
+          <div class="payment-limit">Minimum balance: 5-50000</div>
         </div>
-        <button class="btn-primary" @click="handleDeposit" :disabled="!isValidAmount || isLoading">
-          <LoadingSpinner v-if="isLoading" :visible="true" message="" />
-          <span v-else>Bayar</span>
-        </button>
+        <img src="/assets/image/a7278a84dccf299c032e11e26c6bad56b79f5ef7.png" alt="Selected" class="check-icon">
+      </div>
+    </section>
+
+    <!-- Top Up Amount Section -->
+    <section id="section-top-up-amount">
+      <h2 class="section-title">Enter the top-up amount</h2>
+
+      <div class="input-group">
+        <div class="input-prefix">USDT</div>
+        <div class="input-divider"></div>
+        <input
+          type="text"
+          :value="displayUsdtAmount"
+          @input="formatUsdtInput"
+          placeholder="Please enter your amount"
+          :readonly="!isUsdtMode"
+          inputmode="decimal"
+          class="amount-input"
+        >
+      </div>
+
+      <div class="input-group">
+        <div class="input-prefix">IDR</div>
+        <div class="input-divider"></div>
+        <input
+          type="text"
+          :value="displayIdrAmount"
+          @input="formatIdrInput"
+          placeholder="Please enter your amount with rupiah"
+          :readonly="isUsdtMode"
+          inputmode="numeric"
+          class="amount-input"
+        >
+      </div>
+
+      <p v-if="showWarning" class="warning-message">{{ warningText }}</p>
+
+      <button class="btn-primary" @click="handleDeposit" :disabled="!isValidAmount || isLoading">
+        <LoadingSpinner v-if="isLoading" :visible="true" message="" />
+        <span v-else>Top up</span>
+      </button>
+    </section>
+
+    <!-- Instructions Section -->
+    <section id="section-instructions">
+      <div class="instructions-card">
+        <h3 class="instructions-title">Recharge instructions</h3>
+        <br>
+        <ol class="instructions-list">
+          <li>The minimum deposit amount for IDR payments is Rp51,000.</li>
+          <li>The minimum deposit amount for USDT payments is $5.</li>
+          <li>All transactions are processed automatically in real-time.</li>
+          <li>Please ensure that the payment amount and wallet/account details are correct before making a deposit.</li>
+          <li>After completing the transaction, refresh the page and check your balance.</li>
+          <li>Deposits below the minimum amount cannot be processed.</li>
+          <li>All transactions are processed directly within the AVR company system.</li>
+          <li>Deposit processing is automatic for both IDR and USDT payments.</li>
+          <li>By making a deposit, users agree to all AVR deposit rules and policies.</li>
+        </ol>
+        <p class="instructions-text">
+          All deposit activities must only be carried out through the official AVR platform, and users are advised not to be tempted by unreasonable offers or transactions outside the company. For security and verification purposes, please keep your transaction receipt or proof of payment for future reference if needed. By making a deposit, users are considered to have agreed to all AVR deposit rules and policies.
+        </p>
       </div>
     </section>
   </div>
@@ -68,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { depositAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
@@ -76,34 +115,61 @@ import ErrorModal from '@/components/modals/ErrorModal.vue'
 
 const router = useRouter()
 const depositAmount = ref('')
-const selectedAmount = ref(null)
+const usdtAmount = ref('')
+const selectedChannel = ref('usdt-trc20')
 const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
+const usdtToIdrRate = ref(17000)
 
-const quickAmounts = [
-  { value: 100000, label: 'Rp100.000' },
-  { value: 500000, label: 'Rp500.000' },
-  { value: 1000000, label: 'Rp1.000.000' },
-  { value: 2000000, label: 'Rp2.000.000' }
+const channels = [
+  { id: 'usdt-trc20', label: 'USDT TRC20', badge: 'OK', icon: '/assets/image/9525994a3170136d2238b0ba554db6cb77f4508e.png' },
+  { id: 'usdt-erc20', label: 'USDT ERC20', badge: null, icon: '/assets/image/70cd308866ce958c5e47193b31aaa1eacef5c658.png' },
+  { id: 'rupiah-idr', label: 'Rupiah IDR', badge: null, icon: '/assets/image/d85fb29e4e19dd899589dbf989e615ca933f1f52.png' }
 ]
+
+const currentChannelLabel = computed(() => {
+  const ch = channels.find(c => c.id === selectedChannel.value)
+  return ch ? ch.label : ''
+})
+
+const isUsdtMode = computed(() => {
+  return String(selectedChannel.value || '').toLowerCase().startsWith('usdt')
+})
 
 const numericAmount = computed(() => {
   const raw = depositAmount.value.replace(/[^0-9]/g, '')
   return Number.parseInt(raw, 10) || 0
 })
 
-const displayAmount = computed(() => {
-  const num = numericAmount.value
-  if (!num) return ''
-  return new Intl.NumberFormat('id-ID').format(num)
+const numericUsdtAmount = computed(() => {
+  const raw = String(usdtAmount.value || '').trim()
+  if (!raw) return 0
+  const n = Number.parseFloat(raw)
+  return Number.isFinite(n) ? n : 0
+})
+
+const displayIdrAmount = computed(() => {
+  return depositAmount.value || ''
+})
+
+const displayUsdtAmount = computed(() => {
+  return usdtAmount.value || ''
 })
 
 const showWarning = computed(() => {
+  if (isUsdtMode.value) {
+    return numericUsdtAmount.value > 0 && numericUsdtAmount.value < 5
+  }
   return numericAmount.value > 0 && numericAmount.value < 50000
 })
 
+const warningText = computed(() => {
+  return isUsdtMode.value ? 'Minimum transaction USDT 5' : 'Minimum transaction IDR 50,000'
+})
+
 const isValidAmount = computed(() => {
+  if (isUsdtMode.value) return numericUsdtAmount.value >= 5
   return numericAmount.value >= 50000
 })
 
@@ -111,38 +177,106 @@ const goBack = () => {
   router.go(-1)
 }
 
-const selectAmount = (value) => {
-  selectedAmount.value = value
-  depositAmount.value = new Intl.NumberFormat('id-ID').format(value)
+const formatUsdtInput = (event) => {
+  if (!isUsdtMode.value) return
+  let raw = String(event?.target?.value || '')
+  raw = raw.replace(/[^0-9.]/g, '')
+  const firstDot = raw.indexOf('.')
+  if (firstDot !== -1) {
+    raw = raw.slice(0, firstDot + 1) + raw.slice(firstDot + 1).replace(/\./g, '')
+  }
+  if (raw.startsWith('.')) raw = `0${raw}`
+  if (raw.includes('.')) {
+    const [a, b] = raw.split('.')
+    raw = `${a}.${String(b || '').slice(0, 2)}`
+  }
+  usdtAmount.value = raw
+
+  const rate = Number(usdtToIdrRate.value || 0)
+  const usdt = Number.parseFloat(raw)
+  if (!Number.isFinite(usdt) || usdt <= 0 || !rate) {
+    depositAmount.value = ''
+    return
+  }
+  const idr = Math.round(usdt * rate)
+  depositAmount.value = new Intl.NumberFormat('id-ID').format(idr)
 }
 
-const formatInput = (event) => {
+const formatIdrInput = (event) => {
+  if (isUsdtMode.value) return
   const raw = event?.target?.value?.replace(/[^0-9]/g, '') || ''
-  selectedAmount.value = null
-  if (raw) {
-    const num = Number.parseInt(raw, 10)
-    depositAmount.value = new Intl.NumberFormat('id-ID').format(num)
-    const match = quickAmounts.find((q) => q.value === num)
-    if (match) selectedAmount.value = num
-  } else {
+  if (!raw) {
     depositAmount.value = ''
+    usdtAmount.value = ''
+    return
   }
+  const num = Number.parseInt(raw, 10)
+  if (!Number.isFinite(num) || num <= 0) {
+    depositAmount.value = ''
+    usdtAmount.value = ''
+    return
+  }
+  depositAmount.value = new Intl.NumberFormat('id-ID').format(num)
+
+  const rate = Number(usdtToIdrRate.value || 0)
+  if (!rate) {
+    usdtAmount.value = ''
+    return
+  }
+  const usdt = num / rate
+  const fixed = usdt.toFixed(2).replace(/\.?0+$/, '')
+  usdtAmount.value = fixed
 }
+
+watch(
+  () => selectedChannel.value,
+  (next, prev) => {
+    const nextIsUsdt = String(next || '').toLowerCase().startsWith('usdt')
+    const prevIsUsdt = String(prev || '').toLowerCase().startsWith('usdt')
+    if (nextIsUsdt === prevIsUsdt) return
+
+    const rate = Number(usdtToIdrRate.value || 0)
+    if (!rate) return
+
+    if (nextIsUsdt) {
+      if (!usdtAmount.value && numericAmount.value > 0) {
+        const usdt = numericAmount.value / rate
+        usdtAmount.value = usdt.toFixed(2).replace(/\.?0+$/, '')
+      }
+      if (usdtAmount.value) {
+        const u = Number.parseFloat(usdtAmount.value)
+        if (Number.isFinite(u) && u > 0) {
+          depositAmount.value = new Intl.NumberFormat('id-ID').format(Math.round(u * rate))
+        }
+      }
+      return
+    }
+
+    if (!depositAmount.value && numericUsdtAmount.value > 0) {
+      depositAmount.value = new Intl.NumberFormat('id-ID').format(Math.round(numericUsdtAmount.value * rate))
+    }
+    if (numericAmount.value > 0) {
+      usdtAmount.value = (numericAmount.value / rate).toFixed(2).replace(/\.?0+$/, '')
+    } else {
+      usdtAmount.value = ''
+    }
+  }
+)
 
 const extractErrorMessage = (err) => {
   const data = err?.response?.data
-  if (!data) return err?.message || 'Gagal memproses deposito'
+  if (!data) return err?.message || 'Failed to process deposit'
   if (typeof data === 'string') return data
   const detail = data?.detail ? String(data.detail) : ''
   const message = data?.message ? String(data.message) : ''
   const combined = `${detail} ${message}`.trim()
   const s = combined.toLowerCase()
   if (s.includes('verify signature failed') || (s.includes('jayapay') && s.includes('signature') && s.includes('failed'))) {
-    return 'Parameter pembayaran salah. Silakan coba lagi'
+    return 'Payment parameters incorrect. Please try again'
   }
   if (detail) return detail
   if (message) return message
-  return 'Gagal memproses deposito'
+  return 'Failed to process deposit'
 }
 
 const handleDeposit = async () => {
@@ -156,7 +290,7 @@ const handleDeposit = async () => {
     const resp = await depositAPI.initiateJayapay({ amount, wallet_type: 'BALANCE' })
     const paymentUrl = String(resp?.data?.payment_url || '').trim()
     if (!paymentUrl) {
-      throw new Error('Payment URL tidak tersedia')
+      throw new Error('Payment URL not available')
     }
     window.location.href = paymentUrl
   } catch (err) {
@@ -169,218 +303,277 @@ const handleDeposit = async () => {
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
   margin: 0 auto;
   padding: 0;
   background-color: #f8f8f8;
+  max-width: 100%;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 412px;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
-* {
-  box-sizing: border-box;
-}
-
-h1,
-h2,
-p {
+h1, h2, h3, p {
   margin: 0;
 }
 
 /* Header Section */
-.site-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 64px;
-  position: relative;
-  padding: 0 16px;
+#section-header {
+  padding: 12px 10px;
 }
 
-.back-button {
-  position: absolute;
-  left: 5px;
+.header {
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 24px;
+}
+
+.back-btn {
   background: none;
   border: none;
-  padding: 8px;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.back-button img {
-  width: 35px;
-  height: 35px;
+.back-btn img {
+  width: 20px;
+  height: 20px;
   object-fit: contain;
-} 
+}
 
-.page-title {
+.header-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 16px;
-  font-weight: 700;
+  font-weight: bold;
   color: #000000;
   margin: 0;
 }
 
-/* Deposit Form Section */
-#section-deposit-form {
-  padding: 24px 16px 0;
+/* Channel Recharge Section */
+#section-channel-recharge {
+  padding: 10px 20px;
 }
 
-.input-group {
-  margin-bottom: 24px;
+.section-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #000000;
+  margin: 0 0 12px 0;
+}
+
+.channel-cards {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.channel-card {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding: 16px 0;
+  display: flex;
   flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
 }
 
-.input-label {
-  display: block;
+.channel-card.active {
+  border-color: #1b46f5;
+}
+
+.badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #1b46f5;
+  color: #ffffff;
+  font-size: 10px;
+  width: 32px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 5px 0 5px;
+}
+
+.card-icon {
+  width: 47px;
+  height: 47px;
+  margin-bottom: 8px;
+  object-fit: contain;
+}
+
+.card-label {
+  font-size: 11px;
+  color: #000000;
+  font-weight: bold;
+}
+
+/* Choose Channel Section */
+#section-choose-channel {
+  padding: 10px;
+}
+
+.payment-method-card {
+  background-color: #ffffff;
+  border: 1px solid #f4f4f4;
+  border-radius: 5px;
+  padding: 20px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.payment-name {
   font-size: 14px;
   color: #000000;
   margin-bottom: 10px;
 }
 
-.input-wrapper {
+.payment-limit {
+  font-size: 12px;
+  color: #707070;
+}
+
+.check-icon {
+  width: 25px;
+  height: 25px;
+}
+
+/* Top Up Amount Section */
+#section-top-up-amount {
+  padding: 10px 30px 20px 30px;
+}
+
+.input-group {
   display: flex;
   align-items: center;
   background-color: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.21);
-  border-radius: 10px;
-  padding: 0 16px;
-  height: 61px;
+  border: 1px solid #eaeaea;
+  border-radius: 20px;
+ 
+  margin-bottom: 12px;
+  padding: 18px 16px;
 }
 
 .input-prefix {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 12px;
   color: #000000;
-  margin-right: 4px;
+  font-weight: bold;
+  width: 36px;
+}
+
+.input-divider {
+  width: 1px;
+  height: 16px;
+  background-color: #777777;
+  margin: 0 12px;
+  opacity: 0.5;
 }
 
 .amount-input {
+  flex: 1;
   border: none;
-  background: transparent;
-  font-size: 16px;
-  font-weight: 400;
-  color: #000000;
-  width: 100%;
   outline: none;
+  font-size: 12px;
+  color: #000000;
+  background: transparent;
   font-family: inherit;
 }
 
 .amount-input::placeholder {
-  color: rgba(0, 0, 0, 0.4);
+  color: #aaaaaa;
+}
+
+.amount-input[readonly] {
+  color: #777777;
 }
 
 .warning-message {
   color: #ff0000;
   font-size: 12px;
-  margin: 10px 0 0 4px;
-}
-
-.quick-amounts-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px 13px;
-  margin-bottom: 24px;
-}
-
-.amount-option {
-  height: 38px;
-  border-radius: 50px;
-  border: 1px solid #cecece;
-  background-color: #ffffff;
-  color: #000000;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.amount-option.selected {
-  background-color: rgba(76, 164, 85, 0.1);
-  border-color: #4ca455;
-  color: #004d43;
-}
-
-.info-notes {
-  margin-top: 24px;
-}
-
-.info-notes p {
-  font-size: 12px;
-  color: #000000;
-  margin: 0 0 4px 0;
-  line-height: 1.4;
-}
-
-/* Footer Section */
-#section-footer {
-  padding: 40px 16px 24px;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.terms-condition {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.terms-icon {
-  width: 26px;
-  height: 25px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.terms-text {
-  font-size: 12px;
-  color: #000000;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.text-highlight {
-  color: #4ca455;
-  font-weight: 600;
-  text-decoration: none;
+  margin: 0 0 8px 4px;
 }
 
 .btn-primary {
   width: 100%;
-  height: 58px;
-  background-color: #004d43;
+  height: 48px;
+  background-color: #1b46f5;
   color: #ffffff;
   border: none;
-  border-radius: 20px;
+  border-radius: 5px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: bold;
+  margin-top: 16px;
   cursor: pointer;
-  font-family: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s ease;
+  font-family: inherit;
+  transition: background-color 0.2s;
 }
 
-.btn-primary:active {
-  opacity: 0.8;
+.btn-primary:hover {
+  background-color: #1538c4;
 }
 
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-</style>
 
+/* Instructions Section */
+#section-instructions {
+  padding: 10px ;
+}
+
+.instructions-card {
+  background: linear-gradient(360deg, rgba(255, 255, 255, 0.47) 0%, rgba(190, 215, 249, 0.47) 100%);
+  border: 1px solid #ffffff;
+  border-radius: 5px;
+  padding: 16px;
+}
+
+.instructions-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 35px;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.instructions-text {
+  font-size: 14px;
+  color: #5e5e5e;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.instructions-list {
+  margin: 0 0 10px 18px;
+  padding: 0;
+  font-size: 14px;
+  color: #5e5e5e;
+  line-height: 1.5;
+}
+
+.instructions-list li + li {
+  margin-top: 6px;
+}
+</style>

@@ -1,53 +1,85 @@
 <template>
   <div class="app-container">
+    <!-- Header -->
     <section id="section-header">
       <header class="app-header">
-        <button class="back-button" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/2018_1451.svg" alt="Back">
+        <a href="/profile" class="back-button" aria-label="Go to profile">
+          <img src="/assets/image/4252_273.svg" alt="Back">
+        </a>
+        <button type="button" ref="menuAnchorEl" class="header-title-wrapper" @click.stop="toggleRecordMenu">
+          <h1 class="header-title">{{ currentRecordLabel }}</h1>
+          <img
+            src="/assets/image/4252_291.svg"
+            alt="Dropdown"
+            class="dropdown-icon"
+            :class="{ open: recordMenuOpen }"
+          >
+          <div v-if="recordMenuOpen" class="record-menu" @click.stop>
+            <button
+              v-for="item in recordMenuItems"
+              :key="item.key"
+              type="button"
+              class="record-menu-item"
+              :class="{ active: item.key === currentRecordKey }"
+              @click.stop="selectRecord(item)"
+            >
+              {{ item.label }}
+            </button>
+          </div>
         </button>
-        <h1 class="page-title">Riwayat pembelian aset</h1>
       </header>
     </section>
 
-    <section id="section-history-list">
-      <div v-if="orders.length === 0 && !isLoading" class="empty-state">
-        <p class="empty-text">Belum ada riwayat pembelian</p>
-      </div>
+    <!-- Record List -->
+    <section id="section-record-list">
+      <div class="record-container">
+        <div class="table-header">
+          <div class="col-status">Status</div>
+          <div class="col-amount">Amount</div>
+          <div class="col-type">Type</div>
+        </div>
 
-      <div class="history-container">
-        <article v-for="order in orders" :key="order.id" class="transaction-card">
-          <div class="transaction-date">Date trx: {{ order.date }}</div>
-          <div class="transaction-details">
-            <img class="transaction-icon" src="/assets/images/51c612507498a1350e8a34d624b4f99146ecdfe9.png" alt="Asset Icon">
-            <div class="transaction-info">
-              <div class="transaction-name">{{ order.orderId }}</div>
-              <div class="transaction-price">{{ formatCurrency(order.price) }}</div>
+        <div v-if="orders.length === 0 && !isLoading" class="empty-state">
+          <p class="empty-text">No purchase records yet</p>
+        </div>
+
+        <div class="record-list">
+          <template v-for="(order, idx) in orders" :key="order.id">
+            <div class="record-item">
+              <div class="col-status status-success">Succeed</div>
+              <div class="col-amount">{{ order.amount }}</div>
+              <div class="col-type">
+                <div class="product-name">{{ order.productName }}</div>
+                <div class="product-date">{{ order.date }}</div>
+              </div>
             </div>
-          </div>
-        </article>
-      </div>
+            <div v-if="idx < orders.length - 1" class="separator"></div>
+          </template>
+        </div>
 
-      <div v-if="showPagination" class="pagination-row">
-        <PaginationBar
-          :page="currentPage"
-          :total-pages="totalPages"
-          :has-prev="hasPrev"
-          :has-next="hasNext"
-          :loading="isLoading"
-          @change="goToPage"
-        />
+        <div v-if="showPagination" class="pagination-row">
+          <PaginationBar
+            :page="currentPage"
+            :total-pages="totalPages"
+            :has-prev="hasPrev"
+            :has-next="hasNext"
+            :loading="isLoading"
+            @change="goToPage"
+          />
+        </div>
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { transactionAPI } from '@/services/api'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const orders = ref([])
 const isLoading = ref(false)
@@ -67,21 +99,69 @@ const goBack = () => {
   router.go(-1)
 }
 
+const recordMenuOpen = ref(false)
+const menuAnchorEl = ref(null)
+
+const recordMenuItems = [
+  { key: 'recharge', label: 'Record recharge', to: '/dep/history' },
+  { key: 'mining', label: 'Mining record', to: '/portfolio/history' },
+  { key: 'payout', label: 'Payout record', to: '/flow/history' },
+  { key: 'purchase', label: 'Purchase record', to: '/orders' },
+  { key: 'commission', label: 'Commision friend', to: '/commission/history' },
+  { key: 'other', label: 'Other record', to: '/trx' }
+]
+
+const currentRecordKey = computed(() => {
+  const p = String(route.path || '')
+  if (p.startsWith('/dep')) return 'recharge'
+  if (p.startsWith('/portfolio')) return 'mining'
+  if (p.startsWith('/flow')) return 'payout'
+  if (p.startsWith('/orders')) return 'purchase'
+  if (p.startsWith('/commission')) return 'commission'
+  return 'other'
+})
+
+const currentRecordLabel = computed(() => {
+  const found = recordMenuItems.find((x) => x.key === currentRecordKey.value)
+  return found?.label || 'Other record'
+})
+
+const toggleRecordMenu = () => {
+  recordMenuOpen.value = !recordMenuOpen.value
+}
+
+const closeRecordMenu = () => {
+  recordMenuOpen.value = false
+}
+
+const selectRecord = (item) => {
+  closeRecordMenu()
+  if (item?.to) router.push(item.to)
+}
+
+const onDocumentClick = (e) => {
+  if (!recordMenuOpen.value) return
+  const anchor = menuAnchorEl.value
+  const target = e?.target
+  if (anchor && target && anchor.contains(target)) return
+  closeRecordMenu()
+}
+
 const pad2 = (n) => String(n).padStart(2, '0')
 const formatDateTime = (value) => {
   if (!value) return '-'
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return String(value)
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}.${pad2(d.getMinutes())}`
 }
 
-const formatCurrency = (value) => {
+const formatUSD = (value) => {
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
-  if (!Number.isFinite(num)) return 'Rp 0'
-  return `Rp ${new Intl.NumberFormat('id-ID', {
+  if (!Number.isFinite(num)) return '$0'
+  return '$' + new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(num)}`
+  }).format(num)
 }
 
 const normalizeTransactionsResponse = (data) => {
@@ -101,10 +181,9 @@ const loadPage = async (page) => {
     const paged = normalizeTransactionsResponse(resp?.data)
     orders.value = paged.results.map((t) => ({
       id: t?.id ?? t?.trx_id ?? `${t?.created_at || ''}-${t?.amount || ''}`,
-      orderId: t?.product_name ? `Aktivasi aset ${t.product_name}` : (t?.trx_id || '-'),
+      productName: t?.product_name || t?.description || 'Product purchase',
       date: formatDateTime(t?.created_at),
-      price: t?.amount,
-      createdAtRaw: t?.created_at || null
+      amount: formatUSD(t?.amount)
     }))
     currentPage.value = Math.max(1, Number(page || 1))
     hasNext.value = Boolean(paged.next)
@@ -127,10 +206,21 @@ const goToPage = (page) => {
 
 onMounted(() => {
   loadPage(1)
+  document.addEventListener('click', onDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
   margin: 0 auto;
@@ -139,60 +229,142 @@ onMounted(() => {
   background-color: #f8f8f8;
   min-height: 100vh;
   position: relative;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
+h1, p {
   margin: 0;
-  padding: 0;
 }
 
 /* Header */
+#section-header {
+  width: 100%;
+}
+
 .app-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 70px;
-  padding: 20px 16px 0;
+  padding: 18px 16px;
   position: relative;
+  min-height: 60px;
 }
 
 .back-button {
   position: absolute;
-  left: 7px;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  padding: 8px;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 10;
+  width: 20px;
+  height: 20px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .back-button img {
-  width: 35px;
-  height: 35px;
-  object-fit: contain;
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
-.page-title {
-  font-size: 15px;
-  font-weight: 600;
+.header-title-wrapper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 700;
   color: #000000;
   margin: 0;
-  text-align: center;
+  line-height: 1.2;
 }
 
-/* History List */
-.history-container {
-  padding: 0 13px;
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
+.dropdown-icon {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.15s ease;
 }
+
+.dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.record-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  z-index: 50;
+}
+
+.record-menu-item {
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 16px;
+  color: #000000;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.record-menu-item + .record-menu-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.record-menu-item.active {
+  font-weight: 700;
+}
+
+/* Record List */
+#section-record-list {
+  min-height: calc(100vh - 64px);
+}
+
+.record-container {
+  padding: 0 16px 24px 16px;
+}
+
+.table-header {
+  background-color: #ffffff;
+  border-radius: 5px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+
+.table-header > div {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.col-status { text-align: left; }
+.col-amount { text-align: center; }
+.col-type { text-align: right; }
 
 .empty-state {
   padding: 40px 0;
@@ -204,77 +376,58 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.transaction-card {
-  background-color: #eeeeee;
-  border-radius: 20px;
-  padding: 15px 16px;
+.record-list {
   display: flex;
   flex-direction: column;
-  gap: 11px;
 }
 
-.transaction-date {
-  color: #004d43;
-  font-size: 12px;
+.record-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr;
+  align-items: center;
+  padding: 16px 16px;
+}
+
+.status-success {
+  color: #0cb300;
+  font-size: 13px;
   font-weight: 600;
-  line-height: 1.2;
 }
 
-.transaction-details {
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
+.record-item .col-amount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #010101;
 }
 
-.transaction-icon {
-  width: 31px;
-  height: 28px;
-  object-fit: contain;
-  margin-top: 2px;
-}
-
-.transaction-info {
+.col-type {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  align-items: flex-end;
 }
 
-.transaction-name {
-  color: rgba(0, 0, 0, 0.5);
+.product-name {
   font-size: 13px;
-  font-weight: 500;
-  line-height: 1.4;
+  font-weight: 700;
+  color: #010101;
+  margin-bottom: 4px;
 }
 
-.transaction-price {
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.4;
+.product-date {
+  font-size: 11px;
+  color: rgba(1, 1, 1, 0.4);
+}
+
+.separator {
+  height: 1px;
+  border-bottom: 1px dotted #999;
+  margin: 0 16px;
 }
 
 .pagination-row {
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 16px 13px 20px;
-}
-
-.load-more-btn {
-  width: 100%;
-  height: 40px;
-  border-radius: 20px;
-  background-color: #004d43;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.load-more-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  padding: 16px 0 20px;
 }
 </style>

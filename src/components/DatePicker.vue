@@ -1,7 +1,7 @@
-<template>
+<!-- <template>
   <div class="date-picker-overlay" @click.self="$emit('close')">
     <div class="date-picker-container">
-      <!-- Header with month navigation -->
+    
       <div class="date-picker-header">
         <div class="month-year">{{ currentMonthYear }}</div>
         <div class="navigation-buttons">
@@ -10,13 +10,12 @@
           <button class="nav-button" @click="nextYear">&gt;&gt;</button>
         </div>
       </div>
-      
-      <!-- Calendar grid -->
+   
       <div class="calendar-grid">
-        <!-- Weekday headers -->
+       
         <div class="weekday-header" v-for="day in weekdays" :key="day">{{ day }}</div>
         
-        <!-- Calendar days -->
+      
         <div 
           v-for="(day, index) in calendarDays" 
           :key="index"
@@ -32,14 +31,14 @@
         </div>
       </div>
       
-      <!-- Footer with buttons -->
+      
       <div class="date-picker-footer">
         <button class="clear-button" @click="clearSelection">Clear</button>
         <button class="ok-button" @click="confirmSelection">OK</button>
       </div>
     </div>
   </div>
-</template>
+</template> -->
 
 <script>
 export default {

@@ -4,131 +4,71 @@
 
     <!-- Header -->
     <section id="section-header">
-      <header class="app-header">
-        <button class="back-btn" @click="goBack" aria-label="Kembali">
-          <img src="/assets/images/2031_431.svg" alt="Back Icon">
+      <header class="header">
+        <button class="back-btn" @click="goBack" aria-label="Go back">
+          <img src="/assets/image/4369_339.svg" alt="Back">
         </button>
-        <h1 class="header-title">Detail Aset Pembayaran</h1>
+        <h1 class="page-title">See Featured</h1>
       </header>
     </section>
 
-    <!-- Product Info -->
-    <section id="section-product-info">
-      <div class="product-info">
-        <img
-          class="product-icon"
-          :src="getProductImage(product)"
-          :alt="productTitle"
-          loading="lazy"
-          decoding="async"
-          @error="handleProductImageError"
-        >
-        <div class="product-text">
-          <h2 class="product-title">{{ productTitle }}</h2>
-          <p class="product-subtitle">{{ product?.specifications || 'Spesifikasi produk' }}</p>
+    <!-- Breadcrumb -->
+    <section id="section-breadcrumb">
+      <nav class="breadcrumb">
+        <div class="breadcrumb-item">
+          <img src="/assets/image/fd891e27e827c0f21ddb395edbc24cfd61c092dc.png" alt="Shop" class="shop-icon">
+          <span>Shop</span>
         </div>
-      </div>
+        <img src="/assets/image/4369_347.svg" alt=">" class="separator-icon">
+        <div class="breadcrumb-item">
+          <span>Cloud Computing</span>
+        </div>
+        <img src="/assets/image/4369_351.svg" alt=">" class="separator-icon">
+        <div class="breadcrumb-item active">
+          <span>See Featured</span>
+        </div>
+      </nav>
     </section>
 
-    <!-- Chart -->
-    <section id="section-chart">
-      <div class="chart-container">
-        <div class="chart-card">
-          <svg
-            v-if="chartReady"
-            class="chart-img"
-            viewBox="0 0 300 120"
-            preserveAspectRatio="none"
-            aria-label="Grafik pertumbuhan aset"
-          >
-            <defs>
-              <linearGradient id="productChartFillGreen" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="rgba(21, 178, 92, 0.28)" />
-                <stop offset="100%" stop-color="rgba(21, 178, 92, 0)" />
-              </linearGradient>
-              <filter id="productChartShadowGreen" x="-20%" y="-40%" width="140%" height="200%">
-                <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#15B25C" flood-opacity="0.35" />
-              </filter>
-            </defs>
-            <path :d="chartAreaPath" fill="url(#productChartFillGreen)" />
-            <path :d="chartLinePath" stroke="#15B25C" stroke-width="3" fill="none" filter="url(#productChartShadowGreen)" />
-          </svg>
-       
-        </div>
-        <p class="chart-caption">Dana pertumbuhan aset 2026</p>
-      </div>
-    </section>
+    <!-- Content -->
+    <section id="section-content">
+      <div class="content-bg">
+        <div class="content-wrapper">
+          <div class="info-card">
+            <p class="card-title" style="padding-bottom: 5px;">Beneficial ownership of the assets</p>
+            
+            <hr class="card-divider">
+            <p class="card-text">
+              Dear user,<br>
+              To continue with verification, please confirm that you are the rightful owner of the assets associated with your AVR account and activities.
+            </p>
+          </div>
 
-    <!-- Price Details -->
-    <section id="section-price-details">
-      <div class="price-container">
-        <div class="price-card-outer">
-          <div class="price-card-inner">
-            <div class="price-col-left">
-              <span class="price-label">Harga Beli</span>
-              <span class="price-value">{{ priceText }}</span>
-              <span class="price-return">Pengembalian: {{ profitPerDay }}/hari</span>
+
+          <label class="confirmation-checkbox">
+            <div class="checkbox-custom" @click.prevent="toggleConfirm">
+              <div class="checkbox-bg" :class="{ checked: isConfirmed }"></div>
+              <img v-if="isConfirmed" src="/assets/image/a84c69a218ab38138fa855a6c1a8a8dfc114da81.png" alt="Check" class="check-icon">
             </div>
-            <div class="price-col-right">
-              <span class="price-limit">Maksimal pembelian: {{ purchaseLimitText }}</span>
-              <span class="price-due">Jatuh tempo: {{ dueDateText }}</span>
-            </div>
+            <span class="checkbox-text" @click.prevent="toggleConfirm">I confirm that I am the authorized owner of the assets to be used.</span>
+            <input type="checkbox" class="hidden-input" :checked="isConfirmed">
+          </label>
+
+          <div class="action-container">
+            <button class="primary-btn" :disabled="!isConfirmed || isPurchasing" @click="confirmPurchase">
+              {{ isPurchasing ? 'Processing...' : 'Start Cloud' }}
+            </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Asset Info -->
-    <section id="section-asset-info">
-      <div class="asset-info-container">
-        <h3 class="asset-info-title">Informasi Aset</h3>
-        <div class="asset-info-list">
-          <div class="asset-info-row">
-            <span class="asset-info-label">Nama Aset</span>
-            <span class="asset-info-value">{{ product?.name || '-' }}</span>
-          </div>
-          <div class="asset-info-row">
-            <span class="asset-info-label">Durasi</span>
-            <span class="asset-info-value">{{ durationText }}</span>
-          </div>
-          <div class="asset-info-row">
-            <span class="asset-info-label">Seri</span>
-            <span class="asset-info-value">{{ product?.golongan || '-' }}</span>
-          </div>
-          <div class="asset-info-row">
-            <span class="asset-info-label">Stock</span>
-            <span class="asset-info-value">{{ availabilityText }}</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <section id="section-footer">
-      <footer class="app-footer">
-        <div class="terms-container">
-          <img class="terms-icon" src="/assets/images/d9b41d54b13e3f872bf656657234e30868c2d994.png" alt="Checkbox Icon">
-          <p class="terms-text">
-            Dengan melanjutkan proses ini, kamu menyetujui <router-link to="/terms" class="terms-highlight">Syarat & Ketentuan</router-link> yang berlaku
-          </p>
-        </div>
-        <button class="btn-primary" @click="openPurchaseModal" :disabled="isPurchasing">Bayar</button>
-      </footer>
-    </section>
-
-    <!-- Purchase Modal -->
-    <teleport to="body">
-      <div v-if="showPurchaseModal" class="purchase-modal-overlay" @click.self="showPurchaseModal = false">
-        <div class="purchase-modal">
-          <div class="purchase-modal-title">Pertanyaan</div>
-          <div class="purchase-modal-desc">Periksa sebelum melanjutkan apa sudah sesuai?</div>
-          <div class="purchase-modal-actions">
-            <button type="button" class="purchase-btn cancel" @click="showPurchaseModal = false" :disabled="isPurchasing">Batal</button>
-            <button type="button" class="purchase-btn ok" @click="confirmPurchase" :disabled="isPurchasing">Setuju</button>
-          </div>
-        </div>
-      </div>
-    </teleport>
+    <ConfirmationModal
+      v-model="showPurchaseModal"
+      message="Are you sure you want to purchase this asset?"
+      :amount="product ? `$${formatPrice(product.price)}` : ''"
+      @confirm="executePurchase"
+    />
 
     <SuccessModal
       v-model="successModalOpen"
@@ -140,19 +80,20 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { productAPI } from '@/services/api'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ConfirmationModal from '@/components/modals/ConfirmationModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
-import { resolveImageUrl } from '@/utils/imageCache'
 
 const router = useRouter()
 const route = useRoute()
 
 const product = ref(null)
 const isLoading = ref(false)
+const isConfirmed = ref(false)
 const showPurchaseModal = ref(false)
 const isPurchasing = ref(false)
 const successModalOpen = ref(false)
@@ -161,18 +102,8 @@ const successMessage = ref('')
 const errorMessage = ref('')
 const redirectInvestmentId = ref(null)
 
-const fallbackProductImage = ''
-
-const getProductImage = (p) => {
-  const raw = String(p?.image || '').trim()
-  const resolved = raw ? resolveImageUrl(raw) : ''
-  return resolved || fallbackProductImage
-}
-
-const handleProductImageError = (e) => {
-  const el = e?.target
-  if (!el) return
-  el.src = fallbackProductImage
+const toggleConfirm = () => {
+  isConfirmed.value = !isConfirmed.value
 }
 
 const parseNumber = (value) => {
@@ -182,163 +113,30 @@ const parseNumber = (value) => {
   return n
 }
 
-const formatNumber = (value) => {
+const formatPrice = (value) => {
   const n = parseNumber(value)
-  if (n === null) return '-'
-  return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)
+  if (n === null) return '0'
+  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)
 }
-
-const seededRng = (seed) => {
-  let s = (Number(seed) || 0) >>> 0
-  return () => {
-    s = (1664525 * s + 1013904223) >>> 0
-    return s / 4294967296
-  }
-}
-
-const normalizeSeries = (raw) => {
-  const list = Array.isArray(raw) ? raw : []
-  const values = list
-    .map((x) => {
-      if (typeof x === 'number') return x
-      if (typeof x === 'string') return parseNumber(x)
-      if (x && typeof x === 'object') {
-        const v = x.value ?? x.amount ?? x.y ?? x.total ?? x.count
-        return parseNumber(v)
-      }
-      return null
-    })
-    .filter((v) => v !== null && Number.isFinite(Number(v)))
-    .map((v) => Number(v))
-  return values
-}
-
-const chartValues = computed(() => {
-  const p = product.value || {}
-  const candidates = [
-    p.growth,
-    p.growth_data,
-    p.growth_points,
-    p.chart,
-    p.chart_data,
-    p.chart_points,
-    p.points,
-    p.graph
-  ]
-  for (const c of candidates) {
-    const values = normalizeSeries(c)
-    if (values.length >= 2) return values.slice(-6)
-  }
-
-  const idSeed = Number(route.params.id || 0) || 0
-  const basePrice = parseNumber(p.price) ?? 0
-  const baseProfit = parseNumber(p.profit_rate) ?? (parseNumber(p.profit_random_min) ?? 0)
-  const base = Math.max(20, Math.round((basePrice / 100000) * 6 + (baseProfit / 10000) * 2))
-  const rand = seededRng(idSeed + Math.round(basePrice) + Math.round(baseProfit * 10))
-
-  const out = []
-  let cur = base
-  for (let i = 0; i < 6; i += 1) {
-    const step = Math.max(1, Math.round(base * (0.04 + rand() * 0.12)))
-    const dip = rand() < 0.22 ? Math.round(step * (0.6 + rand() * 0.6)) : 0
-    cur = Math.max(1, cur + step - dip)
-    out.push(cur)
-  }
-  return out
-})
-
-const chartPoints = computed(() => {
-  const values = chartValues.value
-  const w = 300
-  const h = 120
-  const padX = 8
-  const padTop = 12
-  const padBottom = 18
-  const innerW = w - padX * 2
-  const innerH = h - padTop - padBottom
-  const max = Math.max(1, ...values)
-  return values.map((v, idx) => {
-    const x = padX + (innerW * idx) / Math.max(1, values.length - 1)
-    const y = padTop + innerH * (1 - v / max)
-    return { x, y }
-  })
-})
-
-const chartLinePath = computed(() => {
-  const pts = chartPoints.value
-  if (pts.length < 2) return ''
-  const path = [`M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`]
-  for (let i = 0; i < pts.length - 1; i += 1) {
-    const p0 = pts[i - 1] || pts[i]
-    const p1 = pts[i]
-    const p2 = pts[i + 1]
-    const p3 = pts[i + 2] || p2
-    const cp1x = p1.x + (p2.x - p0.x) / 6
-    const cp1y = p1.y + (p2.y - p0.y) / 6
-    const cp2x = p2.x - (p3.x - p1.x) / 6
-    const cp2y = p2.y - (p3.y - p1.y) / 6
-    path.push(
-      `C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)} ${cp2x.toFixed(2)} ${cp2y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
-    )
-  }
-  return path.join(' ')
-})
-
-const chartAreaPath = computed(() => {
-  const pts = chartPoints.value
-  if (pts.length < 2) return ''
-  const baseY = 120 - 18
-  const path = [`M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`]
-  for (let i = 0; i < pts.length - 1; i += 1) {
-    const p0 = pts[i - 1] || pts[i]
-    const p1 = pts[i]
-    const p2 = pts[i + 1]
-    const p3 = pts[i + 2] || p2
-    const cp1x = p1.x + (p2.x - p0.x) / 6
-    const cp1y = p1.y + (p2.y - p0.y) / 6
-    const cp2x = p2.x - (p3.x - p1.x) / 6
-    const cp2y = p2.y - (p3.y - p1.y) / 6
-    path.push(
-      `C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)} ${cp2x.toFixed(2)} ${cp2y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
-    )
-  }
-  path.push(`L ${pts[pts.length - 1].x.toFixed(2)} ${baseY}`)
-  path.push(`L ${pts[0].x.toFixed(2)} ${baseY}`)
-  path.push('Z')
-  return path.join(' ')
-})
-
-const chartReady = computed(() => Boolean(product.value) && chartLinePath.value && chartAreaPath.value)
-
-const productTitle = computed(() => product.value?.name || 'Aset')
-
-const priceText = computed(() => {
-  const p = parseNumber(product.value?.price)
-  if (p === null) return 'Rp -'
-  return `Rp ${formatNumber(p)}`
-})
 
 const profitPerDay = computed(() => {
+  if (!product.value) return '$-/day'
   const profitType = String(product.value?.profit_type || '').toLowerCase()
   if (profitType === 'random') {
     const min = parseNumber(product.value?.profit_random_min)
-    if (min !== null) return `Rp ${formatNumber(min)}`
+    const max = parseNumber(product.value?.profit_random_max)
+    if (min !== null && max !== null) return `$${formatPrice(min)}~${formatPrice(max)}`
+    if (min !== null) return `$${formatPrice(min)}`
   }
   const rate = parseNumber(product.value?.profit_rate)
-  if (rate !== null && rate > 0) return `Rp ${formatNumber(rate)}`
-  return 'Rp -'
+  if (rate !== null && rate > 0) return `$${formatPrice(rate)}`
+  return '$-'
 })
 
 const durationText = computed(() => {
   const d = parseNumber(product.value?.duration)
   if (d === null) return '-'
-  return `${d} Hari`
-})
-
-const purchaseLimitText = computed(() => {
-  const limit = parseNumber(product.value?.purchase_limit)
-  if (limit === null) return '1'
-  return String(Math.max(1, Math.round(limit)))
+  return `${d} Days`
 })
 
 const dueDateText = computed(() => {
@@ -352,8 +150,8 @@ const dueDateText = computed(() => {
 const availabilityText = computed(() => {
   const enabled = product.value?.stock_enabled
   const stock = parseNumber(product.value?.stock)
-  if (enabled && stock !== null && stock <= 0) return 'Stok habis'
-  return 'Tersedia'
+  if (enabled && stock !== null && stock <= 0) return 'Sold out'
+  return 'Available'
 })
 
 const fetchProduct = async () => {
@@ -376,7 +174,8 @@ const goBack = () => {
   router.go(-1)
 }
 
-const openPurchaseModal = () => {
+const confirmPurchase = () => {
+  if (!isConfirmed.value) return
   errorMessage.value = ''
   errorModalOpen.value = false
   showPurchaseModal.value = true
@@ -398,22 +197,21 @@ const extractPurchaseErrorMessage = (data) => {
 
   const s = combined.toLowerCase()
   if (
-    s.includes('saldo') ||
     s.includes('balance') ||
     s.includes('insufficient') ||
-    s.includes('tidak cukup') ||
-    s.includes('kurang')
+    s.includes('saldo')
   ) {
-    return 'Silakan lakukan pengisian saldo terlebih dahulu.'
+    return 'Please top up your balance first.'
   }
-  if (s.includes('batas pembelian') || s.includes('hanya bisa membeli') || s.includes('kali')) {
-    return 'Anda telah mencapai batas maksimal untuk produk ini.'
+  if (s.includes('purchase limit') || s.includes('maximum')) {
+    return 'You have reached the maximum limit for this product.'
   }
 
   return combined
 }
 
-const confirmPurchase = async () => {
+const executePurchase = async () => {
+  if (isPurchasing.value) return
   const productId = Number(route.params.id)
   if (!Number.isFinite(productId)) return
   showPurchaseModal.value = false
@@ -428,11 +226,11 @@ const confirmPurchase = async () => {
     })
     const inv = resp?.data
     redirectInvestmentId.value = inv?.id ?? inv?.investment_id ?? null
-    successMessage.value = 'Aset telah ditambahkan ke akun Anda.'
+    successMessage.value = 'Asset has been added to your account.'
     successModalOpen.value = true
   } catch (err) {
     const data = err?.response?.data
-    errorMessage.value = extractPurchaseErrorMessage(data) || 'Gagal melakukan pembelian'
+    errorMessage.value = extractPurchaseErrorMessage(data) || 'Purchase failed'
     errorModalOpen.value = true
   } finally {
     isPurchasing.value = false
@@ -448,354 +246,225 @@ const handleSuccessConfirm = () => {
   }
   router.push('/portfolio')
 }
-
-onBeforeUnmount(() => {
-  // cleanup if needed
-})
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
   width: 100%;
-  max-width: 412px;
+  max-width: 100%;
   background-color: #f8f8f8;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
   margin: 0 auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-h1, h2, h3, p {
-  margin: 0;
-}
-
 /* Header */
-.app-header {
+#section-header .header {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px;
+  height: 50px;
   position: relative;
+  padding: 0 19px;
 }
 
-.back-btn {
+#section-header .back-btn {
   position: absolute;
-  left: 16px;
+  left: 19px;
   background: none;
   border: none;
+  padding: 0;
   cursor: pointer;
-  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.back-btn img {
-  width: 24px;
-  height: 24px;
+#section-header .back-btn img {
+  width: 20px;
+  height: 20px;
 }
 
-.header-title {
-  font-size: 16px;
+#section-header .page-title {
+  font-size: 18px;
   font-weight: 700;
   color: #000000;
   margin: 0;
 }
 
-/* Product Info */
-.product-info {
+/* Breadcrumb */
+#section-breadcrumb .breadcrumb {
   display: flex;
   align-items: center;
-  padding: 16px;
-  gap: 12px;
+  padding: 10px 23px;
+  gap: 8px;
 }
 
-.product-icon {
-  width: 49px;
-  height: 49px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.product-text {
+#section-breadcrumb .breadcrumb-item {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.product-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0;
-}
-
-.product-subtitle {
-  font-size: 12px;
-  color: #666666;
-  margin: 0;
-}
-
-/* Chart */
-.chart-container {
-  padding: 8px 0px;
-}
-
-.chart-card {
-  background-color: #ffffff;
-  border-radius: 10px;
-  padding: 24px 0px;
-  margin-bottom: 12px;
-}
-
-.chart-img {
-  width: 100%;
-  height: 150px;
-  display: block;
-}
-
-.chart-caption {
-  text-align: right;
-  font-size: 12px;
-  color: #000000;
-  margin: 0;
-}
-
-/* Price Details */
-.price-container {
-  padding: 0 16px 24px;
-}
-
-.price-card-outer {
-  background-color: #eeeeee;
-  border-radius: 20px;
-  padding: 16px;
-}
-
-.price-card-inner {
-  background-color: #f8f8f8;
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.price-col-left {
-  display: flex;
-  flex-direction: column;
-}
-
-.price-label {
-  font-size: 12px;
-  color: #004d43;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.price-value {
-  font-size: 20px;
-  font-weight: 700;
-  color: #000000;
-  margin-bottom: 16px;
-}
-
-.price-return {
-  font-size: 10px;
-  color: rgba(0, 0, 0, 0.5);
-}
-
-.price-col-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}
-
-.price-limit, .price-due {
-  font-size: 10px;
-  color: #004d43;
-  font-weight: 600;
-}
-
-/* Asset Info */
-.asset-info-container {
-  padding: 0 16px 32px;
-  flex-grow: 1;
-}
-
-.asset-info-title {
-  font-size: 14px;
-  color: #004d43;
-  font-weight: 700;
-  margin-bottom: 16px;
-  margin-top: 0;
-}
-
-.asset-info-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.asset-info-row {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #939393;
 }
 
-.asset-info-label {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.5);
-}
-
-.asset-info-value {
-  font-size: 12px;
+#section-breadcrumb .breadcrumb-item.active {
   color: #000000;
   font-weight: 700;
 }
 
-/* Footer */
-#section-footer {
-  margin-top: auto;
-}
-
-.app-footer {
-  padding: 16px;
-  background-color: #f8f8f8;
-}
-
-.terms-container {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.terms-icon {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
+#section-breadcrumb .shop-icon {
+  width: 21px;
+  height: 21px;
   object-fit: contain;
 }
 
-.terms-text {
-  font-size: 12px;
-  color: #000000;
+#section-breadcrumb .separator-icon {
+  width: 17px;
+  height: 17px;
+}
+
+/* Content */
+#section-content .content-bg {
+  min-height: calc(100vh - 100px);
+}
+
+#section-content .content-wrapper {
+  padding: 10px 23px 40px 23px;
+}
+
+#section-content .info-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.25);
+  padding: 20px 15px 15px 11px;
+  margin-bottom: 15px;
+}
+
+#section-content .card-divider {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  margin: 0 0 10px 0;
+}
+
+#section-content .card-text {
+  font-size: 14px;
+  color: #737373;
   line-height: 1.5;
   margin: 0;
 }
 
-.terms-highlight {
-  color: #004d43;
-  font-weight: 600;
+.detail-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.btn-primary {
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #000000;
+  font-weight: 700;
+}
+
+/* Checkbox */
+.confirmation-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  margin-bottom: 35px;
+  padding: 0 6px;
+}
+
+.checkbox-custom {
+  position: relative;
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.checkbox-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  background-color: #004d43;
+  height: 100%;
+  background-color: #cccccc;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.checkbox-bg.checked {
+  background-color: #1b46f5;
+}
+
+.check-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.checkbox-text {
+  font-size: 12px;
+  color: #000000;
+  line-height: 1.4;
+}
+
+/* Action Button */
+.action-container {
+  display: flex;
+  justify-content: center;
+}
+
+.primary-btn {
+  width: 177px;
+  height: 45px;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #4084e0 0%, #2656b5 100%);
   color: #ffffff;
   border: none;
-  border-radius: 20px;
-  padding: 18px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  text-align: center;
-  font-family: inherit;
-  transition: background-color 0.2s ease;
-}
-
-.btn-primary:hover {
-  background-color: #003831;
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Purchase Modal */
-.purchase-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-}
-
-.purchase-modal {
-  width: 100%;
-  max-width: 320px;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
-}
-
-.purchase-modal-title {
-  text-align: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #000000;
-  margin-bottom: 8px;
-}
-
-.purchase-modal-desc {
-  text-align: center;
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.6);
-  line-height: 1.4;
-  margin-bottom: 16px;
-}
-
-.purchase-modal-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.purchase-btn {
-  flex: 1;
-  height: 40px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
   font-family: inherit;
-  cursor: pointer;
-  border: none;
+  transition: opacity 0.2s;
 }
 
-.purchase-btn.cancel {
-  background-color: #eeeeee;
-  color: #000000;
+.primary-btn:hover {
+  opacity: 0.9;
 }
 
-.purchase-btn.ok {
-  background-color: #004d43;
-  color: #ffffff;
-}
-
-.purchase-btn:disabled {
-  opacity: 0.5;
+.primary-btn:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
 }
 </style>

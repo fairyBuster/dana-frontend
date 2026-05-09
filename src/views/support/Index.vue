@@ -3,48 +3,83 @@
     <!-- Header -->
     <section id="section-header">
       <header class="header">
-        <button class="back-btn" @click="goBack" aria-label="Kembali">
-          <img src="/assets/images/17_89.svg" alt="Back Icon">
+        <button class="back-btn" @click="goBack" aria-label="Go back">
+          <img src="/assets/image/441_929.svg" alt="">
         </button>
-        <h1 class="header-title">Layanan Umum</h1>
+        <h1 class="title">Contact Us</h1>
       </header>
     </section>
 
-    <section id="section-services">
-      <div class="services-container">
+    <!-- Intro -->
+    <section id="section-intro">
+      <div class="intro-text">
+        Contact us<br>
+        if you have any question, please contact us!
+      </div>
+    </section>
 
-        <article class="service-card">
-          <p class="service-desc">Layanan pelanggan terbuka selama jam operasional. Anda bisa menghubungi layanan dengan nyaman dan aman. Percakapan Anda kami rekam demi keamanan bersama.</p>
-          <div class="service-action">
-            <button class="action-btn" @click="handleLinkClick(telegramChannelLink)">
-              <img src="/assets/images/2013_1153.svg" alt="" class="btn-icon">
-              <span>Mulai percakapan</span>
-            </button>
+    <!-- Contact List -->
+    <section id="section-contact-list">
+      <div class="contact-list">
+        <!-- Telegram Channel -->
+        <a class="contact-card" @click.prevent="handleLinkClick(telegramChannelLink)">
+          <div class="blue-line"></div>
+          <div class="icon-container">
+            <img class="card-icon" src="/assets/image/12c90035b0ea3086c159165d7e40bd1ea08c635a.png" alt="Telegram">
           </div>
-        </article>
+          <span class="card-text">Telegram Channel</span>
+          <img class="card-arrow" src="/assets/image/443_957.svg" alt="">
+        </a>
 
-
-        <article class="service-card">
-          <p class="service-desc">Bergabung dengan komunitas kami untuk melihat kegiatan dan aktivitas operasional setiap hari.</p>
-          <div class="service-action">
-            <button class="action-btn" @click="handleLinkClick(officialSupportLink)">
-              <img src="/assets/images/2013_1162.svg" alt="" class="btn-icon">
-              <span>Lihat komunitas</span>
-            </button>
+        <!-- Customer Service -->
+        <a class="contact-card" @click.prevent="handleLinkClick(officialSupportLink)">
+          <div class="blue-line"></div>
+          <div class="icon-container">
+            <img class="card-icon" src="/assets/image/12c90035b0ea3086c159165d7e40bd1ea08c635a.png" alt="Customer Service">
           </div>
-        </article>
+          <span class="card-text">Customer Service</span>
+          <img class="card-arrow" src="/assets/image/443_960.svg" alt="">
+        </a>
 
- 
-        <article class="service-card">
-          <p class="service-desc">Jika Anda membutuhkan bantuan singkat, silakan berbicara dengan layanan bot kami!</p>
-          <div class="service-action">
-            <button class="action-btn" @click="goToHelpCenter">
-              <img src="/assets/images/2013_1170.svg" alt="" class="btn-icon">
-              <span>Mulai percakapan</span>
-            </button>
+        <!-- Community WhatsApp -->
+        <a class="contact-card" @click.prevent="handleLinkClick(whatsappLink)">
+          <div class="blue-line"></div>
+          <div class="icon-container">
+            <img class="card-icon" src="/assets/image/92eab75ecb988672b7182dcc489e5a84b6f62d24.png" alt="WhatsApp">
           </div>
-        </article>
+          <span class="card-text">Community WhatsApp</span>
+          <img class="card-arrow" src="/assets/image/443_963.svg" alt="">
+        </a>
 
+        <!-- Private Consultant -->
+        <a class="contact-card" @click.prevent="handleLinkClick(consultantLink)">
+          <div class="blue-line"></div>
+          <div class="icon-container">
+            <img class="card-icon" src="/assets/image/92eab75ecb988672b7182dcc489e5a84b6f62d24.png" alt="Private Consultant">
+          </div>
+          <span class="card-text">Private Consultant</span>
+          <img class="card-arrow" src="/assets/image/522_108.svg" alt="">
+        </a>
+
+        <!-- Facebook -->
+        <a class="contact-card" @click.prevent="handleLinkClick(facebookLink)">
+          <div class="blue-line"></div>
+          <div class="icon-container">
+            <img class="card-icon" src="/assets/image/d153b1998421f83ecc7dc00ffa24cb9dfc1e887a.png" alt="Facebook">
+          </div>
+          <span class="card-text">Facebook</span>
+          <img class="card-arrow" src="/assets/image/4273_528.svg" alt="">
+        </a>
+
+        <!-- Twitter X -->
+        <a class="contact-card" @click.prevent="handleLinkClick(twitterLink)">
+          <div class="blue-line"></div>
+          <div class="icon-container">
+            <img class="card-icon" src="/assets/image/80176cbddefe4711112048121da03baff34f98b5.png" alt="Twitter X">
+          </div>
+          <span class="card-text">Twitter X</span>
+          <img class="card-arrow" src="/assets/image/4273_542.svg" alt="">
+        </a>
       </div>
     </section>
   </div>
@@ -58,18 +93,17 @@ import { supportAPI } from '@/services/api'
 const router = useRouter()
 const telegramChannelLink = ref('#')
 const officialSupportLink = ref('#')
+const whatsappLink = ref('#')
+const consultantLink = ref('#')
+const facebookLink = ref('#')
+const twitterLink = ref('#')
 
 const goBack = () => {
   router.go(-1)
 }
 
-const goToHelpCenter = () => {
-  router.push('/support/platform')
-}
-
 const handleLinkClick = (link) => {
   if (!link || link === '#') {
-    // Link not yet available
     return
   }
   window.open(link, '_blank')
@@ -86,16 +120,13 @@ const fetchSupportLinks = async () => {
       data = response.data.results
     }
 
-    const telegramItem = data.find(item => item.id === 1)
-    const supportItem = data.find(item => item.id === 4)
-
-    if (telegramItem && telegramItem.url) {
-      telegramChannelLink.value = telegramItem.url.trim()
-    }
-
-    if (supportItem && supportItem.url) {
-      officialSupportLink.value = supportItem.url.trim()
-    }
+    data.forEach((item) => {
+      if (!item || !item.url) return
+      const url = item.url.trim()
+      const id = Number(item.id)
+      if (id === 1) telegramChannelLink.value = url
+      else if (id === 4) officialSupportLink.value = url
+    })
   } catch (error) {
     console.error('Failed to fetch support links:', error)
   }
@@ -107,19 +138,19 @@ onMounted(() => {
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
-  width: 100%;
-  max-width: 412px;
   margin: 0 auto;
+  padding: 0;
+  max-width: 412px;
   background-color: #f8f8f8;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 /* Header */
@@ -127,100 +158,95 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px 10px;
+  padding-top: 19px;
+  padding-bottom: 23px;
   position: relative;
 }
 
 #section-header .back-btn {
   position: absolute;
-  left: 5px;
+  left: 18px;
+  top: 21px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
   background: none;
   border: none;
-  padding: 4px;
+  padding: 0;
   cursor: pointer;
+}
+
+#section-header .title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+/* Intro */
+#section-intro .intro-text {
+  padding: 0 18px 17px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1.4;
+}
+
+/* Contact List */
+#section-contact-list .contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 18px 40px;
+}
+
+#section-contact-list .contact-card {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding-right: 18px;
+  text-decoration: none;
+  color: #000000;
+  position: relative;
+  height: 67px;
+  cursor: pointer;
+}
+
+#section-contact-list .blue-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 29px;
+  background-color: #1b46f5;
+  border-top-left-radius: 5px;
+}
+
+#section-contact-list .icon-container {
+  width: 60px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-#section-header .back-btn img {
-  width: 35px;
-  height: 35px;
+#section-contact-list .card-icon {
+  max-width: 47px;
+  max-height: 44px;
   object-fit: contain;
 }
 
-#section-header .header-title {
-  font-size: 15px;
+#section-contact-list .card-text {
+  flex: 1;
+  font-size: 14px;
   font-weight: 700;
-  color: #000000;
-  margin: 0;
-  letter-spacing: 0.2px;
 }
 
-/* Services */
-#section-services {
-  padding: 10px 17px 30px;
-  min-height: calc(100vh - 80px);
-}
-
-#section-services .services-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-#section-services .service-card {
-  background: linear-gradient(90deg, #4e733f 0%, #60995b 100%);
-  border-radius: 20px;
-  padding: 18px 20px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-#section-services .service-desc {
-  color: #ffffff;
-  font-size: 13px;
-  line-height: 1.45;
-  margin: 0;
-  font-weight: 400;
-}
-
-#section-services .service-action {
-  display: flex;
-  justify-content: flex-end;
-}
-
-#section-services .action-btn {
-  background-color: #004d43;
-  border: none;
-  border-radius: 50px;
-  padding: 6px 14px 6px 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background-color 0.2s ease;
-}
-
-#section-services .action-btn:hover {
-  background-color: #003831;
-}
-
-#section-services .action-btn span {
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-
-#section-services .btn-icon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
+#section-contact-list .card-arrow {
+  width: 20px;
+  height: 20px;
 }
 </style>
-
-

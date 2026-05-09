@@ -1,93 +1,35 @@
 <template>
   <div class="app-container">
-    <section id="section-header">
-      <header class="header-content">
-        <div class="header-text">
-          <h1 class="header-title">Trivex Capital Sekuritas</h1>
-          <div class="header-subtitle">
-            <span class="subtitle-text">Terpercaya</span>
-            <span class="subtitle-highlight">NO.1</span>
-          </div>
-        </div>
-        <img
-          class="header-logo"
-          src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png"
-          alt="Trivex Logo"
-        >
-      </header>
-    </section>
-
-    <section id="section-list">
-      <div class="card-list">
-        <div class="card">
-          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
-          <div class="card-text">
-            <h2 class="card-title">Trivex Capital Sekuritas</h2>
-            <p class="card-desc">
-              TRIVEX (Transaksi Investasi & Valuta Exchange) adalah platform digital yang berfokus pada pengelolaan aset dan aktivitas investasi berbasis teknologi modern. TRIVEX hadir untuk memberikan kemudahan bagi pengguna dalam mengakses berbagai pilihan produk investasi dengan sistem yang efisien, transparan, dan mudah digunakan.
-              <br>
-              <br>
-              Dengan mengusung konsep platform yang terintegrasi, TRIVEX menyediakan layanan yang memungkinkan pengguna untuk melakukan pengelolaan aset secara fleksibel, mulai dari pemantauan portofolio hingga aktivitas transaksi dalam satu aplikasi.
-            </p>
-          </div>
-        </div>
-        <div class="card">
-          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
-          <div class="card-text">
-            <h2 class="card-title">Visi Trivex Capital Sekuritas</h2>
-            <p class="card-desc">Menjadi platform investasi digital yang terpercaya, inovatif, dan mudah diakses oleh semua kalangan.</p>
-          </div>
-        </div>
-        <div class="card">
-          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
-          <div class="card-text">
-            <h2 class="card-title">Misi Trivex Capital Sekuritas</h2>
-            <p class="card-desc">
-              - Menghadirkan sistem investasi yang sederhana dan efisien
-              <br>
-              - Memberikan pengalaman pengguna yang aman dan nyaman
-              <br>
-              - Mengembangkan teknologi untuk mendukung pertumbuhan aset digital
-              <br>
-              - Menyediakan layanan yang transparan dan berkelanjutan
-            </p>
-          </div>
-        </div>
-        <div class="card">
-          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
-          <div class="card-text">
-            <h2 class="card-title">Legalitas & Informasi Perusahaan</h2>
-            <p class="card-desc">
-              Nama Perusahaan: PT Trivex Capital Sekuritas
-              <br>
-              Status: Perusahaan berbasis teknologi finansial (Fintech Platform)
-              <br>
-              Nomor Usaha: 10.249.338.1-092.785
-              <br>
-              Nomor Registrasi Sistem Elektronik: 082648/DJAI.PSE/01/2026
-            </p>
-          </div>
-        </div>
-        <div class="card">
-          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
-          <div class="card-text">
-            <h2 class="card-title">Kantor Operasional</h2>
-            <p class="card-desc">
-              Gedung Perkantoran Kawasan Bisnis
-              <br>
-              Jl. TB Simatupang
-              <br>
-              Jakarta Selatan, DKI Jakarta, Indonesia
-            </p>
-          </div>
-        </div>
-        <div class="card">
-          <img class="card-icon" src="/assets/images/c8dc65f2b19ebe7fdbe1680f53c083c860893ba3.png" alt="Icon">
-          <div class="card-text">
-            <h2 class="card-title">Keamanan & Sistem</h2>
-            <p class="card-desc">TRIVEX menggunakan sistem keamanan berlapis dengan dukungan enkripsi data dan teknologi SSL aktif untuk menjaga kerahasiaan serta keamanan informasi pengguna.</p>
-          </div>
-        </div>
+    <section id="section-content">
+      <div class="content-container">
+        <h1 class="page-title">AVR (Autonomous Virtual Resource)</h1>
+        <div class="page-body"><p>
+AVR (Autonomous Virtual Resource) is a digital platform established in 2020, designed to provide structured access to managed resource systems through a clear and organized service model. With its head office based in the United Kingdom, AVR operates with a focus on delivering a stable, accessible, and well-managed environment for users to engage with system-based activities.
+</p>
+<p>
+From its early development, AVR has been built with the goal of simplifying how users interact with digital systems. The platform introduces a structured approach where activities, processes, and user engagement are presented in a consistent and easy-to-understand manner. This allows users to navigate the platform efficiently without unnecessary complexity.
+</p>
+<p>
+AVR emphasizes clarity and usability in every aspect of its design. The system is developed to ensure that users can access features, monitor their activity, and manage their progress within a unified interface. By focusing on simplicity and structure, AVR creates an experience that is both functional and reliable.
+</p>
+<p>
+The platform operates on a managed system framework, where processes are designed to run in an organized and controlled environment. This approach ensures that all activities within the platform follow a consistent flow, allowing users to maintain continuity and stability in their interactions.
+</p>
+<p>
+As part of its long-term vision, AVR continues to improve its infrastructure and system architecture. The platform is regularly refined to enhance performance, optimize user experience, and maintain operational consistency. This ongoing development reflects AVR’s commitment to building a sustainable and scalable digital environment.
+</p>
+<p>
+Security and transparency are key priorities within AVR. The platform is designed with safeguards to protect user accounts and ensure that all activities are conducted within a secure framework. At the same time, AVR maintains a transparent approach in its operations, allowing users to clearly understand how the system functions.
+</p>
+<p>
+AVR also promotes responsible usage of its services. Users are encouraged to engage with the platform in a structured and informed manner, ensuring that all activities are aligned with the intended system design. This helps maintain a balanced and reliable ecosystem for all users.
+</p>
+<p>
+Operating independently, AVR is not affiliated with, endorsed by, or associated with any external organizations or institutions. The platform stands as a self-contained system, developed with its own framework and operational standards.
+</p>
+<p>
+With a foundation built on structure, consistency, and continuous improvement, AVR aims to provide a dependable digital environment where users can manage their activities and resources in a simple, organized, and efficient way.
+</p></div>
       </div>
     </section>
   </div>
@@ -100,120 +42,47 @@ import FooterBar from '@/components/partials/FooterBar.vue'
 </script>
 
 <style scoped>
-.app-container {
-  margin: 0 auto;
-  padding: 0;
-  font-family: 'Inter', sans-serif;
-  width: 100%;
-  max-width: 412px;
-  min-height: 100vh;
-  background: linear-gradient(180deg, #0a4345 0%, #0b6563 100%);
-  position: relative;
-  overflow-x: hidden;
-}
-
 * {
   box-sizing: border-box;
 }
 
-h1,
-h2,
-p {
+.app-container {
+  width: 100%;
+  max-width: 412px;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  position: relative;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+h1 {
   margin: 0;
 }
 
-/* Header Section */
-#section-header {
-  padding: 30px 20px 20px;
-  width: 100%;
+.content-container {
+  padding: 38px 24px 80px 24px;
 }
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.header-title {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 8px;
-  line-height: 1.2;
-}
-
-.header-subtitle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.subtitle-text {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 14px;
-}
-
-.subtitle-highlight {
-  color: #de6f00;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.header-logo {
-  width: 100px;
-  height: 32px;
-  object-fit: contain;
-  border-radius: 50px;
-}
-
-/* List Section */
-#section-list {
-  padding: 0 20px 96px;
-  width: 100%;
-}
-
-.card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.card {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  padding: 18px 14px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  height: auto;
-}
-
-.card-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.card-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 2px;
-}
-
-.card-title {
-  color: #ffffff;
+.page-title {
   font-size: 16px;
-  font-weight: 600;
-  line-height: 1.2;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
 }
 
-.card-desc {
-  color: #ffffff;
+.page-body {
   font-size: 14px;
-  opacity: 0.9;
-  white-space: pre-line;
-  line-height: 1.5;
+  color: #000000;
+  line-height: 1.6;
+}
+
+.page-body p {
+  margin: 0 0 12px 0;
+}
+
+.page-body p:last-child {
+  margin-bottom: 0;
 }
 </style>

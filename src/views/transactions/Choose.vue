@@ -1,6 +1,6 @@
-<template>
+<!-- <template>
   <div class="app-container">
-    <!-- Header -->
+ 
     <section id="section-header">
       <header class="header">
         <button class="back-button" @click="goBack" aria-label="Go back">
@@ -10,7 +10,7 @@
       </header>
     </section>
 
-    <!-- List -->
+
     <section id="section-list">
       <nav class="transaction-list">
         <a href="#" class="list-item" @click.prevent="goToProfitHistory">
@@ -40,7 +40,7 @@
       </nav>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { useRouter } from 'vue-router'

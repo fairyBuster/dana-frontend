@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div v-if="modelValue" class="confirmation-screen" @click.self="close">
     <section id="section-popup">
       <div class="popup-overlay">
@@ -37,7 +37,7 @@
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'

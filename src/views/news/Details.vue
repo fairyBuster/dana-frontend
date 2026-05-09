@@ -1,31 +1,31 @@
 <template>
   <div class="app-container">
+    <!-- Header Section -->
     <section id="section-header">
-      <header class="app-header">
-        <button class="back-btn" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/16_148.svg" alt="Back Icon">
+      <header class="header">
+        <button class="back-button" @click="goBack" aria-label="Go back">
+          <img src="/assets/image/4289_765.svg" alt="Back">
         </button>
-        <h1 class="page-title">Pemberitahuan</h1>
       </header>
     </section>
 
-    <section id="section-notification">
-      <article class="notification-card">
-        <div class="card-image-placeholder">
+    <!-- News Detail Section -->
+    <section id="section-news-detail">
+      <article class="news-card">
+        <div class="news-image-placeholder">
           <img
             v-if="article?.image"
             :src="resolveNewsImageUrl(article.image)"
-            :alt="article?.title || 'Gambar berita'"
-            class="card-hero-img"
+            :alt="article?.title || 'News image'"
+            class="news-hero-img"
             loading="lazy"
             decoding="async"
             referrerpolicy="no-referrer"
             @error="handleHeroError"
           >
         </div>
-        <h2 class="card-title">{{ article?.title || '-' }}</h2>
-        <div class="card-meta">{{ formatDate(article?.published_at || article?.updated_at) }}</div>
-        <div class="card-text" v-html="formattedBody"></div>
+        <h1 class="news-title">{{ article?.title || '-' }}</h1>
+        <div class="news-content" v-html="formattedBody"></div>
       </article>
     </section>
   </div>
@@ -73,13 +73,6 @@ const goBack = () => {
   }
 }
 
-const formatDate = (dateString) => {
-  if (!dateString) return '-'
-  const d = new Date(dateString)
-  if (Number.isNaN(d.getTime())) return '-'
-  return d.toLocaleString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }).replace(',', '')
-}
-
 const escapeHtml = (unsafe) => {
   return String(unsafe || '')
     .replace(/&/g, '&amp;')
@@ -107,8 +100,8 @@ const formattedBody = computed(() => {
     .replace(/<[^>]*>?/gm, '')
     .replace(/\u00a0/g, ' ')
     .replace(/[–—•]/g, '-')
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
+    .replace(/[""]/g, '"')
+    .replace(/['']/g, "'")
     .replace(/\uFFFD/g, '-')
   const clean = escapeHtml(normalized)
   return clean
@@ -128,7 +121,7 @@ const fetchArticle = async (articleId) => {
   } catch (err) {
     article.value = null
     const data = err?.response?.data
-    errorMessage.value = typeof data === 'string' ? data : (data?.detail ? String(data.detail) : 'Gagal mengambil berita')
+    errorMessage.value = typeof data === 'string' ? data : (data?.detail ? String(data.detail) : 'Failed to fetch news')
     showErrorModal.value = true
   } finally {
     isLoading.value = false
@@ -151,123 +144,119 @@ watch(() => route.params.id, (newId, oldId) => {
 
 <style scoped>
 .app-container {
-  font-family: 'Inter', sans-serif;
-  margin: 0 auto;
+  margin: 0;
   padding: 0;
+  font-family: 'Inter', sans-serif;
   background-color: #f8f8f8;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  max-width: 100%;
   min-height: 100vh;
-  width: 100%;
-  max-width: 412px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
 * {
   box-sizing: border-box;
 }
 
-section {
-  width: 100%;
-}
-
-h1,
-h2,
-p {
+h1, p {
   margin: 0;
 }
 
 /* Header Section */
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 60px;
-  position: relative;
+#section-header {
   width: 100%;
 }
 
-.back-btn {
-  position: absolute;
-  left: 7px;
+#section-header .header {
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+}
+
+#section-header .back-button {
   background: transparent;
   border: none;
-  padding: 0;
+  padding: 10px 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 41px;
-  height: 41px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
 }
 
-.back-btn img {
-  width: 35px;
-  height: 35px;
-  object-fit: contain;
+#section-header .back-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
-.page-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #000000;
-  text-align: center;
-}
-
-/* Notification Section */
-#section-notification {
-  padding: 0 20px 24px;
-}
-
-.notification-card {
-  background-color: #ffffff;
-  border-radius: 20px;
-  min-height: 375px;
-  padding: 24px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.card-image-placeholder {
-  background-color: #d9d9d9;
-  border-radius: 20px;
-  width: 100%;
-  height: 146px;
-}
-
-.card-hero-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 20px;
+#section-header .back-button img {
+  width: 20px;
+  height: 20px;
   display: block;
 }
 
-.card-title {
-  color: #004d43;
+/* News Detail Section */
+#section-news-detail {
+  padding: 10px 20px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+#section-news-detail .news-card {
+  width: 100%;
+  max-width: 100%;
+  background-color: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
+  padding: 35px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 719px;
+}
+
+#section-news-detail .news-image-placeholder {
+  width: 100%;
+  height: 138px;
+  background-color: #d9d9d9;
+  border-radius: 2px;
+  margin-bottom: 34px;
+  overflow: hidden;
+}
+
+#section-news-detail .news-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#section-news-detail .news-title {
   font-size: 16px;
   font-weight: 700;
+  color: #000000;
+  margin: 0 0 11px 0;
+  text-align: center;
   line-height: 1.2;
 }
 
-.card-meta {
-  font-size: 11px;
-  color: rgba(0, 0, 0, 0.5);
-}
-
-.card-text {
-  color: #000000;
-  font-size: 14px;
+#section-news-detail .news-content {
+  font-size: 13px;
   font-weight: 400;
-  line-height: 1.4;
+  color: #000000;
+  line-height: 1.5;
+  margin: 0;
+  text-align: left;
+  width: 100%;
 }
 
-.card-text :deep(p) {
+#section-news-detail .news-content :deep(p) {
   margin: 0 0 10px;
 }
 
-.card-text :deep(p:last-child) {
+#section-news-detail .news-content :deep(p:last-child) {
   margin-bottom: 0;
 }
 </style>
-

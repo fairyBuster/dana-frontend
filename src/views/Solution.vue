@@ -1,94 +1,86 @@
-<!-- <template>
+<template>
   <div class="solution-page">
-   
-    <section id="section-header">
-      <header class="app-header">
-        <button class="back-btn" @click="goBack">
-          <img src="/assets/images/2023_1661.svg" alt="Back">
-        </button>
-        <h1 class="page-title">Produk dan Solusi</h1>
+    <!-- Header Section -->
+    <section id="section-header" class="header-section">
+      <header class="header-content">
+        <a href="#" class="back-btn" aria-label="Go back" @click.prevent="goBack">
+          <img src="/assets/image/4026_541.svg" alt="Back Arrow">
+        </a>
+        <h1 class="header-title">Customer Agreement</h1>
       </header>
     </section>
 
-    
-    <section id="section-hero">
-      <div class="hero-content">
-        <h2 class="hero-title">Produk & Solusi OT-SENT</h2>
-        <p class="hero-subtitle">Memaksimalkan potensi teknologi pemetaan udara berbasis AI.</p>
-      </div>
-    </section>
+    <!-- Agreement Section -->
+    <section id="section-agreement" class="agreement-section">
+      <div class="agreement-container">
+        <h2 class="agreement-main-title">AVR CUSTOMER AGREEMENT</h2>
+        <div class="agreement-text">
+          <p>1. Introduction<br>
+          Welcome to AVR (Autonomous Virtual Resource). By accessing or using AVR services, you agree to comply with and be bound by this Customer Agreement. If you do not agree, please do not use this platform.</p>
 
-    
-    <section id="section-products">
-      <div class="section-label-container">
-        <div class="gradient-pill">
-          <span>Produk</span>
-        </div>
-      </div>
-      
-      <div class="card-list">
-       
-        <article class="feature-card">
-          <h3 class="card-title">AI Mapping Engine</h3>
-          <p class="card-desc">Sistem pemetaan berbasis kecerdasan buatan untuk mengolah data udara menjadi visualisasi yang terstruktur dan mudah dipahami.</p>
-        </article>
+          <p>2. Service Description<br>
+          AVR provides an AI-driven automated system designed for digital resource management and optimization. All system operations, outputs, and performance are generated automatically based on internal algorithms and real-time conditions.</p>
 
-       
-        <article class="feature-card">
-          <h3 class="card-title">Real-Time Monitoring</h3>
-          <p class="card-desc">Pantau data secara langsung melalui sistem monitoring yang terintegrasi dalam platform OT-SENT.</p>
-        </article>
+          <p>3. User Responsibilities<br>
+          By using AVR, you agree that:</p>
+          <ul>
+            <li>You provide accurate and valid information during registration</li>
+            <li>You are responsible for maintaining the security of your account</li>
+            <li>You will not misuse the platform in any form</li>
+            <li>You understand that all actions performed through your account are your responsibility</li>
+          </ul>
 
-      
-        <article class="feature-card">
-          <h3 class="card-title">Data Analytics</h3>
-          <p class="card-desc">Analisis data hasil pemetaan untuk mendapatkan insight yang relevan dan mendukung pengambilan keputusan.</p>
-        </article>
-      </div>
-    </section>
+          <p>4. Risk Acknowledgement<br>
+          You acknowledge that:</p>
+          <ul>
+            <li>System performance and outputs may vary and are not guaranteed</li>
+            <li>Results are influenced by real-time system and operational conditions</li>
+            <li>You are solely responsible for your decisions when using the platform</li>
+          </ul>
 
-   
-    <section id="section-solutions">
-      <div class="section-label-container">
-        <div class="gradient-pill">
-          <span>Solusi</span>
-        </div>
-      </div>
+          <p>5. Prohibited Activities<br>
+          Users are strictly prohibited from:</p>
+          <ul>
+            <li>Engaging in phishing, fraud, or deceptive activities</li>
+            <li>Attempting to exploit, hack, or abuse the system</li>
+            <li>Using the platform for unauthorized or illegal purposes</li>
+            <li>Creating multiple accounts for manipulation or misuse</li>
+          </ul>
+          <p>AVR enforces a zero-tolerance policy toward such activities.</p>
 
-      <div class="solutions-grid">
-       
-        <article class="solution-card">
-          <h3 class="solution-title">Pemetaan Area</h3>
-          <div class="solution-image">
-            <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Pemetaan Area">
-          </div>
-          <p class="solution-desc">Menyediakan solusi pemetaan area yang efisien menggunakan teknologi drone dan sistem AI.</p>
-        </article>
+          <p>6. System Integrity & Compliance<br>
+          AVR is committed to maintaining a secure, transparent, and compliant environment. We reserve the right to monitor, restrict, or terminate accounts that violate our policies.</p>
 
-        <article class="solution-card">
-          <h3 class="solution-title">Monitoring Wilayah</h3>
-          <div class="solution-image">
-            <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Monitoring Wilayah">
-          </div>
-          <p class="solution-desc">Memantau kondisi wilayah secara real-time untuk mendukung pengawasan dan analisis data.</p>
-        </article>
-      </div>
-    </section>
+          <p>7. No Affiliation<br>
+          AVR operates independently and is not affiliated with, endorsed by, or associated with any external companies, organizations, or financial institutions.</p>
 
- 
-    <section id="section-footer">
-      <div class="footer-container">
-        <p class="powered-text">Ditenagai oleh teknologi kecerdasan buatan untuk analisis udara.</p>
-        <div class="footer-bottom">
-          <div class="logo-wrapper">
-            <img src="/assets/images/3ac255d5c6533888be0b453286e8c59c5d0e1e9e.png" alt="Logo">
-          </div>
-          <p class="copyright">© 2026 OT-SENT. All Rights Reserved</p>
+          <p>8. Limitation of Liability<br>
+          AVR shall not be held liable for:</p>
+          <ul>
+            <li>Any loss resulting from system variability</li>
+            <li>User decisions or misuse of the platform</li>
+            <li>External factors beyond system control</li>
+          </ul>
+          <p>All services are provided "as is" without guarantees of performance.</p>
+
+          <p>9. Account Suspension & Termination<br>
+          AVR reserves the right to suspend or terminate any account that:</p>
+          <ul>
+            <li>Violates this agreement</li>
+            <li>Engages in suspicious or harmful activities</li>
+            <li>Poses a risk to platform integrity</li>
+          </ul>
+
+          <p>10. Changes to Terms<br>
+          AVR may update or modify this agreement at any time. Continued use of the platform constitutes acceptance of the updated terms.</p>
+
+          <p>11. Contact<br>
+          If you have any questions regarding this agreement, please contact the AVR support team.</p>
         </div>
       </div>
     </section>
   </div>
-</template> -->
+</template>
 
 <script setup>
 import { useRouter } from 'vue-router'
@@ -100,236 +92,102 @@ const goBack = () => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
 .solution-page {
-  font-family: 'Inter', sans-serif;
-  margin: 0 auto;
-  padding: 0;
-  background-color: #0f0b2e;
-  background-image: none;
-  background-size: 100% auto;
-  background-repeat: no-repeat;
-  background-position: top center;
-  max-width: 412px;
-  min-height: 100vh;
-  color: #ffffff;
-  box-sizing: border-box;
-  position: relative;
-}
-
-*, *::before, *::after {
-  box-sizing: inherit;
-}
-
-img {
-  display: block;
-  max-width: 100%;
-}
-
-h1, h2, h3, p {
   margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f5f5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar styling for aesthetics */
-::-webkit-scrollbar {
-  width: 0px;
-  background: transparent;
+* {
+  box-sizing: border-box;
 }
 
 /* Header Section */
-.app-header {
+.header-section {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  background-color: #ffffff;
+  padding: 19px 15px 10px 15px;
+}
+
+.header-content {
   display: flex;
   align-items: center;
-  padding: 20px 20px 20px;
   position: relative;
+  justify-content: center;
 }
 
 .back-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 20px;
+  height: 20px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .back-btn img {
-  width: 24px;
-  height: 24px;
-}
-
-.page-title {
-  font-size: 16px;
-  font-weight: 600;
-  text-align: center;
-  flex-grow: 1;
-  margin-right: 24px;
-}
-
-/* Hero Section */
-.hero-content {
-  padding: 10px 24px 30px;
-  text-align: center;
-}
-
-.hero-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  line-height: 1.25;
-}
-
-.hero-subtitle {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.4;
-  text-align: left;
-}
-
-/* Products Section */
-#section-products {
-  padding: 0 21px 30px;
-}
-
-.section-label-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.gradient-pill {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 134px;
-  height: 38px;
-  background: linear-gradient(180deg, #0F0B2E 0%, #2B1B6F 100%);
-  box-shadow: inset 0px 4px 30px rgba(0, 0, 0, 0.3);
-  border-radius: 19px;
-}
-
-.gradient-pill span {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.feature-card {
-  background: linear-gradient(180deg, #0F0B2E 0%, #2B1B6F 100%);
-  box-shadow: inset 0px 4px 30px rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-  padding: 16px 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  text-align: center;
-}
-
-.card-desc {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #ffffff;
-  text-align: left;
-}
-
-/* Solutions Section */
-#section-solutions {
-  padding: 0 21px 40px;
-}
-
-.solutions-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.solution-card {
-  background: linear-gradient(180deg, #0F0B2E 0%, #2B1B6F 100%);
-  box-shadow: inset 0px 4px 30px rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-  padding: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.solution-title {
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 10px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.solution-image {
-  width: 100%;
-  margin-bottom: 12px;
-  border-radius: 4px;
-  overflow: hidden;
-  aspect-ratio: 1.5;
-}
-
-.solution-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
-.solution-desc {
-  font-size: 11px;
-  line-height: 1.4;
-  text-align: left;
+.header-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #000000;
+  line-height: 21px;
+  text-align: center;
+  max-width: 100%;
+}
+
+.back-btn {
+  position: absolute;
+  left: 0;
+}
+
+/* Agreement Section */
+.agreement-section {
   width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  background-color: #ffffff;
+  padding: 11px 19px 40px 19px;
+  min-height: calc(100vh - 50px);
 }
 
-/* Footer Section */
-#section-footer {
-  padding: 0 20px 40px;
+.agreement-main-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 7px 0;
+  line-height: 30px;
 }
 
-.footer-container {
-  display: flex;
-  flex-direction: column;
+.agreement-text {
+  font-size: 15px;
+  color: #000000;
+  line-height: 1.5;
+  padding-left: 3px;
 }
 
-.powered-text {
-  font-size: 12px;
-  color: #c4c4c4;
-  margin-bottom: 16px;
-  text-align: left;
+.agreement-text p {
+  margin: 0 0 14px 0;
 }
 
-.footer-bottom {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.agreement-text ul {
+  margin: -10px 0 14px 0;
+  padding-left: 18px;
 }
 
-.logo-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.logo-wrapper img {
-  height: 24px;
-  width: auto;
-}
-
-.copyright {
-  font-size: 10px;
-  color: #ffffff;
-  white-space: nowrap;
+.agreement-text li {
+  margin-bottom: 2px;
 }
 </style>

@@ -1,96 +1,162 @@
 <template>
   <div class="app-container">
+    <!-- Header -->
     <section id="section-header">
-      <header class="header">
-        <button class="back-btn" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/17_36.svg" alt="Back Icon">
-        </button>
-        <h1 class="page-title">Withdraw</h1>
+      <header class="app-header">
+        <img src="/assets/image/4283_619.svg" alt="Back" class="back-icon" @click="goBack">
+        <h1 class="header-title">Payout</h1>
       </header>
     </section>
 
-    <section id="section-balance">
-      <div class="balance-card">
-        <div class="balance-info">
-          <p class="balance-label">Saldo rekening utama saya</p>
-          <p class="balance-amount">{{ formatCurrency(withdrawableBalance) }}</p>
+    <!-- Channel Payout -->
+    <section id="section-channel-payout">
+      <div class="channel-payout-content">
+        <h2 class="section-title" style="margin-bottom: 16px;">Choose channel payout</h2>
+        <div class="channel-grid">
+          <div
+            class="channel-card"
+            :class="{ active: selectedChannel === 'USDT' }"
+            @click="selectedChannel = 'USDT'"
+          >
+            <img src="/assets/image/65dd62c6e1300473a49c744e825c21008d000875.png" alt="USDT" class="channel-icon">
+            <span class="channel-name">USDT</span>
+            <div v-if="selectedChannel === 'USDT'" class="badge">OK</div>
+          </div>
+          <div
+            class="channel-card"
+            :class="{ active: selectedChannel === 'IDR' }"
+            @click="selectedChannel = 'IDR'"
+          >
+            <img src="/assets/image/d85fb29e4e19dd899589dbf989e615ca933f1f52.png" alt="Rupiah IDR" class="channel-icon">
+            <span class="channel-name">Rupiah IDR</span>
+            <div v-if="selectedChannel === 'IDR'" class="badge">OK</div>
+          </div>
         </div>
-        <img
-          src="/assets/images/3949bfaf68a457f5031cbc2104b43e4f33f5e668.png"
-          alt="Wallet Icon"
-          class="wallet-icon"
-        >
       </div>
     </section>
 
-    <section id="section-form">
-      <div class="form-container">
-        <h2 class="section-title">Data Pengguna</h2>
-
-        <div class="form-group bank-select" @click="handleBankSelectClick">
-          <div class="input-content">
-            <label>Rekening Penarikan</label>
-            <template v-if="selectedUserBank">
-              <p class="placeholder">
-                {{ selectedUserBank.bank_name || selectedUserBank.bank_code || '-' }} · {{ selectedUserBank.account_number || '-' }}
-              </p>
-            </template>
-            <template v-else>
-              <p class="placeholder">Pilih rekening bank</p>
-            </template>
-          </div>
-          <img src="/assets/images/2010_849.svg" alt="Select Bank" class="dropdown-icon">
+    <!-- Choose Channel (Bank) -->
+    <section id="section-choose-channel">
+      <div class="choose-channel-content">
+        <div class="section-title-wrapper">
+          <div class="section-indicator"></div>
+          <h2 class="section-title">Choose channel</h2>
         </div>
+        <div v-if="selectedUserBank" class="bank-card" @click="handleBankSelectClick">
+          <div class="bank-info">
+            <div class="bank-owner">{{ selectedUserBank.account_name || '-' }}</div>
+            <div class="bank-details">{{ selectedUserBank.account_number || '-' }}<br>{{ selectedUserBank.bank_name || selectedUserBank.bank_code || '-' }}</div>
+          </div>
+          <img src="/assets/image/a7278a84dccf299c032e11e26c6bad56b79f5ef7.png" alt="Selected" class="check-icon">
+        </div>
+        <div v-else class="bank-card" @click="handleBankSelectClick">
+          <div class="bank-info">
+            <div class="bank-owner">Select bank account</div>
+            <div class="bank-details">No bank account selected</div>
+          </div>
+          <img src="/assets/image/a7278a84dccf299c032e11e26c6bad56b79f5ef7.png" alt="Select" class="check-icon">
+        </div>
+      </div>
+    </section>
 
-        <div class="form-group amount-input-group">
-          <div class="amount-input-inner">
-            <label>Nominal Penarikan</label>
+    <!-- Enter Amount -->
+    <section id="section-enter-amount">
+      <div class="enter-amount-content">
+        <div class="section-title-wrapper">
+          <div class="section-indicator"></div>
+          <h2 class="section-title">Enter the payout amount</h2>
+        </div>
+        <div class="input-group">
+          <div class="input-field">
+            <span class="currency-label">USDT</span>
+            <div class="separator"></div>
             <input
               type="text"
-              class="amount-value"
-              :value="displayAmount"
-              @input="formatInput"
-              placeholder="Rp 0"
+              class="amount-input"
+              :value="displayUsdtAmount"
+              :readonly="selectedChannel !== 'USDT'"
+              inputmode="numeric"
+              @input="formatUsdtInput"
+              placeholder="Please enter your amount"
             >
           </div>
-          <div class="fee-info">
-            <span class="fee-rate">Fee transaksi: 10%</span>
-            <span class="fee-total">Setelah biaya: Rp {{ formatCurrency(afterFeeAmount) }}</span>
+          <div class="input-field">
+            <span class="currency-label">IDR</span>
+            <div class="separator"></div>
+            <input
+              type="text"
+              class="amount-input"
+              :value="displayIdrAmount"
+              :readonly="selectedChannel !== 'IDR'"
+              inputmode="numeric"
+              @input="formatIdrInput"
+              placeholder="Please enter your amount with rupiah"
+            >
           </div>
         </div>
       </div>
     </section>
 
-    <section id="section-info">
-      <div class="info-container">
-        <ul class="rules-list">
-          <li>Minimal penarikan 35.000</li>
-          <li>Penarikan terbuka dalam waktu 24 jam setiap hari tanpa hari libur meskipun akhir pekan atau hari libur nasional</li>
-          <li>Biaya pengiriman operasional 10%</li>
-          <li>Transaksi penarikan otomatis yang dikirim melalui saluran pembayaran Trivex</li>
-        </ul>
+    <!-- Summary -->
+    <section id="section-summary">
+      <div class="summary-content">
+        <div class="summary-box">
+          <!-- <div class="summary-row">
+            <span>Minimum Payout</span>
+            <span class="val-with-line">{{ selectedChannel === 'USDT' ? '$3' : 'Rp 35,000' }}</span>
+          </div> -->
+          <div class="summary-row" style="margin-top: 8px;">
+            <span>Payout fee</span>
+            <span></span>
+          </div>
+          <div class="summary-row">
+            <span>IDR</span>
+            <span>12%</span>
+          </div>
+          <div class="summary-row">
+            <span>USDT</span>
+            <span>$3</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <div class="terms-container">
-          <img src="/assets/images/d9b41d54b13e3f872bf656657234e30868c2d994.png" alt="Agree" class="check-icon">
-          <p class="terms-text">
-            Dengan melanjutkan proses ini, kamu menyetujui
-            <router-link to="/terms" class="text-green">Syarat & Ketentuan</router-link>
-            yang berlaku
+    <!-- Action -->
+    <section id="section-action">
+      <div class="action-content">
+        <button class="btn-payout" @click="handleWithdraw" :disabled="!isValidAmount || isSubmitting">
+          <LoadingSpinner v-if="isSubmitting" :visible="true" message="" />
+          <span v-else>Payout</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Instructions -->
+    <section id="section-instructions">
+      <div class="instructions-content">
+        <div class="instructions-box">
+          <h3 class="instructions-title">Payout instructions</h3>
+          <ul class="instructions-list">
+            <li> 🔹 The minimum withdrawal amount is $3 USD for the IDR withdrawal channel.</li>
+            <li> 🔹 The minimum withdrawal amount is $10 USD for the USDT withdrawal channel.</li>
+            <li> 🔹 All withdrawal transactions are processed automatically in real-time.</li>
+            <li> 🔹 Please ensure that your withdrawal account or wallet information is correct before submitting a withdrawal request.</li>
+            <li> 🔹 After completing the withdrawal request, refresh the page and check your account balance.</li>
+            <li> 🔹 Withdrawals below the minimum amount cannot be processed.</li>
+            <li> 🔹 All withdrawal transactions are handled directly through the official AVR company system.</li>
+            <li> 🔹 All withdrawal activities must only be carried out through the official AVR platform. Users are advised not to trust unreasonable offers or transactions outside the company.</li>
+            <li> 🔹 For security and verification purposes, please keep your withdrawal receipt or transaction proof for future reference if needed.</li>
+            <li> 🔹 By making a withdrawal, users are considered to have agreed to all AVR withdrawal rules and policies.</li>
+          </ul>
+          <p class="instructions-text">
+            Every withdrawal on AVR (Autonomous Virtual Resource) is processed automatically in real-time, and users are not required to report or submit any additional confirmation unless the withdrawal has not been received. Users are encouraged to document their withdrawal transactions through the official chat channel for positive and official activity purposes. Please ensure that all withdrawal activities are carried out only through the official AVR platform and keep your transaction proof for security and verification purposes when needed.
           </p>
         </div>
       </div>
     </section>
-
-    <section id="section-action">
-      <div class="action-container">
-        <button class="submit-btn" @click="handleWithdraw" :disabled="!isValidAmount || isSubmitting">
-          <LoadingSpinner v-if="isSubmitting" :visible="true" message="" />
-          <span v-else>Lanjutkan</span>
-        </button>
-      </div>
-    </section>
   </div>
 
+  <!-- Bottom Sheet for Bank Selection -->
   <section v-if="isBottomSheetOpen" id="section-bottom-sheet">
     <div class="overlay" @click="closeBottomSheet"></div>
     <div class="bottom-sheet">
@@ -104,24 +170,19 @@
           @click="selectBank(bank)"
         >
           <div class="account-details">
-            <span class="account-label">Data Rekening</span>
+            <span class="account-label">Bank Account</span>
             <span class="account-number">{{ bank?.account_number || '-' }}</span>
             <span class="account-bank">{{ bank?.bank_name || bank?.bank_code || '-' }}</span>
             <span class="account-name">{{ bank?.account_name || '-' }}</span>
           </div>
-          <img class="radio-icon" src="/assets/images/2011_1066.svg" alt="Selected">
+          <img class="radio-icon" src="/assets/image/a7278a84dccf299c032e11e26c6bad56b79f5ef7.png" alt="Selected">
         </div>
       </template>
 
       <template v-else>
-        <img
-          src="/assets/images/d634ba55ee38309526b6d657b8e1a5a382ef7c60.png"
-          alt="Wallet Illustration"
-          class="illustration"
-        >
-        <h3 class="sheet-title">Rekening Penarikan</h3>
-        <p class="sheet-desc">Yuk, tambahkan rekening penarikan Anda untuk melakukan transaksi penarikan!</p>
-        <button type="button" class="btn-add" @click="handleAddBank">Tambah Rekening Penarikan</button>
+        <h3 class="sheet-title">Withdrawal Account</h3>
+        <p class="sheet-desc">Add a withdrawal account to process your payout transaction!</p>
+        <button type="button" class="btn-add" @click="handleAddBank">Add Withdrawal Account</button>
       </template>
     </div>
   </section>
@@ -156,20 +217,46 @@ const successMessage = ref('')
 const errorMessage = ref('')
 const isRefreshing = ref(false)
 const lastRefreshedAt = ref(0)
+const selectedChannel = ref('IDR')
 let successRedirectTimeoutId = 0
 let hasRedirectedAfterSuccess = false
+const usdtToIdrRate = ref(16000)
 
-const MIN_WITHDRAW = 30000
-const MAX_WITHDRAW = 100000000
 const SERVICE_FEE_RATE = 0.10
+const MIN_WITHDRAW_IDR = 30000
+const MAX_WITHDRAW_IDR = 100000000
+const MIN_WITHDRAW_USDT = 10
+const MAX_WITHDRAW_USDT = 1000000
 
 const numericAmount = computed(() => {
   const raw = withdrawAmount.value.replace(/[^0-9]/g, '')
   return Number.parseInt(raw, 10) || 0
 })
 
-const displayAmount = computed(() => {
-  const num = numericAmount.value
+const idrAmountNumber = computed(() => {
+  const amount = numericAmount.value
+  if (!amount) return 0
+  if (selectedChannel.value === 'IDR') return amount
+  return Math.round(amount * Number(usdtToIdrRate.value || 0))
+})
+
+const usdtAmountNumber = computed(() => {
+  const amount = numericAmount.value
+  if (!amount) return 0
+  if (selectedChannel.value === 'USDT') return amount
+  const rate = Number(usdtToIdrRate.value || 0)
+  if (!rate) return 0
+  return Number((amount / rate).toFixed(2))
+})
+
+const displayUsdtAmount = computed(() => {
+  const num = usdtAmountNumber.value
+  if (!num) return ''
+  return `$${new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(num)}`
+})
+
+const displayIdrAmount = computed(() => {
+  const num = idrAmountNumber.value
   if (!num) return ''
   return `Rp ${new Intl.NumberFormat('id-ID').format(num)}`
 })
@@ -187,8 +274,16 @@ const isValidAmount = computed(() => {
   if (!selectedUserBankId.value) return false
   const amount = numericAmount.value
   if (amount <= 0) return false
-  if (amount < MIN_WITHDRAW || amount > MAX_WITHDRAW) return false
-  if (amount > withdrawableBalance.value) return false
+  if (selectedChannel.value === 'USDT') {
+    if (amount < MIN_WITHDRAW_USDT || amount > MAX_WITHDRAW_USDT) return false
+    if (amount > withdrawableBalance.value) return false
+    return true
+  }
+  if (amount < MIN_WITHDRAW_IDR || amount > MAX_WITHDRAW_IDR) return false
+  const rate = Number(usdtToIdrRate.value || 0)
+  if (!rate) return false
+  const amountUsd = amount / rate
+  if (amountUsd > withdrawableBalance.value) return false
   return true
 })
 
@@ -220,13 +315,26 @@ const handleBankSelectClick = () => {
   isBottomSheetOpen.value = true
 }
 
-const formatInput = (event) => {
+const formatUsdtInput = (event) => {
+  if (selectedChannel.value !== 'USDT') return
   const raw = event?.target?.value?.replace(/[^0-9]/g, '') || ''
-  if (raw) {
-    withdrawAmount.value = new Intl.NumberFormat('id-ID').format(Number.parseInt(raw, 10))
-  } else {
+  if (!raw) {
     withdrawAmount.value = ''
+    return
   }
+  const n = Number.parseInt(raw, 10)
+  withdrawAmount.value = Number.isFinite(n) ? new Intl.NumberFormat('en-US').format(n) : ''
+}
+
+const formatIdrInput = (event) => {
+  if (selectedChannel.value !== 'IDR') return
+  const raw = event?.target?.value?.replace(/[^0-9]/g, '') || ''
+  if (!raw) {
+    withdrawAmount.value = ''
+    return
+  }
+  const n = Number.parseInt(raw, 10)
+  withdrawAmount.value = Number.isFinite(n) ? new Intl.NumberFormat('id-ID').format(n) : ''
 }
 
 const formatCurrency = (value) => {
@@ -260,16 +368,16 @@ const normalizeWithdrawErrorMessage = (err) => {
     s.includes('tidak cukup') ||
     s.includes('kurang')
   ) {
-    return 'Pastikan jumlah penarikan sesuai dengan saldo yang tersedia.'
+    return 'Make sure the withdrawal amount matches your available balance.'
   }
   if (s.includes('1 kali') || s.includes('sekali') || s.includes('daily') || s.includes('hari')) {
-    return 'Anda hanya bisa melakukan 1 kali penarikan dalam sehari.'
+    return 'You can only make 1 withdrawal per day.'
   }
   if (s.includes('minimum') || s.includes('maksimum') || s.includes('maximum') || s.includes('min')) {
-    return 'Pastikan jumlah penarikan Anda berada dalam rentang yang diizinkan.'
+    return 'Make sure your withdrawal amount is within the allowed range.'
   }
   if (raw) return String(raw)
-  return 'Permintaan gagal, segarkan halaman'
+  return 'Request failed, please refresh the page'
 }
 
 const fetchAccountInfo = async () => {
@@ -288,6 +396,16 @@ const fetchDefaultService = async () => {
     const list = Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : []
     const first = list?.[0]
     if (first?.id) serviceId.value = first.id
+    const candidates = [
+      first?.usdt_to_idr_rate,
+      first?.usd_to_idr_rate,
+      first?.exchange_rate,
+      first?.rate,
+      first?.idr_rate,
+      first?.idr_per_usdt
+    ]
+    const picked = candidates.map((v) => parseNumber(v)).find((n) => n >= 1000 && n <= 1000000) || 0
+    if (picked) usdtToIdrRate.value = picked
   } catch (_) {
     serviceId.value = null
   }
@@ -347,7 +465,7 @@ const handleSuccessConfirm = () => {
 const handleWithdraw = async () => {
   if (!isValidAmount.value) return
   if (!selectedUserBankId.value) {
-    errorMessage.value = 'Silakan pilih rekening bank penerima'
+    errorMessage.value = 'Please select a bank account'
     errorModalOpen.value = true
     return
   }
@@ -361,7 +479,7 @@ const handleWithdraw = async () => {
       pin: '',
       service_id: serviceId.value ?? 0
     })
-    successMessage.value = 'Permintaan Anda telah diterima oleh sistem.'
+    successMessage.value = 'Your request has been received by the system.'
     hasRedirectedAfterSuccess = false
     successModalOpen.value = true
     if (successRedirectTimeoutId) {
@@ -401,33 +519,25 @@ onActivated(() => {
 </script>
 
 <style scoped>
-.app-container {
-  --bg-color: #f8f8f8;
-  --text-main: #000000;
-  --text-light: #ffffff;
-  --text-muted: rgba(0, 0, 0, 0.5);
-  --primary-color: #004d43;
-  --card-bg: #eeeeee;
-  --input-bg: #f8f8f8;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
+.app-container {
   font-family: 'Inter', sans-serif;
   margin: 0 auto;
   padding: 0;
-  background-color: var(--bg-color);
+  background-color: #f8f8f8;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 412px;
+  max-width: 100%;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-h1,
-h2,
-p {
+h1, h2, h3, p {
   margin: 0;
 }
 
@@ -435,250 +545,302 @@ section {
   width: 100%;
 }
 
-/* Header Section */
-#section-header .header {
+.section-title-wrapper {
   display: flex;
   align-items: center;
-  padding: 20px 10px;
-  position: relative;
-  height: 60px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-#section-header .back-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+.section-indicator {
+  width: 4px;
+  height: 16px;
+  background-color: #1b46f5;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000;
+}
+
+/* Header */
+.app-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  z-index: 1;
+  padding: 10px 0;
+  position: relative;
 }
 
-#section-header .back-btn img {
-  width: 35px;
-  height: 35px;
-}
-
-#section-header .page-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-main);
-  margin: 0;
+.back-icon {
   position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
-  pointer-events: none;
+  left: 10px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 
-/* Balance Section */
-#section-balance {
-  padding: 0 16px;
-}
-
-#section-balance .balance-card {
-  background: linear-gradient(90deg, #4e733f 0%, #60995b 100%);
-  border-radius: 15px;
-  padding: 16px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: var(--text-light);
-}
-
-#section-balance .balance-label {
-  font-size: 12px;
-  margin: 0 0 4px 0;
-  font-weight: 400;
-}
-
-#section-balance .balance-amount {
-  font-size: 18px;
+.header-title {
+  font-size: 16px;
   font-weight: 700;
-  margin: 0;
+  color: #000000;
 }
 
-#section-balance .wallet-icon {
-  width: 50px;
-  height: 50px;
+/* Channel Payout */
+.channel-payout-content {
+  padding: 16px 20px;
+}
+
+.channel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.channel-card {
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.channel-card.active {
+  border-color: #1b46f5;
+}
+
+.channel-icon {
+  width: 53px;
+  height: 53px;
   object-fit: contain;
 }
 
-/* Form Section */
-#section-form {
-  padding: 24px 16px 0;
-}
-
-#section-form .section-title {
-  font-size: 14px;
+.channel-name {
+  font-size: 12px;
+  color: #000000;
   font-weight: 600;
-  color: var(--text-main);
-  margin: 0 0 12px 0;
 }
 
-#section-form .form-group {
-  background-color: var(--card-bg);
-  border-radius: 20px;
-  margin-bottom: 12px;
+.badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #1b46f5;
+  color: #ffffff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-bottom-left-radius: 5px;
+  font-weight: 600;
 }
 
-#section-form .bank-select {
+/* Choose Channel (Bank) */
+.choose-channel-content {
   padding: 16px 20px;
+}
+
+.bank-card {
+  background-color: #ffffff;
+  border: 1px solid #f4f4f4;
+  border-radius: 5px;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
 }
 
-#section-form .input-content label {
-  display: block;
-  font-size: 12px;
-  color: var(--primary-color);
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-#section-form .input-content .placeholder {
-  font-size: 12px;
-  color: var(--text-muted);
-  background-color: transparent;
-  margin: 0;
-}
-
-#section-form .dropdown-icon {
-  width: 24px;
-  height: 24px;
-}
-
-#section-form .amount-input-group {
-  padding: 16px;
-}
-
-#section-form .amount-input-inner {
-  background-color: var(--input-bg);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 12px;
-}
-
-#section-form .amount-input-inner label {
-  display: block;
-  font-size: 12px;
-  color: var(--primary-color);
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-#section-form .amount-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text-main);
-  background: transparent;
-  border: none;
-  outline: none;
-  font-family: inherit;
-  width: 100%;
-}
-
-#section-form .amount-value::placeholder {
-  color: var(--text-muted);
-  font-weight: 400;
-}
-
-#section-form .fee-info {
+.bank-info {
   display: flex;
-  justify-content: space-between;
-  padding: 0 4px;
-  font-size: 10px;
+  flex-direction: column;
+  gap: 4px;
 }
 
-#section-form .fee-rate {
-  color: var(--text-muted);
-}
-
-#section-form .fee-total {
-  color: var(--primary-color);
+.bank-owner {
+  font-size: 14px;
+  color: #000000;
   font-weight: 600;
 }
 
-/* Info Section */
-#section-info {
-  padding: 24px 20px;
+.bank-details {
+  font-size: 14px;
+  color: #707070;
+  line-height: 1.4;
 }
 
-#section-info .rules-list {
-  margin: 0 0 24px 0;
-  padding-left: 16px;
-  font-size: 10px;
-  color: var(--text-main);
-  line-height: 1.6;
+.check-icon {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
 }
 
-#section-info .rules-list li {
-  margin-bottom: 4px;
-  padding-left: 4px;
+/* Enter Amount */
+.enter-amount-content {
+  padding: 16px 20px;
 }
 
-#section-info .terms-container {
+.input-group {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 12px;
 }
 
-#section-info .check-icon {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-#section-info .terms-text {
-  font-size: 10px;
-  color: var(--text-main);
-  margin: 0;
-  line-height: 1.5;
-  font-weight: 600;
-}
-
-.text-green {
-  color: #4caf50;
-  text-decoration: none;
-}
-
-/* Action Section */
-#section-action {
-  padding: 16px 20px 40px;
-}
-
-#section-action .submit-btn {
-  width: 100%;
-  background-color: var(--primary-color);
-  color: var(--text-light);
-  border: none;
+.input-field {
+  background-color: #ffffff;
+  border: 1px solid #eaeaea;
   border-radius: 20px;
+  padding: 15px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.currency-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+  width: 36px;
+}
+
+.separator {
+  width: 1px;
+  height: 16px;
+  background-color: #777777;
+  opacity: 0.5;
+}
+
+.placeholder-text {
+  font-size: 12px;
+  color: #aaaaaa;
+}
+
+.amount-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: #000000;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  min-width: 0;
+}
+
+.amount-input::placeholder {
+  color: #aaaaaa;
+}
+
+.amount-input[readonly] {
+  color: #777777;
+}
+
+/* Summary */
+.summary-content {
+  padding: 16px 20px;
+}
+
+.summary-box {
+  background-color: #f1f5ff;
+  border-radius: 5px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #727272;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.val-with-line {
+  border-bottom: 1px solid #000000;
+  padding-bottom: 2px;
+  min-width: 50px;
+  text-align: right;
+  color: #444444;
+}
+
+/* Action */
+.action-content {
+  padding: 16px 20px;
+}
+
+.btn-payout {
+  width: 100%;
+  background-color: #1b46f5;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
   padding: 16px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  text-align: center;
-  transition: opacity 0.2s;
-  font-family: inherit;
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-#section-action .submit-btn:active {
-  opacity: 0.8;
+.btn-payout:hover {
+  background-color: #1538c4;
 }
 
-#section-action .submit-btn:disabled {
+.btn-payout:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
+/* Instructions */
+.instructions-content {
+  padding: 16px 10px;
+}
+
+.instructions-box {
+  background: linear-gradient(360deg, rgba(255, 255, 255, 0.47) 0%, rgba(190, 215, 249, 0.47) 100%);
+  border: 1px solid #ffffff;
+  border-radius: 5px;
+  padding: 16px;
+}
+
+.instructions-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 8px;
+}
+
+.instructions-text {
+  font-size: 11px;
+  color: #5e5e5e;
+  line-height: 1.6;
+}
+
+.instructions-list {
+  margin: 0 0 10px 0;
+  padding: 0;
+  font-size: 11px;
+  color: #5e5e5e;
+  line-height: 1.6;
+  list-style: none;
+}
+
+.instructions-list li + li {
+  margin-top: 6px;
+}
+
+/* Bottom Sheet */
 #section-bottom-sheet {
   position: fixed;
   top: 0;
@@ -724,23 +886,25 @@ section {
 }
 
 #section-bottom-sheet .account-card {
-  background-color: #eeeeee;
-  border-radius: 20px;
-  padding: 20px;
+  background-color: #f9f9fc;
+  border-radius: 10px;
+  padding: 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 12px;
+  cursor: pointer;
 }
 
 #section-bottom-sheet .account-details {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 #section-bottom-sheet .account-label {
   font-size: 12px;
-  color: #004d43;
+  color: #1b46f5;
   font-weight: 600;
 }
 
@@ -757,18 +921,8 @@ section {
 }
 
 #section-bottom-sheet .radio-icon {
-  width: 24px;
-  height: 24px;
-}
-
-#section-bottom-sheet .illustration {
-  width: 139px;
-  height: 139px;
-  margin-bottom: 28px;
-  object-fit: contain;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+  width: 16px;
+  height: 16px;
 }
 
 #section-bottom-sheet .sheet-title {
@@ -785,15 +939,12 @@ section {
   text-align: center;
   margin: 0 0 32px 0;
   line-height: 1.5;
-  max-width: 368px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 #section-bottom-sheet .btn-add {
   width: 100%;
   max-width: 387px;
-  background-color: #004d43;
+  background-color: #1b46f5;
   color: #ffffff;
   border: none;
   border-radius: 20px;
@@ -804,6 +955,7 @@ section {
   display: flex;
   justify-content: center;
   align-items: center;
+  font-family: 'Inter', sans-serif;
+  margin: 0 auto;
 }
 </style>
-

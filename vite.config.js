@@ -11,6 +11,10 @@ const isProd = process.env.NODE_ENV === 'production'
 export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const proxyTarget = env.VITE_PROXY_TARGET || env.VITE_BACKEND_URL || 'https://backend.scagerwebsite.uk'
+  const mtProxyTarget =
+    env.VITE_MT_PROXY_TARGET ||
+    env.VITE_MT_API_URL ||
+    'http://localhost:5000'
 
   const devPlugins = []
   if (!isProd) {
@@ -51,7 +55,7 @@ export default defineConfig(async ({ mode }) => {
       port: 5174,
       host: true,
       // Allow dev server to be accessed via specified hosts
-      allowedHosts: ['localhost:8000','localhost:5174','drashcloudsafer.online','trivexcapt.com','trivxcapt.com'],
+      allowedHosts: ['localhost:8000','localhost:5174','frontend.scagerwebsite.uk','backend.scagerwebsite.uk'],
       proxy: {
         '/api': {
           target: proxyTarget,
@@ -82,6 +86,12 @@ export default defineConfig(async ({ mode }) => {
           target: proxyTarget,
           changeOrigin: true,
           secure: false
+        },
+        '/mt': {
+          target: mtProxyTarget,
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/mt/, '')
         }
       }
     },

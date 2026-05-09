@@ -1,36 +1,67 @@
 <template>
   <div class="app-container">
+    <!-- Header -->
     <section id="section-header">
-      <header class="header">
-        <button class="back-button" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/37_82.svg" alt="Back">
+      <header class="app-header">
+        <a href="/profile" class="back-btn" aria-label="Go to profile">
+          <img src="/assets/image/4252_299.svg" alt="Back">
+        </a>
+        <button type="button" ref="menuAnchorEl" class="title-group" @click.stop="toggleRecordMenu">
+          <h1>{{ currentRecordLabel }}</h1>
+          <img
+            src="/assets/image/4252_317.svg"
+            alt="Toggle dropdown"
+            class="dropdown-icon"
+            :class="{ open: recordMenuOpen }"
+          >
+          <div v-if="recordMenuOpen" class="record-menu" @click.stop>
+            <button
+              v-for="item in recordMenuItems"
+              :key="item.key"
+              type="button"
+              class="record-menu-item"
+              :class="{ active: item.key === currentRecordKey }"
+              @click.stop="selectRecord(item)"
+            >
+              {{ item.label }}
+            </button>
+          </div>
         </button>
-        <h1 class="page-title">Riwayat komisi undangan</h1>
       </header>
     </section>
 
-    <section id="section-history-list">
-      <div v-if="commissions.length === 0 && !isLoading" class="empty-state">
-        <p class="empty-text">Belum ada riwayat komisi</p>
+    <!-- Commission List -->
+    <section id="section-commission-list">
+      <div class="table-header">
+        <div class="col-status">Status</div>
+        <div class="col-amount">Amount</div>
+        <div class="col-type">Type</div>
       </div>
 
-      <main class="history-list">
-        <article v-for="commission in commissions" :key="commission.id" class="history-card">
-          <p class="card-date">Date trx: {{ commission.date }}</p>
-          <div class="card-content">
-            <img src="/assets/images/cde3277fa2769528c9be71b8b0840666c070bbdb.png" alt="Commission Icon" class="card-icon">
-            <div class="card-details">
-              <p class="card-description">{{ commission.description }}</p>
-              <p class="card-amount">{{ formatCurrency(commission.amount) }}</p>
-            </div>
+      <div v-if="commissions.length === 0 && !isLoading" class="empty-state">
+        <p class="empty-text">No commission records yet</p>
+      </div>
+
+      <div class="list-body">
+        <div v-for="commission in commissions" :key="commission.id" class="list-item">
+          <div class="col-status status-success">Succeed</div>
+          <div class="col-amount font-bold">{{ commission.amount }}</div>
+          <div class="col-type">
+            <div class="type-phone">{{ commission.memberId }}</div>
+            <div class="type-date">{{ commission.date }}</div>
           </div>
-        </article>
-      </main>
+        </div>
+      </div>
 
       <div v-if="commissions.length > 0 && hasMore" class="pagination-row">
-        <button class="load-more-btn" @click="loadMore" :disabled="isLoading">
-          Memuat lebih banyak
-        </button>
+        <PaginationBar
+          :page="1"
+          :total-pages="1"
+          :has-prev="false"
+          :has-next="hasMore"
+          :loading="isLoading"
+          @change="loadMore"
+        />
       </div>
     </section>
 
@@ -39,12 +70,14 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { transactionAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
+import PaginationBar from '@/components/partials/PaginationBar.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const commissions = ref([])
 const allCommissions = ref([])
@@ -55,6 +88,55 @@ const pageSize = 20
 const visibleCount = ref(pageSize)
 const hasMore = ref(true)
 const nextFetchPage = ref(1)
+
+/* Record menu dropdown */
+const recordMenuOpen = ref(false)
+const menuAnchorEl = ref(null)
+
+const recordMenuItems = [
+  { key: 'recharge', label: 'Record recharge', to: '/dep/history' },
+  { key: 'mining', label: 'Mining record', to: '/portfolio/history' },
+  { key: 'payout', label: 'Payout record', to: '/flow/history' },
+  { key: 'purchase', label: 'Purchase record', to: '/orders' },
+  { key: 'commission', label: 'Commision friend', to: '/commission/history' },
+  { key: 'other', label: 'Other record', to: '/trx' }
+]
+
+const currentRecordKey = computed(() => {
+  const p = String(route.path || '')
+  if (p.startsWith('/dep')) return 'recharge'
+  if (p.startsWith('/portfolio')) return 'mining'
+  if (p.startsWith('/flow')) return 'payout'
+  if (p.startsWith('/orders')) return 'purchase'
+  if (p.startsWith('/commission')) return 'commission'
+  return 'other'
+})
+
+const currentRecordLabel = computed(() => {
+  const found = recordMenuItems.find((x) => x.key === currentRecordKey.value)
+  return found?.label || 'Other record'
+})
+
+const toggleRecordMenu = () => {
+  recordMenuOpen.value = !recordMenuOpen.value
+}
+
+const closeRecordMenu = () => {
+  recordMenuOpen.value = false
+}
+
+const selectRecord = (item) => {
+  closeRecordMenu()
+  if (item?.to) router.push(item.to)
+}
+
+const onDocumentClick = (e) => {
+  if (!recordMenuOpen.value) return
+  const anchor = menuAnchorEl.value
+  const target = e?.target
+  if (anchor && target && anchor.contains(target)) return
+  closeRecordMenu()
+}
 
 const goBack = () => {
   router.go(-1)
@@ -68,12 +150,12 @@ const parseNumber = (value) => {
   return Number.isFinite(n) ? n : 0
 }
 
-const formatCurrency = (value) => {
+const formatUSD = (value) => {
   const num = parseNumber(value)
-  return `Rp ${new Intl.NumberFormat('id-ID', {
+  return '$' + new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(num)}`
+  }).format(num)
 }
 
 const normalizeTransactionsResponse = (data) => {
@@ -88,28 +170,28 @@ const formatDateTime = (value) => {
   if (!value) return '-'
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return String(value)
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}.${pad2(d.getMinutes())}`
 }
 
 const extractErrorMessage = (err) => {
   const data = err?.response?.data
-  if (!data) return err?.message || 'Permintaan gagal, segarkan halaman'
+  if (!data) return err?.message || 'Request failed, please refresh the page'
   if (typeof data === 'string') return data
   if (data.detail) return String(data.detail)
   const firstKey = Object.keys(data)[0]
   const firstVal = data[firstKey]
   if (Array.isArray(firstVal) && firstVal.length) return String(firstVal[0])
   if (firstVal) return String(firstVal)
-  return 'Permintaan gagal, segarkan halaman'
+  return 'Request failed, please refresh the page'
 }
 
 const mapTransactionToCommission = (trx) => {
   const memberId = trx?.upline_phone || trx?.user_phone || trx?.trx_id || '-'
   return {
     id: trx?.id ?? trx?.trx_id,
-    description: `Komisi aset dari ${memberId}`,
+    memberId: memberId,
     date: formatDateTime(trx?.created_at),
-    amount: parseNumber(trx?.amount),
+    amount: formatUSD(parseNumber(trx?.amount)),
     createdAtRaw: trx?.created_at || null
   }
 }
@@ -211,73 +293,156 @@ const loadMore = async () => {
 
 onMounted(() => {
   fetchCommissionTransactions()
+  document.addEventListener('click', onDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 
 <style scoped>
-.app-container {
-  margin: 0 auto;
+* {
+  box-sizing: border-box;
+  margin: 0;
   padding: 0;
+}
+
+.app-container {
   font-family: 'Inter', sans-serif;
   background-color: #f8f8f8;
   max-width: 412px;
   min-height: 100vh;
+  margin: 0 auto;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
+h1, p {
+  margin: 0;
 }
 
 /* Header */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 30px 16px 20px 16px;
-  position: relative;
-  background-color: #f8f8f8;
-}
-
-.back-button {
-  position: absolute;
-  left: 7px;
-  top: 21px;
-  width: 41px;
-  height: 41px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  background: none;
-  padding: 0;
-}
-
-.back-button img {
+#section-header {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
-.page-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #000000;
-  margin: 0;
-  text-align: center;
-}
-
-/* History List */
-.history-list {
-  padding: 0 13px 20px 13px;
+.app-header {
   display: flex;
-  flex-direction: column;
-  gap: 9px;
-  background-color: #f8f8f8;
+  align-items: center;
+  padding: 18px 16px;
+  position: relative;
+  min-height: 60px;
 }
+
+.back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.back-btn img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.title-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  position: relative;
+}
+
+.title-group h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.dropdown-icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.record-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  z-index: 50;
+}
+
+.record-menu-item {
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 16px;
+  color: #000000;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.record-menu-item + .record-menu-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.record-menu-item.active {
+  font-weight: 700;
+}
+
+/* Commission List */
+#section-commission-list {
+  padding: 8px 16px 32px 16px;
+  min-height: calc(100vh - 64px);
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr;
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.col-status { text-align: left; }
+.col-amount { text-align: center; }
+.col-type { text-align: right; }
 
 .empty-state {
   padding: 40px 0;
@@ -289,76 +454,58 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.history-card {
-  background-color: #eeeeee;
-  border-radius: 20px;
-  padding: 15px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.list-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr;
+  align-items: center;
+  padding: 16px 8px;
+  position: relative;
 }
 
-.card-date {
-  color: #004d43;
+.list-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  border-bottom: 1px dotted #888888;
+}
+
+.status-success {
+  color: #0cb300;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.font-bold {
+  font-weight: 700;
+  font-size: 13px;
+  color: #010101;
+  text-align: center;
+}
+
+.col-type {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.type-phone {
   font-size: 13px;
   font-weight: 600;
-  margin: 0;
+  color: #010101;
+  margin-bottom: 4px;
 }
 
-.card-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.card-icon {
-  width: 32px;
-  height: 30px;
-  object-fit: contain;
-}
-
-.card-details {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.card-description {
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 13px;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.card-amount {
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 13px;
-  margin: 0;
-  line-height: 1.2;
+.type-date {
+  font-size: 11px;
+  color: rgba(1, 1, 1, 0.4);
 }
 
 .pagination-row {
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 0 13px 20px;
-}
-
-.load-more-btn {
-  width: 100%;
-  height: 40px;
-  border-radius: 20px;
-  background-color: #004d43;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.load-more-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  padding: 16px 0 0;
 }
 </style>
