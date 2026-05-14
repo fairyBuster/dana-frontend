@@ -208,7 +208,7 @@ const loadBankData = async () => {
   if (!bankId) {
     errorMessage.value = 'ID kartu bank tidak ditemukan'
     errorModalOpen.value = true
-    router.push('/connect')
+    router.push('/hn/user/account')
     return
   }
 
@@ -219,7 +219,7 @@ const loadBankData = async () => {
     if (!found) {
       errorMessage.value = 'Data kartu bank tidak ditemukan'
       errorModalOpen.value = true
-      router.push('/connect')
+      router.push('/hn/user/account')
       return
     }
 
@@ -238,7 +238,7 @@ const loadBankData = async () => {
   } catch (error) {
     errorMessage.value = extractErrorMessage(error)
     errorModalOpen.value = true
-    router.push('/connect')
+    router.push('/hn/user/account')
   }
 }
 
@@ -271,7 +271,7 @@ const handleSubmit = async () => {
       account_number: String(formData.accountNumber).replace(/\s+/g, ''),
       is_default: Boolean(formData.isDefault)
     })
-    router.replace('/profile')
+    router.replace('/hn/user/account')
   } catch (error) {
     errorMessage.value = extractErrorMessage(error)
     errorModalOpen.value = true

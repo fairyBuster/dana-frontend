@@ -13,28 +13,28 @@
     <!-- Agreement Section -->
     <section id="section-agreement" class="agreement-section">
       <div class="agreement-container">
-        <h2 class="agreement-main-title">AVR CUSTOMER AGREEMENT</h2>
+        <h2 class="agreement-main-title">HUE CUSTOMER AGREEMENT</h2>
         <div class="agreement-text">
           <p>1. Introduction<br>
-          Welcome to AVR (Autonomous Virtual Resource). By accessing or using AVR services, you agree to comply with and be bound by this Customer Agreement. If you do not agree, please do not use this platform.</p>
+          Welcome to HUE (Hybrid Unified Edge). By accessing or using HUE services, you agree to comply with and be bound by this Customer Agreement. If you do not agree, please do not use this platform.</p>
 
           <p>2. Service Description<br>
-          AVR provides an AI-driven automated system designed for digital resource management and optimization. All system operations, outputs, and performance are generated automatically based on internal algorithms and real-time conditions.</p>
+          HUE provides a cloud computing and digital infrastructure system designed for resource management, distributed computing, and operational optimization. All system operations, outputs, and performance are processed automatically based on internal systems and real-time operational conditions.</p>
 
           <p>3. User Responsibilities<br>
-          By using AVR, you agree that:</p>
+          By using HUE, you agree that:</p>
           <ul>
             <li>You provide accurate and valid information during registration</li>
             <li>You are responsible for maintaining the security of your account</li>
             <li>You will not misuse the platform in any form</li>
-            <li>You understand that all actions performed through your account are your responsibility</li>
+            <li>You understand that all activities performed through your account are your responsibility</li>
           </ul>
 
           <p>4. Risk Acknowledgement<br>
           You acknowledge that:</p>
           <ul>
-            <li>System performance and outputs may vary and are not guaranteed</li>
-            <li>Results are influenced by real-time system and operational conditions</li>
+            <li>System performance and operational outputs may vary and are not guaranteed</li>
+            <li>Results are influenced by real-time system and infrastructure conditions</li>
             <li>You are solely responsible for your decisions when using the platform</li>
           </ul>
 
@@ -46,36 +46,36 @@
             <li>Using the platform for unauthorized or illegal purposes</li>
             <li>Creating multiple accounts for manipulation or misuse</li>
           </ul>
-          <p>AVR enforces a zero-tolerance policy toward such activities.</p>
+          <p>HUE enforces a zero-tolerance policy toward such activities.</p>
 
           <p>6. System Integrity & Compliance<br>
-          AVR is committed to maintaining a secure, transparent, and compliant environment. We reserve the right to monitor, restrict, or terminate accounts that violate our policies.</p>
+          HUE is committed to maintaining a secure, transparent, and compliant environment. We reserve the right to monitor, restrict, suspend, or terminate accounts that violate our policies or compromise platform integrity.</p>
 
           <p>7. No Affiliation<br>
-          AVR operates independently and is not affiliated with, endorsed by, or associated with any external companies, organizations, or financial institutions.</p>
+          HUE operates independently and is not affiliated with, endorsed by, or associated with any external companies, organizations, financial institutions, or third-party entities.</p>
 
           <p>8. Limitation of Liability<br>
-          AVR shall not be held liable for:</p>
+          HUE shall not be held liable for:</p>
           <ul>
-            <li>Any loss resulting from system variability</li>
+            <li>Any loss resulting from system variability or operational interruptions</li>
             <li>User decisions or misuse of the platform</li>
             <li>External factors beyond system control</li>
           </ul>
-          <p>All services are provided "as is" without guarantees of performance.</p>
+          <p>All services are provided "as is" without guarantees of specific performance or results.</p>
 
           <p>9. Account Suspension & Termination<br>
-          AVR reserves the right to suspend or terminate any account that:</p>
+          HUE reserves the right to suspend or terminate any account that:</p>
           <ul>
             <li>Violates this agreement</li>
-            <li>Engages in suspicious or harmful activities</li>
-            <li>Poses a risk to platform integrity</li>
+            <li>Engages in suspicious, abusive, or harmful activities</li>
+            <li>Poses a risk to platform security or operational integrity</li>
           </ul>
 
           <p>10. Changes to Terms<br>
-          AVR may update or modify this agreement at any time. Continued use of the platform constitutes acceptance of the updated terms.</p>
+          HUE may update or modify this agreement at any time. Continued use of the platform constitutes acceptance of the updated terms.</p>
 
           <p>11. Contact<br>
-          If you have any questions regarding this agreement, please contact the AVR support team.</p>
+          If you have any questions regarding this agreement, please contact the HUE support team.</p>
         </div>
       </div>
     </section>

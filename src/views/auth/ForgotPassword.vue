@@ -174,7 +174,7 @@ const handleReset = async () => {
     showSuccessModal.value = true
     
     setTimeout(() => {
-      router.push('/login')
+      router.push('/hn/console')
     }, 2000)
   } catch (error) {
     console.error('Change password error:', error.response?.data || error.message)

@@ -17,26 +17,26 @@
         <div class="account-card">
           <div class="card-tag tag-idr">IDR</div>
           <div class="card-content">
-            <img src="/assets/image/d85fb29e4e19dd899589dbf989e615ca933f1f52.png" alt="Rp Icon" class="card-icon">
+            <img src="/assets/image/d85fb29e4e19dd899589dbf989e615ca933f1f52.png" alt="IDR Icon" class="card-icon">
             <div class="card-text">
               <h2 class="card-title">Bind IDR Bank Account</h2>
               <p class="card-desc">Bind your Indonesian bank account to withdraw IDR funds.</p>
             </div>
           </div>
-          <button class="btn btn-idr" @click="router.push('/connect/add')">Submit New</button>
+          <button class="btn btn-idr" @click="router.push({ path: '/hn/connect/add', query: { currency_code: 'IDR' } })">Submit New</button>
         </div>
 
-        <!-- USDT Card -->
+        <!-- USD Card -->
         <div class="account-card">
-          <div class="card-tag tag-usdt">USDT</div>
+          <div class="card-tag tag-usdt">USD</div>
           <div class="card-content">
             <img src="/assets/image/65dd62c6e1300473a49c744e825c21008d000875.png" alt="USDT Icon" class="card-icon">
             <div class="card-text">
-              <h2 class="card-title">Bind USDT Wallet</h2>
-              <p class="card-desc">Bind your USDT wallet address to withdraw USDT funds.</p>
+              <h2 class="card-title">Bind USD Account</h2>
+              <p class="card-desc">Bind your USD account to withdraw USD funds.</p>
             </div>
           </div>
-          <button class="btn btn-usdt" @click="router.push('/connect/add')">Submit New</button>
+          <button class="btn btn-usdt" @click="router.push({ path: '/hn/connect/add', query: { currency_code: 'USD' } })">Submit New</button>
         </div>
       </div>
     </section>

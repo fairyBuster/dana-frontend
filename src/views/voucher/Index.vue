@@ -91,6 +91,7 @@ import { voucherAPI, transactionAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import VoucherSuccessModal from '@/components/modals/VoucherSuccessModal.vue'
+import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 const voucherCode = ref('')
@@ -108,8 +109,8 @@ const goBack = () => {
 
 const formatCurrency = (value) => {
   const num = Number(String(value ?? 0).replace(/[^0-9.-]/g, ''))
-  if (!Number.isFinite(num)) return 'RP 0'
-  return 'RP ' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(num)
+  if (!Number.isFinite(num)) return formatAppCurrency(0, { decimals: 0 })
+  return formatAppCurrency(num, { decimals: 0 })
 }
 
 const formatDate = (iso) => {

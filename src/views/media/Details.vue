@@ -48,7 +48,7 @@ const goBack = () => {
     router.go(-1)
     return
   }
-  router.push('/media')
+  router.push('/hn/media')
 }
 
 const article = computed(() => {
@@ -59,11 +59,11 @@ const article = computed(() => {
       title: 'Peluncuran Fitur Terbaru',
       date: '21 Maret 2026',
       paragraphs: [
-        'OT-SENT secara resmi memperkenalkan fitur AI Mapping Engine sebagai bagian dari pengembangan sistem pemetaan udara berbasis kecerdasan buatan.',
-        'Fitur ini dirancang untuk membantu pengguna dalam mengolah data hasil pemetaan drone menjadi visualisasi yang lebih terstruktur, akurat, dan mudah dipahami. Dengan pendekatan berbasis AI, proses analisis data dapat dilakukan secara otomatis tanpa memerlukan pengolahan manual yang kompleks.',
-        'AI Mapping Engine memungkinkan integrasi data secara real-time, sehingga pengguna dapat memantau hasil pemetaan secara langsung melalui platform OT-SENT. Hal ini memberikan efisiensi yang lebih tinggi dalam proses monitoring dan pengambilan keputusan berbasis data.',
+        'OT-SENT secara resmi memperkenalkan fitur Cloud Mapping Engine sebagai bagian dari pengembangan sistem pemetaan udara berbasis kecerdasan buatan.',
+        'Fitur ini dirancang untuk membantu pengguna dalam mengolah data hasil pemetaan drone menjadi visualisasi yang lebih terstruktur, akurat, dan mudah dipahami. Dengan pendekatan berbasis Cloud, proses analisis data dapat dilakukan secara otomatis tanpa memerlukan pengolahan manual yang kompleks.',
+        'Cloud Mapping Engine memungkinkan integrasi data secara real-time, sehingga pengguna dapat memantau hasil pemetaan secara langsung melalui platform OT-SENT. Hal ini memberikan efisiensi yang lebih tinggi dalam proses monitoring dan pengambilan keputusan berbasis data.',
         'Selain itu, sistem ini juga mendukung berbagai skenario penggunaan, mulai dari pemetaan area hingga analisis data udara dalam skala yang lebih luas. Pengembangan fitur ini merupakan bagian dari komitmen OT-SENT dalam menghadirkan solusi teknologi yang adaptif dan terukur.',
-        'Fitur AI Mapping Engine saat ini tersedia secara bertahap bagi pengguna OT-SENT dan akan terus dikembangkan untuk meningkatkan performa serta akurasi sistem di masa mendatang.'
+        'Fitur Cloud Mapping Engine saat ini tersedia secara bertahap bagi pengguna OT-SENT dan akan terus dikembangkan untuk meningkatkan performa serta akurasi sistem di masa mendatang.'
       ]
     }
   }
@@ -73,7 +73,7 @@ const article = computed(() => {
       title: 'Kolaborasi Strategis',
       date: '11 Maret 2026',
       paragraphs: [
-        'OT-SENT mengumumkan kolaborasi strategis untuk memperluas jangkauan layanan pemetaan udara berbasis AI dan meningkatkan kemampuan analisis data di berbagai sektor.',
+        'OT-SENT mengumumkan kolaborasi strategis untuk memperluas jangkauan layanan pemetaan udara berbasis Cloud dan meningkatkan kemampuan analisis data di berbagai sektor.',
         'Melalui kemitraan ini, pengguna akan mendapatkan akses ke integrasi data yang lebih kaya, peningkatan performa pemrosesan, serta dukungan operasional yang lebih kuat di lapangan.'
       ]
     }

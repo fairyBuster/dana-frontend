@@ -29,13 +29,13 @@
     <section id="section-hero">
       <div class="hero-container">
         <div class="hero-content">
-          <img src="/assets/image/Logo01.png" alt="AVR Logo" class="hero-logo">
+          <img src="/assets/image/Logo01.png" alt="HUE Logo" class="hero-logo">
           <div class="hero-text">
             <h1 class="hero-title">{{ ui.heroTitle }}</h1>
             <p class="hero-subtitle">{{ ui.heroSubtitle }}</p>
           </div>
         </div>
-        <!-- <router-link to="/register" class="hero-link">
+        <!-- <router-link to="/pages/register" class="hero-link">
           {{ ui.heroLink }}
           <img src="/assets/image/4255_218.svg" alt="Arrow Right" class="icon-arrow-right">
         </router-link> -->
@@ -45,7 +45,7 @@
     <!-- Form Section -->
     <section id="section-form">
       <div class="form-container">
-        <form class="registration-form" @submit.prevent="handleRegister">
+        <form class="registration-form" novalidate @submit.prevent="handleRequestOtpAndOpenModal">
 
           <!-- Phone -->
           <div class="form-group">
@@ -71,6 +71,9 @@
                 @blur="checkPhoneError"
                 @focus="clearPhoneError"
               >
+              <button v-if="otpActive" type="button" class="otp-btn" @click="requestOtp" :disabled="isLoading || isRequestingOtp">
+                {{ isRequestingOtp ? '...' : 'OTP' }}
+              </button>
             </div>
           </div>
 
@@ -179,15 +182,15 @@
             </div>
             <p class="terms-text">
               {{ ui.agreementPrefix }}
-              <router-link to="/solution">{{ ui.customerAgreement }}</router-link>,
-              <router-link to="/terms">{{ ui.termsOfService }}</router-link>
+              <router-link to="/hn/legal/agreement">{{ ui.customerAgreement }}</router-link>,
+              <router-link to="/hn/legal/terms">{{ ui.termsOfService }}</router-link>
               {{ ui.andWord }}
-              <router-link to="/privacy">{{ ui.privacyPolicy }}</router-link>
+              <router-link to="/hn/legal/privacy">{{ ui.privacyPolicy }}</router-link>
             </p>
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" class="btn-primary" :disabled="isLoading">
+          <button type="submit" class="btn-primary" :disabled="isLoading || isRequestingOtp">
             <LoadingSpinner v-if="isLoading" :visible="true" message="" />
             <span v-else>{{ ui.signUp }}</span>
           </button>
@@ -199,15 +202,47 @@
     <section id="section-footer">
       <div class="footer-container">
         <div class="footer-links">
-          <span>{{ ui.alreadyHaveAccount }}</span> <router-link to="/login">{{ ui.signIn }}</router-link>
+          <span>{{ ui.alreadyHaveAccount }}</span> <router-link to="/hn/console">{{ ui.signIn }}</router-link>
         </div>
         <div class="footer-copyright">
-          &copy; 2026 AVR System. All rights reserved.
+          &copy; 2026 HUE System. All rights reserved.
         </div>
       </div>
     </section>
 
     <!-- Modals -->
+    <div v-if="otpActive && otpModalOpen" id="section-otp-modal" @click.self="closeOtpModal">
+      <div class="otp-modal-container">
+        <div class="otp-card">
+          <div class="otp-card-header">
+            <p class="otp-description">Enter OTP</p>
+          </div>
+
+          <div class="otp-input-box">
+            <input
+              ref="otpInput"
+              v-model="formData.otp"
+              type="text"
+              class="otp-input"
+              placeholder="---"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              @keyup.enter="submitRegisterFromOtpModal"
+            >
+          </div>
+
+          <div class="otp-actions">
+            <button class="otp-action otp-action--primary" type="button" @click="submitRegisterFromOtpModal" :disabled="isLoading || isRequestingOtp">
+              Confirm
+            </button>
+            <button class="otp-action otp-action--secondary" type="button" @click="closeOtpModal" :disabled="isLoading || isRequestingOtp">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <ErrorModal
       v-model="showErrorModal"
       :message="generalError || 'Registration error occurred.'"
@@ -230,6 +265,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { setLanguage } from '../../i18n'
 import { authAPI } from '../../services/api'
+import { appSettings } from '@/utils/settings'
 import CountrySelector from '../../components/CountrySelector.vue'
 import ErrorModal from '../../components/modals/ErrorModal.vue'
 import SuccessModal from '../../components/modals/SuccessModal.vue'
@@ -240,8 +276,8 @@ const route = useRoute()
 const { locale } = useI18n()
 
 const EN_UI = Object.freeze({
-  heroTitle: 'Join AVR and access advanced AI system features!',
-  heroSubtitle: 'Join thousands of users and experience smart AI-powered resource management',
+  heroTitle: 'Join HUE and access advanced Cloud system features!',
+  heroSubtitle: 'Join thousands of users and experience smart Cloud-powered resource management',
   heroLink: 'Sign up to console with email',
   phoneLabel: 'Phone',
   phonePlaceholder: 'Mobile phone number',
@@ -267,8 +303,8 @@ const EN_UI = Object.freeze({
 })
 
 const ID_UI_FALLBACK = Object.freeze({
-  heroTitle: 'Bergabung dengan AVR dan akses fitur sistem AI canggih!',
-  heroSubtitle: 'Bergabunglah dengan ribuan pengguna dan rasakan manajemen sumber daya berbasis AI yang cerdas',
+  heroTitle: 'Bergabung dengan HUE dan akses fitur sistem Cloud canggih!',
+  heroSubtitle: 'Bergabunglah dengan ribuan pengguna dan rasakan manajemen sumber daya berbasis Cloud yang cerdas',
   heroLink: 'Daftar ke konsol dengan email',
   phoneLabel: 'Nomor',
   phonePlaceholder: 'Nomor ponsel',
@@ -405,6 +441,7 @@ const formData = reactive({
   username: '',
   email: '',
   phone: '',
+  otp: '',
   password: '',
   password2: '',
   referralCode: '',
@@ -424,6 +461,76 @@ const generatedCaptcha = ref('')
 const showReferral = ref(false)
 const showCountrySelector = ref(false)
 const selectedCountry = ref({ name: 'Indonesia', code: 'ID', dialCode: '62', flag: '🇮🇩' })
+const isRequestingOtp = ref(false)
+const otpModalOpen = ref(false)
+const otpInput = ref(null)
+const otpActiveOverride = ref(null)
+const otpRequiredOverride = ref(null)
+
+const toBool = (v) => {
+  if (typeof v === 'boolean') return v
+  if (typeof v === 'number') return v !== 0
+  if (typeof v === 'string') {
+    const s = v.trim().toLowerCase()
+    if (s === 'true' || s === '1' || s === 'yes' || s === 'y' || s === 'on') return true
+    if (s === 'false' || s === '0' || s === 'no' || s === 'n' || s === 'off') return false
+  }
+  return null
+}
+
+const pickFirstBool = (values) => {
+  for (const v of values) {
+    const b = toBool(v)
+    if (b !== null) return b
+  }
+  return null
+}
+
+const otpActive = computed(() => {
+  const override = otpActiveOverride.value
+  if (override === true) return true
+  if (override === false) return false
+
+  const s = appSettings.settings || {}
+  const direct = pickFirstBool([
+    s.otp_enabled,
+    s.otp_active,
+    s.otp_is_active,
+    s.is_otp_active,
+    s.register_otp_enabled,
+    s.otp_service_enabled,
+    s.whatsapp_otp_enabled
+  ])
+  if (direct !== null) return direct
+
+  const nested = s.otp && typeof s.otp === 'object'
+    ? pickFirstBool([s.otp.enabled, s.otp.active, s.otp.is_active, s.otp.service_enabled])
+    : null
+  if (nested !== null) return nested
+
+  return true
+})
+
+const otpRequired = computed(() => {
+  const override = otpRequiredOverride.value
+  if (override === true) return true
+  if (override === false) return false
+
+  const s = appSettings.settings || {}
+  const direct = pickFirstBool([
+    s.otp_required,
+    s.register_otp_required,
+    s.is_register_otp_required
+  ])
+  if (direct !== null) return direct
+
+  const nested = s.otp && typeof s.otp === 'object'
+    ? pickFirstBool([s.otp.required, s.otp.is_required, s.otp.register_required])
+    : null
+  if (nested !== null) return nested
+
+  return false
+})
 
 const langMenuOpen = ref(false)
 const langWrapEl = ref(null)
@@ -502,6 +609,128 @@ const formatPhoneNumber = () => {
   return phoneNumber
 }
 
+const extractOtpErrorMessage = (err) => {
+  const status = err?.response?.status
+  if (status === 503) return 'OTP service disabled'
+  const data = err?.response?.data
+  if (!data) return err?.message || 'OTP sending failed'
+  if (typeof data === 'string') return data
+  if (data.detail) return String(data.detail)
+  if (data.message) return String(data.message)
+  const firstKey = Object.keys(data)[0]
+  const firstVal = data[firstKey]
+  if (Array.isArray(firstVal) && firstVal.length) return String(firstVal[0])
+  if (firstVal) return String(firstVal)
+  return 'OTP sending failed'
+}
+
+const requestOtp = async () => {
+  if (isLoading.value || isRequestingOtp.value) return
+  if (!otpActive.value) {
+    showErrorModal.value = true
+    generalError.value = 'OTP tidak aktif'
+    return
+  }
+  showErrorModal.value = false
+  generalError.value = ''
+  showSuccessModal.value = false
+  successMessage.value = ''
+
+  const phoneNumber = formatPhoneNumber()
+  if (!phoneNumber) {
+    generalError.value = 'Phone number must be numeric'
+    showErrorModal.value = true
+    return
+  }
+
+  isRequestingOtp.value = true
+  try {
+    await authAPI.requestOTP(phoneNumber)
+    successMessage.value = 'OTP sent successfully'
+    showSuccessModal.value = true
+    otpModalOpen.value = true
+    setTimeout(() => {
+      if (otpInput.value) otpInput.value.focus()
+    }, 120)
+  } catch (err) {
+    if (err?.response?.status === 503) {
+      otpActiveOverride.value = false
+      otpRequiredOverride.value = false
+      otpModalOpen.value = false
+      formData.otp = ''
+      generalError.value = 'OTP tidak aktif'
+      showErrorModal.value = true
+      return
+    }
+    generalError.value = extractOtpErrorMessage(err)
+    showErrorModal.value = true
+  } finally {
+    isRequestingOtp.value = false
+  }
+}
+
+const closeOtpModal = () => {
+  if (isLoading.value || isRequestingOtp.value) return
+  otpModalOpen.value = false
+}
+
+const handleRequestOtpAndOpenModal = async () => {
+  successMessage.value = ''
+  generalError.value = ''
+  showErrorModal.value = false
+
+  const showError = (msg) => {
+    generalError.value = msg
+    showErrorModal.value = true
+  }
+
+  const username = String(formData.username || '').trim()
+  const phoneRaw = String(formData.phone || '').trim()
+  const email = String(formData.email || '').trim()
+  const password = String(formData.password || '')
+  const password2 = String(formData.password2 || '')
+
+  if (!phoneRaw) return showError('Nomor wajib diisi.')
+  if (!email) return showError('Email wajib diisi.')
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Format email tidak valid.')
+  if (!password) return showError('Password wajib diisi.')
+  if (!password2) return showError('Konfirmasi password wajib diisi.')
+  if (!username) return showError('Signature wajib diisi.')
+
+  if (showReferral.value && !String(formData.referralCode || '').trim()) {
+    return showError('Referral code wajib diisi.')
+  }
+
+  if (formData.password !== formData.password2) {
+    return showError('Passwords do not match.')
+  }
+
+  if (!isTermsAccepted.value) {
+    return showError('Please agree to the Customer Agreement, Terms of Service and Privacy Policy.')
+  }
+
+  if (!generatedCaptcha.value) {
+    refreshCaptcha()
+  }
+  formData.captcha = generatedCaptcha.value
+
+  const phoneNumber = formatPhoneNumber()
+  if (!phoneNumber) {
+    return showError('Phone number must be numeric')
+  }
+
+  if (!otpActive.value) {
+    return handleRegister()
+  }
+
+  await requestOtp()
+}
+
+const submitRegisterFromOtpModal = async () => {
+  if (isLoading.value || isRequestingOtp.value) return
+  await handleRegister()
+}
+
 const sanitizeUsername = (value) => String(value ?? '').replace(/[^a-zA-Z0-9]/g, '')
 
 watch(
@@ -550,30 +779,38 @@ watch(
 const handleRegister = async () => {
   successMessage.value = ''
   generalError.value = ''
+  showErrorModal.value = false
   
-  // Basic validation
-  if (!formData.username.trim() || !formData.phone.trim() || !formData.password || !formData.password2) {
-    generalError.value = 'Please fill in all required fields.'
+  const showError = (msg) => {
+    generalError.value = msg
     showErrorModal.value = true
-    return
   }
 
+  const username = String(formData.username || '').trim()
+  const phoneRaw = String(formData.phone || '').trim()
+  const email = String(formData.email || '').trim()
+  const otp = String(formData.otp || '').trim()
+  const password = String(formData.password || '')
+  const password2 = String(formData.password2 || '')
+
+  if (!phoneRaw) return showError('Nomor wajib diisi.')
+  if (!email) return showError('Email wajib diisi.')
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Format email tidak valid.')
+  if (!password) return showError('Password wajib diisi.')
+  if (!password2) return showError('Konfirmasi password wajib diisi.')
+  if (!username) return showError('Signature wajib diisi.')
+  if (otpRequired.value && !otp) return showError('OTP wajib diisi.')
+
   if (showReferral.value && !String(formData.referralCode || '').trim()) {
-    generalError.value = 'Referral code is required.'
-    showErrorModal.value = true
-    return
+    return showError('Referral code wajib diisi.')
   }
 
   if (formData.password !== formData.password2) {
-    generalError.value = 'Passwords do not match.'
-    showErrorModal.value = true
-    return
+    return showError('Passwords do not match.')
   }
 
   if (!isTermsAccepted.value) {
-    generalError.value = 'Please agree to the Customer Agreement, Terms of Service and Privacy Policy.'
-    showErrorModal.value = true
-    return
+    return showError('Please agree to the Customer Agreement, Terms of Service and Privacy Policy.')
   }
 
   // Auto-generate captcha for submission
@@ -588,13 +825,11 @@ const handleRegister = async () => {
     // Format phone number with country code
     const phoneNumber = formatPhoneNumber()
     if (!phoneNumber) {
-      generalError.value = 'Phone number must be numeric'
-      showErrorModal.value = true
-      return
+      return showError('Phone number must be numeric')
     }
 
     const rand = Math.random().toString(36).slice(2, 10)
-    const emailToUse = formData.email?.trim() || `user.${rand}@avr.local`
+    const emailToUse = email
     const fullNameGenerated = `User ${rand}`
     
     const payload = {
@@ -605,7 +840,7 @@ const handleRegister = async () => {
       password: formData.password,
       password2: formData.password2,
       referral_code: formData.referralCode?.trim() || '',
-      otp: '',
+      otp: otpActive.value ? otp : '',
       withdraw_pin: ''
     }
     
@@ -613,9 +848,10 @@ const handleRegister = async () => {
     
     successMessage.value = 'Successfully'
     showSuccessModal.value = true
+    otpModalOpen.value = false
     
     setTimeout(() => {
-      router.push('/login')
+      router.push('/hn/console')
     }, 2000)
   } catch (error) {
     console.error('Registration error:', error.response?.data || error.message)
@@ -647,7 +883,68 @@ const handleRegister = async () => {
           ? 'Username already taken. Please choose another.'
           : 'Invalid data format. Please check your input.'
       } else if (errorData.phone) {
-        generalError.value = 'Phone number already in use. Use a different number or login.'
+        const phoneErrors = Array.isArray(errorData.phone) ? errorData.phone : [errorData.phone]
+        const phoneMessage = phoneErrors.map((x) => String(x || '')).join(' ').toLowerCase()
+        const phoneCompact = phoneMessage.replace(/\s+/g, '')
+        const step = String(errorData?.error_step || '').toLowerCase()
+        const isAlreadyRegistered =
+          step === 'db_check' &&
+          (phoneMessage.includes('already registered') || phoneCompact.includes('alreadyregistered'))
+        if (isAlreadyRegistered) {
+          generalError.value = 'Already registered'
+          showErrorModal.value = true
+          return
+        }
+        const looksLikeNoWhatsapp =
+          phoneMessage.includes('whatsapp') ||
+          phoneCompact.includes('phonahasnowhatsapp') ||
+          phoneMessage.includes('tidak terdeteksi') && phoneMessage.includes('whatsapp')
+        generalError.value = looksLikeNoWhatsapp
+          ? 'Tidak ada whatsapp'
+          : 'Phone number already in use. Use a different number or login.'
+      } else if (errorData.otp) {
+        const otpErrors = Array.isArray(errorData.otp) ? errorData.otp : [errorData.otp]
+        const otpMessage = otpErrors.map((x) => String(x || '')).join(' ').toLowerCase()
+        const otpCompact = otpMessage.replace(/\s+/g, '')
+        const isOtpDisabled =
+          otpMessage.includes('service') && otpMessage.includes('disabled') ||
+          otpMessage.includes('otp service disabled') ||
+          otpMessage.includes('otp tidak aktif')
+        if (isOtpDisabled) {
+          otpActiveOverride.value = false
+          otpRequiredOverride.value = false
+          formData.otp = ''
+          otpModalOpen.value = false
+          generalError.value = 'OTP tidak aktif'
+        } else {
+          const isOtpMissing =
+            otpMessage.includes('required') ||
+            otpMessage.includes('must be filled') ||
+            otpMessage.includes('must be provided') ||
+            otpMessage.includes('may not be blank') ||
+            otpMessage.includes('missing')
+
+          const isOtpRequiredByServer =
+            otpCompact.includes('otpcodeisrequired') ||
+            (otpMessage.includes('otp') && isOtpMissing)
+
+          if (isOtpRequiredByServer) {
+            otpActiveOverride.value = true
+            otpRequiredOverride.value = true
+            generalError.value = 'OTP wajib diisi.'
+            otpModalOpen.value = true
+            setTimeout(() => {
+              if (otpInput.value) otpInput.value.focus()
+            }, 120)
+          } else {
+            otpActiveOverride.value = true
+            generalError.value = 'Invalid OTP'
+            otpModalOpen.value = true
+            setTimeout(() => {
+              if (otpInput.value) otpInput.value.focus()
+            }, 120)
+          }
+        }
       } else if (errorData.email) {
         generalError.value = 'Email already in use. Use a different email or login.'
       } else if (errorData.referral_code || errorData.referralCode) {
@@ -790,7 +1087,7 @@ input {
 }
 
 .hero-subtitle {
-  font-size: 12px;
+  font-size: 14px;
   color: #494747;
   margin: 0;
   line-height: 1.4;
@@ -801,7 +1098,7 @@ input {
   align-items: center;
   gap: 5px;
   color: #0073ff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   text-decoration: none;
 }
@@ -859,6 +1156,145 @@ input {
   color: rgba(0, 0, 0, 0.37);
 }
 
+.otp-btn {
+  height: 43px;
+  padding: 0 12px;
+  border: none;
+  background: #1b46f5;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 10px;
+  border-radius: 4px;
+  flex: 0 0 auto;
+}
+
+.otp-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#section-otp-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #7d7d7d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  padding: 20px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.otp-modal-container {
+  max-width: 412px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.otp-card {
+  position: relative;
+  width: 343px;
+  background-color: #f9f9fc;
+  border-radius: 10px;
+  padding-top: 17px;
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.otp-card-header {
+  width: 100%;
+  padding-right: 0px;
+  display: flex;
+  justify-content: center;
+}
+
+.otp-description {
+  width: 100%;
+  margin: 0;
+  font-size: 18px;
+  text-align: center;
+  line-height: 1.4;
+  color: #000000;
+  font-weight: 500;
+  z-index: 2;
+}
+
+.otp-input-box {
+  width: 307px;
+  height: 64px;
+  margin-top: 22px;
+  background-color: #ffffff;
+  border: 1px solid #ebebeb;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.otp-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 4px;
+}
+
+.otp-actions {
+  width: 330px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.otp-action {
+  width: 162px;
+  height: 44px;
+  border-radius: 30px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.otp-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.otp-action--primary {
+  background: linear-gradient(90deg, #4085e1 0%, #2757b7 100%);
+}
+
+.otp-action--secondary {
+  background-color: #0cb300;
+}
+
+.otp-action:hover {
+  opacity: 0.9;
+}
+
 .country-code {
   display: flex;
   align-items: center;
@@ -904,14 +1340,14 @@ input {
 }
 
 .country-flag-img {
-  width: 18px;
-  height: 12px;
+  width: 22px;
+  height: 16px;
   object-fit: cover;
   border-radius: 2px;
 }
 
 .input-icon-left {
-  width: 16px;
+  width: 20px;
   margin-right: 10px;
   opacity: 0.7;
 }
@@ -942,7 +1378,7 @@ input {
   background: none;
   align-items: center;
   gap: 5px;
-  font-size: 13px;
+  font-size: 15px;
   color: #000;
   cursor: pointer;
   margin-top: 5px;
@@ -1048,7 +1484,7 @@ input {
 }
 
 .footer-links {
-  font-size: 13px;
+  font-size: 15px;
   color: #000;
   margin-top: 10px;
 }
@@ -1059,7 +1495,7 @@ input {
 }
 
 .footer-copyright {
-  font-size: 12px;
+  font-size: 14px;
   color: #000;
   
   margin-top: auto;

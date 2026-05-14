@@ -43,7 +43,7 @@
               <img src="/assets/image/4265_356.svg" alt="Copy">
             </button>
           </div>
-          <span class="site">Site: AVR Mining</span>
+          <span class="site">Site: HUE Mining</span>
         </div>
       </div>
     </section>
@@ -61,10 +61,8 @@
             </div>
             <div class="stat-divider"></div>
             <div class="stat-col-2">
-              <button type="button" class="stat-title stat-link" @click="goToRightTeam">
-                {{ rightTeamLabel }}
-              </button>
-              <span class="stat-value">{{ rightTeamValue }}</span>
+              <span class="stat-title">Paid members</span>
+              <span class="stat-value">{{ paidMembersCount }}</span>
               <span class="stat-desc">Paid members</span>
             </div>
           </div>
@@ -108,17 +106,19 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { authAPI, investmentAPI } from '@/services/api'
+import { authAPI, commissionAPI, investmentAPI } from '@/services/api'
 import FooterBar from '@/components/partials/FooterBar.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
+import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 const route = useRoute()
-const teamId = ref('1')
+const teamId = ref('0')
 const overview = ref(null)
 const accountInfo = ref(null)
+const downlineStats = ref([])
 const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
@@ -131,9 +131,10 @@ const teamMenuOpen = ref(false)
 const menuAnchorEl = ref(null)
 
 const teamLevel = computed(() => {
-  const raw = route.params?.id ?? route.query?.id ?? teamId.value
+  const raw = route.params?.id ?? route.query?.id
+  if (raw === null || raw === undefined || raw === '') return 0
   const n = Number(raw)
-  return Number.isFinite(n) && n > 0 ? n : 1
+  return Number.isFinite(n) && n >= 1 && n <= 5 ? n : 0
 })
 
 const teamTitle = computed(() => {
@@ -162,9 +163,10 @@ const teamLevelLabel = computed(() => {
 
 const teamMenuItems = computed(() => {
   return [
-    { level: 1, label: 'Direct team', to: '/team/1' },
-    { level: 2, label: 'Second team', to: '/team/2' },
-    { level: 3, label: 'Third team', to: '/team/3' }
+    { level: 0, label: 'All (1-3)', to: '/hn/network/community' },
+    { level: 1, label: 'Direct team', to: '/hn/network/community/1' },
+    { level: 2, label: 'Second team', to: '/hn/network/community/2' },
+    { level: 3, label: 'Third team', to: '/hn/network/community/3' }
   ]
 })
 
@@ -212,31 +214,55 @@ const thirdLevelData = computed(() => {
   return levels.find((l) => Number(l?.level) === 3) || null
 })
 
+const normalizeDownlineStatsResponse = (data) => {
+  const levels = Array.isArray(data?.levels) ? data.levels : Array.isArray(data) ? data : []
+  return levels.filter(Boolean)
+}
+
+const selectedLevelsForStats = computed(() => {
+  const lvl = teamLevel.value
+  if (!lvl) return [1, 2, 3]
+  return [lvl]
+})
+
+const statsLevelsMap = computed(() => {
+  const map = new Map()
+  for (const row of downlineStats.value || []) {
+    const lvl = Number(row?.level)
+    if (!Number.isFinite(lvl)) continue
+    map.set(lvl, row)
+  }
+  return map
+})
+
+const totalMembersCount = computed(() => {
+  let sum = 0
+  for (const lvl of selectedLevelsForStats.value) {
+    const row = statsLevelsMap.value.get(lvl)
+    sum += Number(row?.members_total || 0)
+  }
+  return sum
+})
+
+const paidMembersCount = computed(() => {
+  let sum = 0
+  for (const lvl of selectedLevelsForStats.value) {
+    const row = statsLevelsMap.value.get(lvl)
+    sum += Number(row?.members_active || 0)
+  }
+  return sum
+})
+
 const teamData = computed(() => {
   const l = levelData.value
+  const fallbackTotal = Number(l?.member_count || 0)
+  const fallbackPaid = Number(l?.active_member_count || 0)
   return {
-    size: Number(l?.member_count || 0),
-    effective: Number(l?.active_member_count || 0),
+    size: totalMembersCount.value || fallbackTotal,
+    effective: paidMembersCount.value || fallbackPaid,
     deposit: l?.total_deposit_amount ?? '0'
   }
 })
-
-const rightTeamLabel = computed(() => {
-  return teamLevel.value === 3 ? 'Second team' : 'Third team'
-})
-
-const rightTeamValue = computed(() => {
-  if (teamLevel.value === 3) return Number(secondLevelData.value?.active_member_count || 0)
-  return Number(thirdLevelData.value?.active_member_count || 0)
-})
-
-const goToRightTeam = () => {
-  if (teamLevel.value === 3) {
-    router.push('/team/2')
-    return
-  }
-  router.push('/team/3')
-}
 
 const pad2 = (n) => String(n).padStart(2, '0')
 const formatDate = (dateString) => {
@@ -295,7 +321,7 @@ const goBack = () => {
 }
 
 const inviteMembers = () => {
-  router.push('/share')
+  router.push('/hn/network/invite')
 }
 
 const copyUid = () => {
@@ -304,8 +330,8 @@ const copyUid = () => {
 
 const formatUSD = (value) => {
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
-  if (!Number.isFinite(num)) return '$0'
-  return '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num)
+  if (!Number.isFinite(num)) return formatAppCurrency(0, { decimals: 0 })
+  return formatAppCurrency(num, { decimals: 0 })
 }
 
 const extractErrorMessage = (err) => {
@@ -323,6 +349,15 @@ const fetchAccountInfo = async () => {
     accountInfo.value = resp?.data || null
   } catch (_) {
     accountInfo.value = null
+  }
+}
+
+const fetchDownlineStats = async () => {
+  try {
+    const resp = await commissionAPI.getDownlineStats()
+    downlineStats.value = normalizeDownlineStatsResponse(resp?.data)
+  } catch (_) {
+    downlineStats.value = []
   }
 }
 
@@ -397,6 +432,7 @@ onMounted(() => {
   if (raw) teamId.value = String(raw)
   membersPage.value = 1
   fetchAccountInfo()
+  fetchDownlineStats()
   fetchOverview()
   fetchMyMaxOrderAmount()
   document.addEventListener('click', onDocumentClick)

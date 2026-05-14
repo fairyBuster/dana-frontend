@@ -1,7 +1,7 @@
 <!-- <template>
   <section class="team-commission-page">
     <header class="site-header">
-      <a href="/mainboard" class="back-button" :aria-label="$t('commission.backAria')">
+      <a href="/pages/dashboard" class="back-button" :aria-label="$t('commission.backAria')">
         <img src="/assets/images/Ellipse 1.png" alt="Back arrow">
       </a>
       <h1 class="page-title">{{ $t('commission.title') }}</h1>
@@ -189,10 +189,10 @@ export default {
       this.$router.go(-1)
     },
     goToCommissionDetails() {
-      this.$router.push('/h5/commission/history')
+      this.$router.push('/pages/commission/history')
     },
     goToReferral() {
-      this.$router.push('/h5/teams')
+      this.$router.push('/pages/team')
     },
     formatCurrency(amount) {
       const numAmount = parseFloat(amount) || 0

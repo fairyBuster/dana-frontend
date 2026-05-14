@@ -57,7 +57,7 @@
         <p class="news-excerpt">OT-SENT merilis fitur terbaru untuk pengguna.</p>
         
         <div class="btn-container">
-          <router-link to="/media/feature-launch" class="btn-read-more">
+          <router-link to="/hn/media/feature-launch" class="btn-read-more">
             <span>Baca selengkapnya</span>
             <img src="/assets/images/2038_161.svg" alt="arrow">
           </router-link>
@@ -72,7 +72,7 @@
         <p class="news-excerpt">OT-SENT umumkan kemitraan baru dengan...</p>
         
         <div class="btn-container">
-          <router-link to="/media/strategic-collaboration" class="btn-read-more">
+          <router-link to="/hn/media/strategic-collaboration" class="btn-read-more">
             <span>Baca selengkapnya</span>
             <img src="/assets/images/2038_161.svg" alt="arrow">
           </router-link>

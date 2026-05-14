@@ -3,7 +3,7 @@
     <section id="section-header">
       <header class="app-header">
         <button class="icon-btn back-btn" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/2033_608.svg" alt="Back Icon">
+          <img src="/assets/image/4252_325.svg" alt="Back Icon">
         </button>
         <h1 class="header-title">Ulasan</h1>
       </header>
@@ -12,7 +12,7 @@
     <section id="section-notice">
       <div class="notice-card">
         <div class="notice-icon-wrapper">
-          <img src="/assets/images/c62929550e6f78f10c44151b65ee54d7d3284539.png" alt="Info Icon" class="notice-icon">
+          <img src="/assets/image/4269_485.svg" alt="Info Icon" class="notice-icon">
         </div>
         <p class="notice-text">Berikan ulasan terbaik Anda setelah melakukan penarikan dan dapatkan hadiah tambahan secara otomatis!</p>
       </div>
@@ -66,8 +66,8 @@ const isLoading = ref(false)
 const hasMore = ref(false)
 const currentPage = ref(1)
 
-const unlikedIcon = '/assets/images/0878c682423e0fb00d79d2496d1071ec44ac4c5e.png'
-const likedIcon = '/assets/images/2a530eac949716d93806f6dbccd2b005049e7be2.png'
+const unlikedIcon = '/assets/image/4195_147.svg'
+const likedIcon = '/assets/image/4182_140.svg'
 
 const goBack = () => {
   router.go(-1)
@@ -78,7 +78,7 @@ const toggleLike = (review) => {
 }
 
 const openReviewModal = () => {
-  router.push('/review/add')
+  router.push('/hn/review/add')
 }
 
 const BACKEND_ORIGIN = (() => {

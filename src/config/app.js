@@ -23,7 +23,7 @@ export default {
   defaultLanguage: 'id',
   
   // Default currency
-  defaultCurrency: 'RP',
+  defaultCurrency: 'USD',
   
   // App version
   version: '1.0.0'

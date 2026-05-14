@@ -61,15 +61,17 @@
               <p class="task-desc">{{ mission.description || mission.title }}</p>
             </div>
             <div class="task-status">
-              <div v-if="mission.claimed" class="status-badge completed">
+              <div v-if="isMissionCompleted(mission)" class="status-badge completed">
                 <img src="/assets/image/4231_173.svg" alt="Check">
                 <span>Completed</span>
               </div>
               <template v-else>
                 <span class="status-text">{{ formatCurrency(mission.reward) }}</span>
+               
                 <div class="task-progress-track">
                   <div class="task-progress-fill" :style="{ width: getMissionProgressPercent(mission) + '%' }"></div>
                 </div>
+                 <span class="status-text">{{ getMissionProgressText(mission) }}</span>
               </template>
             </div>
           </li>
@@ -87,7 +89,7 @@
     <section id="section-info">
       <div class="info-banner">
         <div class="info-content">
-          <h3 class="info-title">AVR Mining System</h3>
+          <h3 class="info-title">HUE Mining System</h3>
           <p class="info-desc">Complete daily missions to earn rewards and level up your account.</p>
         </div>
       </div>
@@ -119,6 +121,7 @@ import { useRouter } from 'vue-router'
 import { authAPI, missionAPI } from '@/services/api'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
+import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 
@@ -158,10 +161,23 @@ const currentLevel = computed(() => {
 const formatCurrency = (value) => {
   const num = toNumber(value)
   const hasFraction = Math.abs(num % 1) > 1e-9
-  return new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: hasFraction ? 2 : 0,
-    maximumFractionDigits: hasFraction ? 2 : 0
-  }).format(num)
+  return formatAppCurrency(num, { decimals: hasFraction ? 2 : 0 })
+}
+
+const isMissionRepeatable = (mission) => {
+  return Boolean(mission?.is_repeatable)
+}
+
+const isMissionCompleted = (mission) => {
+  if (isMissionRepeatable(mission)) return false
+  return Boolean(mission?.claimed)
+}
+
+const isMissionCurrentlyClaimable = (mission) => {
+  if (!mission) return false
+  if (!Boolean(mission?.can_claim)) return false
+  if (!Boolean(mission?.claimed)) return true
+  return isMissionRepeatable(mission)
 }
 
 const normalizeMissionsResponse = (data) => {
@@ -179,6 +195,20 @@ const getMissionRequirement = (mission) => {
   return toNumber(mission?.requirement_amount ?? mission?.requirement ?? mission?.target_amount ?? 0)
 }
 
+const getMissionCurrent = (mission) => {
+  const req = getMissionRequirement(mission)
+  if (req <= 0) return getMissionProgress(mission)
+
+  const rawRemaining = mission?.remaining
+  const hasRemaining = rawRemaining !== null && rawRemaining !== undefined && rawRemaining !== ''
+  if (hasRemaining) {
+    const rem = toNumber(rawRemaining)
+    if (Number.isFinite(rem)) return Math.min(req, Math.max(0, req - rem))
+  }
+
+  return Math.min(req, Math.max(0, getMissionProgress(mission)))
+}
+
 const getMissionRemaining = (mission) => {
   const fromApi = toNumber(mission?.remaining)
   if (fromApi > 0) return fromApi
@@ -190,9 +220,15 @@ const getMissionRemaining = (mission) => {
 
 const getMissionProgressPercent = (mission) => {
   const req = getMissionRequirement(mission)
-  const prog = getMissionProgress(mission)
   if (req <= 0) return 0
-  return Math.min(100, Math.round((prog / req) * 100))
+  const curr = getMissionCurrent(mission)
+  return Math.min(100, Math.round((curr / req) * 100))
+}
+
+const getMissionProgressText = (mission) => {
+  const req = getMissionRequirement(mission)
+  if (req <= 0) return String(getMissionCurrent(mission))
+  return `${getMissionCurrent(mission)}/${req}`
 }
 
 const overallProgressPercent = computed(() => {
@@ -202,23 +238,23 @@ const overallProgressPercent = computed(() => {
 })
 
 const overallProgressText = computed(() => {
-  const completed = sortedMissions.value.filter(m => m.claimed).length
+  const completed = sortedMissions.value.filter(m => isMissionCompleted(m)).length
   return `${completed}/${sortedMissions.value.length}`
 })
 
 const hasClaimable = computed(() => {
-  return sortedMissions.value.some(m => m.can_claim && !m.claimed)
+  return sortedMissions.value.some(m => isMissionCurrentlyClaimable(m))
 })
 
 const sortedMissions = computed(() => {
   const list = Array.isArray(missions.value) ? [...missions.value] : []
   list.sort((a, b) => {
-    const aClaimed = Boolean(a?.claimed)
-    const bClaimed = Boolean(b?.claimed)
-    if (aClaimed !== bClaimed) return aClaimed ? 1 : -1
+    const aCompleted = isMissionCompleted(a)
+    const bCompleted = isMissionCompleted(b)
+    if (aCompleted !== bCompleted) return aCompleted ? 1 : -1
 
-    const aCan = Boolean(a?.can_claim)
-    const bCan = Boolean(b?.can_claim)
+    const aCan = isMissionCurrentlyClaimable(a)
+    const bCan = isMissionCurrentlyClaimable(b)
     if (aCan !== bCan) return aCan ? -1 : 1
 
     const ar = getMissionRemaining(a)
@@ -281,7 +317,7 @@ const fetchMissions = async () => {
 
 const claimNextMission = async () => {
   if (isClaiming.value) return
-  const mission = sortedMissions.value.find(m => m.can_claim && !m.claimed)
+  const mission = sortedMissions.value.find(m => isMissionCurrentlyClaimable(m))
   if (!mission?.id) return
 
   isClaiming.value = true
@@ -400,7 +436,8 @@ h1, h2, h3, h4, p {
   color: var(--color-white);
   position: relative;
   overflow: hidden;
-
+  margin-top: -20px;
+  margin-bottom: -20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -501,14 +538,14 @@ h1, h2, h3, h4, p {
 }
 
 .req-header h3 {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-black);
   margin-bottom: 4px;
 }
 
 .req-header p {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--color-black);
   opacity: 0.7;
 }
@@ -581,14 +618,14 @@ h1, h2, h3, h4, p {
 }
 
 .task-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--color-black);
   margin-bottom: 4px;
 }
 
 .task-desc {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--color-black);
   opacity: 0.6;
 }
@@ -687,13 +724,13 @@ h1, h2, h3, h4, p {
 }
 
 .info-title {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-primary-dark);
 }
 
 .info-desc {
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1.4;
   color: var(--color-black);
   opacity: 0.8;

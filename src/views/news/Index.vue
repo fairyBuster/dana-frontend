@@ -67,14 +67,14 @@ const articles = ref([])
 const goBack = () => {
   try {
     if (window.history.length > 1) router.back()
-    else router.push('/dashboard')
+    else router.push('/hn/home')
   } catch (_) {
-    router.push('/dashboard')
+    router.push('/hn/home')
   }
 }
 
 const viewDetails = (articleId) => {
-  router.push(`/news/${articleId}`)
+  router.push(`/hn/home/news/${articleId}`)
 }
 
 const resolveNewsImageUrl = (rawUrl) => {

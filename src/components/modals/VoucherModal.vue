@@ -40,6 +40,7 @@ import { ref, watch } from 'vue'
 import { voucherAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
+import { formatAppCurrency } from '@/utils/settings'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -73,13 +74,57 @@ const close = () => {
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return 0
-  const n = Number(String(value).replace(/[^0-9.-]/g, ''))
+  const raw = String(value).trim()
+  if (!raw) return 0
+  let s = raw.replace(/\s+/g, '')
+  s = s.replace(/[^0-9,.-]/g, '')
+  const dots = (s.match(/\./g) || []).length
+  const commas = (s.match(/,/g) || []).length
+
+  if (dots > 0 && commas > 0) {
+    const lastDot = s.lastIndexOf('.')
+    const lastComma = s.lastIndexOf(',')
+    const decimalSep = lastDot > lastComma ? '.' : ','
+    const groupSep = decimalSep === '.' ? ',' : '.'
+    s = s.split(groupSep).join('')
+    if (decimalSep === ',') s = s.replace(',', '.')
+  } else if (dots > 1 && commas === 0) {
+    s = s.split('.').join('')
+  } else if (commas > 1 && dots === 0) {
+    s = s.split(',').join('')
+  } else if (commas === 1 && dots === 0) {
+    const idx = s.indexOf(',')
+    const digitsAfter = s.length - idx - 1
+    if (digitsAfter === 3) s = s.replace(',', '')
+    else s = s.replace(',', '.')
+  } else if (dots === 1 && commas === 0) {
+    const idx = s.indexOf('.')
+    const digitsAfter = s.length - idx - 1
+    if (digitsAfter === 3) s = s.replace('.', '')
+  }
+
+  const n = Number(s)
   return Number.isFinite(n) ? n : 0
 }
 
-const formatRupiah = (value) => {
+const getFractionDigitsFromRaw = (value) => {
+  if (value === null || value === undefined) return null
+  const raw = String(value).trim()
+  if (!raw) return null
+  const lastDot = raw.lastIndexOf('.')
+  const lastComma = raw.lastIndexOf(',')
+  const lastSep = Math.max(lastDot, lastComma)
+  if (lastSep <= -1) return 0
+  const frac = raw.slice(lastSep + 1).replace(/[^0-9]/g, '')
+  if (!frac) return 0
+  return Math.min(8, frac.length)
+}
+
+const formatVoucherAmount = (value) => {
   const n = parseNumber(value)
-  return `Rp ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)}`
+  const rawDecimals = getFractionDigitsFromRaw(value)
+  const decimals = rawDecimals === null ? 0 : rawDecimals
+  return formatAppCurrency(n, { decimals })
 }
 
 const extractErrorMessage = (err) => {
@@ -158,7 +203,7 @@ const submit = async () => {
     const resp = await voucherAPI.claim({ code: raw })
     const data = resp?.data || {}
     const claimed = parseNumber(data.claimed_amount ?? data.amount ?? data.value ?? 0)
-    successMessage.value = `Successfully received bonus ${formatRupiah(claimed)}`
+    successMessage.value = `Success redeem mine ${formatVoucherAmount(data.claimed_amount ?? data.amount ?? data.value ?? claimed)}`
     showSuccessModal.value = true
     emit('submit', raw)
     emit('update:modelValue', false)

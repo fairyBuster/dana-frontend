@@ -14,7 +14,7 @@
      
         <div class="hero-section">
           <h2 class="hero-title">Karir di SENT</h2>
-          <p class="hero-subtitle">Bergabunglah dalam pengembangan teknologi pemetaan udara berbasis AI.</p>
+          <p class="hero-subtitle">Bergabunglah dalam pengembangan teknologi pemetaan udara berbasis Cloud.</p>
         </div>
 
        
@@ -29,12 +29,12 @@
 
   
           <div class="card job-card">
-            <h4 class="job-title">AI Engineer</h4>
+            <h4 class="job-title">Cloud Engineer</h4>
             <div class="divider"></div>
             <p class="job-desc">Mengembangkan dan mengoptimalkan sistem berbasis kecerdasan buatan untuk pengolahan data pemetaan udara.</p>
             <div class="job-qualifications">
               <p>Kualifikasi:<br>
-              Memahami dasar AI / Machine Learning<br>
+              Memahami dasar Cloud / Machine Learning<br>
               Mampu bekerja dengan data<br>
               Memiliki ketertarikan pada teknologi drone</p>
             </div>

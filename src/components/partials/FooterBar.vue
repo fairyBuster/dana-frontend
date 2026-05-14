@@ -1,42 +1,42 @@
 <template>
   <section id="section-bottom-nav">
     <nav class="bottom-nav-container">
-      <router-link to="/dashboard" class="nav-item" :class="{ active: isActive('/dashboard') }">
+      <router-link to="/hn/home" class="nav-item" :class="{ active: isActive('/home') }">
         <img
           src="/assets/image/ffe25a591934a7a193bade6d431223b8869d2cde.png"
           alt="Home"
           class="nav-icon"
-          :class="{ 'opacity-low': !isActive('/dashboard') }"
+          :class="{ 'opacity-low': !isActive('/home') }"
         >
         <span class="nav-text">Home</span>
       </router-link>
 
-      <router-link to="/about" class="nav-item" :class="{ active: isActive('/about') }">
+      <router-link to="/hn/company" class="nav-item" :class="{ active: isActive('/company') }">
         <img
           src="/assets/image/3cb24173dc41742eccf595898ca2eed035661785.png"
           alt="About Us"
           class="nav-icon"
-          :class="{ 'opacity-low': !isActive('/about') }"
+          :class="{ 'opacity-low': !isActive('/company') }"
         >
         <span class="nav-text">About Us</span>
       </router-link>
 
-      <router-link to="/profile" class="nav-item" :class="{ active: isActive('/profile') }">
+      <router-link to="/hn/user" class="nav-item" :class="{ active: isActive('/user') }">
         <img
           src="/assets/image/48b8a39f7811095779bfc9811422446819d34f1b.png"
           alt="Mine"
           class="nav-icon"
-          :class="{ 'opacity-low': !isActive('/profile') }"
+          :class="{ 'opacity-low': !isActive('/user') }"
         >
         <span class="nav-text">Mine</span>
       </router-link>
 
-      <router-link to="/products" class="nav-item" :class="{ active: isActive('/products') }">
+      <router-link to="/hn/shop" class="nav-item" :class="{ active: isActive('/shop') }">
         <img
           src="/assets/image/fd891e27e827c0f21ddb395edbc24cfd61c092dc.png"
           alt="Shop"
           class="nav-icon"
-          :class="{ 'opacity-low': !isActive('/products') }"
+          :class="{ 'opacity-low': !isActive('/shop') }"
         >
         <span class="nav-text">Shop</span>
       </router-link>
@@ -50,7 +50,8 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const isActive = (basePath) => {
   const p = String(route.path || '')
-  return p === basePath || p.startsWith(`${basePath}/`)
+  const path = p.startsWith('/hn') ? (p.slice('/hn'.length) || '/') : p
+  return path === basePath || path.startsWith(`${basePath}/`)
 }
 </script>
 

@@ -241,8 +241,8 @@ onMounted(() => {
 
 #section-contact-list .card-text {
   flex: 1;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 500;
 }
 
 #section-contact-list .card-arrow {

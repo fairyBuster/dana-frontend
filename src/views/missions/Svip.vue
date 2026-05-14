@@ -14,11 +14,11 @@
     <section id="section-tiers">
       <div class="tiers-container">
         <div
-          v-for="(level, idx) in rankLevels"
+          v-for="(level, idx) in displayRankLevels"
           :key="level.rank"
           class="tier-card"
         >
-          <img :src="getTierBg(level.rank)" alt="LV Background" class="tier-bg">
+          <img :src="getTierBg(level)" alt="LV Background" class="tier-bg">
           <div class="tier-content">
             <div class="tier-name" :class="getTierNameClass(idx)">{{ level.title || `LV${level.rank}` }}</div>
             <div class="tier-desc" :class="getTierDescClass(idx)">{{ getTierDesc(level) }}</div>
@@ -48,20 +48,31 @@
     <!-- Content Card -->
     <section id="section-content">
       <div class="content-card">
-        <div v-for="(level, idx) in rankLevels" :key="'c-' + level.rank" class="content-row">
-          <p class="content-text-bold">{{ level.title || `LV${level.rank}` }}</p>
-          <p class="content-text-regular">
-            <span>Recharge: ${{ formatUSD(level.deposit_self_total_required) }}</span>
-            <template v-if="toNumber(level.downlines_total_required) > 0">
-              <span class="content-sep">|</span>
-              <span>Referrals: {{ level.downlines_total_required }}</span>
-            </template>
-            <template v-if="toNumber(level.missions_required_total) > 0">
-              <span class="content-sep">|</span>
-              <span>Missions: {{ level.missions_required_total }}</span>
-            </template>
-          </p>
-          <div v-if="idx < rankLevels.length - 1" class="content-divider"></div>
+        <div class="vip-table">
+          <div class="vip-row vip-header">
+            <div class="vip-cell">Very Important Person</div>
+            <div class="vip-cell">Collection Downline</div>
+            <div class="vip-cell">Daily Sign</div>
+            <div class="vip-cell">Commision Upgrade</div>
+          </div>
+
+          <div v-for="row in svipRows" :key="row.rank" class="vip-row">
+            <div class="vip-cell">
+              <div>If you</div>
+              <div class="vip-blue">{{ row.lv }}</div>
+            </div>
+            <div class="vip-cell">
+              <div>Collection</div>
+              <div class="vip-blue">{{ row.downlines }} people</div>
+            </div>
+            <div class="vip-cell">
+              <div>Everyday</div>
+              <div class="vip-blue">{{ formatAppCurrency(row.dailySign, { decimals: 2 }) }}</div>
+            </div>
+            <div class="vip-cell">
+              <div>Got <span class="vip-blue">{{ formatAppCurrency(row.upgrade, { decimals: 0 }) }}</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -72,6 +83,7 @@
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI, commissionAPI } from '@/services/api'
+import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 const accountInfo = ref(null)
@@ -100,40 +112,157 @@ const toNumber = (value) => {
 
 const currentLevel = computed(() => {
   const d = rankStatus.value || {}
+  const title = String(d.current_title ?? d.currentTitle ?? '').trim()
+  if (title) return title
   const n = Math.floor(toNumber(d.current_rank))
   return Number.isFinite(n) ? `LV${n}` : 'LV0'
 })
 
 const progressPercent = computed(() => {
   const d = rankStatus.value || {}
-  const current = toNumber(d.deposit_self_total)
-  const nextLevel = rankLevels.value.find(l => !l.is_current_rank && l.is_unlocked) || rankLevels.value[0]
-  if (!nextLevel) return 0
-  const required = toNumber(nextLevel.deposit_self_total_required)
+  const nextRequiredDeposit = toNumber(d.next_required_deposit_self_total)
+  const nextRequiredDownlinesActive = toNumber(d.next_required_downlines_active)
+  const nextRequiredDownlinesTotal = toNumber(d.next_required_downlines_total)
+  const nextRequiredMissions = toNumber(d.next_required_missions)
+
+  const currentDeposit = toNumber(d.deposit_self_total)
+  const currentDownlinesActive = toNumber(d.downlines_active)
+  const currentDownlinesTotal = toNumber(d.downlines_total)
+  const currentMissions = toNumber(d.completed_missions)
+
+  let current = 0
+  let required = 0
+
+  if (nextRequiredDeposit > 0) {
+    current = currentDeposit
+    required = nextRequiredDeposit
+  } else if (nextRequiredDownlinesActive > 0) {
+    current = currentDownlinesActive
+    required = nextRequiredDownlinesActive
+  } else if (nextRequiredDownlinesTotal > 0) {
+    current = currentDownlinesTotal
+    required = nextRequiredDownlinesTotal
+  } else if (nextRequiredMissions > 0) {
+    current = currentMissions
+    required = nextRequiredMissions
+  } else {
+    return 0
+  }
+
   if (required <= 0) return 0
   return Math.min(100, (current / required) * 100)
 })
 
 const progressCurrent = computed(() => {
   const d = rankStatus.value || {}
-  return toNumber(d.deposit_self_total)
+  const nextRequiredDeposit = toNumber(d.next_required_deposit_self_total)
+  const nextRequiredDownlinesActive = toNumber(d.next_required_downlines_active)
+  const nextRequiredDownlinesTotal = toNumber(d.next_required_downlines_total)
+  const nextRequiredMissions = toNumber(d.next_required_missions)
+
+  if (nextRequiredDeposit > 0) return toNumber(d.deposit_self_total)
+  if (nextRequiredDownlinesActive > 0) return toNumber(d.downlines_active)
+  if (nextRequiredDownlinesTotal > 0) return toNumber(d.downlines_total)
+  if (nextRequiredMissions > 0) return toNumber(d.completed_missions)
+  return 0
 })
 
 const progressTotal = computed(() => {
   const nextLevel = rankLevels.value.find(l => !l.is_current_rank && l.is_unlocked) || rankLevels.value[0]
   if (!nextLevel) return 0
-  return toNumber(nextLevel.deposit_self_total_required)
+
+  const d = rankStatus.value || {}
+  const nextRequiredDeposit = toNumber(d.next_required_deposit_self_total)
+  const nextRequiredDownlinesActive = toNumber(d.next_required_downlines_active)
+  const nextRequiredDownlinesTotal = toNumber(d.next_required_downlines_total)
+  const nextRequiredMissions = toNumber(d.next_required_missions)
+
+  if (nextRequiredDeposit > 0) return nextRequiredDeposit
+  if (nextRequiredDownlinesActive > 0) return nextRequiredDownlinesActive
+  if (nextRequiredDownlinesTotal > 0) return nextRequiredDownlinesTotal
+  if (nextRequiredMissions > 0) return nextRequiredMissions
+  return 0
 })
 
-const formatUSD = (value) => {
-  const num = toNumber(value)
-  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(num)
+const DAILY_SIGN_BY_LEVEL = Object.freeze({
+  0: 0.03,
+  1: 0.05,
+  2: 0.1,
+  3: 0.2,
+  4: 0.4,
+  5: 0.5,
+  6: 0.8,
+  7: 2,
+  8: 10
+})
+
+const UPGRADE_BY_LEVEL = Object.freeze({
+  0: 0,
+  1: 1,
+  2: 3,
+  3: 10,
+  4: 20,
+  5: 30,
+  6: 50,
+  7: 100,
+  8: 500
+})
+
+const getLevelNumberFromTitle = (title, rank) => {
+  const t = String(title || '').trim()
+  const digits = t.replace(/[^0-9]/g, '')
+  if (digits) {
+    const n = Number.parseInt(digits, 10)
+    if (Number.isFinite(n)) return n
+  }
+  const r = Math.floor(toNumber(rank))
+  return Number.isFinite(r) ? Math.max(0, r - 1) : 0
 }
 
-const getTierBg = (rank) => {
-  const n = Math.floor(toNumber(rank))
-  const clamped = Math.min(8, Math.max(1, Number.isFinite(n) ? n : 1))
-  return `/assets/image/lv${clamped}.png`
+const getDefaultTitleByRank = (rank) => {
+  const r = Math.floor(toNumber(rank))
+  if (!Number.isFinite(r) || r <= 0) return 'LV0'
+  if (r === 1) return 'LV0'
+  return `LV${String(r - 1).padStart(2, '0')}`
+}
+
+const displayRankLevels = computed(() => {
+  const list = Array.isArray(rankLevels.value) ? rankLevels.value : []
+  return list.filter((level) => {
+    const title = String(level?.title || '').trim()
+    const levelNum = getLevelNumberFromTitle(title, level?.rank)
+    return levelNum >= 1 && levelNum <= 8
+  })
+})
+
+const svipRows = computed(() => {
+  const baseList = displayRankLevels.value.length
+    ? displayRankLevels.value
+    : Array.from({ length: 9 }, (_, i) => ({ rank: i + 1, title: getDefaultTitleByRank(i + 1), downlines_active_required: 0 }))
+
+  return baseList
+    .map((level) => {
+      const rank = Math.floor(toNumber(level?.rank))
+      const safeRank = Number.isFinite(rank) && rank > 0 ? rank : 0
+      const title = String(level?.title || getDefaultTitleByRank(safeRank)).trim() || getDefaultTitleByRank(safeRank)
+      const downlines = Math.floor(toNumber(level?.downlines_active_required ?? level?.downlines_total_required ?? 0))
+      const levelNum = getLevelNumberFromTitle(title, safeRank)
+      return {
+        rank: safeRank,
+        lv: title,
+        downlines: downlines > 0 ? downlines : 0,
+        dailySign: Number(DAILY_SIGN_BY_LEVEL[levelNum] ?? 0),
+        upgrade: Number(UPGRADE_BY_LEVEL[levelNum] ?? 0)
+      }
+    })
+    .filter((x) => x.rank > 0)
+    .sort((a, b) => a.rank - b.rank)
+})
+
+const getTierBg = (level) => {
+  const levelNum = getLevelNumberFromTitle(level?.title, level?.rank)
+  const clamped = Math.min(8, Math.max(1, Number.isFinite(levelNum) ? levelNum : 1))
+  return `/assets/image/level${clamped}.png`
 }
 
 const getTierNameClass = (idx) => {
@@ -145,10 +274,10 @@ const getTierDescClass = (idx) => {
 }
 
 const getTierDesc = (level) => {
-  const referrals = toNumber(level.downlines_total_required)
+  const referrals = toNumber(level.downlines_active_required ?? level.downlines_total_required)
   if (referrals > 0) return `Unlock by inviting ${referrals} members`
   const deposit = toNumber(level.deposit_self_total_required)
-  if (deposit > 0) return `Unlock by recharging $${formatUSD(deposit)}`
+  if (deposit > 0) return `Unlock by recharging ${formatAppCurrency(deposit, { decimals: 0 })}`
   return `Level ${level.rank}`
 }
 
@@ -177,7 +306,7 @@ const fetchRankLevels = async () => {
     const byRank = new Map()
     for (const item of raw) {
       const rank = Math.floor(toNumber(item?.rank))
-      if (!Number.isFinite(rank) || rank < 1 || rank > 8) continue
+      if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue
       const prev = byRank.get(rank)
       if (!prev) {
         byRank.set(rank, item)
@@ -191,17 +320,18 @@ const fetchRankLevels = async () => {
     }
 
     const normalized = []
-    for (let r = 1; r <= 8; r += 1) {
+    for (let r = 1; r <= 9; r += 1) {
       const level = byRank.get(r)
       if (level) {
         normalized.push(level)
       } else {
         normalized.push({
           rank: r,
-          title: `LV${r}`,
+          title: getDefaultTitleByRank(r),
           deposit_self_total_required: 0,
           deposit_self_total: 0,
           downlines_total_required: 0,
+          downlines_active_required: 0,
           missions_required_total: 0,
           is_unlocked: false,
           is_current_rank: false
@@ -477,6 +607,48 @@ h1, p {
 
 .content-row {
   padding: 8px 0;
+}
+
+.vip-table {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.vip-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.vip-cell {
+  padding: 12px 6px;
+  text-align: center;
+  font-size: 11px;
+  color: #000000;
+  border-right: 1px solid rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  line-height: 1.2;
+}
+
+.vip-row:last-child .vip-cell {
+  border-bottom: none;
+}
+
+.vip-cell:last-child {
+  border-right: none;
+}
+
+.vip-header .vip-cell {
+  font-size: 10px;
+  font-weight: 600;
+  background: #fafafa;
+}
+
+.vip-blue {
+  color: #1b46f5;
+  font-weight: 700;
 }
 
 .content-divider {

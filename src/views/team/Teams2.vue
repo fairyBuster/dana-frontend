@@ -3,9 +3,9 @@
     <!-- Header -->
     <section id="section-header">
       <header class="header">
-        <button class="icon-btn" @click="goBack">
+        <a href="/#/hn/user" class="icon-btn" aria-label="Go to profile">
           <img src="/assets/image/4265_350.svg" alt="Back">
-        </button>
+        </a>
         <button type="button" ref="menuAnchorEl" class="header-title" @click.stop="toggleTeamMenu">
           <h1>{{ teamTitle }}</h1>
           <span class="header-caret" :class="{ open: teamMenuOpen }"></span>
@@ -39,7 +39,7 @@
               <img src="/assets/image/4265_356.svg" alt="Copy">
             </button>
           </div>
-          <span class="site">Site: AVR Mining</span>
+          <span class="site">Site: HUE Mining</span>
         </div>
       </div>
     </section>
@@ -57,11 +57,9 @@
             </div>
             <div class="stat-divider"></div>
             <div class="stat-col-2">
-              <button type="button" class="stat-title stat-link" @click="goToRightTeam">
-                {{ rightTeamLabel }}
-              </button>
-              <span class="stat-value">{{ rightTeamValue }}</span>
-              <span class="stat-desc">Paid members</span>
+              <span class="stat-title">Second Team </span>
+              <span class="stat-value">{{ teamData.effective }}</span>
+              <span class="stat-desc">Active members</span>
             </div>
           </div>
         </div>
@@ -93,7 +91,7 @@
               <span class="user-name">{{ member.description }}</span>
             </div>
             <div class="col-status-data">
-              <span class="status-text">{{ member.isActive ? 'Running' : 'Registered' }}</span>
+              <span class="status-text">{{ member.isActive ? 'Running' : 'Not running' }}</span>
             </div>
             <div class="col-mining-data">
               <span class="mining-value">{{ member.miningCount }}</span>
@@ -122,7 +120,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { authAPI, investmentAPI } from '@/services/api'
+import { authAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
@@ -133,7 +131,6 @@ const accountInfo = ref(null)
 const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
-const myMaxOrderAmount = ref(null)
 const membersPage = ref(1)
 const membersTotalPages = ref(1)
 const membersHasNext = ref(false)
@@ -147,9 +144,9 @@ const teamTitle = computed(() => 'Second team')
 
 const teamMenuItems = computed(() => {
   return [
-    { level: 1, label: 'Direct team', to: '/team/1' },
-    { level: 2, label: 'Second team', to: '/team/2' },
-    { level: 3, label: 'Third team', to: '/team/3' }
+    { level: 1, label: 'Direct team', to: '/hn/network/community/1' },
+    { level: 2, label: 'Second team', to: '/hn/network/community/2' },
+    { level: 3, label: 'Third team', to: '/hn/network/community/3' }
   ]
 })
 
@@ -179,11 +176,6 @@ const levelData = computed(() => {
   return levels.find((l) => Number(l?.level) === Number(teamLevel.value)) || null
 })
 
-const thirdLevelData = computed(() => {
-  const levels = Array.isArray(overview.value?.levels) ? overview.value.levels : []
-  return levels.find((l) => Number(l?.level) === 3) || null
-})
-
 const teamData = computed(() => {
   const l = levelData.value
   return {
@@ -192,12 +184,6 @@ const teamData = computed(() => {
     deposit: l?.total_deposit_amount ?? '0'
   }
 })
-
-const rightTeamLabel = computed(() => 'Third team')
-const rightTeamValue = computed(() => Number(thirdLevelData.value?.active_member_count || 0))
-const goToRightTeam = () => {
-  router.push('/team/3')
-}
 
 const pad2 = (n) => String(n).padStart(2, '0')
 const formatDate = (dateString) => {
@@ -215,7 +201,6 @@ const parseAmount = (value) => {
 
 const transactions = computed(() => {
   const members = Array.isArray(levelData.value?.members) ? levelData.value.members : []
-  const myMax = myMaxOrderAmount.value
   const list = members.map((m, i) => {
     const phone = String(m?.phone || '').trim()
     const username = String(m?.username || '').trim()
@@ -225,10 +210,7 @@ const transactions = computed(() => {
 
     const totalInv = parseAmount(m?.total_investment_amount)
     const totalInvCount = parseAmount(m?.total_investments)
-    const memberEstimatedMax = totalInv !== null
-      ? (totalInvCount && totalInvCount > 0 ? totalInv / totalInvCount : totalInv)
-      : null
-    const isActive = myMax !== null && memberEstimatedMax !== null && memberEstimatedMax > 0
+    const isActive = m?.is_active === true
     const miningCount = totalInvCount !== null && totalInvCount > 0 ? totalInvCount : 0
 
     return {
@@ -320,41 +302,10 @@ const goToPage = (page) => {
   fetchOverview()
 }
 
-const normalizeInvestmentsResponse = (data) => {
-  if (!data) return []
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data.results)) return data.results
-  return []
-}
-
-const fetchMyMaxOrderAmount = async () => {
-  try {
-    const respActive = await investmentAPI.getInvestments({ status: 'ACTIVE' })
-    const activeItems = normalizeInvestmentsResponse(respActive?.data)
-
-    let expiredItems = []
-    try {
-      const respExpired = await investmentAPI.getInvestments({ status: 'EXPIRED' })
-      expiredItems = normalizeInvestmentsResponse(respExpired?.data)
-    } catch (_) {}
-
-    const all = [...activeItems, ...expiredItems]
-    const maxVal = all.reduce((acc, inv) => {
-      const v = parseAmount(inv?.product_price ?? inv?.total_amount)
-      if (v === null) return acc
-      return acc === null ? v : Math.max(acc, v)
-    }, null)
-    myMaxOrderAmount.value = maxVal
-  } catch (_) {
-    myMaxOrderAmount.value = null
-  }
-}
-
 onMounted(() => {
   membersPage.value = 1
   fetchAccountInfo()
   fetchOverview()
-  fetchMyMaxOrderAmount()
   document.addEventListener('click', onDocumentClick)
 })
 

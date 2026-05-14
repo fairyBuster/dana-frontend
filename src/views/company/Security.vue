@@ -170,7 +170,7 @@ watch(
   () => successModalOpen.value,
   (open) => {
     if (!open && isAccepted.value) {
-      router.push('/dashboard')
+      router.push('/hn/home')
     }
   }
 )

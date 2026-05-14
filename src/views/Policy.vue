@@ -10,63 +10,92 @@
     </section>
 
     <section id="section-content" class="mobile-container">
-      <h2 class="main-heading">PRIVACY POLICY (AVR)</h2>
-      <div class="policy-text-block">{{ policyText }}</div>
+      <h2 class="main-heading">PRIVACY POLICY (HUE)</h2>
+      <div class="policy-text-block">
+        <p>1. Introduction<br>
+        HUE (Hybrid Unified Edge) respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you use our platform and services.</p>
+
+        <p>2. Information We Collect<br>
+        We may collect the following information:</p>
+        <ul>
+          <li>Personal information (such as email address and phone number)</li>
+          <li>Account-related data (username, account activity, and system logs)</li>
+          <li>Technical data (IP address, browser information, device type, and access information)</li>
+        </ul>
+
+        <p>3. How We Use Your Information<br>
+        Your information may be used to:</p>
+        <ul>
+          <li>Provide, maintain, and improve HUE services</li>
+          <li>Enhance system performance and user experience</li>
+          <li>Ensure platform security and prevent unauthorized activities</li>
+          <li>Communicate important updates, notifications, or operational information</li>
+        </ul>
+
+        <p>4. Data Protection<br>
+        We implement appropriate administrative and technical security measures to protect your data from unauthorized access, misuse, alteration, or disclosure. However, no online system or transmission method can be guaranteed to be completely secure, and users are encouraged to maintain the security of their own accounts and devices.</p>
+
+        <p>5. Data Sharing<br>
+        HUE does not sell, trade, or share your personal information with third parties, except:</p>
+        <ul>
+          <li>When required by applicable laws or regulations</li>
+          <li>To protect system integrity, platform security, or prevent fraud and abuse</li>
+          <li>When necessary for operational or compliance purposes</li>
+        </ul>
+
+        <p>6. Cookies and Tracking Technologies<br>
+        We may use cookies and similar technologies to:</p>
+        <ul>
+          <li>Improve platform functionality and performance</li>
+          <li>Analyze usage patterns and operational metrics</li>
+          <li>Enhance overall user experience</li>
+        </ul>
+        <p>Users may manage browser cookie settings independently through their device or browser preferences.</p>
+
+        <p>7. User Responsibility<br>
+        Users are responsible for:</p>
+        <ul>
+          <li>Keeping account credentials and authentication information secure</li>
+          <li>Ensuring the accuracy of submitted personal information</li>
+          <li>Maintaining the confidentiality of account access</li>
+        </ul>
+
+        <p>8. Data Retention<br>
+        We retain user information only for as long as necessary to provide services, maintain operational integrity, comply with legal obligations, and resolve disputes when required.</p>
+
+        <p>9. No Affiliation<br>
+        HUE operates independently and is not affiliated with, endorsed by, or associated with any third-party organizations, institutions, or companies unless explicitly stated.</p>
+
+        <p>10. Updates to This Policy<br>
+        We may update or modify this Privacy Policy from time to time. Continued use of HUE services following any updates constitutes acceptance of the revised policy.</p>
+
+        <p>11. Contact<br>
+        If you have any questions regarding this Privacy Policy or your personal data, please contact the HUE support team.</p>
+      </div>
     </section>
   </div>
 </template>
 
 <script setup>
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
 const goBack = () => {
   router.go(-1)
 }
 
-const policyText = `1. Introduction
- AVR (Autonomous Virtual Resource) respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you use our platform.
- 
-2. Information We Collect
- We may collect the following information: 
-  Personal information (such as email address and phone number)
-  Account-related data (username, activity logs)
-  Technical data (IP address, device type, browser information)
+const handleScroll = () => {
+}
 
-3. How We Use Your Information
- Your information is used to: 
-  Provide and maintain AVR services
-  Improve system performance and user experience
-  Ensure platform security and prevent unauthorized activities
-  Communicate important updates or notifications
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
 
-4. Data Protection
- We implement appropriate security measures to protect your data from unauthorized access, alteration, or misuse. However, no system is completely secure, and users should take steps to protect their own accounts. 
-
-5. Data Sharing
- AVR does not sell, trade, or share your personal information with third parties, except: 
-  When required by law or regulation
-  To protect system integrity and prevent fraud or abuse
-
-6. Cookies and Tracking
- We may use cookies or similar technologies to enhance user experience, analyze usage, and improve platform functionality. 
-
-7. User Responsibility
- Users are responsible for: 
-  Keeping their login credentials secure
-  Ensuring the accuracy of their personal information
-
-8. Data Retention
- We retain user data only for as long as necessary to provide services and comply with legal obligations. 
-
-9. No Affiliation
- AVR operates independently and is not affiliated with any third-party organizations or companies. 
-
-10. Updates to This Policy
- We may update this Privacy Policy from time to time. Continued use of AVR services means you accept any changes. 
-
-11. Contact
- If you have questions about this Privacy Policy, please contact the AVR support team.`
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <style scoped>

@@ -45,7 +45,7 @@
     <section id="section-products">
       <div class="product-list-container">
         <div v-if="sortedProducts.length === 0" class="empty-state">
-          <p class="empty-text">No products available</p>
+          <p class="empty-text">Not available sold cloud</p>
         </div>
 
         <div
@@ -67,7 +67,7 @@
                 <div class="stat-col">
                   <div class="stat-item">
                     <span class="stat-label">Mining Output</span>
-                    <span class="stat-value"><span class="text-blue">${{ formatProfitValue(product) }}</span> <span class="text-sm">/day</span></span>
+                    <span class="stat-value"><span class="text-blue">{{ formatProfitValue(product) }}</span> <span class="text-sm">/day</span></span>
                   </div>
                 </div>
                 <div class="stat-col">
@@ -82,13 +82,13 @@
                 <div class="stat-col">
                   <div class="stat-item">
                     <span class="stat-label">Mining Speed</span>
-                    <span class="stat-value" style="font-size: 14px; font-style: italic;"><span>≈0.6949 PH/s</span></span>
+                    <span class="stat-value" style="font-size: 14px; font-style: italic;"><span translate="no" class="notranslate">{{ getMiningSpeedText(product) }}</span></span>
                   </div>
                 </div>
                 <div class="stat-col">
                   <div class="stat-item">
                     <span class="stat-label">Mining Duration</span>
-                    <span class="stat-value" style="font-size: 14px; font-style: italic;"><span>≈24 hour</span></span>
+                    <span class="stat-value" style="font-size: 14px; font-style: italic;"><span translate="no" class="notranslate">≈24 hour</span></span>
                   </div>
                 </div>
                 
@@ -111,10 +111,10 @@
           <div class="card-footer">
             <div class="price-wrap">
               <span class="price-label">Price:</span>
-              <span class="price-value">${{ formatPrice(product.price) }}</span>
+              <span class="price-value">{{ formatPrice(product.price) }}</span>
             </div>
             <button class="btn-buy" :disabled="isOutOfStock(product)" @click.stop="buyProduct(product)">
-              {{ isOutOfStock(product) ? 'Sold Out' : 'See Featured' }}
+              {{ isOutOfStock(product) ? 'Sold Out' : 'Featured' }}
             </button>
           </div>
         </div>
@@ -133,6 +133,7 @@ import { authAPI, productAPI } from '@/services/api'
 import FooterBar from '@/components/partials/FooterBar.vue'
 import { resolveImageUrl } from '@/utils/imageCache'
 import { setLanguage } from '@/i18n'
+import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 const { locale } = useI18n()
@@ -193,28 +194,70 @@ const onDocumentClick = (event) => {
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return null
-  const n = Number(String(value).replace(/,/g, ''))
-  if (Number.isNaN(n)) return null
-  return n
+  const raw = String(value).trim()
+  if (!raw) return null
+
+  const s = raw.replace(/\s+/g, '')
+  const sign = s.startsWith('-') ? '-' : ''
+  const unsigned = s.replace(/^[+-]/, '')
+
+  const lastDot = unsigned.lastIndexOf('.')
+  const lastComma = unsigned.lastIndexOf(',')
+  const lastSep = Math.max(lastDot, lastComma)
+
+  if (lastSep > -1) {
+    const intPart = unsigned.slice(0, lastSep).replace(/[.,]/g, '').replace(/[^0-9]/g, '')
+    const fracPart = unsigned.slice(lastSep + 1).replace(/[^0-9]/g, '')
+    const normalized = fracPart ? `${sign}${intPart || '0'}.${fracPart}` : `${sign}${intPart || '0'}`
+    const n = Number(normalized)
+    return Number.isFinite(n) ? n : null
+  }
+
+  const digitsOnly = unsigned.replace(/[^0-9]/g, '')
+  if (!digitsOnly) return null
+  const n = Number(`${sign}${digitsOnly}`)
+  return Number.isFinite(n) ? n : null
+}
+
+const getFractionDigitsFromRaw = (value) => {
+  const raw = String(value ?? '').trim()
+  const lastSep = Math.max(raw.lastIndexOf('.'), raw.lastIndexOf(','))
+  if (lastSep <= -1) return 0
+  const frac = raw.slice(lastSep + 1).replace(/[^0-9]/g, '')
+  return Math.min(8, frac.length || 0)
 }
 
 const formatPrice = (value) => {
   const n = parseNumber(value)
-  if (n === null) return '0'
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)
+  if (n === null) return formatAppCurrency(0, { decimals: 0 })
+  return formatAppCurrency(n, { decimals: 0 })
+}
+
+const formatProfitAmount = (value) => {
+  const n = parseNumber(value)
+  if (n === null) return '-'
+  const decimals = getFractionDigitsFromRaw(value)
+  return formatAppCurrency(n, { decimals })
 }
 
 const formatProfitValue = (product) => {
   const profitType = String(product?.profit_type || '').toLowerCase()
   if (profitType === 'random') {
-    const min = parseNumber(product?.profit_random_min)
-    const max = parseNumber(product?.profit_random_max)
-    if (min !== null && max !== null) return `${formatPrice(min)}~${formatPrice(max)}`
-    if (min !== null) return formatPrice(min)
+    const min = formatProfitAmount(product?.profit_random_min)
+    const max = formatProfitAmount(product?.profit_random_max)
+    if (min !== '-' && max !== '-') return `${min}~${max}`
+    if (min !== '-') return min
   }
   const rate = parseNumber(product?.profit_rate)
-  if (rate !== null && rate > 0) return formatPrice(rate)
+  if (rate !== null && rate > 0) return formatProfitAmount(product?.profit_rate)
   return '-'
+}
+
+const getMiningSpeedText = (product) => {
+  const price = parseNumber(product?.price)
+  const p = price === null ? 0 : Math.max(0, price)
+  const speed = Math.min(99.9999, Math.max(0.01, p * 0.006949))
+  return `≈${speed.toFixed(4)} PH/s`
 }
 
 const isOutOfStock = (product) => {
@@ -272,7 +315,7 @@ const getProductImage = (product) => {
 const buyProduct = (product) => {
   if (!product || !product.id) return
   if (isOutOfStock(product)) return
-  router.push(`/products/${product.id}`)
+  router.push({ name: 'ProductDetails', params: { id: String(product.id) } })
 }
 
 const fetchAccountInfo = async () => {
@@ -448,7 +491,7 @@ onBeforeUnmount(() => {
 
 /* Product List */
 .product-list-container {
-  padding: 8px 24px 80px;
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -461,7 +504,7 @@ onBeforeUnmount(() => {
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.04);
   position: relative;
   padding: 16px;
-  padding-top: 28px;
+  padding-top: 10px;
   cursor: pointer;
 }
 
@@ -471,7 +514,7 @@ onBeforeUnmount(() => {
   left: 0;
   background-color: #1b46f5;
   color: #ffffff;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
   padding: 5px 12px;
   border-top-left-radius: 10px;
@@ -500,7 +543,7 @@ onBeforeUnmount(() => {
 
 .product-title {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 400;
   color: #1e1e1e;
   margin-top: -10px;
   text-align: center;
@@ -515,7 +558,7 @@ onBeforeUnmount(() => {
 .stat-col {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 5px;
   flex: 1;
 }
 
@@ -529,6 +572,7 @@ onBeforeUnmount(() => {
 .stat-label {
   font-size: 10px;
   color: #737373;
+  font-style: italic;
 }
 
 .stat-value {
@@ -551,7 +595,7 @@ onBeforeUnmount(() => {
 
 .divider {
   border-top: 1px dashed #e0e0e0;
-  margin: 16px 0;
+  margin: 3px 0;
 }
 
 .card-footer {
@@ -572,7 +616,7 @@ onBeforeUnmount(() => {
 }
 
 .price-value {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
   color: #2d5eaf;
 }

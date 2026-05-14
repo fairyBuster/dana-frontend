@@ -10,8 +10,71 @@
         </header>
 
         <main class="main-content">
-          <h2 class="main-title">TERMS OF SERVICE (AVR)</h2>
-          <div class="terms-text">{{ termsText }}</div>
+          <h2 class="main-title">TERMS OF SERVICE (HUE)</h2>
+          <div class="terms-text">
+            <p>1. Acceptance of Terms<br>
+            By accessing or using HUE (Hybrid Unified Edge), you agree to be bound by these Terms of Service. If you do not agree, you must discontinue use of the platform.</p>
+
+            <p>2. Service Overview<br>
+            HUE provides a cloud computing and digital infrastructure system designed for resource management, distributed computing, and operational optimization. All system processes, outputs, and performance are generated dynamically based on internal systems and real-time operational conditions.</p>
+
+            <p>3. Eligibility<br>
+            You must be at least 18 years old and have the legal capacity to use this platform. By using HUE, you confirm that you meet these requirements.</p>
+
+            <p>4. Account Registration<br>
+            Users are required to:</p>
+            <ul>
+              <li>Provide accurate and up-to-date information</li>
+              <li>Maintain the confidentiality of account credentials</li>
+              <li>Be fully responsible for all activities under their account</li>
+            </ul>
+            <p>HUE is not responsible for unauthorized access resulting from user negligence or compromised credentials.</p>
+
+            <p>5. User Conduct<br>
+            You agree not to:</p>
+            <ul>
+              <li>Engage in phishing, fraud, or deceptive practices</li>
+              <li>Exploit, hack, abuse, or disrupt system operations</li>
+              <li>Use the platform for unlawful or unauthorized purposes</li>
+              <li>Create multiple or fake accounts for manipulation or misuse</li>
+            </ul>
+            <p>HUE enforces a strict zero-tolerance policy toward violations of platform rules and security standards.</p>
+
+            <p>6. Risk Disclosure<br>
+            HUE operates as a cloud-based automated infrastructure system. Operational outputs and system performance may vary depending on real-time conditions and are not guaranteed. Users acknowledge that all decisions and activities are performed at their own discretion and risk.</p>
+
+            <p>7. System Integrity<br>
+            We are committed to maintaining a secure, transparent, and compliant platform environment. HUE reserves the right to monitor platform activity and take necessary actions to protect operational integrity and system security.</p>
+
+            <p>8. No Affiliation<br>
+            HUE operates independently and is not affiliated with, endorsed by, or associated with any third-party companies, organizations, or financial institutions unless explicitly stated.</p>
+
+            <p>9. Limitation of Liability<br>
+            HUE shall not be held liable for:</p>
+            <ul>
+              <li>Variations in system performance or operational outputs</li>
+              <li>User decisions or misuse of the platform</li>
+              <li>External factors beyond system control</li>
+            </ul>
+            <p>All services are provided "as is" without warranties or guarantees of specific results.</p>
+
+            <p>10. Account Suspension & Termination<br>
+            We reserve the right to suspend or terminate accounts that:</p>
+            <ul>
+              <li>Violate these Terms</li>
+              <li>Engage in suspicious, harmful, or abusive activities</li>
+              <li>Pose risks to platform security, operations, or integrity</li>
+            </ul>
+
+            <p>11. Modifications<br>
+            HUE may update or modify these Terms at any time. Continued use of the platform constitutes acceptance of any revised terms and policies.</p>
+
+            <p>12. Governing Terms<br>
+            These Terms are governed by applicable laws and regulations. Users agree to comply with all relevant legal and regulatory requirements within their jurisdiction.</p>
+
+            <p>13. Contact<br>
+            For questions, assistance, or support, please contact the HUE support team.</p>
+          </div>
         </main>
       </div>
     </section>
@@ -19,67 +82,25 @@
 </template>
 
 <script setup>
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
 const goBack = () => {
-  router.go(-1)
+  router.push('/hn/user')
 }
 
-const termsText = `1. Acceptance of Terms
-By accessing or using AVR (Autonomous Virtual Resource), you agree to be bound by these Terms of Service. If you do not agree, you must discontinue use of the platform.
+const handleScroll = () => {
+}
 
-2. Service Overview
-AVR provides an AI-driven automated system designed for digital resource management and optimization. All system processes, outputs, and performance are generated dynamically based on internal algorithms and real-time operational conditions.
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
 
-3. Eligibility
-You must be at least 18 years old and have the legal capacity to use this platform. By using AVR, you confirm that you meet these requirements.
-
-4. Account Registration
-Users are required to:
-  Provide accurate and up-to-date information
-  Maintain the confidentiality of account credentials
-  Be fully responsible for all activities under their account
-AVR is not responsible for unauthorized access due to user negligence.
-
-5. User Conduct
-You agree not to:
-  Engage in phishing, fraud, or deceptive practices
-  Exploit, hack, or disrupt system operations
-  Use the platform for unlawful or unauthorized purposes
-  Create multiple or fake accounts for manipulation
-AVR enforces a strict zero-tolerance policy for violations.
-
-6. Risk Disclosure
-AVR operates as an AI-based automated system. Performance and outputs may vary and are not guaranteed. Users acknowledge that all actions and decisions are made at their own discretion and risk.
-
-7. System Integrity
-We are committed to maintaining a secure and compliant platform. AVR reserves the right to monitor activity and take necessary actions to protect system integrity.
-
-8. No Affiliation
-AVR operates independently and is not affiliated with, endorsed by, or associated with any third-party companies or organizations.
-
-9. Limitation of Liability
-AVR shall not be held liable for:
-  Variations in system performance or outputs
-  User decisions or misuse of the platform
-  External factors beyond system control
-All services are provided "as is" without warranties.
-
-10. Account Suspension & Termination
-We reserve the right to suspend or terminate accounts that:
-  Violate these Terms
-  Engage in suspicious or harmful activities
-  Pose risks to platform security
-
-11. Modifications
-AVR may update these Terms at any time. Continued use of the platform constitutes acceptance of any changes.
-
-12. Governing Terms
-These Terms are governed by applicable laws and regulations. Users agree to comply with all relevant legal requirements.
-
-13. Contact
-For questions or support, please contact the AVR support team.`
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <style scoped>

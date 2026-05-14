@@ -3,7 +3,7 @@
     <!-- Header -->
     <section id="section-header">
       <header class="header">
-        <a href="/profile" class="back-btn" aria-label="Go to profile">
+        <a href="#/hn/user" class="back-btn" aria-label="Go to profile">
           <img src="/assets/image/181_194.svg" alt="Back" class="icon-back">
         </a>
         <button type="button" ref="menuAnchorEl" class="header-title-group" @click.stop="toggleRecordMenu">
@@ -48,7 +48,7 @@
           <div class="col-status status-success">Succeed</div>
           <div class="col-amount amount">{{ transaction.amount }}</div>
           <div class="col-type type-info">
-            <div class="type-name">{{ transaction.title }}</div>
+            <div class="type-name">TopUp Balance</div>
             <div class="type-date">{{ transaction.date }}</div>
           </div>
         </div>
@@ -77,6 +77,7 @@ import { depositAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
+import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 const route = useRoute()
@@ -105,21 +106,22 @@ const recordMenuOpen = ref(false)
 const menuAnchorEl = ref(null)
 
 const recordMenuItems = [
-  { key: 'recharge', label: 'Record recharge', to: '/dep/history' },
-  { key: 'mining', label: 'Mining record', to: '/portfolio/history' },
-  { key: 'payout', label: 'Payout record', to: '/flow/history' },
-  { key: 'purchase', label: 'Purchase record', to: '/orders' },
-  { key: 'commission', label: 'Commision friend', to: '/commission/history' },
-  { key: 'other', label: 'Other record', to: '/trx' }
+  { key: 'recharge', label: 'Record recharge', to: '/hn/app/charge/history' },
+  { key: 'mining', label: 'Mining record', to: '/hn/hall/outputhall/history' },
+  { key: 'payout', label: 'Payout record', to: '/hn/app/settlement/history' },
+  { key: 'purchase', label: 'Purchase record', to: '/hn/orders' },
+  { key: 'commission', label: 'Commision friend', to: '/hn/commission/history' },
+  { key: 'other', label: 'Other record', to: '/hn/user/history' }
 ]
 
 const currentRecordKey = computed(() => {
   const p = String(route.path || '')
-  if (p.startsWith('/dep')) return 'recharge'
-  if (p.startsWith('/portfolio')) return 'mining'
-  if (p.startsWith('/flow')) return 'payout'
-  if (p.startsWith('/orders')) return 'purchase'
-  if (p.startsWith('/commission')) return 'commission'
+  const normalized = p.startsWith('/hn/') ? p.slice('/hn'.length) : p
+  if (normalized.startsWith('/app/charge')) return 'recharge'
+  if (normalized.startsWith('/hall/outputhall')) return 'mining'
+  if (normalized.startsWith('/app/settlement')) return 'payout'
+  if (normalized.startsWith('/orders')) return 'purchase'
+  if (normalized.startsWith('/commission')) return 'commission'
   return 'other'
 })
 
@@ -170,13 +172,59 @@ const formatDateTime = (value) => {
   return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}.${pad2(d.getMinutes())}`
 }
 
+const parseNumber = (value) => {
+  if (value === null || value === undefined || value === '') return 0
+  const raw = String(value).trim()
+  if (!raw) return 0
+  let s = raw.replace(/\s+/g, '')
+  s = s.replace(/[^0-9,.-]/g, '')
+  const dots = (s.match(/\./g) || []).length
+  const commas = (s.match(/,/g) || []).length
+
+  if (dots > 0 && commas > 0) {
+    const lastDot = s.lastIndexOf('.')
+    const lastComma = s.lastIndexOf(',')
+    const decimalSep = lastDot > lastComma ? '.' : ','
+    const groupSep = decimalSep === '.' ? ',' : '.'
+    s = s.split(groupSep).join('')
+    if (decimalSep === ',') s = s.replace(',', '.')
+  } else if (dots > 1 && commas === 0) {
+    s = s.split('.').join('')
+  } else if (commas > 1 && dots === 0) {
+    s = s.split(',').join('')
+  } else if (commas === 1 && dots === 0) {
+    const idx = s.indexOf(',')
+    const digitsAfter = s.length - idx - 1
+    if (digitsAfter === 3) s = s.replace(',', '')
+    else s = s.replace(',', '.')
+  } else if (dots === 1 && commas === 0) {
+    const idx = s.indexOf('.')
+    const digitsAfter = s.length - idx - 1
+    if (digitsAfter === 3) s = s.replace('.', '')
+  }
+
+  const n = Number(s)
+  return Number.isFinite(n) ? n : 0
+}
+
+const getFractionDigitsFromRaw = (value) => {
+  if (value === null || value === undefined) return null
+  const raw = String(value).trim()
+  if (!raw) return null
+  const lastDot = raw.lastIndexOf('.')
+  const lastComma = raw.lastIndexOf(',')
+  const lastSep = Math.max(lastDot, lastComma)
+  if (lastSep <= -1) return 0
+  const frac = raw.slice(lastSep + 1).replace(/[^0-9]/g, '')
+  if (!frac) return 0
+  return Math.min(8, frac.length)
+}
+
 const formatUSD = (value) => {
-  const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
-  if (!Number.isFinite(num)) return '$0'
-  return '$' + new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(num)
+  const num = parseNumber(value)
+  const rawDecimals = getFractionDigitsFromRaw(value)
+  const decimals = rawDecimals === null ? 2 : rawDecimals
+  return formatAppCurrency(num, { decimals })
 }
 
 const normalizeTransactionsResponse = (data) => {

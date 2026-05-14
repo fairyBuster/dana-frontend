@@ -5,9 +5,9 @@
     <!-- Header -->
     <section id="section-header">
       <header class="header">
-        <button type="button" class="back-btn" @click="goBack" aria-label="Go back">
+        <a href="#/hn/home" class="back-btn" aria-label="Go to profile">
           <img src="/assets/image/4244_332.svg" alt="">
-        </button>
+        </a>
         <h1 class="page-title">Mining Hall</h1>
         <div class="header-spacer"></div>
       </header>
@@ -66,15 +66,15 @@
             <img :src="getProductImage(inv)" alt="Product" class="product-img" @error="onImageError">
             <div class="stats-columns">
               <div class="stats-col-left">
-                {{ inv.product_golongan || inv.product_category || 'Category' }}<br>
+                Cloud Computing<br>
                 Already running<br>
                 Daily hall<br>
                 Amount total
               </div>
               <div class="stats-col-right">
-                {{ inv.product_specification || inv.specifications || inv.product_spec || '-' }}<br>
-                {{ getDaysActive(inv) }}<br>
                 {{ formatCurrency(inv.daily_profit) }}<br>
+                {{ getDaysActive(inv) }}<br>
+                {{ formatCurrency(inv.total_claimed_profit) }}<br>
                 {{ formatCurrency(inv.total_amount || inv.product_price) }}
               </div>
             </div>
@@ -84,12 +84,12 @@
             <div class="status-col-left">
               Time start<br>
               Time end<br>
-              Status
+        
             </div>
             <div class="status-col-right">
               {{ formatDate(inv.created_at || inv.start_date) }}<br>
               {{ formatDate(inv.expires_at) }}<br>
-              {{ inv.status || 'Active' }}
+        
             </div>
           </div>
           <button class="action-btn" @click="openInvestmentDetails(inv)">Check Transaction History</button>
@@ -123,12 +123,12 @@
     </div>
   </Teleport>
 
-  <SuccessModal v-model="claimSuccessOpen" message="Claim complete" />
+  <SuccessModal v-model="claimSuccessOpen" message="Success" />
   <ErrorModal v-model="claimErrorOpen" :message="claimErrorMessage" />
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onActivated, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { resolveImageUrl } from '@/utils/imageCache'
 import FooterBar from '@/components/partials/FooterBar.vue'
@@ -136,6 +136,7 @@ import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import { investmentAPI } from '@/services/api'
+import { appSettings, formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 
@@ -163,16 +164,6 @@ const timerDisplay = computed(() => {
   const pad = (n) => String(n).padStart(2, '0')
   return `${pad(hours)} : ${pad(minutes)} : ${pad(seconds)}`
 })
-
-const goBack = () => {
-  try {
-    if (window?.history?.length > 1) {
-      router.go(-1)
-      return
-    }
-  } catch (_) {}
-  router.push('/dashboard')
-}
 
 const normalizeInvestmentsResponse = (data) => {
   if (!data) return { results: [], next: null }
@@ -215,25 +206,80 @@ const filteredInvestments = computed(() => {
   })
 })
 
-const toNumber = (value) => {
+const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return 0
-  const num = Number(String(value).replace(/,/g, ''))
-  if (Number.isNaN(num)) return 0
-  return num
+  const raw = String(value).trim()
+  if (!raw) return 0
+  let s = raw.replace(/\s+/g, '')
+  s = s.replace(/[^0-9,.-]/g, '')
+  const dots = (s.match(/\./g) || []).length
+  const commas = (s.match(/,/g) || []).length
+
+  if (dots > 0 && commas > 0) {
+    const lastDot = s.lastIndexOf('.')
+    const lastComma = s.lastIndexOf(',')
+    const decimalSep = lastDot > lastComma ? '.' : ','
+    const groupSep = decimalSep === '.' ? ',' : '.'
+    s = s.split(groupSep).join('')
+    if (decimalSep === ',') s = s.replace(',', '.')
+  } else if (dots > 1 && commas === 0) {
+    s = s.split('.').join('')
+  } else if (commas > 1 && dots === 0) {
+    s = s.split(',').join('')
+  } else if (commas === 1 && dots === 0) {
+    const idx = s.indexOf(',')
+    const digitsAfter = s.length - idx - 1
+    if (digitsAfter === 3) s = s.replace(',', '')
+    else s = s.replace(',', '.')
+  } else if (dots === 1 && commas === 0) {
+    const idx = s.indexOf('.')
+    const digitsAfter = s.length - idx - 1
+    if (digitsAfter === 3) s = s.replace('.', '')
+  }
+
+  const n = Number(s)
+  return Number.isFinite(n) ? n : 0
+}
+
+const getFractionDigitsFromRaw = (value) => {
+  const raw = String(value ?? '').trim()
+  const lastSep = Math.max(raw.lastIndexOf('.'), raw.lastIndexOf(','))
+  if (lastSep <= -1) return 0
+  const frac = raw.slice(lastSep + 1).replace(/[^0-9]/g, '')
+  return Math.min(8, frac.length || 0)
 }
 
 const claimAmount = computed(() => {
-  return filteredInvestments.value.reduce((sum, inv) => sum + toNumber(inv?.daily_profit), 0)
+  return filteredInvestments.value.reduce((sum, inv) => sum + parseNumber(inv?.daily_profit), 0)
 })
 
-const formatCurrency = (value) => {
-  if (value === null || value === undefined || value === '') return '$0'
-  const num = Number(String(value).replace(/,/g, ''))
-  if (Number.isNaN(num)) return '$0'
-  return '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num)
+const claimAmountDecimals = computed(() => {
+  const list = filteredInvestments.value || []
+  let max = 0
+  for (const inv of list) {
+    const d = getFractionDigitsFromRaw(inv?.daily_profit)
+    if (d > max) max = d
+    if (max >= 8) break
+  }
+  return max
+})
+
+const getAppDefaultDecimals = () => {
+  const d = Number(appSettings?.currency?.decimals)
+  return Number.isFinite(d) ? Math.max(0, d) : 2
 }
 
-const claimAmountDisplay = computed(() => formatCurrency(claimAmount.value))
+const formatCurrency = (value, decimals = null) => {
+  const num = parseNumber(value)
+  let d = decimals
+  if (d === null || d === undefined) {
+    const fromRaw = getFractionDigitsFromRaw(value)
+    d = fromRaw > 0 ? fromRaw : getAppDefaultDecimals()
+  }
+  return formatAppCurrency(num, { decimals: d })
+}
+
+const claimAmountDisplay = computed(() => formatCurrency(claimAmount.value, claimAmountDecimals.value))
 
 const formatDate = (dateString) => {
   if (!dateString) return '-'
@@ -268,7 +314,7 @@ const onImageError = (e) => {
 
 const openInvestmentDetails = (inv) => {
   if (!inv) return
-  router.push('/portfolio/history')
+  router.push('/hn/hall/outputhall/history')
 }
 
 const getDaysActive = (inv) => {
@@ -336,7 +382,7 @@ const confirmClaim = async () => {
 
     claimSuccessOpen.value = true
     setTimeout(() => {
-      router.push('/portfolio/history')
+      router.push('/hn/hall/outputhall/history')
     }, 800)
   } catch (err) {
     claimConfirmOpen.value = false
@@ -350,7 +396,7 @@ const confirmClaim = async () => {
 const goHomeFromClaim = () => {
   if (isClaiming.value) return
   claimConfirmOpen.value = false
-  router.push('/dashboard')
+  router.push('/hn/home')
 }
 
 onMounted(() => {
@@ -358,6 +404,10 @@ onMounted(() => {
   timerInterval = setInterval(() => {
     now.value = Date.now()
   }, 1000)
+})
+
+onActivated(() => {
+  fetchInvestments()
 })
 
 onBeforeUnmount(() => {
@@ -631,7 +681,7 @@ onBeforeUnmount(() => {
 }
 
 .product-title {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: #000000;
   margin: 0 0 12px 0;
@@ -654,7 +704,7 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: space-between;
   flex: 1;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.6;
   color: #000000;
 }
@@ -673,13 +723,14 @@ onBeforeUnmount(() => {
 .status-columns {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.6;
   color: #000000;
 }
 
 .status-col-right {
   text-align: right;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -688,9 +739,9 @@ onBeforeUnmount(() => {
   color: #ffffff;
   border: none;
   border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 10px;
-  font-weight: 600;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   display: block;
   margin: 16px 0 0 auto;

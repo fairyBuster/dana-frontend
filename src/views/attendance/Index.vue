@@ -71,6 +71,7 @@ import { attendanceAPI, authAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
+import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 const goBack = () => {
@@ -142,14 +143,11 @@ const parseNumber = (value) => {
 const formatCurrency = (value) => {
   const n = parseNumber(value)
   const hasFraction = Math.abs(n % 1) > 1e-9
-  return new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: hasFraction ? 2 : 0
-  }).format(n)
+  return formatAppCurrency(n, { decimals: hasFraction ? 2 : 0 })
 }
 
 const formatRupiah = (value) => {
-  return `Rp ${formatCurrency(value)}`
+  return formatCurrency(value)
 }
 
 const extractErrorMessage = (err) => {
@@ -324,16 +322,7 @@ const handleCheckIn = async () => {
       const expected = rankRewardAmount.value
       if (expected > 0) claimedAmount = expected
     }
-    const streakAfter = parseNumber(data.streak ?? data.log?.streak_count ?? streakCount.value)
-    const baseMsg = String(data.message || 'Check-in successful').trim()
-    const nextClaimDate = data.next_claim_date ? String(data.next_claim_date) : ''
-
-    let msg = baseMsg || 'Check-in successful'
-    if (claimedAmount > 0) msg += `! You received ${formatRupiah(claimedAmount)}.`
-    else msg += '!'
-    if (streakAfter > 0) msg += ` Streak: ${streakAfter} days.`
-    if (nextClaimDate) msg += ` Next claim: ${nextClaimDate}.`
-    successMessage.value = msg
+    successMessage.value = 'Success'
     showSuccessModal.value = true
   } catch (err) {
     errorMessage.value = extractErrorMessage(err)

@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { authAPI } from '../services/api'
 
 // Code Splitting (Dynamic Imports)
@@ -74,7 +74,18 @@ const PointExchange = () => import('../views/point/Index.vue')
 const NotificationIndex = () => import('../views/notification/Index.vue')
 const DownloadApp = () => import('../views/DownloadApp.vue')
 
-const routes = [
+const PAGES_PREFIX = '/hn'
+
+const toPagesPath = (path) => {
+  const p = String(path || '')
+  if (!p) return PAGES_PREFIX
+  if (p === '/') return PAGES_PREFIX
+  if (p.startsWith(PAGES_PREFIX + '/')) return p
+  if (p.startsWith('/')) return `${PAGES_PREFIX}${p}`
+  return `${PAGES_PREFIX}/${p}`
+}
+
+const rawRoutes = [
   {
     path: '/',
     name: 'Index',
@@ -90,7 +101,7 @@ const routes = [
     name: 'SignupInvite',
     redirect: (to) => {
       const code = decodeURIComponent(String(to.params.code || ''))
-      return { path: '/register', query: { ...to.query, inviteCode: code }, hash: to.hash }
+      return { path: '/network', query: { ...to.query, inviteCode: code }, hash: to.hash }
     }
   },
   {
@@ -115,21 +126,21 @@ const routes = [
         }
       } catch (_) {}
       
-      if (code) return next({ path: '/register', query: { inviteCode: code } })
-      return next('/register')
+      if (code) return next({ path: '/network', query: { inviteCode: code } })
+      return next('/network')
     }
   },
   {
-    path: '/register=:code(.*)',
+    path: '/network=:code(.*)',
     name: 'RegisterEq',
     beforeEnter: (to, from, next) => {
       const code = decodeURIComponent(String(to.params.code || '').replace(/^\?/, ''))
-      if (code) return next({ path: '/register', query: { inviteCode: code } })
-      return next('/register')
+      if (code) return next({ path: '/network', query: { inviteCode: code } })
+      return next('/network')
     }
   },
   {
-    path: '/register/invitecode',
+    path: '/network/invitecode',
     name: 'ReferralRedirect',
     beforeEnter: (to, from, next) => {
       let code = to.query.ref || to.query.code || null
@@ -147,20 +158,20 @@ const routes = [
           }
         } catch (_) {}
       }
-      if (code) return next({ path: '/register', query: { inviteCode: code } })
-      return next('/register')
+      if (code) return next({ path: '/network', query: { inviteCode: code } })
+      return next('/network')
     }
   },
   {
-    path: '/register/:refCode(.*)',
+    path: '/network/:refCode(.*)',
     name: 'PagesRegisterWithReferral',
     redirect: (to) => {
       const code = decodeURIComponent(String(to.params.refCode || ''))
-      return { path: '/register', query: { ...to.query, inviteCode: code }, hash: to.hash }
+      return { path: '/network', query: { ...to.query, inviteCode: code }, hash: to.hash }
     }
   },
   {
-    path: '/register',
+    path: '/network',
     name: 'Register',
     component: Register,
     beforeEnter: (to, from, next) => {
@@ -175,7 +186,7 @@ const routes = [
       if (!code) {
         try {
           const fp = to.fullPath || ''
-          const matchEq = fp.match(/\/register=([^?&#]+)/)
+          const matchEq = fp.match(/\/network=([^?&#]+)/)
           if (matchEq && matchEq[1]) {
             code = decodeURIComponent(matchEq[1])
           }
@@ -205,7 +216,7 @@ const routes = [
     }
   },
   {
-    path: '/login',
+    path: '/console',
     name: 'Login',
     component: Login,
     beforeEnter: (to, from, next) => {
@@ -229,12 +240,12 @@ const routes = [
     component: ForgotPassword
   },
   {
-    path: '/terms',
+    path: '/legal/terms',
     name: 'Terms',
     component: Terms
   },
   {
-    path: '/privacy',
+    path: '/legal/privacy',
     name: 'PrivacyPolicy',
     component: Policy
   },
@@ -260,41 +271,41 @@ const routes = [
     component: Career
   },
   {
-    path: '/solution',
+    path: '/legal/agreement',
     name: 'Solution',
     component: Solution
   },
   {
-    path: '/dashboard',
+    path: '/home',
     name: 'Dashboard',
     component: Dashboard,
     meta: { requiresAuth: true }
   },
   {
-    path: '/about',
+    path: '/company',
     name: 'AboutUs',
     component: AboutUs
   },
   {
-    path: '/profile',
+    path: '/user',
     name: 'Profile',
     component: Profile,
     meta: { requiresAuth: true }
   },
   {
-    path: '/profile/statistic',
+    path: '/user/statistic',
     name: 'ProfileStatistic',
     component: ProfileStatistic,
     meta: { requiresAuth: true }
   },
   {
-    path: '/dep',
+    path: '/app/charge',
     name: 'Deposit',
     component: Deposit,
     meta: { requiresAuth: true }
   },
   {
-    path: '/dep/history',
+    path: '/app/charge/history',
     name: 'WalletHistory',
     component: DepositRecords,
     meta: { requiresAuth: true }
@@ -318,13 +329,13 @@ const routes = [
   //   meta: { requiresAuth: true }
   // },
   {
-    path: '/settings/personal-info',
+    path: '/user/detail',
     name: 'PersonalInfo',
     component: PersonalInfo,
     meta: { requiresAuth: true }
   },
   {
-    path: '/settings/change-password',
+    path: '/user/change',
     name: 'ChangePassword',
     component: ChangePassword,
     meta: { requiresAuth: true }
@@ -354,13 +365,13 @@ const routes = [
   //   meta: { requiresAuth: true }
   // },
   {
-    path: '/task',
+    path: '/hall/taskhall',
     name: 'Missions',
     component: Missions,
     meta: { requiresAuth: true }
   },
   {
-    path: '/vp',
+    path: '/user/person',
     name: 'MissionsSvip',
     component: MissionsSvip,
     meta: { requiresAuth: true }
@@ -378,25 +389,25 @@ const routes = [
   //   meta: { requiresAuth: true }
   // },
   {
-    path: '/task/user-status',
+    path: '/hall/taskhall/user-status',
     name: 'UserStatus',
     component: UserStatus,
     meta: { requiresAuth: true }
   },
   {
-    path: '/task/status/instructions',
+    path: '/hall/taskhall/status/instructions',
     name: 'InstructionsStatus',
     component: InstructionsStatus,
     meta: { requiresAuth: true }
   },
   {
-    path: '/sign',
+    path: '/hall/sign',
     name: 'Attendance',
     component: AttendanceIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/sign/history',
+    path: '/hall/sign/history',
     name: 'AttendanceHistory',
     component: AttendanceTrx,
     meta: { requiresAuth: true }
@@ -408,7 +419,7 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/trx',
+    path: '/user/history',
     name: 'TransactionsIndex',
     component: Transactions,
     meta: { requiresAuth: true }
@@ -432,13 +443,13 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/support/platform',
+    path: '/user/help',
     name: 'Support',
     component: Support,
     meta: { requiresAuth: false }
   },
   {
-    path: '/support',
+    path: '/user/contact',
     name: 'SupportIndex',
     component: SupportIndex,
     meta: { requiresAuth: false }
@@ -450,37 +461,31 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/support/help',
-    name: 'SupportHelp',
-    component: Help,
-    meta: { requiresAuth: true }
-  },
-  {
     path: '/help',
     name: 'Help',
     component: Help,
     meta: { requiresAuth: false }
   },
   {
-    path: '/team/1',
+    path: '/network/community/1',
     name: 'Teams',
     component: Teams,
     meta: { requiresAuth: true }
   },
   {
-    path: '/team/2',
+    path: '/network/community/2',
     name: 'Teams2',
     component: Teams2,
     meta: { requiresAuth: true }
   },
   {
-    path: '/team/3',
+    path: '/network/community/3',
     name: 'Teams3',
     component: Teams3,
     meta: { requiresAuth: true }
   },
   {
-    path: '/team',
+    path: '/network/community',
     name: 'TeamIndex',
     component: TeamIndex,
     meta: { requiresAuth: true }
@@ -498,22 +503,30 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/news',
+    path: '/home/news',
     name: 'NewsIndex',
     component: NewsIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/news/:id',
+    path: '/home/news/:id',
     name: 'NewsDetails',
     component: NewsDetails,
     meta: { requiresAuth: true }
   },
   {
-    path: '/products',
+    path: '/shop',
     name: 'ProductIndex',
     component: ProductIndex,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/products',
+    redirect: () => `${PAGES_PREFIX}/shop`
+  },
+  {
+    path: '/products/:id',
+    redirect: (to) => `${PAGES_PREFIX}/shop/detail/${to.params.id}`
   },
   {
     path: '/orders',
@@ -522,31 +535,31 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/products/:id',
+    path: '/shop/detail/:id',
     name: 'ProductDetails',
     component: ProductDetails,
     meta: { requiresAuth: true }
   },
   {
-    path: '/portfolio',
+    path: '/hall/outputhall',
     name: 'ActiveProduct',
     component: InvestmentsActive,
     meta: { requiresAuth: true }
   },
   {
-    path: '/portfolio/:id',
+    path: '/hall/outputhall/:id',
     name: 'ActiveProductDetails',
     component: InvestmentDetails,
     meta: { requiresAuth: true }
   },
   {
-    path: '/portfolio/history',
+    path: '/hall/outputhall/history',
     name: 'InvestmentHistory',
     component: InvestmentTransactions,
     meta: { requiresAuth: true }
   },
   {
-    path: '/connect',
+    path: '/user/account',
     name: 'BankIndex',
     component: BankIndex,
     meta: { requiresAuth: true }
@@ -564,19 +577,19 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/share',
+    path: '/network/invite',
     name: 'ShareIndex',
     component: ShareIndex,
     meta: { requiresAuth: true }
   },
   {
-    path: '/flow',
+    path: '/app/settlement',
     name: 'WithdrawCreate',
     component: WithdrawCreate,
     meta: { requiresAuth: true }
   },
   {
-    path: '/flow/history',
+    path: '/app/settlement/history',
     name: 'SettlementHistory',
     component: WithdrawRecords,
     meta: { requiresAuth: true }
@@ -629,27 +642,27 @@ const routes = [
     component: HowToUse,
     meta: { requiresAuth: true }
   },
-  { path: '/me', redirect: '/profile' },
-  { path: '/me/statistic', redirect: '/profile/statistic' },
-  { path: '/deposit', redirect: '/dep' },
-  { path: '/deposit/history', redirect: '/dep/history' },
-  { path: '/missions', redirect: '/task' },
-  { path: '/missions/user-status', redirect: '/task/user-status' },
-  { path: '/missions/status/instructions', redirect: '/task/status/instructions' },
-  { path: '/svip', redirect: '/vp' },
-  { path: '/attendance', redirect: '/sign' },
-  { path: '/attendance/history', redirect: '/sign/history' },
+  { path: '/me', redirect: '/user' },
+  { path: '/me/statistic', redirect: '/user/statistic' },
+  { path: '/deposit', redirect: '/app/charge' },
+  { path: '/deposit/history', redirect: '/app/charge/history' },
+  { path: '/missions', redirect: '/hall/taskhall' },
+  { path: '/missions/user-status', redirect: '/hall/taskhall/user-status' },
+  { path: '/missions/status/instructions', redirect: '/hall/taskhall/status/instructions' },
+  { path: '/svip', redirect: '/user/person' },
+  { path: '/attendance', redirect: '/hall/sign' },
+  { path: '/attendance/history', redirect: '/hall/sign/history' },
   { path: '/billing/overview', redirect: '/informations/overview' },
   { path: '/billing/options', redirect: '/informations/options' },
-  { path: '/transactions', redirect: '/trx' },
-  { path: '/bank', redirect: '/connect' },
+  { path: '/transactions', redirect: '/user/history' },
+  { path: '/bank', redirect: '/user/account' },
   { path: '/bank/add', redirect: '/connect/add' },
   { path: '/bank/edit', redirect: '/connect/edit' },
-  { path: '/invite', redirect: '/share' },
-  { path: '/withdraw', redirect: '/flow' },
-  { path: '/withdraw/history', redirect: '/flow/history' },
+  { path: '/invite', redirect: '/network/invite' },
+  { path: '/withdraw', redirect: '/app/settlement' },
+  { path: '/withdraw/history', redirect: '/app/settlement/history' },
   { path: '/index/download-app', redirect: '/download-app' },
-  { path: '/index/access', redirect: '/login' },
+  { path: '/index/access', redirect: '/console' },
   {
     path: '/index/register/ref',
     redirect: (to) => ({ path: '/register/ref', query: to.query, hash: to.hash })
@@ -668,59 +681,59 @@ const routes = [
   },
   { path: '/index/register', redirect: '/register' },
   { path: '/index/forgot-password', redirect: '/forgot-password' },
-  { path: '/index/terms', redirect: '/terms' },
-  { path: '/index/privacy', redirect: '/privacy' },
+  { path: '/index/terms', redirect: '/legal/terms' },
+  { path: '/index/privacy', redirect: '/legal/privacy' },
   { path: '/index/cookie', redirect: '/cookie' },
   { path: '/index/media', redirect: '/media' },
   { path: '/index/media/:id', redirect: (to) => ({ path: `/media/${to.params.id}`, query: to.query, hash: to.hash }) },
   { path: '/index/career', redirect: '/career' },
-  { path: '/index/solution', redirect: '/solution' },
-  { path: '/index/active', redirect: '/dashboard' },
-  { path: '/index/about', redirect: '/about' },
-  { path: '/index/account', redirect: '/profile' },
-  { path: '/balance/recharge', redirect: '/dep' },
-  { path: '/history/recharge', redirect: '/dep/history' },
+  { path: '/index/solution', redirect: '/legal/agreement' },
+  { path: '/index/active', redirect: '/home' },
+  { path: '/index/about', redirect: '/company' },
+  { path: '/index/account', redirect: '/user' },
+  { path: '/balance/recharge', redirect: '/app/charge' },
+  { path: '/history/recharge', redirect: '/app/charge/history' },
   { path: '/index/settings', redirect: '/settings' },
-  { path: '/index/settings/personal-info', redirect: '/settings/personal-info' },
-  { path: '/index/settings/change-password', redirect: '/settings/change-password' },
+  { path: '/index/settings/personal-info', redirect: '/user/detail' },
+  { path: '/index/settings/change-password', redirect: '/user/change' },
   { path: '/index/settings/pin-withdraw', redirect: '/settings/pin-withdraw' },
   { path: '/index/settings/device-info', redirect: '/settings/device-info' },
   { path: '/index/settings/address', redirect: '/settings/address' },
-  { path: '/index/missions', redirect: '/task' },
-  { path: '/benefits/premium', redirect: '/vp' },
-  { path: '/index/missions/user-status', redirect: '/task/user-status' },
-  { path: '/index/missions/status/instructions', redirect: '/task/status/instructions' },
-  { path: '/index/attendance', redirect: '/sign' },
-  { path: '/history/attendance', redirect: '/sign/history' },
+  { path: '/index/missions', redirect: '/hall/taskhall' },
+  { path: '/benefits/premium', redirect: '/user/person' },
+  { path: '/index/missions/user-status', redirect: '/hall/taskhall/user-status' },
+  { path: '/index/missions/status/instructions', redirect: '/hall/taskhall/status/instructions' },
+  { path: '/index/attendance', redirect: '/hall/sign' },
+  { path: '/history/attendance', redirect: '/hall/sign/history' },
   { path: '/index/billing/overview', redirect: '/informations/overview' },
-  { path: '/history/transaction', redirect: '/trx' },
+  { path: '/history/transaction', redirect: '/user/history' },
   { path: '/index/billing/options', redirect: '/informations/options' },
   { path: '/history/teams', redirect: '/commission/history' },
-  { path: '/index/support/platform', redirect: '/support/platform' },
-  { path: '/index/support', redirect: '/support' },
+  { path: '/index/support/platform', redirect: '/user/help' },
+  { path: '/index/support', redirect: '/user/contact' },
   { path: '/index/support/bot', redirect: '/support/bot' },
-  { path: '/index/support/help', redirect: '/support/help' },
+  { path: '/index/support/help', redirect: '/user/help' },
   { path: '/index/help', redirect: '/help' },
-  { path: '/invite/team/level/1', redirect: '/team/1' },
-  { path: '/invite/team/level/2', redirect: '/team/2' },
-  { path: '/invite/team/level/3', redirect: '/team/3' },
-  { path: '/invite/team', redirect: '/team' },
-  { path: '/team/level/:level(1|2|3)', redirect: (to) => ({ path: `/team/${to.params.level}`, query: to.query, hash: to.hash }) },
-  { path: '/index/news', redirect: '/news' },
-  { path: '/index/news/:id', redirect: (to) => ({ path: `/news/${to.params.id}`, query: to.query, hash: to.hash }) },
-  { path: '/index/products', redirect: '/products' },
+  { path: '/invite/team/level/1', redirect: '/network/community/1' },
+  { path: '/invite/team/level/2', redirect: '/network/community/2' },
+  { path: '/invite/team/level/3', redirect: '/network/community/3' },
+  { path: '/invite/team', redirect: '/network/community' },
+  { path: '/team/level/:level(1|2|3)', redirect: (to) => ({ path: `/network/community/${to.params.level}`, query: to.query, hash: to.hash }) },
+  { path: '/index/news', redirect: '/home/news' },
+  { path: '/index/news/:id', redirect: (to) => ({ path: `/home/news/${to.params.id}`, query: to.query, hash: to.hash }) },
+  { path: '/index/products', redirect: '/shop' },
   { path: '/history/order', redirect: '/orders' },
-  { path: '/index/products/:id', redirect: (to) => ({ path: `/products/${to.params.id}`, query: to.query, hash: to.hash }) },
-  { path: '/index/panel', redirect: '/portfolio' },
-  { path: '/index/panel/history', redirect: '/portfolio/history' },
-  { path: '/index/panel/:id', redirect: (to) => ({ path: `/portfolio/${to.params.id}`, query: to.query, hash: to.hash }) },
-  { path: '/history/records', redirect: '/portfolio/history' },
-  { path: '/assets/bind', redirect: '/connect' },
+  { path: '/index/products/:id', redirect: (to) => ({ path: `/shop/detail/${to.params.id}`, query: to.query, hash: to.hash }) },
+  { path: '/index/panel', redirect: '/hall/outputhall' },
+  { path: '/index/panel/history', redirect: '/hall/outputhall/history' },
+  { path: '/index/panel/:id', redirect: (to) => ({ path: `/hall/outputhall/${to.params.id}`, query: to.query, hash: to.hash }) },
+  { path: '/history/records', redirect: '/hall/outputhall/history' },
+  { path: '/assets/bind', redirect: '/user/account' },
   { path: '/assets/bind/add', redirect: '/connect/add' },
   { path: '/assets/bind/edit', redirect: '/connect/edit' },
-  { path: '/invite/invite', redirect: '/share' },
-  { path: '/assets/release', redirect: '/flow' },
-  { path: '/history/release', redirect: '/flow/history' },
+  { path: '/invite/invite', redirect: '/network/invite' },
+  { path: '/assets/release', redirect: '/app/settlement' },
+  { path: '/history/release', redirect: '/app/settlement/history' },
   { path: '/index/rewards', redirect: '/rewards' },
   { path: '/history/rewards', redirect: '/rewards/history' },
   { path: '/history/bonus', redirect: '/bonus/history' },
@@ -729,12 +742,28 @@ const routes = [
   { path: '/index/company/security', redirect: '/company/security' },
   { path: '/index/ranking', redirect: '/ranking' },
   { path: '/index/rules', redirect: '/rules' },
-  { path: '/auth/register', redirect: '/register' },
-  { path: '/auth/register/:refCode(.*)', redirect: (to) => ({ path: `/register/${to.params.refCode || ''}`, query: to.query, hash: to.hash }) }
+  { path: '/auth/register', redirect: '/network' },
+  { path: '/auth/register/:refCode(.*)', redirect: (to) => ({ path: `/network/${to.params.refCode || ''}`, query: to.query, hash: to.hash }) },
+  { path: '/support', redirect: '/user/contact' },
+  { path: '/support/platform', redirect: '/user/help' },
+  { path: '/shop/detail', redirect: '/shop' }
 ]
 
+const prefixedRoutes = rawRoutes.map((r) => ({ ...r, path: toPagesPath(r.path) }))
+const legacyRedirectRoutes = rawRoutes.map((r) => {
+  const p = String(r?.path || '')
+  if (!p) return null
+  if (p === '/') return { path: '/', redirect: PAGES_PREFIX }
+  return {
+    path: p,
+    redirect: (to) => ({ path: toPagesPath(to.path), query: to.query, hash: to.hash })
+  }
+}).filter(Boolean)
+
+const routes = [...legacyRedirectRoutes, ...prefixedRoutes]
+
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes
 })
 
@@ -747,20 +776,22 @@ router.beforeEach(async (to, from, next) => {
   const publicRoutes = [
     '/',
     '/download-app',
-    '/login',
-    '/register',
+    '/console',
+    '/network',
     '/forgot-password',
-    '/terms',
-    '/privacy',
+    '/legal/terms',
+    '/legal/privacy',
     '/cookie',
     '/media',
     '/career',
-    '/solution',
-    '/about',
-    '/help',
-    '/support'
+    '/legal/agreement',
+    '/company',
+    '/user/help',
+    '/user/contact',
+    '/help'
   ]
-  const isPublicRoute = publicRoutes.some(route => to.path.startsWith(route))
+  const normalizedPath = to.path.startsWith(PAGES_PREFIX) ? (to.path.slice(PAGES_PREFIX.length) || '/') : to.path
+  const isPublicRoute = publicRoutes.some(route => normalizedPath.startsWith(route))
 
   if (requiresAuth && !token) {
     if (sessionOk) {
@@ -769,11 +800,11 @@ router.beforeEach(async (to, from, next) => {
         return next()
       } catch (_) {
         localStorage.removeItem('session_authenticated')
-        return next('/login?session_expired=true')
+        return next(`${PAGES_PREFIX}/login?session_expired=true`)
       }
     }
     if (!isPublicRoute) {
-      return next('/login')
+      return next(`${PAGES_PREFIX}/login`)
     }
   }
 

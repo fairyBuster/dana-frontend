@@ -52,27 +52,27 @@ const goBack = () => {
 }
 
 const goToProfitHistory = () => {
-  router.push('/portfolio/history')
+  router.push('/hn/hall/outputhall/history')
 }
 
 const goToDepositHistory = () => {
-  router.push('/dep/history')
+  router.push('/hn/app/charge/history')
 }
 
 const goToWithdrawHistory = () => {
-  router.push('/flow/history')
+  router.push('/hn/app/settlement/history')
 }
 
 const goToCommissionHistory = () => {
-  router.push('/commission/history')
+  router.push('/hn/commission/history')
 }
 
 const goToPurchaseHistory = () => {
-  router.push('/orders')
+  router.push('/hn/orders')
 }
 
 const goToOtherHistory = () => {
-  router.push('/trx')
+  router.push('/hn/user/history')
 }
 </script>
 

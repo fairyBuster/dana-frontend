@@ -26,7 +26,7 @@
     <!-- Hero Section -->
     <section id="section-hero">
       <div class="hero-content">
-        <img src="/assets/image/Logo01.png" alt="AVR Logo" class="hero-logo">
+        <img src="/assets/image/Logo01.png" alt="HUE Logo" class="hero-logo">
         <div class="hero-text">
           <h1 class="hero-title">{{ ui.heroTitle }}</h1>
           <p class="hero-subtitle">{{ ui.heroSubtitle }}</p>
@@ -118,10 +118,10 @@
             </div>
             <p class="agreement-text">
               {{ ui.agreementPrefix }}
-              <router-link to="/solution">{{ ui.customerAgreement }}</router-link>,
-              <router-link to="/terms">{{ ui.termsOfService }}</router-link>
+              <router-link to="/hn/legal/agreement">{{ ui.customerAgreement }}</router-link>,
+              <router-link to="/hn/legal/terms">{{ ui.termsOfService }}</router-link>
               {{ ui.andWord }}
-              <router-link to="/privacy">{{ ui.privacyPolicy }}</router-link>
+              <router-link to="/hn/legal/privacy">{{ ui.privacyPolicy }}</router-link>
             </p>
           </div>
 
@@ -134,7 +134,7 @@
           <!-- Register Link -->
           <div class="register-link">
             {{ ui.noAccount }}
-            <router-link to="/register">{{ ui.createAccount }}</router-link>
+            <router-link to="/hn/network">{{ ui.createAccount }}</router-link>
           </div>
         </form>
       </div>
@@ -142,7 +142,7 @@
 
     <!-- Footer Section -->
     <section id="section-footer">
-      <p class="copyright">&copy; 2026 AVR System. All rights reserved.</p>
+      <p class="copyright">&copy; 2026 HUE System. All rights reserved.</p>
     </section>
 
     <!-- Modals -->
@@ -177,8 +177,8 @@ const router = useRouter()
 const { locale } = useI18n()
 
 const EN_UI = Object.freeze({
-  heroTitle: 'Start AVR and access advanced AI system features!',
-  heroSubtitle: 'Join thousands of users and experience smart AI-powered resource management',
+  heroTitle: 'Start HUE and access advanced Cloud system features!',
+  heroSubtitle: 'Join thousands of users and experience smart Cloud-powered resource management',
   signInWithEmail: 'Sign in to console with email',
   signInWithPhone: 'Sign in to console with phone',
   phoneLabel: 'Phone',
@@ -198,8 +198,8 @@ const EN_UI = Object.freeze({
 })
 
 const ID_UI_FALLBACK = Object.freeze({
-  heroTitle: 'Mulai AVR dan akses fitur sistem AI canggih!',
-  heroSubtitle: 'Bergabunglah dengan ribuan pengguna dan rasakan manajemen sumber daya berbasis AI yang cerdas',
+  heroTitle: 'Mulai HUE dan akses fitur sistem Cloud canggih!',
+  heroSubtitle: 'Bergabunglah dengan ribuan pengguna dan rasakan manajemen sumber daya berbasis Cloud yang cerdas',
   signInWithEmail: 'Masuk ke konsol dengan email',
   signInWithPhone: 'Masuk ke konsol dengan nomor',
   phoneLabel: 'Nomor',
@@ -513,12 +513,14 @@ const handleLogin = async () => {
       }
     }
 
-    const response = await authAPI.login(payload)
+    const response = loginMode.value === 'email'
+      ? await authAPI.emailLogin(payload)
+      : await authAPI.login(payload)
 
     // Extract token from response
     const data = response?.data || {}
     const headerAuth = response?.headers?.authorization || response?.headers?.Authorization
-    let token = data.token || data.key || data.auth_token || data.access || data.access_token
+    let token = data.access || data.token || data.key || data.auth_token || data.access_token
     if (!token && typeof headerAuth === 'string') {
       const parts = headerAuth.split(/\s+/)
       token = parts.length > 1 ? parts.pop() : headerAuth
@@ -544,7 +546,7 @@ const handleLogin = async () => {
     successMessage.value = 'Successfully'
     showSuccessModal.value = true
     setTimeout(() => {
-      router.push('/dashboard')
+      router.push('/hn/home')
     }, 1500)
   } catch (error) {
     const status = error.response?.status
@@ -572,10 +574,11 @@ const handleLogin = async () => {
     }
 
     if (status === 401) {
-      if (serverTextLower.includes('please provide both phone and password')) {
-        msg = 'Please provide both phone number and password.'
-      } else if (serverTextLower.includes('invalid phone number or password')) {
-        msg = 'Invalid phone number or password. Please try again.'
+      const isEmail = loginMode.value === 'email'
+      if (serverTextLower.includes('please provide both') && serverTextLower.includes('password')) {
+        msg = isEmail ? 'Please provide both email and password.' : 'Please provide both phone number and password.'
+      } else if (serverTextLower.includes('invalid') && serverTextLower.includes('password')) {
+        msg = isEmail ? 'Invalid email or password. Please try again.' : 'Invalid phone number or password. Please try again.'
       } else if (serverTextLower.includes('user account is disabled')) {
         msg = 'Your account is temporarily restricted. Please contact customer service.'
       } else if (serverTextLower.includes('user is banned')) {
@@ -587,17 +590,18 @@ const handleLogin = async () => {
       } else if (serverTextLower.includes('user credentials are expired')) {
         msg = 'Your credentials have expired. Please recover your account or contact Customer Service.'
       } else {
-        msg = serverText || 'Invalid phone number or password. Please try again.'
+        msg = serverText || (isEmail ? 'Invalid email or password. Please try again.' : 'Invalid phone number or password. Please try again.')
       }
     } else if (status === 404) {
       msg = 'Account not found. Please register first.'
     } else if (status === 429 || serverTextLower.includes('throttle') || serverTextLower.includes('limit')) {
       msg = 'Too many failed login attempts. Please try again later.'
     } else if (status === 400) {
-      if (serverTextLower.includes('please provide both phone and password')) {
-        msg = 'Please provide both phone number and password.'
-      } else if (serverTextLower.includes('invalid phone number or password')) {
-        msg = 'Invalid phone number or password. Please try again.'
+      const isEmail = loginMode.value === 'email'
+      if (serverTextLower.includes('please provide both') && serverTextLower.includes('password')) {
+        msg = isEmail ? 'Please provide both email and password.' : 'Please provide both phone number and password.'
+      } else if (serverTextLower.includes('invalid') && serverTextLower.includes('password')) {
+        msg = isEmail ? 'Invalid email or password. Please try again.' : 'Invalid phone number or password. Please try again.'
       } else {
         msg = serverText || msg
       }
@@ -724,7 +728,7 @@ input {
   border: none;
   text-align: left;
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: #000000;
   cursor: pointer;
@@ -770,7 +774,7 @@ input {
 
 .hero-subtitle {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
   color: #494747;
   line-height: 1.4;
 }
@@ -788,7 +792,7 @@ input {
   border: none;
   gap: 4px;
   color: #0073ff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   margin-bottom: 24px;
 }
@@ -991,7 +995,7 @@ input {
 
 .register-link {
   text-align: center;
-  font-size: 14px;
+  font-size: 15px;
   color: #000000;
   margin-top: 20px;
 }
@@ -1010,7 +1014,7 @@ input {
 
 .copyright {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
   color: #000000;
 }
 </style>

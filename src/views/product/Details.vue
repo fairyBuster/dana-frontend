@@ -40,7 +40,7 @@
             <hr class="card-divider">
             <p class="card-text">
               Dear user,<br>
-              To continue with verification, please confirm that you are the rightful owner of the assets associated with your AVR account and activities.
+              To continue with verification, please confirm that you are the rightful owner of the assets associated with your HUE account and activities.
             </p>
           </div>
 
@@ -66,7 +66,7 @@
     <ConfirmationModal
       v-model="showPurchaseModal"
       message="Are you sure you want to purchase this asset?"
-      :amount="product ? `$${formatPrice(product.price)}` : ''"
+      :amount="purchaseAmountDisplay"
       @confirm="executePurchase"
     />
 
@@ -87,6 +87,7 @@ import SuccessModal from '@/components/modals/SuccessModal.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import ConfirmationModal from '@/components/modals/ConfirmationModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
+import { appSettings, formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 const route = useRoute()
@@ -108,29 +109,83 @@ const toggleConfirm = () => {
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return null
-  const n = Number(String(value).replace(/,/g, ''))
-  if (Number.isNaN(n)) return null
-  return n
+  const raw = String(value).trim()
+  if (!raw) return null
+
+  const s = raw.replace(/\s+/g, '')
+  const sign = s.startsWith('-') ? '-' : ''
+  const unsigned = s.replace(/^[+-]/, '')
+
+  const lastDot = unsigned.lastIndexOf('.')
+  const lastComma = unsigned.lastIndexOf(',')
+  const lastSep = Math.max(lastDot, lastComma)
+
+  if (lastSep > -1) {
+    const intPart = unsigned.slice(0, lastSep).replace(/[.,]/g, '').replace(/[^0-9]/g, '')
+    const fracPart = unsigned.slice(lastSep + 1).replace(/[^0-9]/g, '')
+    const normalized = fracPart ? `${sign}${intPart || '0'}.${fracPart}` : `${sign}${intPart || '0'}`
+    const n = Number(normalized)
+    return Number.isFinite(n) ? n : null
+  }
+
+  const digitsOnly = unsigned.replace(/[^0-9]/g, '')
+  if (!digitsOnly) return null
+  const n = Number(`${sign}${digitsOnly}`)
+  return Number.isFinite(n) ? n : null
 }
+
+const getFractionDigitsFromRaw = (value) => {
+  const raw = String(value ?? '').trim()
+  const lastSep = Math.max(raw.lastIndexOf('.'), raw.lastIndexOf(','))
+  if (lastSep <= -1) return 0
+  const frac = raw.slice(lastSep + 1).replace(/[^0-9]/g, '')
+  return Math.min(8, frac.length || 0)
+}
+
+const getAppDefaultDecimals = () => {
+  const d = Number(appSettings?.currency?.decimals)
+  return Number.isFinite(d) ? Math.max(0, d) : 0
+}
+
+const purchaseAmountDisplay = computed(() => {
+  const priceRaw = product.value?.price
+  const n = parseNumber(priceRaw)
+  if (n === null) return ''
+  const decimalsFromRaw = getFractionDigitsFromRaw(priceRaw)
+  const decimals = decimalsFromRaw > 0 ? decimalsFromRaw : getAppDefaultDecimals()
+  return formatAppCurrency(n, { decimals })
+})
 
 const formatPrice = (value) => {
   const n = parseNumber(value)
-  if (n === null) return '0'
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)
+  if (n === null) return formatAppCurrency(0, { decimals: 0 })
+  return formatAppCurrency(n, { decimals: 0 })
+}
+
+const formatCurrencyPlaceholder = (text) => {
+  const cfg = appSettings.currency || {}
+  const symbol = String(cfg.symbol || '')
+  const symbolPosition = String(cfg.symbol_position || 'prefix')
+  const symbolSpace = Boolean(cfg.symbol_space ?? false)
+  const space = symbol && symbolSpace ? ' ' : ''
+
+  if (!symbol) return String(text || '')
+  if (symbolPosition === 'suffix') return `${text}${space}${symbol}`
+  return `${symbol}${space}${text}`
 }
 
 const profitPerDay = computed(() => {
-  if (!product.value) return '$-/day'
+  if (!product.value) return `${formatCurrencyPlaceholder('-')}/day`
   const profitType = String(product.value?.profit_type || '').toLowerCase()
   if (profitType === 'random') {
     const min = parseNumber(product.value?.profit_random_min)
     const max = parseNumber(product.value?.profit_random_max)
-    if (min !== null && max !== null) return `$${formatPrice(min)}~${formatPrice(max)}`
-    if (min !== null) return `$${formatPrice(min)}`
+    if (min !== null && max !== null) return `${formatAppCurrency(min, { decimals: 0 })}~${formatAppCurrency(max, { decimals: 0 })}`
+    if (min !== null) return formatAppCurrency(min, { decimals: 0 })
   }
   const rate = parseNumber(product.value?.profit_rate)
-  if (rate !== null && rate > 0) return `$${formatPrice(rate)}`
-  return '$-'
+  if (rate !== null && rate > 0) return formatAppCurrency(rate, { decimals: 0 })
+  return formatCurrencyPlaceholder('-')
 })
 
 const durationText = computed(() => {
@@ -196,6 +251,9 @@ const extractPurchaseErrorMessage = (data) => {
   if (!combined) return ''
 
   const s = combined.toLowerCase()
+  if (s.includes('no news matches to this query') || s.includes('no product matches to this query') || s.includes('no matches to this query')) {
+    return 'Refresh your connection or logout first.'
+  }
   if (
     s.includes('balance') ||
     s.includes('insufficient') ||
@@ -203,8 +261,13 @@ const extractPurchaseErrorMessage = (data) => {
   ) {
     return 'Please top up your balance first.'
   }
-  if (s.includes('purchase limit') || s.includes('maximum')) {
-    return 'You have reached the maximum limit for this product.'
+  if (
+    s.includes('batas pembelian tercapai') ||
+    s.includes('hanya bisa membeli produk ini') ||
+    s.includes('purchase limit') ||
+    s.includes('maximum')
+  ) {
+    return 'Limit'
   }
 
   return combined
@@ -226,7 +289,7 @@ const executePurchase = async () => {
     })
     const inv = resp?.data
     redirectInvestmentId.value = inv?.id ?? inv?.investment_id ?? null
-    successMessage.value = 'Asset has been added to your account.'
+    successMessage.value = 'Success'
     successModalOpen.value = true
   } catch (err) {
     const data = err?.response?.data
@@ -241,10 +304,10 @@ const handleSuccessConfirm = () => {
   const id = redirectInvestmentId.value
   redirectInvestmentId.value = null
   if (id) {
-    router.push(`/portfolio`)
+    router.push('/hn/hall/outputhall')
     return
   }
-  router.push('/portfolio')
+  router.push('/hn/hall/outputhall')
 }
 </script>
 

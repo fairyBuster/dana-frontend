@@ -34,7 +34,7 @@
       <div class="payment-method-card">
         <div class="payment-info">
           <div class="payment-name">Payment methods {{ currentChannelLabel }}</div>
-          <div class="payment-limit">Minimum balance: 5-50000</div>
+          <div class="payment-limit">Minimum balance: {{ channelLimitText }}</div>
         </div>
         <img src="/assets/image/a7278a84dccf299c032e11e26c6bad56b79f5ef7.png" alt="Selected" class="check-icon">
       </div>
@@ -83,21 +83,21 @@
     <!-- Instructions Section -->
     <section id="section-instructions">
       <div class="instructions-card">
-        <h3 class="instructions-title">Recharge instructions</h3>
+       
         <br>
         <ol class="instructions-list">
-          <li>The minimum deposit amount for IDR payments is Rp51,000.</li>
-          <li>The minimum deposit amount for USDT payments is $5.</li>
+          <li>The minimum deposit amount for IDR payments is IDR 51,000.</li>
+          <li>The minimum deposit amount for USDT payments is USDT 5.</li>
           <li>All transactions are processed automatically in real-time.</li>
           <li>Please ensure that the payment amount and wallet/account details are correct before making a deposit.</li>
           <li>After completing the transaction, refresh the page and check your balance.</li>
           <li>Deposits below the minimum amount cannot be processed.</li>
-          <li>All transactions are processed directly within the AVR company system.</li>
+          <li>All transactions are processed directly within the HUE company system.</li>
           <li>Deposit processing is automatic for both IDR and USDT payments.</li>
-          <li>By making a deposit, users agree to all AVR deposit rules and policies.</li>
+          <li>By making a deposit, users agree to all HUE deposit rules and policies.</li>
         </ol>
         <p class="instructions-text">
-          All deposit activities must only be carried out through the official AVR platform, and users are advised not to be tempted by unreasonable offers or transactions outside the company. For security and verification purposes, please keep your transaction receipt or proof of payment for future reference if needed. By making a deposit, users are considered to have agreed to all AVR deposit rules and policies.
+          All deposit activities must only be carried out through the official HUE platform, and users are advised not to be tempted by unreasonable offers or transactions outside the company. For security and verification purposes, please keep your transaction receipt or proof of payment for future reference if needed. By making a deposit, users are considered to have agreed to all HUE deposit rules and policies.
         </p>
       </div>
     </section>
@@ -110,6 +110,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { depositAPI } from '@/services/api'
+import { appSettings, formatAppCurrency, getRateToIdr } from '@/utils/settings'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 
@@ -120,7 +121,16 @@ const selectedChannel = ref('usdt-trc20')
 const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
-const usdtToIdrRate = ref(17000)
+const usdtToIdrRate = ref(getRateToIdr() || 17000)
+
+watch(
+  () => appSettings.currency?.rate_to_idr,
+  () => {
+    const next = getRateToIdr()
+    if (next > 0) usdtToIdrRate.value = next
+  },
+  { immediate: true }
+)
 
 const channels = [
   { id: 'usdt-trc20', label: 'USDT TRC20', badge: 'OK', icon: '/assets/image/9525994a3170136d2238b0ba554db6cb77f4508e.png' },
@@ -135,6 +145,15 @@ const currentChannelLabel = computed(() => {
 
 const isUsdtMode = computed(() => {
   return String(selectedChannel.value || '').toLowerCase().startsWith('usdt')
+})
+
+const MIN_DEPOSIT_USDT = 5
+const MAX_DEPOSIT_USDT = 50000
+const MIN_DEPOSIT_IDR = 51000
+const MAX_DEPOSIT_IDR = 20000000
+
+const channelLimitText = computed(() => {
+  return isUsdtMode.value ? '5-50000' : '51K-20000K'
 })
 
 const numericAmount = computed(() => {
@@ -159,18 +178,31 @@ const displayUsdtAmount = computed(() => {
 
 const showWarning = computed(() => {
   if (isUsdtMode.value) {
-    return numericUsdtAmount.value > 0 && numericUsdtAmount.value < 5
+    return (
+      numericUsdtAmount.value > 0 &&
+      (numericUsdtAmount.value < MIN_DEPOSIT_USDT || numericUsdtAmount.value > MAX_DEPOSIT_USDT)
+    )
   }
-  return numericAmount.value > 0 && numericAmount.value < 50000
+  return (
+    numericAmount.value > 0 &&
+    (numericAmount.value < MIN_DEPOSIT_IDR || numericAmount.value > MAX_DEPOSIT_IDR)
+  )
 })
 
 const warningText = computed(() => {
-  return isUsdtMode.value ? 'Minimum transaction USDT 5' : 'Minimum transaction IDR 50,000'
+  if (isUsdtMode.value) {
+    if (numericUsdtAmount.value > MAX_DEPOSIT_USDT) return `Maximum transaction USDT ${MAX_DEPOSIT_USDT}`
+    return `Minimum transaction USDT ${MIN_DEPOSIT_USDT}`
+  }
+  if (numericAmount.value > MAX_DEPOSIT_IDR) return 'Maximum transaction IDR 20,000,000'
+  return 'Minimum transaction IDR 51,000'
 })
 
 const isValidAmount = computed(() => {
-  if (isUsdtMode.value) return numericUsdtAmount.value >= 5
-  return numericAmount.value >= 50000
+  if (isUsdtMode.value) {
+    return numericUsdtAmount.value >= MIN_DEPOSIT_USDT && numericUsdtAmount.value <= MAX_DEPOSIT_USDT
+  }
+  return numericAmount.value >= MIN_DEPOSIT_IDR && numericAmount.value <= MAX_DEPOSIT_IDR
 })
 
 const goBack = () => {
@@ -199,7 +231,7 @@ const formatUsdtInput = (event) => {
     return
   }
   const idr = Math.round(usdt * rate)
-  depositAmount.value = new Intl.NumberFormat('id-ID').format(idr)
+  depositAmount.value = formatAppCurrency(idr, { symbol: '', decimals: 0 })
 }
 
 const formatIdrInput = (event) => {
@@ -216,7 +248,7 @@ const formatIdrInput = (event) => {
     usdtAmount.value = ''
     return
   }
-  depositAmount.value = new Intl.NumberFormat('id-ID').format(num)
+  depositAmount.value = formatAppCurrency(num, { symbol: '', decimals: 0 })
 
   const rate = Number(usdtToIdrRate.value || 0)
   if (!rate) {
@@ -246,14 +278,14 @@ watch(
       if (usdtAmount.value) {
         const u = Number.parseFloat(usdtAmount.value)
         if (Number.isFinite(u) && u > 0) {
-          depositAmount.value = new Intl.NumberFormat('id-ID').format(Math.round(u * rate))
+          depositAmount.value = formatAppCurrency(Math.round(u * rate), { symbol: '', decimals: 0 })
         }
       }
       return
     }
 
     if (!depositAmount.value && numericUsdtAmount.value > 0) {
-      depositAmount.value = new Intl.NumberFormat('id-ID').format(Math.round(numericUsdtAmount.value * rate))
+      depositAmount.value = formatAppCurrency(Math.round(numericUsdtAmount.value * rate), { symbol: '', decimals: 0 })
     }
     if (numericAmount.value > 0) {
       usdtAmount.value = (numericAmount.value / rate).toFixed(2).replace(/\.?0+$/, '')
@@ -441,13 +473,13 @@ h1, h2, h3, p {
 }
 
 .payment-name {
-  font-size: 14px;
+  font-size: 15px;
   color: #000000;
   margin-bottom: 10px;
 }
 
 .payment-limit {
-  font-size: 12px;
+  font-size: 13px;
   color: #707070;
 }
 
@@ -473,7 +505,7 @@ h1, h2, h3, p {
 }
 
 .input-prefix {
-  font-size: 12px;
+  font-size: 14px;
   color: #000000;
   font-weight: bold;
   width: 36px;
@@ -491,7 +523,7 @@ h1, h2, h3, p {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 12px;
+  font-size: 14px;
   color: #000000;
   background: transparent;
   font-family: inherit;
@@ -507,7 +539,7 @@ h1, h2, h3, p {
 
 .warning-message {
   color: #ff0000;
-  font-size: 12px;
+  font-size: 14px;
   margin: 0 0 8px 4px;
 }
 
@@ -518,7 +550,7 @@ h1, h2, h3, p {
   color: #ffffff;
   border: none;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   margin-top: 16px;
   cursor: pointer;

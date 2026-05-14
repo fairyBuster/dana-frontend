@@ -112,7 +112,7 @@ const submit = async () => {
       username: raw 
     })
     
-    successMessage.value = 'Username updated successfully'
+    successMessage.value = 'Success'
     showSuccessModal.value = true
     emit('success', raw)
     

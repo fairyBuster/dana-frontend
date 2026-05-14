@@ -45,7 +45,7 @@
       <img src="/assets/image/4089_249.svg" alt="Volume Icon">
       <div class="notice-marquee">
         <div class="notice-marquee-track">
-          <span class="notice-text">Urgent notice about AVR account</span>
+          <span class="notice-text">Urgent notice about HUE account</span>
         </div>
       </div>
     </section>
@@ -76,7 +76,7 @@
               
             </div>
           </div>
-          <span class="label" style="font-size: 12px;">Assets</span>
+          <span class="label" style="font-size: 16px;">Assets</span>
         </div>
 
         <button class="btn-start" @click="goToMining">Start</button>
@@ -135,25 +135,25 @@
 
     <!-- Action Grid -->
     <section class="action-grid">
-      <router-link to="/rules" class="action-item">
+      <router-link to="/hn/user/help" class="action-item">
         <div class="icon-box">
           <img src="/assets/image/guide.png" alt="Recharge">
         </div>
         <span class="action-label">Guide</span>
       </router-link>
-      <router-link to="/dep" class="action-item">
+      <router-link to="/hn/app/charge" class="action-item">
         <div class="icon-box">
           <img src="/assets/image/recharge.png" alt="Payout">
         </div>
         <span class="action-label">Recharge</span>
       </router-link>
-      <router-link to="/flow" class="action-item">
+      <router-link to="/hn/app/settlement" class="action-item">
         <div class="icon-box">
           <img src="/assets/image/payout.png" alt="Mining">
         </div>
         <span class="action-label">Payout</span>
       </router-link>
-      <router-link to="/share" class="action-item">
+      <router-link to="/hn/network/invite" class="action-item">
         <div class="icon-box">
           <img src="/assets/image/invite.png" alt="Missions">
         </div>
@@ -181,7 +181,7 @@
     <section class="news-section">
       <div class="news-header">
         <h3>See updated now</h3>
-        <router-link to="/news" class="more-link">
+        <router-link to="/hn/home/news" class="more-link">
           more details here
           <img src="/assets/image/4044_138.svg" alt="Arrow">
         </router-link>
@@ -212,7 +212,7 @@
               <div class="market-name">{{ item.name }}</div>
             </div>
             <div class="market-right">
-              <div class="market-price">${{ formatMarketPrice(item.priceUsd) }}</div>
+              <div class="market-price">{{ formatMarketPrice(item.priceUsd) }}</div>
               <div class="market-change" :class="item.change24h >= 0 ? 'pos' : 'neg'">
                 {{ formatChange(item.change24h) }}
               </div>
@@ -257,14 +257,16 @@ import VoucherModal from '@/components/modals/VoucherModal.vue'
 import AnnouncementModal from '@/components/modals/AnnouncementModal.vue'
 import { authAPI, newsAPI } from '@/services/api'
 import { setLanguage } from '@/i18n'
+import { appSettings, formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 const { locale } = useI18n()
 
 const username = ref('Username')
-const phone = ref('+•••••••')
+const phone = ref('•••••••')
 const mainBalance = ref(0)
-const todayBalance = ref(0)
+const depositBalance = ref(0)
+const interestTotal = ref(0)
 const activeAssetCount = ref(0)
 const isBalanceVisible = ref(false)
 const isActiveAssetsVisible = ref(true)
@@ -293,7 +295,7 @@ const maskPhoneAll = (raw) => {
   const digits = p.replace(/\D/g, '')
   if (!digits) return '**********'
   const masked = '*'.repeat(digits.length)
-  return p.startsWith('+') ? `+${masked}` : masked
+  return p.startsWith('+') ? `${masked}` : masked
 }
 
 const maskedPhone = computed(() => maskPhoneAll(phone.value))
@@ -354,11 +356,9 @@ const MARKET_COINS = [
 
 const formatMarketPrice = (value) => {
   const n = Number(value)
-  if (!Number.isFinite(n)) return '0'
-  const opts = n >= 1
-    ? { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-    : { minimumFractionDigits: 4, maximumFractionDigits: 8 }
-  return new Intl.NumberFormat('en-US', opts).format(n)
+  if (!Number.isFinite(n)) return formatAppCurrency(0)
+  const decimals = n >= 1 ? 2 : 6
+  return formatAppCurrency(n, { decimals })
 }
 
 const formatChange = (value) => {
@@ -433,25 +433,27 @@ const fetchMarket = async () => {
 }
 
 const balanceDisplay = computed(() => {
-  return `$${new Intl.NumberFormat('en-US').format(mainBalance.value)}`
+  return formatAppCurrency(mainBalance.value)
 })
 
 const toggleBalanceVisibility = () => {
   isBalanceVisible.value = !isBalanceVisible.value
 }
 
-const formatUSD = (value) => {
-  const n = Number(String(value ?? '').replace(/[^0-9.-]/g, ''))
-  if (!Number.isFinite(n) || n === 0) return '0'
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(n)
+const maskAppCurrency = (mask = '********') => {
+  const cfg = appSettings.currency || {}
+  const symbol = String(cfg.symbol || '')
+  const symbolPosition = String(cfg.symbol_position || 'prefix')
+  const symbolSpace = Boolean(cfg.symbol_space ?? false)
+  const space = symbolSpace ? ' ' : ''
+  if (!symbol) return mask
+  if (symbolPosition === 'suffix') return `${mask}${space}${symbol}`
+  return `${symbol}${space}${mask}`
 }
 
 const activeBalanceText = computed(() => {
-  if (!isActiveAssetsVisible.value) return '$**********'
-  return `$${formatUSD(mainBalance.value)}`
+  if (!isActiveAssetsVisible.value) return maskAppCurrency()
+  return formatAppCurrency(interestTotal.value)
 })
 
 const activeCountText = computed(() => {
@@ -464,13 +466,13 @@ const toggleActiveAssetsVisibility = () => {
 }
 
 const availableFundsText = computed(() => {
-  if (!isFundsVisible.value) return '$**********'
-  return `$${formatUSD(mainBalance.value)}`
+  if (!isFundsVisible.value) return maskAppCurrency()
+  return formatAppCurrency(mainBalance.value)
 })
 
 const rechargeFundsText = computed(() => {
-  if (!isFundsVisible.value) return '$**********'
-  return `$${formatUSD(todayBalance.value)}`
+  if (!isFundsVisible.value) return maskAppCurrency()
+  return formatAppCurrency(depositBalance.value)
 })
 
 const toggleFundsVisibility = () => {
@@ -484,9 +486,9 @@ const toAmount = (value) => {
 
 const fetchAccountInfo = async () => {
   try {
-    const [accountRes, statsRes] = await Promise.allSettled([
+    const [accountRes, statsAllTimeRes] = await Promise.allSettled([
       authAPI.getAccountInfo(),
-      authAPI.getBalanceStatistics('today')
+      authAPI.getBalanceStatistics('all-time')
     ])
 
     if (accountRes.status === 'fulfilled') {
@@ -494,11 +496,15 @@ const fetchAccountInfo = async () => {
       username.value = data?.username || 'Username'
       phone.value = data?.phone || '+62 81239402453'
       mainBalance.value = toAmount(data?.balance ?? 0)
+      depositBalance.value = toAmount(data?.balance_deposit ?? data?.deposit_balance ?? 0)
+      activeAssetCount.value = Number.isFinite(Number(data?.active_investments_count))
+        ? Number(data.active_investments_count)
+        : 0
     }
 
-    if (statsRes.status === 'fulfilled') {
-      const stats = statsRes.value?.data || {}
-      todayBalance.value = toAmount(stats?.total_income ?? 0)
+    if (statsAllTimeRes.status === 'fulfilled') {
+      const stats = statsAllTimeRes.value?.data || {}
+      interestTotal.value = toAmount(stats?.interest_total ?? 0)
     }
   } catch (_) {
     // Use defaults
@@ -506,23 +512,23 @@ const fetchAccountInfo = async () => {
 }
 
 const goToDeposit = () => {
-  router.push('/dep')
+  router.push('/hn/app/charge')
 }
 
 const goToWithdraw = () => {
-  router.push('/flow')
+  router.push('/hn/app/settlement')
 }
 
 const goToPortfolio = () => {
-  router.push('/task')
+  router.push('/hn/hall/taskhall')
 }
 
 const goToMining = () => {
-  router.push('/portfolio')
+  router.push('/hn/hall/outputhall')
 }
 
 const goToSignIn = () => {
-  router.push('/sign')
+  router.push('/hn/hall/sign')
 }
 
 const openVoucherModal = () => {
@@ -570,7 +576,7 @@ a {
   margin: 0;
   padding: 0;
   background-color: #f8f8f8;
-  max-width: 413px;
+  max-width: 100%;
   position: relative;
   min-height: 100vh;
   padding-bottom: 68px;
@@ -680,7 +686,7 @@ a {
   text-align: left;
   padding: 10px 12px;
   border-top: 1px solid #000;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   color: #000000;
   cursor: pointer;
@@ -732,7 +738,7 @@ a {
 .notice-text {
   color: #0073ff;
   margin-bottom: 3px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -787,7 +793,7 @@ a {
 }
 
 .subtitle {
-  font-size: 12px;
+  font-size: 14px;
   color: #000;
   margin-top: 4px;
   margin-bottom: 20px;
@@ -1049,14 +1055,14 @@ a {
 }
 
 .signin-content h3 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: #000;
   margin-bottom: 4px;
 }
 
 .signin-content p {
-  font-size: 10px;
+  font-size: 14px;
   color: #333;
   line-height: 1.3;
 }
@@ -1146,7 +1152,7 @@ a {
 }
 
 .more-link {
-  font-size: 12px;
+  font-size: 14px;
   color: #747474;
   display: flex;
   align-items: center;
@@ -1283,13 +1289,13 @@ a {
 }
 
 .market-symbol {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
   color: #000000;
 }
 
 .market-name {
-  font-size: 11px;
+  font-size: 15px;
   color: #747474;
   margin-top: 3px;
 }
@@ -1299,13 +1305,13 @@ a {
 }
 
 .market-price {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: #000000;
 }
 
 .market-change {
-  font-size: 11px;
+  font-size: 15px;
   margin-top: 3px;
   font-weight: 700;
 }

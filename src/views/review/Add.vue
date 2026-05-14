@@ -3,7 +3,7 @@
     <section id="section-header">
       <header class="header">
         <button class="back-btn" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/2033_555.svg" alt="Back Icon">
+          <img src="/assets/image/4252_325.svg" alt="Back Icon">
         </button>
         <h1 class="page-title">Ulasan</h1>
       </header>
@@ -11,7 +11,7 @@
 
     <section id="section-alert">
       <div class="alert-banner">
-        <img src="/assets/images/c62929550e6f78f10c44151b65ee54d7d3284539.png" alt="Info Icon" class="alert-icon">
+        <img src="/assets/image/4269_485.svg" alt="Info Icon" class="alert-icon">
         <p class="alert-text">Berikan ulasan terbaik Anda setelah melakukan penarikan dan dapatkan hadiah tambahan secara otomatis!</p>
       </div>
     </section>
@@ -36,7 +36,7 @@
             <p class="upload-text">Ketuk untuk mengganti gambar<br>JPG/PNG Maks: 1MB</p>
           </template>
           <template v-else>
-            <img src="/assets/images/2033_573.svg" alt="Upload Photo Icon" class="upload-icon">
+            <img src="/assets/image/4252_247.svg" alt="Upload Photo Icon" class="upload-icon">
             <p class="upload-text">Tambahkan tangkapan layar penarikan Anda untuk memberikan ulasan terbaik!<br>JPG/PNG Maks: 1MB</p>
           </template>
         </div>

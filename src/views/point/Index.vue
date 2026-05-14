@@ -84,6 +84,7 @@ import { useRouter } from 'vue-router'
 import { rouletteAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
+import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 const availableTickets = ref(0)
@@ -205,7 +206,7 @@ const wheelFaceStyle = computed(() => {
 const getSegmentLabel = (p) => {
   const type = String(p?.prize_type || '').toUpperCase()
   const amount = parseNumber(p?.amount)
-  if (type === 'BALANCE' && amount > 0) return `Rp ${formatAmount(amount)}`
+  if (type === 'BALANCE' && amount > 0) return formatAppCurrency(amount, { decimals: 0 })
   const name = String(p?.name || '').trim()
   return name || '-'
 }

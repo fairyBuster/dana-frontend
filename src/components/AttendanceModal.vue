@@ -5,12 +5,12 @@
         <div class="modal-card">
           <!-- Close Icon -->
           <button class="close-btn" aria-label="Close" @click="closeModal">
-            <img src="/assets/images-asset/14_483.svg" alt="Close Icon">
+            <img src="/assets/image/4200_226.svg" alt="Close Icon">
           </button>
 
           <!-- Illustration -->
           <div class="illustration-wrapper">
-            <img src="/assets/images-asset/72dd3d79e11255878a1c5e3d16e647a8cbd16019.png" alt="Check-in Illustration" class="main-illustration">
+            <img src="/assets/image/daily1.png" alt="Check-in Illustration" class="main-illustration">
           </div>
 
           <!-- Text Content -->
@@ -19,7 +19,7 @@
               Absen direset setiap jam 00:00<br>
               Absen hari ini:
             </p>
-            <h2 class="amount-text">Rp 1,000</h2>
+            <h2 class="amount-text">{{ rewardAmountDisplay }}</h2>
           </div>
 
           <!-- Action Button -->
@@ -41,6 +41,7 @@
 import { attendanceAPI, authAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
+import { formatAppCurrency } from '@/utils/settings'
 export default {
   name: 'AttendanceModal',
   components: { ErrorModal, SuccessModal },
@@ -91,9 +92,9 @@ export default {
       return this.formatAmount(source)
     },
     rewardAmountDisplay() {
-      if (!this.settings) return 'Rp 0'
+      if (!this.settings) return formatAppCurrency(0, { decimals: 0 })
       const amount = Number(this.settings.fixed_amount || 0)
-      return 'Rp ' + this.formatAmount(amount)
+      return formatAppCurrency(amount, { decimals: 0 })
     }
   },
   methods: {

@@ -3,7 +3,7 @@
     <!-- Header -->
     <section id="section-header">
       <header class="app-header">
-        <a href="/profile" class="back-btn" aria-label="Go to profile">
+        <a href="#/hn/user" class="back-btn" aria-label="Go to profile">
           <img src="/assets/image/4252_325.svg" alt="Back" class="icon-back">
         </a>
         <button type="button" ref="menuAnchorEl" class="title-group" @click.stop="toggleRecordMenu">
@@ -43,7 +43,7 @@
       </div>
 
       <div v-else-if="displayTransactions.length === 0" class="empty-state">
-        <p class="empty-text">No transaction records yet</p>
+
       </div>
 
       <div v-else class="record-list">
@@ -81,6 +81,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { transactionAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
+import { formatAppCurrency } from '@/utils/settings'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
 
 const router = useRouter()
@@ -99,21 +100,22 @@ const recordMenuOpen = ref(false)
 const menuAnchorEl = ref(null)
 
 const recordMenuItems = [
-  { key: 'recharge', label: 'Record recharge', to: '/dep/history' },
-  { key: 'mining', label: 'Mining record', to: '/portfolio/history' },
-  { key: 'payout', label: 'Payout record', to: '/flow/history' },
-  { key: 'purchase', label: 'Purchase record', to: '/orders' },
-  { key: 'commission', label: 'Commision friend', to: '/commission/history' },
-  { key: 'other', label: 'Other record', to: '/trx' }
+  { key: 'recharge', label: 'Record recharge', to: '/hn/app/charge/history' },
+  { key: 'mining', label: 'Mining record', to: '/hn/hall/outputhall/history' },
+  { key: 'payout', label: 'Payout record', to: '/hn/app/settlement/history' },
+  { key: 'purchase', label: 'Purchase record', to: '/hn/orders' },
+  { key: 'commission', label: 'Commision friend', to: '/hn/commission/history' },
+  { key: 'other', label: 'Other record', to: '/hn/user/history' }
 ]
 
 const currentRecordKey = computed(() => {
   const p = String(route.path || '')
-  if (p.startsWith('/dep')) return 'recharge'
-  if (p.startsWith('/portfolio')) return 'mining'
-  if (p.startsWith('/flow')) return 'payout'
-  if (p.startsWith('/orders')) return 'purchase'
-  if (p.startsWith('/commission')) return 'commission'
+  const normalized = p.startsWith('/hn/') ? p.slice('/hn'.length) : p
+  if (normalized.startsWith('/app/charge')) return 'recharge'
+  if (normalized.startsWith('/hall/outputhall')) return 'mining'
+  if (normalized.startsWith('/app/settlement')) return 'payout'
+  if (normalized.startsWith('/orders')) return 'purchase'
+  if (normalized.startsWith('/commission')) return 'commission'
   return 'other'
 })
 
@@ -181,13 +183,57 @@ const showPagination = computed(() => {
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return 0
-  const n = Number(String(value).replace(/[^0-9.-]/g, ''))
+  const raw = String(value).trim()
+  if (!raw) return 0
+  let s = raw.replace(/\s+/g, '')
+  s = s.replace(/[^0-9,.-]/g, '')
+  const dots = (s.match(/\./g) || []).length
+  const commas = (s.match(/,/g) || []).length
+
+  if (dots > 0 && commas > 0) {
+    const lastDot = s.lastIndexOf('.')
+    const lastComma = s.lastIndexOf(',')
+    const decimalSep = lastDot > lastComma ? '.' : ','
+    const groupSep = decimalSep === '.' ? ',' : '.'
+    s = s.split(groupSep).join('')
+    if (decimalSep === ',') s = s.replace(',', '.')
+  } else if (dots > 1 && commas === 0) {
+    s = s.split('.').join('')
+  } else if (commas > 1 && dots === 0) {
+    s = s.split(',').join('')
+  } else if (commas === 1 && dots === 0) {
+    const idx = s.indexOf(',')
+    const digitsAfter = s.length - idx - 1
+    if (digitsAfter === 3) s = s.replace(',', '')
+    else s = s.replace(',', '.')
+  } else if (dots === 1 && commas === 0) {
+    const idx = s.indexOf('.')
+    const digitsAfter = s.length - idx - 1
+    if (digitsAfter === 3) s = s.replace('.', '')
+  }
+
+  const n = Number(s)
   return Number.isFinite(n) ? n : 0
+}
+
+const getFractionDigitsFromRaw = (value) => {
+  if (value === null || value === undefined) return null
+  const raw = String(value).trim()
+  if (!raw) return null
+  const lastDot = raw.lastIndexOf('.')
+  const lastComma = raw.lastIndexOf(',')
+  const lastSep = Math.max(lastDot, lastComma)
+  if (lastSep <= -1) return 0
+  const frac = raw.slice(lastSep + 1).replace(/[^0-9]/g, '')
+  if (!frac) return 0
+  return Math.min(8, frac.length)
 }
 
 const formatUSD = (value) => {
   const num = parseNumber(value)
-  return '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num)
+  const rawDecimals = getFractionDigitsFromRaw(value)
+  const decimals = rawDecimals === null ? 2 : rawDecimals
+  return formatAppCurrency(num, { decimals })
 }
 
 const formatDate = (dateString) => {
@@ -204,7 +250,7 @@ const getTitle = (trx) => {
   if (t === 'MISSIONS') return 'Task hall'
   if (t === 'BONUS') return 'Registration bonus'
   if (t === 'VOUCHER') return 'Envelope'
-  if (t === 'CREDIT' || t === 'BALANCE_PLUS') return 'Add balance'
+  if (t === 'CREDIT' || t === 'BALANCE_PLUS') return 'From company'
   if (t === 'DEBIT' || t === 'BALANCE_MINUS') return 'Deduct balance'
   if (t === 'ATTENDANCE') return 'Sign in daily'
   if (desc) return desc
@@ -232,10 +278,10 @@ const goBack = () => {
     if (window.history.length > 1) {
       router.back()
     } else {
-      router.push('/profile')
+      router.push('/hn/user')
     }
   } catch (_) {
-    router.push('/profile')
+    router.push('/hn/user')
   }
 }
 
@@ -418,10 +464,16 @@ h1, p {
 }
 
 .col-status {
+  font-size: 15px;
+  font-weight: 400;
+  color: #000000;
   text-align: left;
 }
 
 .col-amount {
+  font-size: 15px;
+  font-weight: 700;
+  color: #010101;
   text-align: center;
 }
 
@@ -441,7 +493,7 @@ h1, p {
 
 .empty-text {
   color: #b2b2b2;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .record-list {
@@ -457,7 +509,7 @@ h1, p {
 }
 
 .record-item .col-status {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 400;
 }
 
@@ -466,7 +518,7 @@ h1, p {
 }
 
 .record-item .col-amount {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: #010101;
 }
@@ -479,19 +531,19 @@ h1, p {
 }
 
 .type-name {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #010101;
 }
 
 .type-date {
-  font-size: 10px;
+  font-size: 12px;
   color: rgba(1, 1, 1, 0.4);
 }
 
 .separator {
   border-bottom: 1px dotted #a0a0a0;
-  margin: 0 10px;
+  margin: 0 15px;
 }
 
 .pagination-controls {

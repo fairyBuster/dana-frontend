@@ -14,9 +14,9 @@
     <section id="section-logo">
       <div class="logo-container">
         <div class="logo-box">
-          <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="AVR Logo" class="logo-img">
+          <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="HUE Logo" class="logo-img">
         </div>
-        <h2 class="app-name">AVR</h2>
+        <h2 class="app-name">HUE</h2>
       </div>
     </section>
 

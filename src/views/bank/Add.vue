@@ -42,7 +42,6 @@
               id="bank-address"
               v-model="formData.accountNumber"
               placeholder="Please input your bank address"
-              inputmode="numeric"
               @input="onAccountNumberInput"
             >
           </div>
@@ -105,13 +104,14 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { bankAPI } from '@/services/api'
 import BankOptionsModal from '@/components/partials/BankOptionsModal.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 
 const router = useRouter()
+const route = useRoute()
 const showBankModal = ref(false)
 const selectedBank = ref('')
 const loading = ref(false)
@@ -121,6 +121,12 @@ const errorMessage = ref('')
 const isAccountVerified = ref(false)
 const isVerifying = ref(false)
 const showHolderName = ref(false)
+
+const currencyCode = computed(() => {
+  const raw = String(route.query.currency_code || route.query.currencyCode || '').trim().toUpperCase()
+  if (raw === 'USD') return 'USD'
+  return 'IDR'
+})
 
 const formData = reactive({
   bankId: null,
@@ -145,7 +151,10 @@ const sanitizeAccountHolder = (value) => {
 }
 
 const sanitizeAccountNumber = (value) => {
-  return String(value || '').replace(/\D+/g, '')
+  return String(value || '')
+    .replace(/[^\p{L}\p{N}\s._-]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trimStart()
 }
 
 const onAccountHolderInput = () => {
@@ -183,7 +192,7 @@ const normalizeBanksResponse = (data) => {
 
 const fetchBanks = async () => {
   try {
-    const resp = await bankAPI.getBanks()
+    const resp = await bankAPI.getBanks({ currency_code: currencyCode.value })
     const list = normalizeBanksResponse(resp?.data)
     bankOptions.value = list
       .map((b) => ({
@@ -210,8 +219,11 @@ const extractErrorMessage = (err) => {
     ) {
       return 'Bank already exists'
     }
-    if (s.includes('maximum limit') && (s.includes('1 bank') || s.includes('1 account'))) {
-      return 'Maximum limit reached'
+    if (
+      (s.includes('maximum limit') && (s.includes('1 bank') || s.includes('1 account'))) ||
+      (s.includes('batas maksimal') && s.includes('1') && s.includes('bank'))
+    ) {
+      return 'Limit'
     }
     return msg
   }
@@ -239,7 +251,7 @@ const handleSubmit = async () => {
     return
   }
   if (!formData.accountNumber) {
-    errorMessage.value = 'Account number must be digits only'
+    errorMessage.value = 'Bank address must not be empty'
     errorModalOpen.value = true
     return
   }
@@ -261,7 +273,7 @@ const handleSubmit = async () => {
       account_number: String(formData.accountNumber).replace(/\s+/g, ''),
       is_default: isDefault
     })
-    router.replace('/profile')
+    router.replace('/hn/user/account')
   } catch (error) {
     errorMessage.value = extractErrorMessage(error)
     errorModalOpen.value = true
@@ -273,6 +285,18 @@ const handleSubmit = async () => {
 onMounted(() => {
   fetchBanks()
 })
+
+watch(
+  () => currencyCode.value,
+  (next, prev) => {
+    if (next === prev) return
+    selectedBank.value = ''
+    formData.bankId = null
+    bankOptions.value = []
+    showBankModal.value = false
+    fetchBanks()
+  }
+)
 </script>
 
 <style scoped>
@@ -409,7 +433,7 @@ h1, h2, p {
 
 .notice-text {
   margin: 10px 0 15px 0;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 400;
   color: #1b46f5;
   line-height: 1.4;

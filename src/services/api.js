@@ -232,6 +232,7 @@ function attachAuthHeader(config) {
       '/register',
       '/auth/login',
       '/auth/jwt/login',
+      '/auth/jwt/email-login',
       '/auth/jwt/refresh',
       '/auth/jwt/verify'
     ]
@@ -340,7 +341,7 @@ api.interceptors.response.use(
         const hasRetried = !!originalRequest._retry
         const path = String(originalRequest.url || '')
         const isRefreshCall = path.includes('/auth/jwt/refresh')
-        const isLoginCall = path.includes('/auth/jwt/login') || path.includes('/auth/login')
+        const isLoginCall = path.includes('/auth/jwt/login') || path.includes('/auth/jwt/email-login') || path.includes('/auth/login')
 
         // Jangan mencoba refresh untuk panggilan refresh atau login
         if (isRefreshCall || isLoginCall) {
@@ -377,11 +378,11 @@ api.interceptors.response.use(
           localStorage.removeItem('auth_token')
           localStorage.removeItem('auth_scheme')
           localStorage.removeItem('refresh_token')
-          const currentPath = window.location.pathname
-          const authPaths = ['/login', '/register', '/forgot-password', '/terms']
+          const currentPath = String(window.location.hash || window.location.pathname || '')
+          const authPaths = ['#/hn/console', '#/hn/network', '#/hn/forgot-password', '#/hn/legal/terms']
           const isAuthPath = authPaths.some(p => currentPath.startsWith(p))
           if (!isAuthPath) {
-            window.location.href = '/login?session_expired=true'
+            window.location.href = '/#/hn/console?session_expired=true'
           }
         }
       }
@@ -403,7 +404,7 @@ rootApi.interceptors.response.use(
         const hasRetried = !!originalRequest._retry
         const path = String(originalRequest.url || '')
         const isRefreshCall = path.includes('/auth/jwt/refresh')
-        const isLoginCall = path.includes('/auth/jwt/login') || path.includes('/auth/login')
+        const isLoginCall = path.includes('/auth/jwt/login') || path.includes('/auth/jwt/email-login') || path.includes('/auth/login')
 
         if (!(isRefreshCall || isLoginCall)) {
           const refresh = localStorage.getItem('refresh_token')
@@ -432,11 +433,11 @@ rootApi.interceptors.response.use(
           localStorage.removeItem('auth_token')
           localStorage.removeItem('auth_scheme')
           localStorage.removeItem('refresh_token')
-          const currentPath = window.location.pathname
-          const authPaths = ['/login', '/register', '/forgot-password', '/terms']
+          const currentPath = String(window.location.hash || window.location.pathname || '')
+          const authPaths = ['#/hn/console', '#/hn/network', '#/hn/forgot-password', '#/hn/legal/terms']
           const isAuthPath = authPaths.some(p => currentPath.startsWith(p))
           if (!isAuthPath) {
-            window.location.href = '/login?session_expired=true'
+            window.location.href = '/#/hn/console?session_expired=true'
           }
         }
       }
@@ -495,11 +496,11 @@ rootApi.interceptors.response.use(
         localStorage.removeItem('auth_token')
         localStorage.removeItem('auth_scheme')
         localStorage.removeItem('refresh_token')
-        const currentPath = window.location.pathname
-        const authPaths = ['/login', '/register', '/forgot-password', '/terms']
+        const currentPath = String(window.location.hash || window.location.pathname || '')
+        const authPaths = ['#/hn/console', '#/hn/network', '#/hn/forgot-password', '#/hn/legal/terms']
         const isAuthPath = authPaths.some(path => currentPath.startsWith(path))
         if (!isAuthPath) {
-          window.location.href = '/login?session_expired=true'
+          window.location.href = '/#/hn/console?session_expired=true'
         }
       }
     }
@@ -542,7 +543,7 @@ const clearClientCaches = async () => {
 
   // Arahkan ke login dan reload untuk reset state memori SPA
   try {
-    window.location.href = '/login'
+    window.location.href = '/#/hn/console'
     // Reload untuk memastikan komponen dan store di-reset total
     setTimeout(() => {
       try { window.location.reload() } catch (_) {}
@@ -574,6 +575,24 @@ export const authAPI = {
     }
   },
 
+  emailLogin: async (credentials) => {
+    try {
+      // JWT email login: kirim JSON body { email, password }
+      const resp = await api.post('/auth/jwt/email-login/', credentials, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        withCredentials: false,
+        validateStatus: (status) => status >= 200 && status < 400,
+      })
+      return resp
+    } catch (err) {
+      throw err
+    }
+  },
+
   // Refresh access token using refresh token
   refreshToken: (refresh) => {
     return api.post('/auth/jwt/refresh/', { refresh })
@@ -589,7 +608,9 @@ export const authAPI = {
   },
   
   logout: () => {
-    return api.post('/auth/logout/').finally(() => {
+    const refresh = localStorage.getItem('refresh_token')
+    const payload = refresh ? { refresh } : {}
+    return api.post('/auth/jwt/logout/', payload).finally(() => {
       clearClientCaches()
     })
   },
@@ -632,6 +653,9 @@ export const authAPI = {
   },
   getSettings: () => {
     return api.get('/auth/settings/')
+  },
+  getCurrencySettings: () => {
+    return api.get('/auth/settings/currency/')
   },
   requestOTP: (phone) => {
     return api.post('/auth/request-otp/', { phone })
@@ -946,8 +970,8 @@ export const productAPI = {
 
 export const bankAPI = {
   // GET /api/banks/ - List active banks for withdrawal
-  getBanks: () => {
-    return api.get('/banks/')
+  getBanks: (params = {}) => {
+    return api.get('/banks/', { params })
   },
   
   // GET /api/banks/user/ - List all banks owned by current user

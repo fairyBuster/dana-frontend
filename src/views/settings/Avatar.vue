@@ -2,7 +2,7 @@
   <main class="avatar-page">
     <div class="container">
       <header class="page-header">
-        <a href="/settings" class="back-link" aria-label="Go back">
+        <a href="/pages/settings" class="back-link" aria-label="Go back">
           <img src="/assets/images/2023_1661.svg" alt="Back" class="back-arrow" />
         </a>
         <h1 class="page-title">Avatar</h1>

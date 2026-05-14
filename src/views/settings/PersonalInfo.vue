@@ -156,15 +156,15 @@ const openChat = () => {
 }
 
 const goToAssets = () => {
-  router.push('/portfolio')
+  router.push('/hn/hall/outputhall')
 }
 
 const goToVIP = () => {
-  router.push('/vp')
+  router.push('/hn/user/person')
 }
 
 const goToBankCards = () => {
-  router.push('/connect')
+  router.push('/hn/user/account')
 }
 
 const saveChanges = async () => {

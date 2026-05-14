@@ -4,7 +4,7 @@
     <section id="section-header">
       <header class="app-header">
         <button class="back-btn" @click="goBack" aria-label="Go back">
-          <img src="/assets/images/37_122.svg" alt="Back">
+          <img src="/assets/image/4252_325.svg" alt="Back">
         </button>
         <h1 class="page-title">Detail tim</h1>
       </header>

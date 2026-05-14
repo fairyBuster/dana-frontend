@@ -4,10 +4,10 @@
     <section id="section-header" class="header-section">
       <div class="container">
         <header class="header">
-          <router-link to="/" class="logo-link">
-            <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="AVR Logo" class="logo">
+          <router-link to="/hn/home" class="logo-link">
+            <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="HUE Logo" class="logo">
           </router-link>
-          <button
+          <!-- <button
             ref="menuBtnEl"
             class="menu-btn"
             aria-label="Toggle menu"
@@ -19,7 +19,7 @@
           <div v-if="menuOpen" ref="menuEl" class="header-menu" @click.stop>
             <button type="button" class="header-menu-item" @click="goTo('/login')">Login</button>
             <button type="button" class="header-menu-item" @click="goTo('/register')">Register</button>
-          </div>
+          </div> -->
         </header>
       </div>
     </section>
@@ -32,8 +32,8 @@
         <div class="hero">
           <div class="hero-content">
             <h1 class="hero-title">The Next Generation of Mining</h1>
-            <p class="hero-subtitle">AVR is a decentralized mining platform that makes simple, secure, and accessible for everyone.</p>
-            <router-link to="/register" class="hero-btn">
+            <p class="hero-subtitle">HUE is a decentralized mining platform that makes simple, secure, and accessible for everyone.</p>
+            <router-link to="/hn/network" class="hero-btn">
               Start Mining
               <img src="/assets/image/4287_723.svg" alt="" class="btn-icon">
             </router-link>
@@ -42,7 +42,7 @@
       </div>
     </section>
       <!-- Stats Section -->
-    <section id="section-stats" class="stats-section">
+    <section id="section-stats" class="stats-section scroll-reveal">
       <div class="container">
         <div class="stats-wrapper">
           <img src="/assets/image/2b298b3071a048b59a6237213eea515c6a9504ef.png" alt="Platform Statistics" class="stats-img" loading="lazy" decoding="async">
@@ -51,13 +51,13 @@
     </section>
 
     <!-- About Section -->
-    <section id="section-about" class="about-section">
+    <section id="section-about" class="about-section scroll-reveal">
       <div class="container">
         <div class="about-container">
           <div class="about-content">
-            <span class="about-label">ABOUT AVR</span>
+            <span class="about-label">ABOUT HUE</span>
             <h2 class="about-title">Building the future of decentralized mining</h2>
-            <p class="about-desc">AVR is designed to bring blockchain and mining technology to everyone. We provide a transparent, secure, and high-performance ecosystem where anyone can grow.</p>
+            <p class="about-desc">HUE is designed to bring blockchain and mining technology to everyone. We provide a transparent, secure, and high-performance ecosystem where anyone can grow.</p>
           </div>
           <div class="about-image-wrapper">
             <img src="/assets/image/04694.png" alt="Global Network" class="about-globe">
@@ -67,7 +67,7 @@
     </section>
 
     <!-- Features Section -->
-    <section id="section-features" class="features-section">
+    <section id="section-features" class="features-section scroll-reveal">
       <div class="container">
         <div class="features-wrapper">
           <img src="/assets/image/e7b2c02da7e11a5bb793b1717c23e9e027badc52.png" alt="Platform Features" class="features-img">
@@ -76,7 +76,7 @@
     </section>
 
     <!-- How It Works Section -->
-    <section id="section-how-it-works" class="hiw-section">
+    <section id="section-how-it-works" class="hiw-section scroll-reveal">
       <div class="container">
         <div class="hiw-wrapper">
           <img src="/assets/image/38cd39adaf3636f4437453a3978128ba2c62a741.png" alt="How it works and Call to Action" class="hiw-img">
@@ -85,28 +85,28 @@
     </section>
 
     <!-- Footer Section -->
-    <section id="section-footer" class="footer-section">
+    <section id="section-footer" class="footer-section scroll-reveal">
       <div class="container">
         <footer class="footer">
           <div class="footer-left">
             <div class="footer-brand">
-              <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="AVR Logo" class="footer-logo">
-              <span class="footer-brand-name">AVR</span>
+              <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="HUE Logo" class="footer-logo">
+              <span class="footer-brand-name">HUE</span>
             </div>
-            <p class="footer-desc">AVR is a next-generation decentralized mining platform for everyone.</p>
+            <p class="footer-desc">HUE is a next-generation decentralized mining platform for everyone.</p>
             <div class="footer-copy">
               <img src="/assets/image/4288_753.svg" alt="Copyright" class="copy-icon">
-              <span>2026 AVR. All rights reserved.</span>
+              <span>2026 HUE. All rights reserved.</span>
             </div>
           </div>
           <div class="footer-right">
             <h4 class="footer-legal-title">Legal</h4>
             <nav class="footer-links">
-              <router-link to="/terms">Terms of Service</router-link>
-              <router-link to="/privacy">Privacy Policy</router-link>
-              <a href="/solution">Customer Agreement</a>
+              <router-link to="/hn/legal/terms">Terms of Service</router-link>
+              <router-link to="/hn/legal/privacy">Privacy Policy</router-link>
+              <router-link to="/hn/legal/agreement">Customer Agreement</router-link>
             </nav>
-            <a href="mailto:support@avr.com" class="footer-email">support@avr.com</a>
+            <a href="mailto:support@hue.com" class="footer-email">support@hue.com</a>
           </div>
         </footer>
       </div>
@@ -123,6 +123,7 @@ const router = useRouter()
 const menuOpen = ref(false)
 const menuBtnEl = ref(null)
 const menuEl = ref(null)
+let revealObserver = null
 
 const toggleMenu = () => {
   menuOpen.value = !menuOpen.value
@@ -142,10 +143,34 @@ const onDocumentClick = (event) => {
 
 onMounted(() => {
   document.addEventListener('click', onDocumentClick)
+
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+  const els = Array.from(document.querySelectorAll('.scroll-reveal'))
+  if (!els.length) return
+
+  if (reduceMotion || !('IntersectionObserver' in window)) {
+    els.forEach((el) => el.classList.add('is-visible'))
+    return
+  }
+
+  revealObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        entry.target.classList.add('is-visible')
+        revealObserver?.unobserve(entry.target)
+      }
+    },
+    { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+  )
+
+  els.forEach((el) => revealObserver.observe(el))
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocumentClick)
+  revealObserver?.disconnect()
+  revealObserver = null
 })
 </script>
 
@@ -178,6 +203,26 @@ onBeforeUnmount(() => {
 img {
   max-width: 100%;
   display: block;
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 600ms ease, transform 600ms ease;
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 /* Header Section */
@@ -324,7 +369,7 @@ img {
 
 .hero-subtitle {
   color: #ffffff;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 400;
   margin: 0 0 18px 0;
   max-width: 181px;
@@ -338,11 +383,11 @@ img {
   border: none;
   border-radius: 5px;
   padding: 0 16px;
-  height: 32px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   gap: 6px;
@@ -431,7 +476,7 @@ img {
   }
 
   .about-label {
-    font-size: 13px;
+    font-size: 15px;
     margin-bottom: 10px;
   }
 
@@ -546,7 +591,7 @@ img {
 .about-label {
   display: block;
   color: #1b46f5;
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 700;
   margin-bottom: 6px;
   letter-spacing: 0.5px;
@@ -554,7 +599,7 @@ img {
 
 .about-title {
   color: #000000;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
   margin: 0 0 12px 0;
   line-height: 1.3;
@@ -562,7 +607,7 @@ img {
 
 .about-desc {
   color: #535353;
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1.5;
   margin: 0;
 }
@@ -655,7 +700,7 @@ img {
 
 .footer-desc {
   color: #535353;
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1.4;
   margin: 0 0 16px 0;
 }
@@ -668,7 +713,7 @@ img {
   color: #000;
   gap: 4px;
   color: #535353;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .copy-icon {
@@ -685,7 +730,7 @@ img {
 
 .footer-legal-title {
   color: #000000;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   margin: 0 0 8px 0;
 }
@@ -699,7 +744,7 @@ img {
 
 .footer-links a {
   color: #535353;
-  font-size: 10px;
+  font-size: 13px;
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -710,7 +755,7 @@ img {
 
 .footer-email {
   color: #000000;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
   text-decoration: none;
   transition: color 0.2s;

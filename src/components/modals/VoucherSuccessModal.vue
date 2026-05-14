@@ -1,20 +1,21 @@
-<template>
+<!-- <template>
   <Teleport to="body">
     <div v-if="modelValue" class="notification-screen" @click.self="close">
       <div class="modal-card">
         <div class="modal-content">
           <h2 class="modal-title">{{ title || 'Parabéns pela conquista' }}</h2>
-          <img src="/assets/images/da4151be78469acf27cc0da4d60d3f5fcefd602d.png" alt="Diamond" class="modal-image">
-          <p class="modal-amount">Rp {{ formattedAmount }}</p>
+          <img src="/assets/image/gift.png" alt="Diamond" class="modal-image">
+          <p class="modal-amount">{{ formattedAmount }}</p>
         </div>
       
       </div>
     </div>
   </Teleport>
-</template>
+</template> -->
 
 <script setup>
 import { computed } from 'vue'
+import { formatAppCurrency } from '@/utils/settings'
 
 const props = defineProps({
   modelValue: {
@@ -36,7 +37,7 @@ const emit = defineEmits(['update:modelValue', 'close'])
 const formattedAmount = computed(() => {
   const val = Number(props.amount || 0)
   const num = Number.isFinite(val) ? val : 0
-  return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num)
+  return formatAppCurrency(num, { decimals: 0 })
 })
 
 const close = () => {

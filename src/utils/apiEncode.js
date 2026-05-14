@@ -1,4 +1,4 @@
-const RESPONSE_SALT = 'KhNHjKLvMASsjIBHMN'
+const RESPONSE_SALT = 'KXXADFDFDF'
 
 export function encodeApiPath(subPath) {
   const norm = subPath.startsWith('/') ? subPath : `/${subPath}`

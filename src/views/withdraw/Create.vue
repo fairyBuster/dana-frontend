@@ -75,7 +75,7 @@
               class="amount-input"
               :value="displayUsdtAmount"
               :readonly="selectedChannel !== 'USDT'"
-              inputmode="numeric"
+              inputmode="decimal"
               @input="formatUsdtInput"
               placeholder="Please enter your amount"
             >
@@ -103,7 +103,7 @@
         <div class="summary-box">
           <!-- <div class="summary-row">
             <span>Minimum Payout</span>
-            <span class="val-with-line">{{ selectedChannel === 'USDT' ? '$3' : 'Rp 35,000' }}</span>
+            <span class="val-with-line">{{ selectedChannel === 'USDT' ? 'USDT 3' : 'IDR 35,000' }}</span>
           </div> -->
           <div class="summary-row" style="margin-top: 8px;">
             <span>Payout fee</span>
@@ -115,7 +115,7 @@
           </div>
           <div class="summary-row">
             <span>USDT</span>
-            <span>$3</span>
+            <span>USDT 3</span>
           </div>
         </div>
       </div>
@@ -135,21 +135,21 @@
     <section id="section-instructions">
       <div class="instructions-content">
         <div class="instructions-box">
-          <h3 class="instructions-title">Payout instructions</h3>
+          
           <ul class="instructions-list">
-            <li> 🔹 The minimum withdrawal amount is $3 USD for the IDR withdrawal channel.</li>
-            <li> 🔹 The minimum withdrawal amount is $10 USD for the USDT withdrawal channel.</li>
+            <li> 🔹 The minimum withdrawal amount is USDT 3 for the IDR withdrawal channel.</li>
+            <li> 🔹 The minimum withdrawal amount is USDT 10 for the USDT withdrawal channel.</li>
             <li> 🔹 All withdrawal transactions are processed automatically in real-time.</li>
             <li> 🔹 Please ensure that your withdrawal account or wallet information is correct before submitting a withdrawal request.</li>
             <li> 🔹 After completing the withdrawal request, refresh the page and check your account balance.</li>
             <li> 🔹 Withdrawals below the minimum amount cannot be processed.</li>
-            <li> 🔹 All withdrawal transactions are handled directly through the official AVR company system.</li>
-            <li> 🔹 All withdrawal activities must only be carried out through the official AVR platform. Users are advised not to trust unreasonable offers or transactions outside the company.</li>
+            <li> 🔹 All withdrawal transactions are handled directly through the official HUE company system.</li>
+            <li> 🔹 All withdrawal activities must only be carried out through the official HUE platform. Users are advised not to trust unreasonable offers or transactions outside the company.</li>
             <li> 🔹 For security and verification purposes, please keep your withdrawal receipt or transaction proof for future reference if needed.</li>
-            <li> 🔹 By making a withdrawal, users are considered to have agreed to all AVR withdrawal rules and policies.</li>
+            <li> 🔹 By making a withdrawal, users are considered to have agreed to all HUE withdrawal rules and policies.</li>
           </ul>
           <p class="instructions-text">
-            Every withdrawal on AVR (Autonomous Virtual Resource) is processed automatically in real-time, and users are not required to report or submit any additional confirmation unless the withdrawal has not been received. Users are encouraged to document their withdrawal transactions through the official chat channel for positive and official activity purposes. Please ensure that all withdrawal activities are carried out only through the official AVR platform and keep your transaction proof for security and verification purposes when needed.
+            Every withdrawal on HUE is processed automatically in real-time, and users are not required to report or submit any additional confirmation unless the withdrawal has not been received. Users are encouraged to document their withdrawal transactions through the official chat channel for positive and official activity purposes. Please ensure that all withdrawal activities are carried out only through the official HUE platform and keep your transaction proof for security and verification purposes when needed.
           </p>
         </div>
       </div>
@@ -162,9 +162,9 @@
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
 
-      <template v-if="(userBanks?.length || 0) > 0">
+      <template v-if="(filteredUserBanks?.length || 0) > 0">
         <div
-          v-for="bank in userBanks"
+          v-for="bank in filteredUserBanks"
           :key="bank?.id || `${bank?.bank_code || ''}-${bank?.account_number || ''}`"
           class="account-card"
           @click="selectBank(bank)"
@@ -181,7 +181,7 @@
 
       <template v-else>
         <h3 class="sheet-title">Withdrawal Account</h3>
-        <p class="sheet-desc">Add a withdrawal account to process your payout transaction!</p>
+        <p class="sheet-desc">No withdrawal account available for this channel.</p>
         <button type="button" class="btn-add" @click="handleAddBank">Add Withdrawal Account</button>
       </template>
     </div>
@@ -196,12 +196,13 @@
 </template>
 
 <script setup>
-import { computed, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI, bankAPI, withdrawalAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import SuccessModal from '@/components/modals/SuccessModal.vue'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
+import { appSettings, formatAppCurrency, getRateToIdr } from '@/utils/settings'
 
 const router = useRouter()
 const withdrawableBalance = ref(0)
@@ -220,7 +221,16 @@ const lastRefreshedAt = ref(0)
 const selectedChannel = ref('IDR')
 let successRedirectTimeoutId = 0
 let hasRedirectedAfterSuccess = false
-const usdtToIdrRate = ref(16000)
+const usdtToIdrRate = ref(getRateToIdr() || 16000)
+
+watch(
+  () => appSettings.currency?.rate_to_idr,
+  () => {
+    const next = getRateToIdr()
+    if (next > 0) usdtToIdrRate.value = next
+  },
+  { immediate: true }
+)
 
 const SERVICE_FEE_RATE = 0.10
 const MIN_WITHDRAW_IDR = 30000
@@ -228,9 +238,73 @@ const MAX_WITHDRAW_IDR = 100000000
 const MIN_WITHDRAW_USDT = 10
 const MAX_WITHDRAW_USDT = 1000000
 
+const normalizeCurrencyCode = (value) => {
+  const raw = String(value || '').trim().toUpperCase()
+  if (raw === 'IDR') return 'IDR'
+  if (raw === 'USD' || raw === 'USDT') return raw
+  return ''
+}
+
+const mapCurrencyToChannel = (currencyCode) => {
+  const code = normalizeCurrencyCode(currencyCode)
+  if (code === 'IDR') return 'IDR'
+  if (code === 'USD' || code === 'USDT') return 'USDT'
+  return selectedChannel.value
+}
+
+const isBankCompatibleWithChannel = (bank, channel) => {
+  const code = normalizeCurrencyCode(bank?.currency_code)
+  if (channel === 'IDR') return code === 'IDR'
+  if (channel === 'USDT') return code === 'USD' || code === 'USDT'
+  return true
+}
+
+const parseUsdtDecimal = (value) => {
+  if (value === null || value === undefined || value === '') return 0
+  const raw = String(value).trim()
+  if (!raw) return 0
+
+  let s = raw.replace(/\s+/g, '')
+  s = s.replace(/[^0-9.,]/g, '')
+  if (!s) return 0
+
+  const hasDot = s.includes('.')
+  const hasComma = s.includes(',')
+  if (hasDot && hasComma) {
+    const lastDot = s.lastIndexOf('.')
+    const lastComma = s.lastIndexOf(',')
+    const decimalSep = lastDot > lastComma ? '.' : ','
+    const groupSep = decimalSep === '.' ? ',' : '.'
+    s = s.split(groupSep).join('')
+    if (decimalSep === ',') s = s.replace(',', '.')
+  } else if (!hasDot && hasComma) {
+    s = s.replace(',', '.')
+  } else if (hasDot && !hasComma) {
+    // ok
+  }
+
+  const firstDot = s.indexOf('.')
+  if (firstDot >= 0) {
+    const before = s.slice(0, firstDot).replace(/\./g, '')
+    const after = s.slice(firstDot + 1).replace(/\./g, '')
+    s = `${before}.${after}`
+  }
+
+  const parts = s.split('.')
+  const intPart = (parts[0] || '').replace(/^0+(?=\d)/, '') || '0'
+  const fracPart = (parts[1] || '').slice(0, 8)
+  const normalized = fracPart.length ? `${intPart}.${fracPart}` : intPart
+
+  const n = Number(normalized)
+  return Number.isFinite(n) ? n : 0
+}
+
 const numericAmount = computed(() => {
-  const raw = withdrawAmount.value.replace(/[^0-9]/g, '')
-  return Number.parseInt(raw, 10) || 0
+  const raw = String(withdrawAmount.value || '').trim()
+  if (!raw) return 0
+  if (selectedChannel.value === 'USDT') return parseUsdtDecimal(raw)
+  const digits = raw.replace(/[^0-9]/g, '')
+  return Number.parseInt(digits, 10) || 0
 })
 
 const idrAmountNumber = computed(() => {
@@ -250,15 +324,21 @@ const usdtAmountNumber = computed(() => {
 })
 
 const displayUsdtAmount = computed(() => {
+  if (selectedChannel.value === 'USDT') {
+    return String(withdrawAmount.value || '')
+  }
   const num = usdtAmountNumber.value
   if (!num) return ''
-  return `$${new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(num)}`
+  return formatAppCurrency(num, { symbol: '', decimals: 2 })
 })
 
 const displayIdrAmount = computed(() => {
+  if (selectedChannel.value === 'IDR') {
+    return String(withdrawAmount.value || '')
+  }
   const num = idrAmountNumber.value
   if (!num) return ''
-  return `Rp ${new Intl.NumberFormat('id-ID').format(num)}`
+  return formatAppCurrency(num, { symbol: '', decimals: 0 })
 })
 
 const feeAmount = computed(() => {
@@ -272,6 +352,7 @@ const afterFeeAmount = computed(() => {
 const isValidAmount = computed(() => {
   if (isSubmitting.value) return false
   if (!selectedUserBankId.value) return false
+  if (selectedUserBank.value && !isBankCompatibleWithChannel(selectedUserBank.value, selectedChannel.value)) return false
   const amount = numericAmount.value
   if (amount <= 0) return false
   if (selectedChannel.value === 'USDT') {
@@ -292,7 +373,7 @@ const goBack = () => {
 }
 
 const goToBindBank = () => {
-  router.push('/connect')
+  router.push('/hn/user/account')
 }
 
 const closeBottomSheet = () => {
@@ -317,13 +398,39 @@ const handleBankSelectClick = () => {
 
 const formatUsdtInput = (event) => {
   if (selectedChannel.value !== 'USDT') return
-  const raw = event?.target?.value?.replace(/[^0-9]/g, '') || ''
+  let raw = String(event?.target?.value ?? '')
+  raw = raw.replace(/\s+/g, '')
+  raw = raw.replace(/[^0-9.,]/g, '')
   if (!raw) {
     withdrawAmount.value = ''
     return
   }
-  const n = Number.parseInt(raw, 10)
-  withdrawAmount.value = Number.isFinite(n) ? new Intl.NumberFormat('en-US').format(n) : ''
+
+  const hasDot = raw.includes('.')
+  const hasComma = raw.includes(',')
+  if (hasDot && hasComma) {
+    const lastDot = raw.lastIndexOf('.')
+    const lastComma = raw.lastIndexOf(',')
+    const decimalSep = lastDot > lastComma ? '.' : ','
+    const groupSep = decimalSep === '.' ? ',' : '.'
+    raw = raw.split(groupSep).join('')
+    if (decimalSep === ',') raw = raw.replace(',', '.')
+  } else if (!hasDot && hasComma) {
+    raw = raw.replace(',', '.')
+  }
+
+  if (raw.startsWith('.')) raw = `0${raw}`
+  const firstDot = raw.indexOf('.')
+  if (firstDot >= 0) {
+    const before = raw.slice(0, firstDot).replace(/\./g, '')
+    let after = raw.slice(firstDot + 1).replace(/\./g, '')
+    after = after.slice(0, 8)
+    withdrawAmount.value = after.length ? `${before || '0'}.${after}` : `${before || '0'}.`
+    return
+  }
+
+  const normalizedInt = raw.replace(/^0+(?=\d)/, '') || '0'
+  withdrawAmount.value = normalizedInt
 }
 
 const formatIdrInput = (event) => {
@@ -334,16 +441,13 @@ const formatIdrInput = (event) => {
     return
   }
   const n = Number.parseInt(raw, 10)
-  withdrawAmount.value = Number.isFinite(n) ? new Intl.NumberFormat('id-ID').format(n) : ''
+  withdrawAmount.value = Number.isFinite(n) ? formatAppCurrency(n, { symbol: '', decimals: 0 }) : ''
 }
 
 const formatCurrency = (value) => {
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
   if (!Number.isFinite(num)) return '0'
-  return new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(num)
+  return formatAppCurrency(num, { symbol: '', decimals: 0 })
 }
 
 const parseNumber = (value) => {
@@ -423,6 +527,11 @@ const selectedUserBank = computed(() => {
   return (userBanks.value || []).find((b) => String(b?.id) === String(id)) || null
 })
 
+const filteredUserBanks = computed(() => {
+  const list = userBanks.value || []
+  return list.filter((b) => isBankCompatibleWithChannel(b, selectedChannel.value))
+})
+
 const fetchUserBanks = async () => {
   try {
     const resp = await bankAPI.getUserBanks()
@@ -459,13 +568,18 @@ const handleSuccessConfirm = () => {
     window.clearTimeout(successRedirectTimeoutId)
     successRedirectTimeoutId = 0
   }
-  router.push('/dashboard')
+  router.push('/hn/home')
 }
 
 const handleWithdraw = async () => {
   if (!isValidAmount.value) return
   if (!selectedUserBankId.value) {
     errorMessage.value = 'Please select a bank account'
+    errorModalOpen.value = true
+    return
+  }
+  if (selectedUserBank.value && !isBankCompatibleWithChannel(selectedUserBank.value, selectedChannel.value)) {
+    errorMessage.value = 'Selected bank account does not match the payout channel'
     errorModalOpen.value = true
     return
   }
@@ -490,7 +604,7 @@ const handleWithdraw = async () => {
       if (hasRedirectedAfterSuccess) return
       hasRedirectedAfterSuccess = true
       successModalOpen.value = false
-      router.push('/flow/history')
+      router.push('/hn/app/settlement/history')
     }, 1200)
   } catch (err) {
     errorMessage.value = normalizeWithdrawErrorMessage(err)
@@ -516,6 +630,31 @@ onActivated(() => {
   if (now - lastRefreshedAt.value < 300) return
   refreshWithdrawData()
 })
+
+watch(
+  () => selectedUserBank.value?.currency_code,
+  (next, prev) => {
+    if (next === prev) return
+    if (!selectedUserBank.value) return
+    const nextChannel = mapCurrencyToChannel(selectedUserBank.value?.currency_code)
+    if (nextChannel !== selectedChannel.value) {
+      selectedChannel.value = nextChannel
+      withdrawAmount.value = ''
+    }
+  }
+)
+
+watch(
+  () => selectedChannel.value,
+  (next, prev) => {
+    if (next === prev) return
+    withdrawAmount.value = ''
+    if (selectedUserBank.value && !isBankCompatibleWithChannel(selectedUserBank.value, next)) {
+      const first = (userBanks.value || []).find((b) => isBankCompatibleWithChannel(b, next)) || null
+      selectedUserBankId.value = first?.id ?? null
+    }
+  }
+)
 </script>
 
 <style scoped>
@@ -704,7 +843,7 @@ section {
 }
 
 .currency-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: #000000;
   width: 36px;
@@ -718,7 +857,7 @@ section {
 }
 
 .placeholder-text {
-  font-size: 12px;
+  font-size: 14px;
   color: #aaaaaa;
 }
 
@@ -726,7 +865,7 @@ section {
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 12px;
+  font-size: 14px;
   color: #000000;
   outline: none;
   font-family: 'Inter', sans-serif;
@@ -753,7 +892,7 @@ section {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 12px;
+  font-size: 14px;
   color: #727272;
 }
 
@@ -783,7 +922,7 @@ section {
   border: none;
   border-radius: 5px;
   padding: 16px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
@@ -822,7 +961,7 @@ section {
 }
 
 .instructions-text {
-  font-size: 11px;
+  font-size: 14px;
   color: #5e5e5e;
   line-height: 1.6;
 }
@@ -830,7 +969,7 @@ section {
 .instructions-list {
   margin: 0 0 10px 0;
   padding: 0;
-  font-size: 11px;
+  font-size: 14px;
   color: #5e5e5e;
   line-height: 1.6;
   list-style: none;
@@ -926,7 +1065,7 @@ section {
 }
 
 #section-bottom-sheet .sheet-title {
-  font-size: 16px;
+  font-size: 22px;
   font-weight: 700;
   color: #000000;
   margin: 0 0 12px 0;
@@ -934,7 +1073,7 @@ section {
 }
 
 #section-bottom-sheet .sheet-desc {
-  font-size: 14px;
+  font-size: 15px;
   color: #7b7b7b;
   text-align: center;
   margin: 0 0 32px 0;

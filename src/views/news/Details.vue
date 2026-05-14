@@ -66,10 +66,10 @@ const goBack = () => {
     if (window.history.length > 1) {
       router.back()
     } else {
-      router.push('/news')
+      router.push('/hn/home/news')
     }
   } catch (_) {
-    router.push('/news')
+    router.push('/hn/home/news')
   }
 }
 
@@ -234,7 +234,7 @@ h1, p {
 }
 
 #section-news-detail .news-title {
-  font-size: 16px;
+  font-size: 22px;
   font-weight: 700;
   color: #000000;
   margin: 0 0 11px 0;
@@ -243,7 +243,7 @@ h1, p {
 }
 
 #section-news-detail .news-content {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 400;
   color: #000000;
   line-height: 1.5;

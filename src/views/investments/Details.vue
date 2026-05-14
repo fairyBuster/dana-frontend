@@ -4,7 +4,7 @@
   
     <header class="header-section">
       <div class="top-nav">
-        <a class="nav-left" href="/portfolio">
+        <a class="nav-left" href="/pages/portfolio">
           <img src="/assets/images/2023_1661.svg" alt="Back" class="icon-back">
           <span class="nav-text">Kembali ke beranda</span>
         </a>
@@ -65,11 +65,11 @@
           <span class="stat-value">{{ daysServedText }}</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Hari ini (Rp)</span>
+          <span class="stat-label">Hari ini</span>
           <span class="stat-value">{{ todayProfitText }}</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Total (Rp)</span>
+          <span class="stat-label">Total</span>
           <span class="stat-value">{{ totalProfitText }}</span>
         </div>
 
@@ -148,6 +148,7 @@ import { investmentAPI, transactionAPI } from '@/services/api'
 import { resolveImageUrl } from '@/utils/imageCache'
 import ErrorModal from '@/components/modals/ErrorModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
+import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 const route = useRoute()
@@ -232,7 +233,7 @@ const formatTime = (dateString) => {
 const formatCurrencyCompact = (value) => {
   const num = parseNumber(value)
   if (num === null) return '-'
-  return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num)
+  return formatAppCurrency(num, { decimals: 0 })
 }
 
 const hashToUint32 = (input) => {
@@ -487,20 +488,20 @@ watch(
 const goBack = () => {
   // Jika history cuma 1 (misal abis refresh atau link langsung), arahkan ke panel
   if (window.history.length <= 1) {
-    router.push('/portfolio')
+    router.push('/hn/hall/outputhall')
   } else {
     router.go(-1)
   }
 }
 
 const goToTransactions = () => {
-  router.push('/orders')
+  router.push('/hn/orders')
 }
 
 const goToProduct = () => {
   const productId = investment.value?.product
   if (productId) {
-    router.push(`/products/${productId}`)
+    router.push(`/hn/shop/detail/${productId}`)
   }
 }
 
@@ -635,7 +636,7 @@ const recentOrders = computed(() => {
       date: formatDate(t?.created_at),
       time: formatTime(t?.created_at),
       capacity: capacityKmRandomForRow(t?.trx_id || t?.id || `interest-${idx}`, t?.investment_quantity ?? inv?.quantity),
-      amount: `RP ${formatCurrencyCompact(getDisplayAmountValue(t?.amount, t?.trx_id || t?.id || `interest-${idx}`, inv?.daily_profit, { min: inv?.profit_random_min, max: inv?.profit_random_max }))}`
+      amount: formatAppCurrency(getDisplayAmountValue(t?.amount, t?.trx_id || t?.id || `interest-${idx}`, inv?.daily_profit, { min: inv?.profit_random_min, max: inv?.profit_random_max }), { decimals: 0 })
     })).filter(r => r.date !== '-' && r.time !== '-')
   }
   return []
