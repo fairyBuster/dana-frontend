@@ -71,9 +71,6 @@
                 @blur="checkPhoneError"
                 @focus="clearPhoneError"
               >
-              <button v-if="otpActive" type="button" class="otp-btn" @click="requestOtp" :disabled="isLoading || isRequestingOtp">
-                {{ isRequestingOtp ? '...' : 'OTP' }}
-              </button>
             </div>
           </div>
 
@@ -155,14 +152,8 @@
             </div>
           </div>
 
-          <!-- Referral Code Toggle -->
-          <div class="referral-toggle" @click="showReferral = !showReferral">
-            <span>{{ ui.referralToggle }}</span>
-            <img src="/assets/image/4255_222.svg" alt="Toggle">
-          </div>
-
-          <!-- Referral Code Input (shown when toggled) -->
-          <div class="form-group" v-if="showReferral">
+          <!-- Referral Code -->
+          <div class="form-group">
             <label>{{ ui.referralLabel }}</label>
             <div class="input-wrapper">
               <input
@@ -267,8 +258,8 @@ import { setLanguage } from '../../i18n'
 import { authAPI } from '../../services/api'
 import { appSettings } from '@/utils/settings'
 import CountrySelector from '../../components/CountrySelector.vue'
-import ErrorModal from '../../components/modals/ErrorModal.vue'
-import SuccessModal from '../../components/modals/SuccessModal.vue'
+import ErrorModal from '../../components/modals/AppErrorModal.vue'
+import SuccessModal from '../../components/modals/AppSuccessModal.vue'
 import LoadingSpinner from '../../components/partials/LoadingSpinner.vue'
 
 const router = useRouter()
@@ -466,6 +457,13 @@ const otpModalOpen = ref(false)
 const otpInput = ref(null)
 const otpActiveOverride = ref(null)
 const otpRequiredOverride = ref(null)
+const OTP_COOLDOWN_MS = 120000
+const lastOtpRequestAt = ref(0)
+
+try {
+  const saved = Number(localStorage.getItem('last_otp_request_at') || 0)
+  if (Number.isFinite(saved) && saved > 0) lastOtpRequestAt.value = saved
+} catch (_) {}
 
 const toBool = (v) => {
   if (typeof v === 'boolean') return v
@@ -627,10 +625,17 @@ const extractOtpErrorMessage = (err) => {
 const requestOtp = async () => {
   if (isLoading.value || isRequestingOtp.value) return
   if (!otpActive.value) {
+    return false
+  }
+
+  const now = Date.now()
+  const remainingMs = OTP_COOLDOWN_MS - (now - (lastOtpRequestAt.value || 0))
+  if (remainingMs > 0) {
     showErrorModal.value = true
-    generalError.value = 'OTP tidak aktif'
+    generalError.value = 'Tunggu 2 menit untuk minta OTP lagi.'
     return
   }
+
   showErrorModal.value = false
   generalError.value = ''
   showSuccessModal.value = false
@@ -646,24 +651,28 @@ const requestOtp = async () => {
   isRequestingOtp.value = true
   try {
     await authAPI.requestOTP(phoneNumber)
+    lastOtpRequestAt.value = now
+    try {
+      localStorage.setItem('last_otp_request_at', String(now))
+    } catch (_) {}
     successMessage.value = 'OTP sent successfully'
     showSuccessModal.value = true
     otpModalOpen.value = true
     setTimeout(() => {
       if (otpInput.value) otpInput.value.focus()
     }, 120)
+    return true
   } catch (err) {
     if (err?.response?.status === 503) {
       otpActiveOverride.value = false
       otpRequiredOverride.value = false
       otpModalOpen.value = false
       formData.otp = ''
-      generalError.value = 'OTP tidak aktif'
-      showErrorModal.value = true
-      return
+      return false
     }
     generalError.value = extractOtpErrorMessage(err)
     showErrorModal.value = true
+    return null
   } finally {
     isRequestingOtp.value = false
   }
@@ -698,8 +707,8 @@ const handleRequestOtpAndOpenModal = async () => {
   if (!username) return showError('Signature wajib diisi.')
 
   if (showReferral.value && !String(formData.referralCode || '').trim()) {
-    return showError('Referral code wajib diisi.')
   }
+  if (!String(formData.referralCode || '').trim()) return showError('Referral code wajib diisi.')
 
   if (formData.password !== formData.password2) {
     return showError('Passwords do not match.')
@@ -720,10 +729,13 @@ const handleRequestOtpAndOpenModal = async () => {
   }
 
   if (!otpActive.value) {
-    return handleRegister()
+    return handleRegister({ forceNoOtp: true })
   }
 
-  await requestOtp()
+  const sent = await requestOtp()
+  if (sent === false) {
+    return handleRegister({ forceNoOtp: true })
+  }
 }
 
 const submitRegisterFromOtpModal = async () => {
@@ -776,7 +788,7 @@ watch(
   { immediate: true }
 )
 
-const handleRegister = async () => {
+const handleRegister = async (opts = {}) => {
   successMessage.value = ''
   generalError.value = ''
   showErrorModal.value = false
@@ -792,6 +804,8 @@ const handleRegister = async () => {
   const otp = String(formData.otp || '').trim()
   const password = String(formData.password || '')
   const password2 = String(formData.password2 || '')
+  const forceNoOtp = Boolean(opts?.forceNoOtp)
+  const retriedWithoutOtp = Boolean(opts?.retriedWithoutOtp)
 
   if (!phoneRaw) return showError('Nomor wajib diisi.')
   if (!email) return showError('Email wajib diisi.')
@@ -799,11 +813,11 @@ const handleRegister = async () => {
   if (!password) return showError('Password wajib diisi.')
   if (!password2) return showError('Konfirmasi password wajib diisi.')
   if (!username) return showError('Signature wajib diisi.')
-  if (otpRequired.value && !otp) return showError('OTP wajib diisi.')
+  if (!forceNoOtp && otpRequired.value && !otp) return showError('OTP wajib diisi.')
 
   if (showReferral.value && !String(formData.referralCode || '').trim()) {
-    return showError('Referral code wajib diisi.')
   }
+  if (!String(formData.referralCode || '').trim()) return showError('Referral code wajib diisi.')
 
   if (formData.password !== formData.password2) {
     return showError('Passwords do not match.')
@@ -840,9 +854,9 @@ const handleRegister = async () => {
       password: formData.password,
       password2: formData.password2,
       referral_code: formData.referralCode?.trim() || '',
-      otp: otpActive.value ? otp : '',
       withdraw_pin: ''
     }
+    if (!forceNoOtp && otpActive.value) payload.otp = otp
     
     const response = await authAPI.register(payload)
     
@@ -858,10 +872,16 @@ const handleRegister = async () => {
     
     if (error.response && error.response.data) {
       const status = error.response.status
-      const errorData = error.response.data
+      const rawErrorData = error.response.data
+      const errorData =
+        rawErrorData && typeof rawErrorData === 'object' && !Array.isArray(rawErrorData)
+          ? (() => {
+              const { error_step, ...rest } = rawErrorData || {}
+              return rest
+            })()
+          : rawErrorData
       const rawFallback = String(errorData?.detail || errorData?.message || error?.message || '')
       const rawFallbackLower = rawFallback.toLowerCase()
-      const rawFallbackCompact = rawFallbackLower.replace(/\s+/g, '')
       const isRateLimited =
         status === 429 ||
         rawFallbackLower.includes('rate limit') ||
@@ -880,18 +900,18 @@ const handleRegister = async () => {
           usernameMessage.includes('already') ||
           usernameMessage.includes('exists')
         generalError.value = isAlreadyTaken
-          ? 'Username already taken. Please choose another.'
+          ? 'Username sudah digunakan'
           : 'Invalid data format. Please check your input.'
       } else if (errorData.phone) {
         const phoneErrors = Array.isArray(errorData.phone) ? errorData.phone : [errorData.phone]
         const phoneMessage = phoneErrors.map((x) => String(x || '')).join(' ').toLowerCase()
         const phoneCompact = phoneMessage.replace(/\s+/g, '')
-        const step = String(errorData?.error_step || '').toLowerCase()
         const isAlreadyRegistered =
-          step === 'db_check' &&
-          (phoneMessage.includes('already registered') || phoneCompact.includes('alreadyregistered'))
+          phoneMessage.includes('already registered') ||
+          phoneMessage.includes('phone number is already registered') ||
+          phoneCompact.includes('alreadyregistered')
         if (isAlreadyRegistered) {
-          generalError.value = 'Already registered'
+          generalError.value = 'already registered'
           showErrorModal.value = true
           return
         }
@@ -915,6 +935,9 @@ const handleRegister = async () => {
           otpRequiredOverride.value = false
           formData.otp = ''
           otpModalOpen.value = false
+          if (!retriedWithoutOtp) {
+            return await handleRegister({ forceNoOtp: true, retriedWithoutOtp: true })
+          }
           generalError.value = 'OTP tidak aktif'
         } else {
           const isOtpMissing =
@@ -946,7 +969,10 @@ const handleRegister = async () => {
           }
         }
       } else if (errorData.email) {
-        generalError.value = 'Email already in use. Use a different email or login.'
+        const emailErrors = Array.isArray(errorData.email) ? errorData.email : [errorData.email]
+        const emailMessage = emailErrors.map((x) => String(x || '')).join(' ').toLowerCase()
+        const isEmailRegistered = emailMessage.includes('already') || emailMessage.includes('exists') || emailMessage.includes('registered')
+        generalError.value = isEmailRegistered ? 'Email sudah terdaftar' : 'Format email tidak valid.'
       } else if (errorData.referral_code || errorData.referralCode) {
         generalError.value = 'Invalid referral code. Please check and try again.'
       } else {
@@ -1154,25 +1180,6 @@ input {
 
 .input-wrapper input::placeholder {
   color: rgba(0, 0, 0, 0.37);
-}
-
-.otp-btn {
-  height: 43px;
-  padding: 0 12px;
-  border: none;
-  background: #1b46f5;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-left: 10px;
-  border-radius: 4px;
-  flex: 0 0 auto;
-}
-
-.otp-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 #section-otp-modal {

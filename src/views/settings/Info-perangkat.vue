@@ -103,7 +103,7 @@ const updateUtcTime = () => {
   const h = String(now.getUTCHours()).padStart(2, '0')
   const min = String(now.getUTCMinutes()).padStart(2, '0')
   const s = String(now.getUTCSeconds()).padStart(2, '0')
-  utcTime.value = `${y}-${m}-${d} ${h}:${min}:${s}`
+  utcTime.value = `${y}-${m}-${d}`
 }
 
 const formatDate = (dateString) => {

@@ -55,7 +55,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { newsAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import { resolveImageUrl } from '@/utils/imageCache'
 
 const router = useRouter()
@@ -86,7 +86,7 @@ const resolveNewsImageUrl = (rawUrl) => {
 const handleThumbError = (e) => {
   const el = e?.target
   if (!el) return
-  el.src = '/assets/images/2052_245.svg'
+  el.src = '/assets/image/Logo01.svg'
 }
 
 const getSnippet = (text = '') => {
@@ -260,7 +260,7 @@ h1, h2, p {
 .news-thumb-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   display: block;
 }
 

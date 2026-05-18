@@ -82,13 +82,22 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
 const goBack = () => {
-  router.push('/hn/user')
+  try {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+  } catch (_) {
+  }
+
+  const token = String(localStorage.getItem('auth_token') || '').trim()
+  router.push(token ? '/hn/user' : '/hn/console')
 }
 
 const handleScroll = () => {

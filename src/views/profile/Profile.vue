@@ -186,7 +186,7 @@
           </div>
           <img src="/assets/image/4200_216.svg" class="menu-arrow" alt="Arrow Right">
         </li>
-        <li class="menu-item" @click="router.push('/hn/user/detail')">
+        <li class="menu-item" @click="router.push('/hn/settings/device-info')">
           <div class="menu-left">
             <img src="/assets/image/detail.png" class="menu-icon" alt="My Portfolio">
             <span class="menu-text">Detail Information</span>
@@ -230,8 +230,8 @@
 <script setup>
 import { computed, onActivated, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import FooterBar from '../../components/partials/FooterBar.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import FooterBar from '../../components/partials/AppFooter.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import EditUsernameModal from '@/components/modals/EditUsernameModal.vue'
 import { authAPI } from '@/services/api'
 import { appSettings, formatAppCurrency } from '@/utils/settings'
@@ -415,14 +415,8 @@ const handleDeleteCache = async () => {
       const keys = await caches.keys()
       await Promise.all(keys.map((k) => caches.delete(k)))
     }
-    errorMessage.value = 'Cache deleted'
-    showErrorModal.value = true
-    setTimeout(() => {
-      router.replace('/hn/console')
-      setTimeout(() => {
-        try { window.location.reload() } catch (_) {}
-      }, 0)
-    }, 800)
+    router.replace('/hn/console')
+    try { window.location.reload() } catch (_) {}
   } catch (_) {
     errorMessage.value = 'Failed to delete cache'
     showErrorModal.value = true

@@ -44,7 +44,7 @@
     <section id="section-top-up-amount">
       <h2 class="section-title">Enter the top-up amount</h2>
 
-      <div class="input-group">
+      <div v-if="!isUsdMode" class="input-group">
         <div class="input-prefix">USDT</div>
         <div class="input-divider"></div>
         <input
@@ -58,7 +58,33 @@
         >
       </div>
 
-      <div class="input-group">
+      <div v-if="isUsdMode" class="input-group">
+        <div class="input-prefix">USD</div>
+        <div class="input-divider"></div>
+        <input
+          type="text"
+          :value="displayUsdAmount"
+          @input="formatUsdInput"
+          placeholder="Please enter your amount"
+          inputmode="decimal"
+          class="amount-input"
+        >
+      </div>
+
+      <div v-if="isUsdMode" class="input-group">
+        <div class="input-prefix">IDR</div>
+        <div class="input-divider"></div>
+        <input
+          type="text"
+          :value="displayUsdIdrAmount"
+          placeholder="Converted rupiah"
+          readonly
+          inputmode="numeric"
+          class="amount-input"
+        >
+      </div>
+
+      <div v-if="!isUsdMode" class="input-group">
         <div class="input-prefix">IDR</div>
         <div class="input-divider"></div>
         <input
@@ -112,16 +138,18 @@ import { useRouter } from 'vue-router'
 import { depositAPI } from '@/services/api'
 import { appSettings, formatAppCurrency, getRateToIdr } from '@/utils/settings'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 
 const router = useRouter()
 const depositAmount = ref('')
 const usdtAmount = ref('')
+const usdAmount = ref('')
 const selectedChannel = ref('usdt-trc20')
 const isLoading = ref(false)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 const usdtToIdrRate = ref(getRateToIdr() || 17000)
+const USD_TO_IDR_RATE = 17000
 
 watch(
   () => appSettings.currency?.rate_to_idr,
@@ -133,8 +161,8 @@ watch(
 )
 
 const channels = [
-  { id: 'usdt-trc20', label: 'USDT TRC20', badge: 'OK', icon: '/assets/image/9525994a3170136d2238b0ba554db6cb77f4508e.png' },
-  { id: 'usdt-erc20', label: 'USDT ERC20', badge: null, icon: '/assets/image/70cd308866ce958c5e47193b31aaa1eacef5c658.png' },
+
+  { id: 'usd', label: 'USD', badge: null, icon: '/assets/image/9525994a3170136d2238b0ba554db6cb77f4508e.png' },
   { id: 'rupiah-idr', label: 'Rupiah IDR', badge: null, icon: '/assets/image/d85fb29e4e19dd899589dbf989e615ca933f1f52.png' }
 ]
 
@@ -147,13 +175,18 @@ const isUsdtMode = computed(() => {
   return String(selectedChannel.value || '').toLowerCase().startsWith('usdt')
 })
 
+const isUsdMode = computed(() => {
+  return String(selectedChannel.value || '').toLowerCase() === 'usd'
+})
+
 const MIN_DEPOSIT_USDT = 5
 const MAX_DEPOSIT_USDT = 50000
 const MIN_DEPOSIT_IDR = 51000
 const MAX_DEPOSIT_IDR = 20000000
 
 const channelLimitText = computed(() => {
-  return isUsdtMode.value ? '5-50000' : '51K-20000K'
+  if (isUsdtMode.value || isUsdMode.value) return '5-50000'
+  return '51K-20000K'
 })
 
 const numericAmount = computed(() => {
@@ -168,6 +201,13 @@ const numericUsdtAmount = computed(() => {
   return Number.isFinite(n) ? n : 0
 })
 
+const numericUsdAmount = computed(() => {
+  const raw = String(usdAmount.value || '').trim()
+  if (!raw) return 0
+  const n = Number.parseFloat(raw)
+  return Number.isFinite(n) ? n : 0
+})
+
 const displayIdrAmount = computed(() => {
   return depositAmount.value || ''
 })
@@ -176,11 +216,28 @@ const displayUsdtAmount = computed(() => {
   return usdtAmount.value || ''
 })
 
+const displayUsdAmount = computed(() => {
+  return usdAmount.value || ''
+})
+
+const displayUsdIdrAmount = computed(() => {
+  const usd = numericUsdAmount.value
+  if (!usd) return ''
+  const idr = Math.round(usd * USD_TO_IDR_RATE)
+  return formatAppCurrency(idr, { symbol: '', decimals: 0 })
+})
+
 const showWarning = computed(() => {
   if (isUsdtMode.value) {
     return (
       numericUsdtAmount.value > 0 &&
       (numericUsdtAmount.value < MIN_DEPOSIT_USDT || numericUsdtAmount.value > MAX_DEPOSIT_USDT)
+    )
+  }
+  if (isUsdMode.value) {
+    return (
+      numericUsdAmount.value > 0 &&
+      (numericUsdAmount.value < MIN_DEPOSIT_USDT || numericUsdAmount.value > MAX_DEPOSIT_USDT)
     )
   }
   return (
@@ -194,6 +251,10 @@ const warningText = computed(() => {
     if (numericUsdtAmount.value > MAX_DEPOSIT_USDT) return `Maximum transaction USDT ${MAX_DEPOSIT_USDT}`
     return `Minimum transaction USDT ${MIN_DEPOSIT_USDT}`
   }
+  if (isUsdMode.value) {
+    if (numericUsdAmount.value > MAX_DEPOSIT_USDT) return `Maximum transaction USD ${MAX_DEPOSIT_USDT}`
+    return `Minimum transaction USD ${MIN_DEPOSIT_USDT}`
+  }
   if (numericAmount.value > MAX_DEPOSIT_IDR) return 'Maximum transaction IDR 20,000,000'
   return 'Minimum transaction IDR 51,000'
 })
@@ -201,6 +262,9 @@ const warningText = computed(() => {
 const isValidAmount = computed(() => {
   if (isUsdtMode.value) {
     return numericUsdtAmount.value >= MIN_DEPOSIT_USDT && numericUsdtAmount.value <= MAX_DEPOSIT_USDT
+  }
+  if (isUsdMode.value) {
+    return numericUsdAmount.value >= MIN_DEPOSIT_USDT && numericUsdAmount.value <= MAX_DEPOSIT_USDT
   }
   return numericAmount.value >= MIN_DEPOSIT_IDR && numericAmount.value <= MAX_DEPOSIT_IDR
 })
@@ -235,7 +299,7 @@ const formatUsdtInput = (event) => {
 }
 
 const formatIdrInput = (event) => {
-  if (isUsdtMode.value) return
+  if (isUsdtMode.value || isUsdMode.value) return
   const raw = event?.target?.value?.replace(/[^0-9]/g, '') || ''
   if (!raw) {
     depositAmount.value = ''
@@ -260,11 +324,69 @@ const formatIdrInput = (event) => {
   usdtAmount.value = fixed
 }
 
+const formatUsdInput = (event) => {
+  if (!isUsdMode.value) return
+  let raw = String(event?.target?.value || '')
+  raw = raw.replace(/[^0-9.]/g, '')
+  const firstDot = raw.indexOf('.')
+  if (firstDot !== -1) {
+    raw = raw.slice(0, firstDot + 1) + raw.slice(firstDot + 1).replace(/\./g, '')
+  }
+  if (raw.startsWith('.')) raw = `0${raw}`
+  if (raw.includes('.')) {
+    const [a, b] = raw.split('.')
+    raw = `${a}.${String(b || '').slice(0, 2)}`
+  }
+  usdAmount.value = raw
+}
+
+const normalizeDepositWalletType = (value) => {
+  const v = String(value || '').trim().toUpperCase()
+  if (v === 'BALANCE' || v === 'BALANCE_DEPOSIT') return v
+  return ''
+}
+
+const defaultUsdWalletType = computed(() => {
+  const s = appSettings.settings || {}
+  const candidates = [
+    s?.usd_deposit_wallet_type,
+    s?.usdDepositWalletType,
+    s?.deposit_wallet_type,
+    s?.depositWalletType,
+    s?.wallet_type_deposit,
+    s?.walletTypeDeposit,
+    s?.wallet_type,
+    s?.walletType
+  ]
+  const picked = candidates.find((x) => String(x ?? '').trim())
+  const normalized = normalizeDepositWalletType(picked)
+  return normalized || 'BALANCE_DEPOSIT'
+})
+
 watch(
   () => selectedChannel.value,
   (next, prev) => {
-    const nextIsUsdt = String(next || '').toLowerCase().startsWith('usdt')
-    const prevIsUsdt = String(prev || '').toLowerCase().startsWith('usdt')
+    const normalizeMode = (val) => {
+      const s = String(val || '').toLowerCase()
+      if (s.startsWith('usdt')) return 'USDT'
+      if (s === 'usd') return 'USD'
+      return 'IDR'
+    }
+    const nextMode = normalizeMode(next)
+    const prevMode = normalizeMode(prev)
+    if (nextMode === prevMode) return
+
+    if (nextMode === 'USD') {
+      depositAmount.value = ''
+      usdtAmount.value = ''
+      return
+    }
+    if (prevMode === 'USD') {
+      usdAmount.value = ''
+    }
+
+    const nextIsUsdt = nextMode === 'USDT'
+    const prevIsUsdt = prevMode === 'USDT'
     if (nextIsUsdt === prevIsUsdt) return
 
     const rate = Number(usdtToIdrRate.value || 0)
@@ -314,13 +436,24 @@ const extractErrorMessage = (err) => {
 const handleDeposit = async () => {
   if (!isValidAmount.value) return
 
-  const amount = numericAmount.value
   isLoading.value = true
   showErrorModal.value = false
   errorMessage.value = ''
   try {
-    const resp = await depositAPI.initiateJayapay({ amount, wallet_type: 'BALANCE' })
-    const paymentUrl = String(resp?.data?.payment_url || '').trim()
+    let resp
+    if (isUsdMode.value) {
+      const fixed = numericUsdAmount.value.toFixed(2)
+      resp = await depositAPI.initiateUsd({
+        amount: fixed,
+        busi_code: '122001',
+        wallet_type: defaultUsdWalletType.value
+      })
+    } else {
+      const amount = numericAmount.value
+      resp = await depositAPI.initiateJayapay({ amount, wallet_type: 'BALANCE' })
+    }
+
+    const paymentUrl = String(resp?.data?.payment_url || resp?.data?.paymentUrl || resp?.data?.url || '').trim()
     if (!paymentUrl) {
       throw new Error('Payment URL not available')
     }

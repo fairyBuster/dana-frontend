@@ -42,7 +42,7 @@ try {
 try {
   if (!BACKEND_ORIGIN && API_URL && /^https?:\/\//.test(API_URL)) BACKEND_ORIGIN = new URL(API_URL).origin
 } catch (_) {}
-if (!BACKEND_ORIGIN) BACKEND_ORIGIN = 'https://drashcloudsafer.online'
+if (!BACKEND_ORIGIN) BACKEND_ORIGIN = FRONTEND_ORIGIN || RUNTIME_ORIGIN || ''
 
 export function resolveImageUrl(rawUrl) {
   let normalized = String(rawUrl ?? '').trim()
@@ -70,21 +70,17 @@ export function resolveImageUrl(rawUrl) {
   const IS_CAPACITOR_ORIGIN = typeof window !== 'undefined' && window?.location?.protocol === 'capacitor:'
   const IS_MOBILE_LOCALHOST = typeof window !== 'undefined' && window?.location?.hostname === 'localhost'
   const IS_MOBILE = IS_CAPACITOR_RUNTIME && (IS_CAPACITOR_ORIGIN || IS_MOBILE_LOCALHOST)
-  const effectiveBackendOrigin = IS_MOBILE ? DEFAULT_ANDROID_BACKEND_ORIGIN : BACKEND_ORIGIN
+  const effectiveBackendOrigin = (IS_MOBILE ? DEFAULT_ANDROID_BACKEND_ORIGIN : (BACKEND_ORIGIN || currentFrontendOrigin)).replace(/\/+$/, '')
 
   try {
     // Handle relative paths (e.g., /media/..)
     if (/^\/.+/.test(normalized)) {
-      if (IS_MOBILE) {
-        if (normalized.startsWith('/media/')) return `${effectiveBackendOrigin}${normalized}`
-        if (normalized.startsWith('/assets/')) return `${currentFrontendOrigin}${normalized}`
-      }
+      if (normalized.startsWith('/media/')) return `${effectiveBackendOrigin}${normalized}`
       return `${currentFrontendOrigin}${normalized}`
     }
 
     if (normalized.startsWith('media/')) {
-      if (IS_MOBILE) return `${effectiveBackendOrigin}/${normalized}`
-      return `${currentFrontendOrigin}/${normalized}`
+      return `${effectiveBackendOrigin}/${normalized}`
     }
 
     if (IS_MOBILE && /^[^/\\]+\\.(png|jpe?g|webp|gif|svg)$/i.test(normalized)) {
@@ -95,13 +91,9 @@ export function resolveImageUrl(rawUrl) {
     // Enforce HTTPS to avoid mixed content and align CSP
     if (u.protocol === 'http:') u.protocol = 'https:'
 
-    // Selalu rute path media ke origin frontend agar tidak menampilkan host backend
-    // Berlaku untuk URL apa pun yang memiliki path /media, terlepas dari host-nya.
+    // Selalu rute path /media ke origin backend agar asset bisa diakses walau frontend dan backend beda origin.
     if (u.pathname.startsWith('/media')) {
-      if (IS_MOBILE) {
-        return `${effectiveBackendOrigin}${u.pathname}${u.search}`
-      }
-      return `${currentFrontendOrigin}${u.pathname}${u.search}`
+      return `${effectiveBackendOrigin}${u.pathname}${u.search}`
     }
 
     // If already pointing to frontend domain, return as is
@@ -193,13 +185,14 @@ const toFrontendMedia = (url) => {
   try {
     // Relative path: Prod absolute ke origin frontend (bukan localhost)
     if (/^\/.+/.test(normalized)) {
+      if (normalized.startsWith('/media/')) return `${BACKEND_ORIGIN}${normalized}`
       return `${FRONTEND_ORIGIN}${normalized}`
     }
     const u = new URL(normalized)
     
-    // Arahkan semua path /media ke domain frontend agar domain backend tersembunyi
+    // Arahkan semua path /media ke origin backend supaya bisa di-load walau beda origin
     if (u.pathname.startsWith('/media')) {
-      return `${FRONTEND_ORIGIN}${u.pathname}${u.search}`
+      return `${BACKEND_ORIGIN}${u.pathname}${u.search}`
     }
 
     return normalized

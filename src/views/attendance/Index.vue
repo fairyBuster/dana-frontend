@@ -68,8 +68,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { attendanceAPI, authAPI } from '@/services/api'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
-import SuccessModal from '@/components/modals/SuccessModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
+import SuccessModal from '@/components/modals/AppSuccessModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import { formatAppCurrency } from '@/utils/settings'
 

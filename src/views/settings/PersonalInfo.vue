@@ -132,8 +132,8 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '@/services/api'
 import ChatBot from '@/components/modals/ChatBot.vue'
-import SuccessModal from '@/components/modals/SuccessModal.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import SuccessModal from '@/components/modals/AppSuccessModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 
 const router = useRouter()
 const loading = ref(true)

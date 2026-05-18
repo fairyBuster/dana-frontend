@@ -38,8 +38,8 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { voucherAPI } from '@/services/api'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
-import SuccessModal from '@/components/modals/SuccessModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
+import SuccessModal from '@/components/modals/AppSuccessModal.vue'
 import { formatAppCurrency } from '@/utils/settings'
 
 const props = defineProps({

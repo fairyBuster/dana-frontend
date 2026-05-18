@@ -24,7 +24,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const OFFLINE_MESSAGE = 'Jaringan Anda terputus. Segarkan halaman atau keluar akun untuk terhubung ulang.'
+const OFFLINE_MESSAGE = 'Refresh your page or login again'
 
 const displayedMessage = computed(() => {
   const raw = String(props.message || '').trim()

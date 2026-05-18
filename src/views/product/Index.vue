@@ -58,7 +58,15 @@
           <h3 class="product-title">{{ product.name || '-' }}</h3>
           <div class="card-content">
             <div class="image-wrapper">
-              <img :src="getProductImage(product)" :alt="product.name || 'Product'" class="product-image" loading="lazy" decoding="async">
+              <img
+                :src="getProductImage(product)"
+                :alt="product.name || 'Product'"
+                class="product-image"
+                loading="lazy"
+                decoding="async"
+                referrerpolicy="no-referrer"
+                @error="handleProductImageError"
+              >
             </div>
             
             <div class="info-wrapper">
@@ -130,7 +138,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { authAPI, productAPI } from '@/services/api'
-import FooterBar from '@/components/partials/FooterBar.vue'
+import FooterBar from '@/components/partials/AppFooter.vue'
 import { resolveImageUrl } from '@/utils/imageCache'
 import { setLanguage } from '@/i18n'
 import { formatAppCurrency } from '@/utils/settings'
@@ -310,6 +318,12 @@ const getProductImage = (product) => {
   const raw = String(product?.image || '').trim()
   const resolved = raw ? resolveImageUrl(raw) : ''
   return resolved || '/assets/image/1ea41e69edf9909600bc1dea02f90a88a2cbf679.png'
+}
+
+const handleProductImageError = (e) => {
+  const el = e?.target
+  if (!el) return
+  el.src = '/assets/image/1ea41e69edf9909600bc1dea02f90a88a2cbf679.png'
 }
 
 const buyProduct = (product) => {
@@ -534,7 +548,7 @@ onBeforeUnmount(() => {
 .product-image {
   width: 100%;
   height: auto;
-  object-fit: contain;
+  object-fit: fill;
 }
 
 .info-wrapper {

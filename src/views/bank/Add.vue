@@ -108,7 +108,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { bankAPI } from '@/services/api'
 import BankOptionsModal from '@/components/partials/BankOptionsModal.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -271,6 +271,7 @@ const handleSubmit = async () => {
       bank: Number(formData.bankId),
       account_name: String(formData.accountHolder).trim(),
       account_number: String(formData.accountNumber).replace(/\s+/g, ''),
+      phone: String(formData.phone || '').trim(),
       is_default: isDefault
     })
     router.replace('/hn/user/account')

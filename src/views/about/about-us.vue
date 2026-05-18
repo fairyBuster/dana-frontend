@@ -40,7 +40,7 @@ With a foundation built on structure, consistency, operational reliability, and 
 </template>
 
 <script setup>
-import FooterBar from '@/components/partials/FooterBar.vue'
+import FooterBar from '@/components/partials/AppFooter.vue'
 </script>
 
 <style scoped>

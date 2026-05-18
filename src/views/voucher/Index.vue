@@ -89,7 +89,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { voucherAPI, transactionAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import VoucherSuccessModal from '@/components/modals/VoucherSuccessModal.vue'
 import { formatAppCurrency } from '@/utils/settings'
 

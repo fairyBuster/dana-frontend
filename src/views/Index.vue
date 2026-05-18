@@ -17,8 +17,8 @@
             <img src="/assets/image/d89b12e7619acdd47438a9301486cb923ced86a1.png" alt="Menu" class="menu-icon">
           </button>
           <div v-if="menuOpen" ref="menuEl" class="header-menu" @click.stop>
-            <button type="button" class="header-menu-item" @click="goTo('/login')">Login</button>
-            <button type="button" class="header-menu-item" @click="goTo('/register')">Register</button>
+            <button type="button" class="header-menu-item" @click="goTo('/hn/console')">Login</button>
+            <button type="button" class="header-menu-item" @click="goTo('/hn/network')">Register</button>
           </div> -->
         </header>
       </div>
@@ -33,10 +33,10 @@
           <div class="hero-content">
             <h1 class="hero-title">The Next Generation of Mining</h1>
             <p class="hero-subtitle">HUE is a decentralized mining platform that makes simple, secure, and accessible for everyone.</p>
-            <router-link to="/hn/network" class="hero-btn">
+            <!-- <router-link to="/hn/network" class="hero-btn">
               Start Mining
               <img src="/assets/image/4287_723.svg" alt="" class="btn-icon">
-            </router-link>
+            </router-link> -->
           </div>
         </div>
       </div>
@@ -106,7 +106,7 @@
               <router-link to="/hn/legal/privacy">Privacy Policy</router-link>
               <router-link to="/hn/legal/agreement">Customer Agreement</router-link>
             </nav>
-            <a href="mailto:support@hue.com" class="footer-email">support@hue.com</a>
+            <a href="mailto:support@huenode.com" class="footer-email">support@huenode.com</a>
           </div>
         </footer>
       </div>

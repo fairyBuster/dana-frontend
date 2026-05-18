@@ -146,7 +146,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { investmentAPI, transactionAPI } from '@/services/api'
 import { resolveImageUrl } from '@/utils/imageCache'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import { formatAppCurrency } from '@/utils/settings'
 

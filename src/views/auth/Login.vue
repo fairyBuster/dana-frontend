@@ -42,7 +42,7 @@
           <img src="/assets/image/4024_190.svg" alt="Arrow Right">
         </button>
 
-        <form class="login-form" @submit.prevent="handleLogin">
+        <form class="login-form" @submit.prevent="handleLogin" novalidate>
 
           <!-- Phone Input -->
           <div v-if="loginMode === 'phone'" class="form-group">
@@ -73,9 +73,13 @@
             <label>{{ ui.emailLabel }}</label>
             <div class="input-wrapper">
               <input
-                type="email"
+                type="text"
                 v-model="formData.email"
                 :placeholder="ui.emailPlaceholder"
+                inputmode="email"
+                autocomplete="email"
+                autocapitalize="off"
+                spellcheck="false"
                 @blur="checkEmailError"
                 @focus="clearEmailError"
               >
@@ -169,8 +173,8 @@ import { useI18n } from 'vue-i18n'
 import { setLanguage } from '../../i18n'
 import { authAPI } from '../../services/api'
 import CountrySelector from '../../components/CountrySelector.vue'
-import ErrorModal from '../../components/modals/ErrorModal.vue'
-import SuccessModal from '../../components/modals/SuccessModal.vue'
+import ErrorModal from '../../components/modals/AppErrorModal.vue'
+import SuccessModal from '../../components/modals/AppSuccessModal.vue'
 import LoadingSpinner from '../../components/partials/LoadingSpinner.vue'
 
 const router = useRouter()

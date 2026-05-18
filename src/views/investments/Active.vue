@@ -128,13 +128,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onActivated, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onActivated, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { resolveImageUrl } from '@/utils/imageCache'
-import FooterBar from '@/components/partials/FooterBar.vue'
+import FooterBar from '@/components/partials/AppFooter.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
-import SuccessModal from '@/components/modals/SuccessModal.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import SuccessModal from '@/components/modals/AppSuccessModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import { investmentAPI } from '@/services/api'
 import { appSettings, formatAppCurrency } from '@/utils/settings'
 
@@ -148,6 +148,8 @@ const claimConfirmOpen = ref(false)
 const claimSuccessOpen = ref(false)
 const claimErrorOpen = ref(false)
 const claimErrorMessage = ref('')
+const claimableProfit = ref({ count: 0, total_claimable_amount: '0', items: [] })
+const isClaimableLoading = ref(false)
 
 // Timer logic
 const now = ref(Date.now())
@@ -250,18 +252,11 @@ const getFractionDigitsFromRaw = (value) => {
 }
 
 const claimAmount = computed(() => {
-  return filteredInvestments.value.reduce((sum, inv) => sum + parseNumber(inv?.daily_profit), 0)
+  return parseNumber(claimableProfit.value?.total_claimable_amount)
 })
 
 const claimAmountDecimals = computed(() => {
-  const list = filteredInvestments.value || []
-  let max = 0
-  for (const inv of list) {
-    const d = getFractionDigitsFromRaw(inv?.daily_profit)
-    if (d > max) max = d
-    if (max >= 8) break
-  }
-  return max
+  return getFractionDigitsFromRaw(claimableProfit.value?.total_claimable_amount)
 })
 
 const getAppDefaultDecimals = () => {
@@ -328,7 +323,20 @@ const getDaysActive = (inv) => {
 
 const openClaimConfirm = () => {
   if (isClaiming.value) return
-  claimConfirmOpen.value = true
+  ;(async () => {
+    try {
+      await fetchClaimableProfit()
+      if (claimAmount.value <= 0) {
+        claimErrorMessage.value = 'Belum saatnya'
+        claimErrorOpen.value = true
+        return
+      }
+      claimConfirmOpen.value = true
+    } catch (err) {
+      claimErrorMessage.value = extractErrorMessage(err)
+      claimErrorOpen.value = true
+    }
+  })()
 }
 
 const closeClaimConfirm = () => {
@@ -356,6 +364,24 @@ const toNumberLoose = (value) => {
   return Number.isFinite(n) ? n : 0
 }
 
+const fetchClaimableProfit = async () => {
+  if (isClaimableLoading.value) return
+  isClaimableLoading.value = true
+  try {
+    const resp = await investmentAPI.getClaimableProfit()
+    const data = resp?.data || {}
+    claimableProfit.value = {
+      count: Number(data?.count ?? 0) || 0,
+      total_claimable_amount: String(data?.total_claimable_amount ?? '0'),
+      items: Array.isArray(data?.items) ? data.items : []
+    }
+  } catch (_) {
+    claimableProfit.value = { count: 0, total_claimable_amount: '0', items: [] }
+  } finally {
+    isClaimableLoading.value = false
+  }
+}
+
 const confirmClaim = async () => {
   if (isClaiming.value) return
   claimErrorOpen.value = false
@@ -363,14 +389,31 @@ const confirmClaim = async () => {
 
   isClaiming.value = true
   try {
+    await fetchClaimableProfit()
+    if (claimAmount.value <= 0) {
+      claimConfirmOpen.value = false
+      claimErrorMessage.value = 'Belum saatnya'
+      claimErrorOpen.value = true
+      return
+    }
+
     const resp = await investmentAPI.claimProfitAll()
     const data = resp?.data || {}
-    const claimedCount = toNumberLoose(data?.claimed_count)
-    const totalClaimedAmount = toNumberLoose(data?.total_claimed_amount)
+    const claimedCount =
+      toNumberLoose(data?.claimed_count) ||
+      toNumberLoose(data?.count) ||
+      (Array.isArray(data?.claimed) ? data.claimed.length : 0) ||
+      (Array.isArray(data?.items) ? data.items.length : 0)
+    const totalClaimedAmount =
+      toNumberLoose(data?.total_claimed_amount) ||
+      toNumberLoose(data?.total_amount) ||
+      toNumberLoose(data?.total_claimed) ||
+      toNumberLoose(data?.amount)
     const nothingClaimed = claimedCount <= 0 || totalClaimedAmount <= 0
 
     try {
       await fetchInvestments()
+      await fetchClaimableProfit()
     } catch (_) {}
     claimConfirmOpen.value = false
 
@@ -401,6 +444,7 @@ const goHomeFromClaim = () => {
 
 onMounted(() => {
   fetchInvestments()
+  fetchClaimableProfit()
   timerInterval = setInterval(() => {
     now.value = Date.now()
   }, 1000)
@@ -408,6 +452,7 @@ onMounted(() => {
 
 onActivated(() => {
   fetchInvestments()
+  fetchClaimableProfit()
 })
 
 onBeforeUnmount(() => {
@@ -696,7 +741,7 @@ onBeforeUnmount(() => {
 .product-img {
   width: 109px;
   height: 62px;
-  object-fit: cover;
+  object-fit: fill;
   border-radius: 4px;
 }
 

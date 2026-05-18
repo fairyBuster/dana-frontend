@@ -22,7 +22,7 @@
     <section id="section-contact-list">
       <div class="contact-list">
         <!-- Telegram Channel -->
-        <a class="contact-card" @click.prevent="handleLinkClick(telegramChannelLink)">
+        <a class="contact-card" :href="getHref(telegramChannelLink)" @click="handleCardClick($event, telegramChannelLink)">
           <div class="blue-line"></div>
           <div class="icon-container">
             <img class="card-icon" src="/assets/image/12c90035b0ea3086c159165d7e40bd1ea08c635a.png" alt="Telegram">
@@ -32,7 +32,7 @@
         </a>
 
         <!-- Customer Service -->
-        <a class="contact-card" @click.prevent="handleLinkClick(officialSupportLink)">
+        <a class="contact-card" :href="getHref(officialSupportLink)" @click="handleCardClick($event, officialSupportLink)">
           <div class="blue-line"></div>
           <div class="icon-container">
             <img class="card-icon" src="/assets/image/12c90035b0ea3086c159165d7e40bd1ea08c635a.png" alt="Customer Service">
@@ -42,7 +42,7 @@
         </a>
 
         <!-- Community WhatsApp -->
-        <a class="contact-card" @click.prevent="handleLinkClick(whatsappLink)">
+        <a class="contact-card" :href="getHref(whatsappLink)" @click="handleCardClick($event, whatsappLink)">
           <div class="blue-line"></div>
           <div class="icon-container">
             <img class="card-icon" src="/assets/image/92eab75ecb988672b7182dcc489e5a84b6f62d24.png" alt="WhatsApp">
@@ -51,18 +51,10 @@
           <img class="card-arrow" src="/assets/image/443_963.svg" alt="">
         </a>
 
-        <!-- Private Consultant -->
-        <a class="contact-card" @click.prevent="handleLinkClick(consultantLink)">
-          <div class="blue-line"></div>
-          <div class="icon-container">
-            <img class="card-icon" src="/assets/image/92eab75ecb988672b7182dcc489e5a84b6f62d24.png" alt="Private Consultant">
-          </div>
-          <span class="card-text">Private Consultant</span>
-          <img class="card-arrow" src="/assets/image/522_108.svg" alt="">
-        </a>
+      
 
         <!-- Facebook -->
-        <a class="contact-card" @click.prevent="handleLinkClick(facebookLink)">
+        <a class="contact-card" :href="getHref(facebookLink)" @click="handleCardClick($event, facebookLink)">
           <div class="blue-line"></div>
           <div class="icon-container">
             <img class="card-icon" src="/assets/image/d153b1998421f83ecc7dc00ffa24cb9dfc1e887a.png" alt="Facebook">
@@ -71,8 +63,18 @@
           <img class="card-arrow" src="/assets/image/4273_528.svg" alt="">
         </a>
 
+        <!-- Instagram -->
+        <a class="contact-card" :href="getHref(instagramLink)" @click="handleCardClick($event, instagramLink)">
+          <div class="blue-line"></div>
+          <div class="icon-container">
+            <img class="card-icon" src="https://api.iconify.design/mdi/instagram.svg?color=%23000000" alt="Instagram">
+          </div>
+          <span class="card-text">Instagram</span>
+          <img class="card-arrow" src="/assets/image/4273_542.svg" alt="">
+        </a>
+
         <!-- Twitter X -->
-        <a class="contact-card" @click.prevent="handleLinkClick(twitterLink)">
+        <a class="contact-card" :href="getHref(twitterLink)" @click="handleCardClick($event, twitterLink)">
           <div class="blue-line"></div>
           <div class="icon-container">
             <img class="card-icon" src="/assets/image/80176cbddefe4711112048121da03baff34f98b5.png" alt="Twitter X">
@@ -88,7 +90,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { supportAPI } from '@/services/api'
+import { authAPI, supportAPI } from '@/services/api'
 
 const router = useRouter()
 const telegramChannelLink = ref('#')
@@ -96,17 +98,46 @@ const officialSupportLink = ref('#')
 const whatsappLink = ref('#')
 const consultantLink = ref('#')
 const facebookLink = ref('#')
+const instagramLink = ref('#')
 const twitterLink = ref('#')
+
+const stripQuotes = (value) => {
+  let s = String(value ?? '').trim()
+  if (!s) return ''
+  if (s.length >= 2) {
+    const first = s[0]
+    const last = s[s.length - 1]
+    if ((first === '`' && last === '`') || (first === '"' && last === '"') || (first === "'" && last === "'")) {
+      s = s.slice(1, -1).trim()
+    }
+  }
+  return s
+}
+
+const toWaMeLink = (phone) => {
+  let digits = String(phone || '').replace(/\D/g, '')
+  if (!digits) return ''
+  if (digits.startsWith('0')) digits = `62${digits.slice(1)}`
+  return digits ? `https://wa.me/${digits}` : ''
+}
 
 const goBack = () => {
   router.go(-1)
 }
 
-const handleLinkClick = (link) => {
-  if (!link || link === '#') {
-    return
+const getHref = (link) => {
+  const s = stripQuotes(link)
+  return s && s !== '#' ? s : '#'
+}
+
+const handleCardClick = (event, link) => {
+  event?.preventDefault?.()
+  const href = getHref(link)
+  if (href === '#') return
+  try {
+    window.location.href = href
+  } catch (_) {
   }
-  window.open(link, '_blank')
 }
 
 const fetchSupportLinks = async () => {
@@ -120,17 +151,41 @@ const fetchSupportLinks = async () => {
       data = response.data.results
     }
 
-    data.forEach((item) => {
-      if (!item || !item.url) return
-      const url = item.url.trim()
+    const rootPhone = stripQuotes(response?.data?.root_parent_phone || '')
+    const waMe = toWaMeLink(rootPhone)
+    if (waMe) consultantLink.value = waMe
+    if (!Array.isArray(data)) return
+    for (const item of data) {
+      if (!item || !item.url) continue
+      if (item.is_active === false) continue
       const id = Number(item.id)
-      if (id === 1) telegramChannelLink.value = url
-      else if (id === 4) officialSupportLink.value = url
-    })
+      const url = stripQuotes(item.url)
+      if (!url) continue
+
+      if (id === 6) telegramChannelLink.value = url
+      else if (id === 10 || id === 4) officialSupportLink.value = url
+      else if (id === 9) whatsappLink.value = url
+      else if (id === 3) consultantLink.value = url
+      else if (id === 8) facebookLink.value = url
+      else if (id === 7) instagramLink.value = url
+      else if (id === 5) twitterLink.value = url
+    }
   } catch (error) {
+
+    if (consultantLink.value === '#' || !consultantLink.value) {
+      try {
+        const token = String(localStorage.getItem('auth_token') || '').trim()
+        if (!token) return
+        const acc = await authAPI.getAccountInfo()
+        const p = stripQuotes(acc?.data?.root_parent_phone || '')
+        const fromAcc = toWaMeLink(p)
+        if (fromAcc) consultantLink.value = fromAcc
+      } catch (_) {}
+    }
     console.error('Failed to fetch support links:', error)
   }
 }
+
 
 onMounted(() => {
   fetchSupportLinks()

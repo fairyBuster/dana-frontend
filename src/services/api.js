@@ -689,6 +689,26 @@ export const depositAPI = {
     const type = (wallet_type || 'BALANCE_DEPOSIT').toUpperCase()
     return api.post('/deposits/klikpay/initiate/', { amount, wallet_type: type })
   },
+  initiateUsd: ({ amount, busi_code, wallet_type, bank_code, bankCode } = {}) => {
+    const rawNum = Number(String(amount ?? '').replace(/[^0-9.-]/g, ''))
+    const fixedAmount = Number.isFinite(rawNum) ? rawNum.toFixed(2) : String(amount ?? '').trim()
+
+    const rawWalletType = String(wallet_type ?? '').trim().toUpperCase()
+    const normalizedWalletType = rawWalletType === 'BALANCE' || rawWalletType === 'BALANCE_DEPOSIT' ? rawWalletType : undefined
+
+    const rawBusiCode = String(busi_code ?? '').trim()
+    const normalizedBusiCode = /^(122002|122003|122004|122005|122006)$/.test(rawBusiCode) ? rawBusiCode : undefined
+
+    const code = String(bankCode ?? bank_code ?? '').trim()
+    const payload = {
+      amount: fixedAmount
+    }
+    if (normalizedBusiCode) payload.busi_code = normalizedBusiCode
+    if (normalizedWalletType) payload.wallet_type = normalizedWalletType
+    if (code) payload.bankCode = code
+
+    return api.post('/deposits/usd/initiate/', payload)
+  },
   // GET /api/deposits/transactions/ - Daftar transaksi deposit dengan filter
   getTransactions: (params = {}) => {
     // Supported parameters:
@@ -742,6 +762,10 @@ export const investmentAPI = {
   // GET /api/investments/ - Get list of investments (Primary endpoint)
   getInvestments: (params = {}) => {
     return api.get('/investments/', { params })
+  },
+  // GET /api/investments/claimable-profit/ - Summary of claimable profit
+  getClaimableProfit: () => {
+    return api.get('/investments/claimable-profit/')
   },
   // GET /api/investments/{id}/
   getInvestment: (id, config = {}) => {

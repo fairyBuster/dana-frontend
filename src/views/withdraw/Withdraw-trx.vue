@@ -3,9 +3,9 @@
     <!-- Header -->
     <section id="section-header">
       <header class="header">
-        <a href="#/hn/user" class="back-btn" aria-label="Go to profile">
+        <button type="button" class="back-btn" aria-label="Go to profile" @click.stop="goToProfile">
           <img src="/assets/image/4252_247.svg" alt="Back" class="back-icon">
-        </a>
+        </button>
         <button type="button" ref="menuAnchorEl" class="title-wrapper" @click.stop="toggleRecordMenu">
           <h1 class="page-title">{{ currentRecordLabel }}</h1>
           <img
@@ -75,17 +75,23 @@
     <div v-if="detailsOpen" class="details-modal-overlay" @click.self="closeDetails">
       <div class="details-modal-container" role="dialog" aria-modal="true" @click.stop>
         <div class="details-modal-details">
-          <div class="details-labels">
-            <p>Name receiptan</p>
-            <p>Address</p>
-            <p>Phone reservation</p>
-            <p>Status</p>
-          </div>
-          <div class="details-values">
-            <p>{{ detailsName }}</p>
-            <p>{{ detailsAddress }}</p>
-            <p>{{ detailsPhone }}</p>
-            <p :class="detailsStatusClass">{{ detailsStatusText }}</p>
+          <div class="details-rows">
+            <div class="details-row">
+              <p class="details-label">Name receiptan</p>
+              <p class="details-value">{{ detailsName }}</p>
+            </div>
+            <div class="details-row">
+              <p class="details-label">Address</p>
+              <p class="details-value">{{ detailsAddress }}</p>
+            </div>
+            <div class="details-row">
+              <p class="details-label">Phone reservation</p>
+              <p class="details-value">{{ detailsPhone }}</p>
+            </div>
+            <div class="details-row">
+              <p class="details-label">Status</p>
+              <p class="details-value" :class="detailsStatusClass">{{ detailsStatusText }}</p>
+            </div>
           </div>
         </div>
 
@@ -104,7 +110,7 @@ import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref }
 import { useRoute, useRouter } from 'vue-router'
 import { withdrawalAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
 import { formatAppCurrency } from '@/utils/settings'
 
@@ -128,8 +134,8 @@ const showPagination = computed(() => {
   return hasNext.value || hasPrev.value || totalPages.value > 1
 })
 
-const goBack = () => {
-  router.go(-1)
+const goToProfile = () => {
+  router.push('/hn/user')
 }
 
 const detailsOpen = ref(false)
@@ -156,17 +162,35 @@ const pickFirstText = (obj, keys) => {
 
 const detailsName = computed(() => {
   const raw = selectedTransaction.value?.raw || {}
-  return pickFirstText(raw, ['receiver_name', 'recipient_name', 'account_name', 'full_name', 'name', 'user_name', 'username'])
+  return pickFirstText(raw, [
+    'bank_account_name',
+    'account_name',
+    'receiver_name',
+    'recipient_name',
+    'full_name',
+    'name',
+    'user_name',
+    'username'
+  ])
 })
 
 const detailsAddress = computed(() => {
   const raw = selectedTransaction.value?.raw || {}
-  return pickFirstText(raw, ['address', 'wallet_address', 'to_address', 'account_number', 'bank_account', 'bank_number'])
+  return pickFirstText(raw, [
+    'bank_account_number',
+    'account_number',
+    'wallet_address',
+    'to_address',
+    'address',
+    'bank_account',
+    'bank_number',
+    'bank_name'
+  ])
 })
 
 const detailsPhone = computed(() => {
   const raw = selectedTransaction.value?.raw || {}
-  return pickFirstText(raw, ['phone', 'phone_number', 'user_phone', 'mobile'])
+  return pickFirstText(raw, ['user_phone', 'phone', 'phone_number', 'mobile'])
 })
 
 const detailsStatusText = computed(() => {
@@ -454,6 +478,7 @@ h1, p {
   width: 20px;
   height: 20px;
   -webkit-tap-highlight-color: transparent;
+  z-index: 2;
 }
 
 .back-icon {
@@ -660,34 +685,48 @@ h1, p {
   padding: 24px 18px;
   box-sizing: border-box;
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
 }
 
 .details-modal-details {
   display: flex;
-  justify-content: space-between;
   margin-bottom: 24px;
   font-size: 12px;
 }
 
-.details-labels p,
-.details-values p {
-  margin: 0 0 10px 0;
+.details-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
 }
 
-.details-labels p:last-child,
-.details-values p:last-child {
-  margin-bottom: 0;
+.details-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
 }
 
-.details-labels {
+.details-label,
+.details-value {
+  margin: 0;
+  font-size: 14px;
+}
+
+.details-label {
   color: #626262;
-  font-size: 14px;
+  flex: 0 0 46%;
 }
 
-.details-values {
+.details-value {
   color: #000000;
+  flex: 1;
+  min-width: 0;
   text-align: right;
-  font-size: 14px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .details-amount-display {

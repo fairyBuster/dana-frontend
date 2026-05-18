@@ -106,11 +106,13 @@
 import { onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '@/services/api'
-import SuccessModal from '@/components/modals/SuccessModal.vue'
+import { getFrontendUrl } from '@/utils/settings'
+import SuccessModal from '@/components/modals/AppSuccessModal.vue'
 
 const router = useRouter()
 const referralCode = ref('')
 const inviteLink = ref('')
+const frontendBaseUrl = ref('')
 const qrStyle = ref('card')
 const successModalOpen = ref(false)
 const successMessage = ref('')
@@ -121,13 +123,32 @@ const goBack = () => {
   router.go(-1)
 }
 
+const ensureFrontendBaseUrl = async () => {
+  if (frontendBaseUrl.value) return frontendBaseUrl.value
+  try {
+    const resp = await authAPI.getSettings()
+    const apiUrl = String(resp?.data?.frontend_url || '').trim()
+    if (apiUrl) {
+      frontendBaseUrl.value = apiUrl.replace(/\/+$/, '')
+      return frontendBaseUrl.value
+    }
+  } catch (_) {}
+
+  frontendBaseUrl.value = getFrontendUrl()
+  return frontendBaseUrl.value
+}
+
 const buildInviteLink = (code) => {
-  const base = 'https://trivexcapt.com'
-  const u = code ? `${base}/signup/invite/${encodeURIComponent(code)}` : `${base}/register`
-  return u
+  const base = String(frontendBaseUrl.value || '').replace(/\/+$/, '')
+  const safeCode = String(code || '').trim()
+  const hashPath = safeCode
+    ? `#/hn/network/${encodeURIComponent(safeCode)}`
+    : '#/hn/network'
+  return base ? `${base}/${hashPath}` : `/${hashPath}`
 }
 
 const loadAccountInfo = async () => {
+  await ensureFrontendBaseUrl()
   try {
     const resp = await authAPI.getAccountInfo()
     const data = resp?.data || {}

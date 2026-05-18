@@ -58,7 +58,7 @@
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supportAPI } from '@/services/api'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 
 const router = useRouter()
 const userMessage = ref('')

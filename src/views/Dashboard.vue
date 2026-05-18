@@ -192,7 +192,18 @@
           <h4>{{ newsTitle }}</h4>
           <p>{{ newsBodyShort }}</p>
         </div>
-        <div class="news-image-box"></div>
+        <div class="news-image-box">
+          <img
+            v-if="newsImageUrl"
+            :src="newsImageUrl"
+            alt=""
+            class="news-thumb-img"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+            @error="handleNewsThumbError"
+          >
+        </div>
       </div>
     </section>
     <section class="market-section">
@@ -252,12 +263,13 @@
 import { ref, computed, onBeforeUnmount, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import FooterBar from '@/components/partials/FooterBar.vue'
+import FooterBar from '@/components/partials/AppFooter.vue'
 import VoucherModal from '@/components/modals/VoucherModal.vue'
 import AnnouncementModal from '@/components/modals/AnnouncementModal.vue'
 import { authAPI, newsAPI } from '@/services/api'
 import { setLanguage } from '@/i18n'
 import { appSettings, formatAppCurrency } from '@/utils/settings'
+import { resolveImageUrl } from '@/utils/imageCache'
 
 const router = useRouter()
 const { locale } = useI18n()
@@ -276,6 +288,13 @@ const isAnnouncementOpen = ref(false)
 
 const newsTitle = ref('')
 const newsBody = ref('')
+const newsImage = ref('')
+
+const newsImageUrl = computed(() => {
+  const raw = String(newsImage.value || '').trim()
+  if (!raw) return ''
+  return resolveImageUrl(raw)
+})
 
 const marketLoading = ref(false)
 const marketError = ref('')
@@ -339,10 +358,18 @@ const fetchNews = async () => {
 
     const title = pickFirstText(first, ['title', 'name', 'headline'])
     const body = pickFirstText(first, ['summary', 'excerpt', 'description', 'content', 'body', 'text'])
+    const image = pickFirstText(first, ['image', 'thumbnail', 'thumb', 'cover', 'banner'])
 
     if (title) newsTitle.value = title
     if (body) newsBody.value = body
+    if (image) newsImage.value = image
   } catch (_) {}
+}
+
+const handleNewsThumbError = (e) => {
+  const el = e?.target
+  if (!el) return
+  el.src = '/assets/image/Logo01.svg'
 }
 
 const MARKET_COINS = [
@@ -1215,6 +1242,14 @@ a {
   height: 64px;
   background-color: #d9d9d9;
   border-radius: 2px;
+  overflow: hidden;
+}
+
+.news-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* Market */

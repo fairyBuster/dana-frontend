@@ -23,7 +23,7 @@
               <p class="card-desc">Bind your Indonesian bank account to withdraw IDR funds.</p>
             </div>
           </div>
-          <button class="btn btn-idr" @click="router.push({ path: '/hn/connect/add', query: { currency_code: 'IDR' } })">Submit New</button>
+          <button class="btn btn-idr" :disabled="isNavigating" @click="goToBankForm('IDR')">Submit New</button>
         </div>
 
         <!-- USD Card -->
@@ -36,7 +36,7 @@
               <p class="card-desc">Bind your USD account to withdraw USD funds.</p>
             </div>
           </div>
-          <button class="btn btn-usdt" @click="router.push({ path: '/hn/connect/add', query: { currency_code: 'USD' } })">Submit New</button>
+          <button class="btn btn-usdt" :disabled="isNavigating" @click="goToBankForm('USD')">Submit New</button>
         </div>
       </div>
     </section>
@@ -45,11 +45,50 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { bankAPI } from '@/services/api'
+import { ref } from 'vue'
 
 const router = useRouter()
+const isNavigating = ref(false)
 
 const goBack = () => {
   router.go(-1)
+}
+
+const normalizeBanksResponse = (data) => {
+  if (!data) return []
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data.results)) return data.results
+  return []
+}
+
+const goToBankForm = async (currencyCode) => {
+  if (isNavigating.value) return
+  isNavigating.value = true
+  try {
+    const [userResp, banksResp] = await Promise.allSettled([
+      bankAPI.getUserBanks(),
+      bankAPI.getBanks({ currency_code: String(currencyCode || '').trim().toUpperCase() })
+    ])
+    const userList = userResp.status === 'fulfilled' ? normalizeBanksResponse(userResp.value?.data) : []
+    const bankList = banksResp.status === 'fulfilled' ? normalizeBanksResponse(banksResp.value?.data) : []
+
+    const allowedIds = new Set(bankList.map((b) => String(b?.id ?? '')).filter(Boolean))
+    const filtered = allowedIds.size
+      ? userList.filter((ub) => allowedIds.has(String(ub?.bank ?? ub?.bank_id ?? '')))
+      : userList
+
+    const existing = filtered[0] || null
+    if (existing?.id) {
+      router.push({ path: '/hn/connect/edit', query: { currency_code: currencyCode, id: String(existing.id) } })
+      return
+    }
+    router.push({ path: '/hn/connect/add', query: { currency_code: currencyCode } })
+  } catch (_) {
+    router.push({ path: '/hn/connect/add', query: { currency_code: currencyCode } })
+  } finally {
+    isNavigating.value = false
+  }
 }
 </script>
 

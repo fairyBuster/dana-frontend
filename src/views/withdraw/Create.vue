@@ -94,6 +94,9 @@
             >
           </div>
         </div>
+        <p v-if="selectedChannel === 'USDT' && numericAmount > 0 && numericAmount < MIN_WITHDRAW_USDT" class="min-hint">
+          Minimum 13 USDT
+        </p>
       </div>
     </section>
 
@@ -138,7 +141,7 @@
           
           <ul class="instructions-list">
             <li> 🔹 The minimum withdrawal amount is USDT 3 for the IDR withdrawal channel.</li>
-            <li> 🔹 The minimum withdrawal amount is USDT 10 for the USDT withdrawal channel.</li>
+            <li> 🔹 The minimum withdrawal amount is USDT 13 for the USDT withdrawal channel.</li>
             <li> 🔹 All withdrawal transactions are processed automatically in real-time.</li>
             <li> 🔹 Please ensure that your withdrawal account or wallet information is correct before submitting a withdrawal request.</li>
             <li> 🔹 After completing the withdrawal request, refresh the page and check your account balance.</li>
@@ -200,8 +203,8 @@ import { computed, onActivated, onBeforeUnmount, onMounted, ref, watch } from 'v
 import { useRouter } from 'vue-router'
 import { authAPI, bankAPI, withdrawalAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
-import SuccessModal from '@/components/modals/SuccessModal.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import SuccessModal from '@/components/modals/AppSuccessModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import { appSettings, formatAppCurrency, getRateToIdr } from '@/utils/settings'
 
 const router = useRouter()
@@ -222,6 +225,7 @@ const selectedChannel = ref('IDR')
 let successRedirectTimeoutId = 0
 let hasRedirectedAfterSuccess = false
 const usdtToIdrRate = ref(getRateToIdr() || 16000)
+const currencyRateLoaded = ref(false)
 
 watch(
   () => appSettings.currency?.rate_to_idr,
@@ -233,9 +237,9 @@ watch(
 )
 
 const SERVICE_FEE_RATE = 0.10
-const MIN_WITHDRAW_IDR = 30000
 const MAX_WITHDRAW_IDR = 100000000
-const MIN_WITHDRAW_USDT = 10
+const MIN_WITHDRAW_USDT_FOR_IDR = 3
+const MIN_WITHDRAW_USDT = 13
 const MAX_WITHDRAW_USDT = 1000000
 
 const normalizeCurrencyCode = (value) => {
@@ -320,7 +324,19 @@ const usdtAmountNumber = computed(() => {
   if (selectedChannel.value === 'USDT') return amount
   const rate = Number(usdtToIdrRate.value || 0)
   if (!rate) return 0
-  return Number((amount / rate).toFixed(2))
+  const decimals = Number.isFinite(Number(appSettings.currency?.decimals)) ? Number(appSettings.currency.decimals) : 2
+  return Number((amount / rate).toFixed(Math.max(0, Math.min(8, decimals))))
+})
+
+const minWithdrawIdr = computed(() => {
+  const rate = Number(usdtToIdrRate.value || 0)
+  if (!rate) return 0
+  return Math.ceil(MIN_WITHDRAW_USDT_FOR_IDR * rate)
+})
+
+const usdAmountToSubmit = computed(() => {
+  if (selectedChannel.value === 'USDT') return Number(numericAmount.value || 0)
+  return Number(usdtAmountNumber.value || 0)
 })
 
 const displayUsdtAmount = computed(() => {
@@ -360,10 +376,13 @@ const isValidAmount = computed(() => {
     if (amount > withdrawableBalance.value) return false
     return true
   }
-  if (amount < MIN_WITHDRAW_IDR || amount > MAX_WITHDRAW_IDR) return false
   const rate = Number(usdtToIdrRate.value || 0)
   if (!rate) return false
+  const minIdr = minWithdrawIdr.value
+  if (minIdr > 0 && amount < minIdr) return false
+  if (amount > MAX_WITHDRAW_IDR) return false
   const amountUsd = amount / rate
+  if (amountUsd < MIN_WITHDRAW_USDT_FOR_IDR || amountUsd > MAX_WITHDRAW_USDT) return false
   if (amountUsd > withdrawableBalance.value) return false
   return true
 })
@@ -458,6 +477,14 @@ const parseNumber = (value) => {
 
 const normalizeWithdrawErrorMessage = (err) => {
   const data = err?.response?.data
+  const nfe = data?.non_field_errors
+  const nfeText = Array.isArray(nfe) ? String(nfe[0] || '') : String(nfe || '')
+  const nfeLower = nfeText.toLowerCase().replace(/\s+/g, ' ').trim()
+  const hasNoActiveProductId =
+    nfeLower.includes('setidaknya') && nfeLower.includes('produk') && nfeLower.includes('aktif')
+  const hasNoActiveProductEn =
+    nfeLower.includes('at least') && nfeLower.includes('active') && nfeLower.includes('product')
+  if (hasNoActiveProductId || hasNoActiveProductEn) return 'No active cloud yet'
   const raw =
     (typeof data === 'string' && data) ||
     data?.detail ||
@@ -509,9 +536,35 @@ const fetchDefaultService = async () => {
       first?.idr_per_usdt
     ]
     const picked = candidates.map((v) => parseNumber(v)).find((n) => n >= 1000 && n <= 1000000) || 0
-    if (picked) usdtToIdrRate.value = picked
+    if (!currencyRateLoaded.value && picked) usdtToIdrRate.value = picked
   } catch (_) {
     serviceId.value = null
+  }
+}
+
+const fetchCurrencySettings = async () => {
+  try {
+    const resp = await authAPI.getCurrencySettings()
+    const data = resp?.data
+    if (!data || typeof data !== 'object') return
+
+    appSettings.currency = {
+      currency_code: String(data.currency_code || appSettings.currency?.currency_code || 'USD'),
+      rate_to_idr: String(data.rate_to_idr || appSettings.currency?.rate_to_idr || '1'),
+      symbol: String(data.symbol || appSettings.currency?.symbol || ''),
+      symbol_position: String(data.symbol_position || appSettings.currency?.symbol_position || 'prefix'),
+      symbol_space: Boolean(data.symbol_space ?? appSettings.currency?.symbol_space),
+      thousand_sep: String(data.thousand_sep || appSettings.currency?.thousand_sep || ','),
+      decimal_sep: String(data.decimal_sep || appSettings.currency?.decimal_sep || '.'),
+      decimals: Number.isFinite(Number(data.decimals)) ? Number(data.decimals) : Number(appSettings.currency?.decimals || 2)
+    }
+
+    const next = getRateToIdr()
+    if (next > 0) {
+      usdtToIdrRate.value = next
+      currencyRateLoaded.value = true
+    }
+  } catch (_) {
   }
 }
 
@@ -552,6 +605,7 @@ const refreshWithdrawData = async () => {
   try {
     await Promise.all([
       fetchAccountInfo(),
+      fetchCurrencySettings(),
       fetchDefaultService(),
       fetchUserBanks()
     ])
@@ -584,11 +638,11 @@ const handleWithdraw = async () => {
     return
   }
 
-  const amount = numericAmount.value
+  const amountUsd = usdAmountToSubmit.value
   isSubmitting.value = true
   try {
     await withdrawalAPI.createWithdrawal({
-      amount: String(amount),
+      amount: String(amountUsd),
       bank_account_id: selectedUserBankId.value,
       pin: '',
       service_id: serviceId.value ?? 0
@@ -878,6 +932,13 @@ section {
 
 .amount-input[readonly] {
   color: #777777;
+}
+
+.min-hint {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d32f2f;
 }
 
 /* Summary */

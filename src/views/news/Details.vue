@@ -39,7 +39,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { newsAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import { resolveImageUrl } from '@/utils/imageCache'
 
 const router = useRouter()
@@ -58,7 +58,7 @@ const resolveNewsImageUrl = (rawUrl) => {
 const handleHeroError = (e) => {
   const el = e?.target
   if (!el) return
-  el.src = '/assets/images/2052_245.svg'
+  el.src = '/assets/image/Logo01.svg'
 }
 
 const goBack = () => {
@@ -219,7 +219,7 @@ h1, p {
 
 #section-news-detail .news-image-placeholder {
   width: 100%;
-  height: 138px;
+  height: 100%;
   background-color: #d9d9d9;
   border-radius: 2px;
   margin-bottom: 34px;
@@ -229,7 +229,7 @@ h1, p {
 #section-news-detail .news-hero-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Prevents stretching and keeps full image visible without cropping */
   display: block;
 }
 

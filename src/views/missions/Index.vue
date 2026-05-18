@@ -23,13 +23,13 @@
           <h2 class="hero-title">Complete, Claim, Repeat</h2>
           <p class="hero-subtitle">Complete the requirements and claim your reward.</p>
 
-          <div class="hero-progress-wrapper">
+          <!-- <div class="hero-progress-wrapper">
             <span class="progress-label">Your Progress</span>
             <div class="progress-track">
               <div class="progress-fill" :style="{ width: overallProgressPercent + '%' }"></div>
             </div>
             <span class="progress-value">{{ overallProgressText }}</span>
-          </div>
+          </div> -->
         </div>
       </div>
     </section>
@@ -119,8 +119,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI, missionAPI } from '@/services/api'
-import SuccessModal from '@/components/modals/SuccessModal.vue'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import SuccessModal from '@/components/modals/AppSuccessModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()

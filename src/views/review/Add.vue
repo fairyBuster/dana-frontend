@@ -57,8 +57,8 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { reviewAPI } from '@/services/api'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
-import SuccessModal from '@/components/modals/SuccessModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
+import SuccessModal from '@/components/modals/AppSuccessModal.vue'
 
 const router = useRouter()
 

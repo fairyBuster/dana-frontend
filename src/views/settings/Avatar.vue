@@ -65,8 +65,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '../../services/api'
-import SuccessModal from '../../components/modals/SuccessModal.vue'
-import ErrorModal from '../../components/modals/ErrorModal.vue'
+import SuccessModal from '../../components/modals/AppSuccessModal.vue'
+import ErrorModal from '../../components/modals/AppErrorModal.vue'
 
 const router = useRouter()
 

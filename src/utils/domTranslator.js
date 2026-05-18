@@ -1,8 +1,11 @@
 import axios from 'axios'
 
 const ENV_MT_API_URL = import.meta.env.VITE_MT_API_URL
+const isLocalhostUrl = (v) => /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(String(v || '').trim())
 const DEFAULT_MT_API_URL = import.meta.env.DEV ? '/mt' : 'https://translate.argosopentech.com'
-const MT_API_URL = ENV_MT_API_URL || DEFAULT_MT_API_URL
+const MT_API_URL = ENV_MT_API_URL ? (isLocalhostUrl(ENV_MT_API_URL) ? '/mt' : ENV_MT_API_URL) : DEFAULT_MT_API_URL
+const MT_TIMEOUT_MS = Number(import.meta.env.VITE_MT_TIMEOUT_MS) > 0 ? Number(import.meta.env.VITE_MT_TIMEOUT_MS) : 60_000
+const MT_BATCH_SIZE = Number(import.meta.env.VITE_MT_BATCH_SIZE) > 0 ? Number(import.meta.env.VITE_MT_BATCH_SIZE) : 10
 
 const MT_FALLBACKS = (!ENV_MT_API_URL && import.meta.env.DEV)
   ? ['https://libretranslate.de', 'https://translate.astian.org', 'https://translate.argosopentech.com']
@@ -72,7 +75,7 @@ export const doTranslate = async (texts, targetLang) => {
 
   if (toTranslate.length > 0) {
     const source = 'auto'
-    const batches = chunk(toTranslate, 20)
+    const batches = chunk(toTranslate, MT_BATCH_SIZE)
     let lastError = null
 
     const translateWithEndpoint = async (endpoint) => {
@@ -80,7 +83,7 @@ export const doTranslate = async (texts, targetLang) => {
       const translateOne = async (text) => {
         const body = buildTranslateBody([text], source, targetLang)
         const res = await axios.post(translateUrl, body, {
-          timeout: 15000,
+          timeout: MT_TIMEOUT_MS,
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
         const translated = res?.data?.translatedText
@@ -91,7 +94,7 @@ export const doTranslate = async (texts, targetLang) => {
         const q = batch.map(item => item.text)
         const body = buildTranslateBody(q, source, targetLang)
         const res = await axios.post(translateUrl, body, {
-          timeout: 15000,
+          timeout: MT_TIMEOUT_MS,
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
 

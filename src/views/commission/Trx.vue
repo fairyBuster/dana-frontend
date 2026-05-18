@@ -3,9 +3,9 @@
     <!-- Header -->
     <section id="section-header">
       <header class="app-header">
-        <a href="#/hn/user" class="back-btn" aria-label="Go to profile">
+        <button type="button" class="back-btn" aria-label="Go to profile" @click.stop="goToProfile">
           <img src="/assets/image/4252_299.svg" alt="Back">
-        </a>
+        </button>
         <button type="button" ref="menuAnchorEl" class="title-group" @click.stop="toggleRecordMenu">
           <h1>{{ currentRecordLabel }}</h1>
           <img
@@ -73,7 +73,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { transactionAPI } from '@/services/api'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
 import { formatAppCurrency } from '@/utils/settings'
 
@@ -140,8 +140,8 @@ const onDocumentClick = (e) => {
   closeRecordMenu()
 }
 
-const goBack = () => {
-  router.go(-1)
+const goToProfile = () => {
+  router.push('/hn/user')
 }
 
 const COMMISSION_TYPES = ['PURCHASE_COMMISSION', 'PROFIT_COMMISSION']
@@ -392,6 +392,7 @@ h1, p {
   height: 20px;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+  z-index: 2;
 }
 
 .back-btn img {

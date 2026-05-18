@@ -74,7 +74,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { depositAPI } from '@/services/api'
-import ErrorModal from '@/components/modals/ErrorModal.vue'
+import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
 import { formatAppCurrency } from '@/utils/settings'

@@ -6,27 +6,53 @@
     }
 
     @allowed {
-        remote_ip 38.180.190.6 51.79.173.81 38.180.190.104 127.0.0.1 ::1
+        remote_ip 15.235.197.134 139.99.103.108 15.235.142.16 127.0.0.1 ::1
     }
 
     @allowed_api {
-        remote_ip 38.180.190.6 51.79.173.81 38.180.190.104 127.0.0.1 ::1
+        remote_ip 15.235.197.134 139.99.103.108 15.235.142.16 127.0.0.1 ::1
         path /api/*
     }
 
     @allowed_media {
-        remote_ip 38.180.190.6 51.79.173.81 38.180.190.104 127.0.0.1 ::1
+        remote_ip 15.235.197.134 139.99.103.108 15.235.142.16 127.0.0.1 ::1
         path /media/*
     }
 
+    @allowed_mt {
+        remote_ip 15.235.197.134 139.99.103.108 15.235.142.16 127.0.0.1 ::1
+        path /mt/*
+    }
+
     handle @allowed_api {
-        reverse_proxy https://drashcloudsafer.online
+        reverse_proxy https://roguecdn.online
         encode gzip zstd
     }
 
     handle @allowed_media {
-        reverse_proxy https://drashcloudsafer.online
+        reverse_proxy https://roguecdn.online
         encode gzip zstd
+    }
+
+    handle @allowed_mt {
+        uri strip_prefix /mt
+        reverse_proxy host.docker.internal:5000 {
+            transport http {
+                read_timeout 60s
+                write_timeout 60s
+            }
+        }
+    }
+
+    @assets {
+        path /assets/*
+    }
+
+    handle @assets {
+        root * /srv
+        try_files {path} =404
+        encode gzip zstd
+        file_server
     }
 
     handle @allowed {

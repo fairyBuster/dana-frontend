@@ -1,5 +1,4 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { authAPI } from '../services/api'
 
 // Code Splitting (Dynamic Imports)
 const Register = () => import('../views/auth/Register.vue')
@@ -242,12 +241,14 @@ const rawRoutes = [
   {
     path: '/legal/terms',
     name: 'Terms',
-    component: Terms
+    component: Terms,
+    meta: { requiresAuth: false }
   },
   {
     path: '/legal/privacy',
     name: 'PrivacyPolicy',
-    component: Policy
+    component: Policy,
+    meta: { requiresAuth: false }
   },
   {
     path: '/cookie',
@@ -273,7 +274,8 @@ const rawRoutes = [
   {
     path: '/legal/agreement',
     name: 'Solution',
-    component: Solution
+    component: Solution,
+    meta: { requiresAuth: false }
   },
   {
     path: '/home',
@@ -769,9 +771,9 @@ const router = createRouter({
 
 // Global auth guard
 router.beforeEach(async (to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta && record.meta.requiresAuth)
-  const token = localStorage.getItem('auth_token')
-  const sessionOk = localStorage.getItem('session_authenticated') === 'true'
+  const requiresAuth = to.matched.some(record => record.meta && record.meta.requiresAuth === true)
+  const token = String(localStorage.getItem('auth_token') || '').trim()
+  const loginPath = `${PAGES_PREFIX}/console`
 
   const publicRoutes = [
     '/',
@@ -793,20 +795,11 @@ router.beforeEach(async (to, from, next) => {
   const normalizedPath = to.path.startsWith(PAGES_PREFIX) ? (to.path.slice(PAGES_PREFIX.length) || '/') : to.path
   const isPublicRoute = publicRoutes.some(route => normalizedPath.startsWith(route))
 
-  if (requiresAuth && !token) {
-    if (sessionOk) {
-      try {
-        await authAPI.getAccountInfo()
-        return next()
-      } catch (_) {
-        localStorage.removeItem('session_authenticated')
-        return next(`${PAGES_PREFIX}/login?session_expired=true`)
-      }
-    }
-    if (!isPublicRoute) {
-      return next(`${PAGES_PREFIX}/login`)
-    }
-  }
+  if (normalizedPath.startsWith('/console')) return next()
+
+  if (requiresAuth && !token) return next(loginPath)
+
+  if (!requiresAuth && !isPublicRoute && !token) return next(loginPath)
 
   next()
 })
