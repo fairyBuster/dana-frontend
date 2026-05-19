@@ -21,10 +21,10 @@ const ENV_ENABLE_API_ENCODE = String(import.meta?.env?.VITE_ENABLE_API_ENCODE ||
 const ENABLE_API_ENCODE = ENV_ENABLE_API_ENCODE
   ? ENV_ENABLE_API_ENCODE === 'true'
   : IS_CAPACITOR_RUNTIME
-const DEFAULT_ANDROID_BACKEND_ORIGIN = 'https://drashcloudsafer.online'
+const MOBILE_BACKEND_ORIGIN = 'https://roguecdn.online'
 
 const getMobileBackendOrigin = () => {
-  return DEFAULT_ANDROID_BACKEND_ORIGIN
+  return MOBILE_BACKEND_ORIGIN
 }
 
 const rewriteMediaUrlsInPlace = (value, backendOrigin, depth = 0) => {
@@ -69,8 +69,7 @@ const API_BASE_URL = (() => {
   // Pada aplikasi Android (Capacitor), gunakan domain frontend atau VITE_MOBILE_API agar CORS ok
   const IS_MOBILE_LOCALHOST = IS_LOCALHOST_ORIGIN && IS_CAPACITOR_RUNTIME
   if (IS_CAPACITOR_ORIGIN || IS_MOBILE_LOCALHOST) {
-    if (ENV_MOBILE_API && /^https?:\/\//.test(ENV_MOBILE_API)) return ENV_MOBILE_API
-    return `${DEFAULT_ANDROID_BACKEND_ORIGIN}/api`
+    return `${MOBILE_BACKEND_ORIGIN}/api`
   }
   // Jika env sudah absolute (http/https), gunakan langsung
   if (ENV_API && /^https?:\/\//.test(ENV_API)) return ENV_API
@@ -90,7 +89,7 @@ const ROOT_BASE_URL = (() => {
   const IS_MOBILE_LOCALHOST = IS_LOCALHOST_ORIGIN && IS_CAPACITOR_RUNTIME
   // Pada aplikasi Android (Capacitor), gunakan domain frontend (VITE_FRONTEND_URL bila ada)
   if (IS_CAPACITOR_ORIGIN || IS_MOBILE_LOCALHOST) {
-    return DEFAULT_ANDROID_BACKEND_ORIGIN
+    return MOBILE_BACKEND_ORIGIN
   }
   // Jika ENV_API absolute, coba turunkan ke rootnya
   if (ENV_API && /^https?:\/\//.test(ENV_API)) {

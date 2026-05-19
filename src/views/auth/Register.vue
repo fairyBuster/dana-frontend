@@ -4,7 +4,9 @@
     <section id="section-topbar">
       <div class="topbar-container">
         <div class="topbar-icons">
+          <a href="/assets/android/hue.apk" download>
           <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
+          </a>
           <div ref="langWrapEl" class="lang-wrap">
             <button
               ref="langBtnEl"
@@ -1016,6 +1018,7 @@ input {
 /* Top Bar Section */
 .topbar-container {
   padding: 20px 35px 10px;
+  
   display: flex;
   justify-content: flex-end;
   min-height: auto;

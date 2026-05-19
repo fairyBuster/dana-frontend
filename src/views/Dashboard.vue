@@ -13,7 +13,7 @@
         >
       </div>
       <div class="header-right">
-        <a href="/assets/android/trivex.apk" download="trivex.apk">
+         <a href="/assets/android/hue.apk" download>
           <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
         </a>
         <div ref="langWrapEl" class="lang-wrap">

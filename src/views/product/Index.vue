@@ -9,7 +9,9 @@
           <img src="/assets/image/4364_188.svg" alt="Show" class="icon-sm" @click="toggleAccount">
         </div>
         <div class="top-bar-right">
-          <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-md">
+           <a href="/assets/android/hue.apk" download>
+            <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
+          </a>
           <div ref="langWrapEl" class="lang-wrap">
             <button
               ref="langBtnEl"

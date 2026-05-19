@@ -3,7 +3,9 @@
     <!-- Header Section -->
     <section id="section-header">
       <div class="header-actions">
-        <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
+        <a href="/assets/android/hue.apk" download>
+          <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
+        </a>
         <div ref="langWrapEl" class="lang-wrap">
           <button
             ref="langBtnEl"
@@ -675,6 +677,7 @@ input {
 /* Header Section */
 #section-header {
   padding: 15px 5px 0;
+  margin-right: 15px;
   display: flex;
   justify-content: flex-end;
   gap: 2px;

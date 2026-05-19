@@ -24,7 +24,7 @@ const RUNTIME_ORIGIN = typeof window !== 'undefined' ? window.location.origin : 
 const FRONTEND_URL = ENV.VITE_FRONTEND_URL || RUNTIME_ORIGIN || 'https://www.ccvoltasein.com'
 const BACKEND_URL = ENV.VITE_BACKEND_URL || ''
 const API_URL = ENV.VITE_API_URL || ''
-const DEFAULT_ANDROID_BACKEND_ORIGIN = 'https://drashcloudsafer.online'
+const DEFAULT_ANDROID_BACKEND_ORIGIN = 'https://roguecdn.online'
 const IS_DEV = !!ENV.DEV
 const IS_PROD = !!ENV.PROD
 
