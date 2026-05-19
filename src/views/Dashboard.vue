@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" translate="no" data-no-translate="true">
     <!-- Header -->
     <header class="top-header">
       <div class="header-left">
@@ -16,7 +16,7 @@
          <a href="/assets/android/hue.apk" download>
           <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
         </a>
-        <div ref="langWrapEl" class="lang-wrap">
+        <div ref="langWrapEl" class="lang-wrap" translate="no" data-no-translate="true">
           <button
             ref="langBtnEl"
             type="button"

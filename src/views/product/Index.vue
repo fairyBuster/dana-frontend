@@ -399,7 +399,12 @@ onBeforeUnmount(() => {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
+.icon-download {
+  width: 23px;
+  height: 23px;
+  object-fit: contain;
+  cursor: pointer;
+}
 /* Header */
 .top-bar {
   display: flex;

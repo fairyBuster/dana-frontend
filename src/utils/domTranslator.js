@@ -13,8 +13,100 @@ const MT_FALLBACKS = (!ENV_MT_API_URL && import.meta.env.DEV)
 
 const MT_ENDPOINTS = Array.from(new Set([MT_API_URL, ...MT_FALLBACKS].filter(Boolean)))
 
-const getCache = () => JSON.parse(localStorage.getItem('translation_cache') || '{}')
-const saveCache = (cache) => localStorage.setItem('translation_cache', JSON.stringify(cache))
+const CACHE_KEY_V2 = 'translation_cache_v2'
+const CACHE_KEY_V1 = 'translation_cache'
+const CACHE_TTL_MS = 365 * 24 * 60 * 60 * 1000
+const CACHE_MAX_ENTRIES = 5000
+
+const safeParseJSON = (raw, fallback) => {
+  try {
+    const v = JSON.parse(raw || '')
+    return v && typeof v === 'object' ? v : fallback
+  } catch (_) {
+    return fallback
+  }
+}
+
+const normalizeCacheObj = (obj) => {
+  if (!obj || typeof obj !== 'object') return {}
+  const now = Date.now()
+  const out = {}
+  for (const k of Object.keys(obj)) {
+    const v = obj[k]
+    if (typeof v === 'string') {
+      out[k] = { v, e: now + CACHE_TTL_MS }
+      continue
+    }
+    if (v && typeof v === 'object') {
+      const text = typeof v.v === 'string' ? v.v : ''
+      const exp = Number(v.e || 0)
+      if (!text) continue
+      if (exp > 0 && exp <= now) continue
+      out[k] = { v: text, e: now + CACHE_TTL_MS }
+    }
+  }
+  return out
+}
+
+const loadPersistentCache = () => {
+  const v2 = safeParseJSON(localStorage.getItem(CACHE_KEY_V2), {})
+  const v1 = safeParseJSON(localStorage.getItem(CACHE_KEY_V1), {})
+  return { ...normalizeCacheObj(v1), ...normalizeCacheObj(v2) }
+}
+
+let persistentCache = {}
+try {
+  persistentCache = loadPersistentCache()
+} catch (_) {
+  persistentCache = {}
+}
+
+const prunePersistentCache = () => {
+  const now = Date.now()
+  const keys = Object.keys(persistentCache)
+  for (const k of keys) {
+    const ent = persistentCache[k]
+    const exp = Number(ent?.e || 0)
+    if (exp > 0 && exp <= now) delete persistentCache[k]
+  }
+  const remainingKeys = Object.keys(persistentCache)
+  if (remainingKeys.length <= CACHE_MAX_ENTRIES) return
+  remainingKeys.sort((a, b) => (Number(persistentCache[a]?.e || 0) - Number(persistentCache[b]?.e || 0)))
+  const removeCount = remainingKeys.length - CACHE_MAX_ENTRIES
+  for (let i = 0; i < removeCount; i += 1) {
+    delete persistentCache[remainingKeys[i]]
+  }
+}
+
+let saveTimer = null
+const scheduleSaveCache = () => {
+  if (saveTimer) return
+  saveTimer = setTimeout(() => {
+    saveTimer = null
+    try {
+      prunePersistentCache()
+      localStorage.setItem(CACHE_KEY_V2, JSON.stringify(persistentCache))
+    } catch (_) {}
+  }, 500)
+}
+
+const cacheKey = (target, text) => `${target}::${text}`
+const getCached = (target, text) => {
+  const key = cacheKey(target, text)
+  const ent = persistentCache[key]
+  if (!ent) return null
+  const exp = Number(ent.e || 0)
+  if (exp > 0 && exp <= Date.now()) {
+    delete persistentCache[key]
+    return null
+  }
+  return typeof ent.v === 'string' ? ent.v : null
+}
+const setCached = (target, text, translated) => {
+  const key = cacheKey(target, text)
+  persistentCache[key] = { v: translated, e: Date.now() + CACHE_TTL_MS }
+  scheduleSaveCache()
+}
 
 let translatedNodes = new WeakSet()
 const resetTranslatedNodes = () => { translatedNodes = new WeakSet() }
@@ -60,14 +152,13 @@ export const doTranslate = async (texts, targetLang) => {
   if (translationDisabled) return texts
   if (shouldSuspend()) return texts
 
-  const cache = getCache()
   const toTranslate = []
   const results = []
   
   texts.forEach((t, i) => {
-    const key = `${targetLang}_${t}`
-    if (cache[key]) {
-      results[i] = cache[key]
+    const cached = getCached(targetLang, t)
+    if (cached) {
+      results[i] = cached
     } else {
       toTranslate.push({ text: t, index: i })
     }
@@ -103,15 +194,15 @@ export const doTranslate = async (texts, targetLang) => {
           translated.forEach((trans, idx) => {
             const original = batch[idx]?.text
             if (!original) return
-            const key = `${targetLang}_${original}`
-            cache[key] = trans
+            if (typeof trans === 'string' && trans) {
+              setCached(targetLang, original, trans)
+            }
             results[batch[idx].index] = trans
           })
         } else if (typeof translated === 'string') {
           if (batch.length === 1) {
             const original = batch[0].text
-            const key = `${targetLang}_${original}`
-            cache[key] = translated
+            if (translated) setCached(targetLang, original, translated)
             results[batch[0].index] = translated
             continue
           }
@@ -125,8 +216,7 @@ export const doTranslate = async (texts, targetLang) => {
               trans = null
             }
             if (typeof trans === 'string' && trans) {
-              const key = `${targetLang}_${original}`
-              cache[key] = trans
+              setCached(targetLang, original, trans)
               results[item.index] = trans
             } else {
               results[item.index] = original
@@ -143,7 +233,6 @@ export const doTranslate = async (texts, targetLang) => {
     for (const endpoint of MT_ENDPOINTS) {
       try {
         await translateWithEndpoint(endpoint)
-        saveCache(cache)
         lastError = null
         break
       } catch (e) {

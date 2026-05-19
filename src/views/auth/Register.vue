@@ -327,11 +327,35 @@ const ui = ref({ ...EN_UI })
 const MT_BASE_URL = String(import.meta?.env?.VITE_MT_API_URL || '').replace(/\/$/, '')
 const MT_API_KEY = String(import.meta?.env?.VITE_MT_API_KEY || localStorage.getItem('mt_api_key') || '').trim()
 const mtUrl = (path) => (MT_BASE_URL ? `${MT_BASE_URL}${path}` : path)
-const mtCacheKey = (target) => `mt_cache_v1_${target}`
+const MT_CACHE_TTL_MS = 365 * 24 * 60 * 60 * 1000
+const MT_CACHE_MAX_ENTRIES = 500
+const mtCacheKey = (target) => `mt_cache_v2_${target}`
+const mtLegacyCacheKey = (target) => `mt_cache_v1_${target}`
 
 const getMtCache = (target) => {
   try {
-    return JSON.parse(localStorage.getItem(mtCacheKey(target)) || '{}') || {}
+    const now = Date.now()
+    const raw = localStorage.getItem(mtCacheKey(target))
+    const rawLegacy = localStorage.getItem(mtLegacyCacheKey(target))
+    const current = raw ? JSON.parse(raw) : {}
+    const legacy = rawLegacy ? JSON.parse(rawLegacy) : {}
+    const merged = { ...(legacy || {}), ...(current || {}) }
+    const out = {}
+    for (const k of Object.keys(merged || {})) {
+      const v = merged[k]
+      if (typeof v === 'string') {
+        out[k] = { v, e: now + MT_CACHE_TTL_MS }
+        continue
+      }
+      if (v && typeof v === 'object') {
+        const text = typeof v.v === 'string' ? v.v : ''
+        const exp = Number(v.e || 0)
+        if (!text) continue
+        if (exp > 0 && exp <= now) continue
+        out[k] = { v: text, e: now + MT_CACHE_TTL_MS }
+      }
+    }
+    return out
   } catch (_) {
     return {}
   }
@@ -339,6 +363,19 @@ const getMtCache = (target) => {
 
 const setMtCache = (target, cacheObj) => {
   try {
+    const now = Date.now()
+    const keys = Object.keys(cacheObj || {})
+    for (const k of keys) {
+      const ent = cacheObj[k]
+      const exp = Number(ent?.e || 0)
+      if (exp > 0 && exp <= now) delete cacheObj[k]
+    }
+    const remaining = Object.keys(cacheObj || {})
+    if (remaining.length > MT_CACHE_MAX_ENTRIES) {
+      remaining.sort((a, b) => (Number(cacheObj[a]?.e || 0) - Number(cacheObj[b]?.e || 0)))
+      const removeCount = remaining.length - MT_CACHE_MAX_ENTRIES
+      for (let i = 0; i < removeCount; i += 1) delete cacheObj[remaining[i]]
+    }
     localStorage.setItem(mtCacheKey(target), JSON.stringify(cacheObj))
   } catch (_) {}
 }
@@ -352,8 +389,12 @@ const mtTranslateMany = async (texts, target, source = 'en') => {
   const missing = []
 
   for (const t of unique) {
-    if (cache[t]) {
-      out.set(t, cache[t])
+    const ent = cache[t]
+    const exp = Number(ent?.e || 0)
+    const isExpired = exp > 0 && exp <= Date.now()
+    const cachedText = !isExpired && typeof ent?.v === 'string' ? ent.v : ''
+    if (cachedText) {
+      out.set(t, cachedText)
     } else {
       missing.push(t)
     }
@@ -381,10 +422,8 @@ const mtTranslateMany = async (texts, target, source = 'en') => {
 
   if (translatedList.length === 1 && missing.length > 1) {
     for (const t of missing) {
-      cache[t] = cache[t] || ''
-      out.set(t, cache[t])
+      out.set(t, '')
     }
-    setMtCache(target, cache)
     return out
   }
 
@@ -396,7 +435,7 @@ const mtTranslateMany = async (texts, target, source = 'en') => {
     const srcText = missing[i]
     const trText = String(translatedList[i] ?? '')
     if (trText) {
-      cache[srcText] = trText
+      cache[srcText] = { v: trText, e: Date.now() + MT_CACHE_TTL_MS }
       out.set(srcText, trText)
     }
   }
