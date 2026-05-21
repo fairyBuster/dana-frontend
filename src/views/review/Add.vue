@@ -1,29 +1,30 @@
 <template>
   <div class="app-container">
+    <!-- Header -->
     <section id="section-header">
-      <header class="header">
-        <button class="back-btn" @click="goBack" aria-label="Go back">
-          <img src="/assets/image/4252_325.svg" alt="Back Icon">
+      <header class="app-header">
+        <button class="back-btn" aria-label="Go back" @click="goBack">
+          <img src="/assets/images/67_323.svg" alt="">
         </button>
-        <h1 class="page-title">Ulasan</h1>
+        <h1 class="header-title">Sebarkan Ulasan Saya</h1>
       </header>
     </section>
 
-    <section id="section-alert">
-      <div class="alert-banner">
-        <img src="/assets/image/4269_485.svg" alt="Info Icon" class="alert-icon">
-        <p class="alert-text">Berikan ulasan terbaik Anda setelah melakukan penarikan dan dapatkan hadiah tambahan secara otomatis!</p>
-      </div>
-    </section>
-
+    <!-- Review Form -->
     <section id="section-review-form">
-      <div class="form-container">
-        <div class="text-input-area">
-          <label class="input-label" for="review-text">Tulis ulasan Anda</label>
-          <textarea id="review-text" v-model="reviewText" class="text-input" placeholder="Masukkan kalimat disini"></textarea>
+      <div class="review-card">
+        <!-- Text Input -->
+        <div class="input-box text-input-box">
+          <label class="input-label">Bagikan pengalaman Anda disini</label>
+          <textarea
+            v-model="reviewText"
+            class="text-input"
+            placeholder="Pengalaman saya...."
+          ></textarea>
         </div>
 
-        <div class="upload-area" @click="triggerUpload">
+        <!-- File Upload -->
+        <div class="input-box file-input-box" @click="triggerUpload">
           <input
             ref="fileInput"
             type="file"
@@ -33,22 +34,23 @@
           >
           <template v-if="previewUrl">
             <img :src="previewUrl" alt="Preview" class="preview-img">
-            <p class="upload-text">Ketuk untuk mengganti gambar<br>JPG/PNG Maks: 1MB</p>
           </template>
           <template v-else>
-            <img src="/assets/image/4252_247.svg" alt="Upload Photo Icon" class="upload-icon">
-            <p class="upload-text">Tambahkan tangkapan layar penarikan Anda untuk memberikan ulasan terbaik!<br>JPG/PNG Maks: 1MB</p>
+            <p class="instruction-text">
+              Tambahkan tangkapan layar penarikan Anda untuk memberikan ulasan terbaik!<br>
+              JPG/PNG Maks: 1MB
+            </p>
           </template>
         </div>
+
+        <!-- Submit -->
+        <button class="submit-btn" :disabled="!canSubmit || isSubmitting" @click="submitReview">
+          {{ isSubmitting ? 'Mengirim...' : 'Sebarkan Ulasan Saya' }}
+        </button>
       </div>
     </section>
-
-    <section id="section-submit-action">
-      <button class="submit-btn" :disabled="!canSubmit || isSubmitting" @click="submitReview">
-        {{ isSubmitting ? 'Mengirim...' : 'Kirim ulasan saya' }}
-      </button>
-    </section>
   </div>
+
   <ErrorModal v-model="showErrorModal" :message="errorMessage" />
   <SuccessModal v-model="showSuccessModal" :message="successMessage" @update:modelValue="onSuccessClose" />
 </template>
@@ -156,119 +158,94 @@ const onSuccessClose = () => {
 </script>
 
 <style scoped>
-.app-container {
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: #f8f8f8;
-  max-width: 412px;
-  margin-left: auto;
-  margin-right: auto;
-  min-height: 100vh;
-}
-
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.app-container {
+  font-family: 'Inter', sans-serif;
+  background-color: #fdfaf4;
+  max-width: 412px;
+  margin: 0 auto;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Header */
-#section-header {
-  background-color: #f8f8f8;
-}
-
-.header {
+.app-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 60px;
-  position: relative;
-  padding: 0 20px;
+  padding: 20px 24px;
+  gap: 16px;
+  height: 64px;
 }
 
 .back-btn {
-  position: absolute;
-  left: 10px;
-  background: none;
+  background: transparent;
   border: none;
-  padding: 10px;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 24px;
+  height: 24px;
 }
 
 .back-btn img {
-  width: 35px;
-  height: 35px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
-.page-title {
+.header-title {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000000;
   margin: 0;
-}
-
-/* Alert */
-#section-alert {
-  padding: 10px 13px;
-  background-color: #f8f8f8;
-}
-
-.alert-banner {
-  background: linear-gradient(90deg, #d1e9e2 0%, #d1e9e2 42.79%, #dfefe9 68.27%, #d6ebe5 82.69%, #e8f4ef 100%);
-  border-radius: 20px;
-  padding: 14px 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.alert-icon {
-  width: 23px;
-  height: 23px;
-  flex-shrink: 0;
-  object-fit: contain;
-}
-
-.alert-text {
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.4;
-  color: #000000;
-  font-weight: 400;
+  line-height: 1.2;
 }
 
 /* Review Form */
 #section-review-form {
-  padding: 10px 12px;
-  background-color: #f8f8f8;
+  padding: 19px 14px 40px 14px;
 }
 
-.form-container {
-  background-color: #eeeeee;
-  border-radius: 20px;
-  padding: 15px;
+.review-card {
+  background-color: #fcf3df;
+  border-radius: 2px;
+  padding: 16px 15px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
 }
 
-.text-input-area {
-  background-color: #f8f8f8;
-  border-radius: 20px;
-  padding: 15px;
+.input-box {
+  background-color: #fdfaf4;
+  border-radius: 2px;
+  width: 100%;
+}
+
+.text-input-box {
+  height: 106px;
+  padding: 11px 15px;
+  margin-bottom: 17px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-height: 106px;
 }
 
 .input-label {
-  color: #004d43;
-  font-size: 13px;
-  font-weight: 700;
+  color: #b1893b;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
 }
 
 .text-input {
@@ -276,88 +253,70 @@ const onSuccessClose = () => {
   border: none;
   resize: none;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   color: #000000;
   outline: none;
   flex-grow: 1;
   padding: 0;
-  min-height: 60px;
 }
 
 .text-input::placeholder {
   color: rgba(0, 0, 0, 0.5);
+  text-align: center;
 }
 
-.upload-area {
-  background-color: #f8f8f8;
-  border: 1px dashed rgba(0, 0, 0, 0.5);
-  border-radius: 20px;
-  padding: 30px 15px;
+.file-input-box {
+  height: 114px;
+  padding: 28px 15px;
+  margin-bottom: 11px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  min-height: 195px;
-  text-align: center;
+  align-items: flex-start;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
-.upload-area:hover {
-  background-color: #f0f0f0;
+.file-input-box:hover {
+  background-color: #f8f3e8;
 }
 
-.upload-icon {
-  width: 107px;
-  height: 100px;
-  opacity: 0.2;
-  object-fit: contain;
+.instruction-text {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
 }
 
 .preview-img {
   width: 100%;
-  max-height: 200px;
+  max-height: 100px;
   object-fit: contain;
-  border-radius: 12px;
-}
-
-.upload-text {
-  margin: 0;
-  font-size: 11px;
-  color: rgba(0, 0, 0, 0.5);
-  line-height: 1.5;
+  border-radius: 4px;
 }
 
 .hidden-file-input {
   display: none;
 }
 
-/* Submit Action */
-#section-submit-action {
-  padding: 20px 12px 40px 12px;
-  background-color: #f8f8f8;
-}
-
 .submit-btn {
-  width: 100%;
-  background-color: #004d43;
-  color: #ffffff;
+  background: linear-gradient(90deg, #f4c142 0%, #f8dd89 46.63%, #f5ca51 100%);
+  border-radius: 10px;
+  width: 212px;
+  height: 41px;
   border: none;
-  border-radius: 20px;
-  height: 50px;
-  font-size: 15px;
+  color: #ffffff;
+  font-size: 14px;
   font-weight: 700;
-  font-family: inherit;
   cursor: pointer;
+  align-self: flex-end;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s ease;
+  font-family: inherit;
 }
 
-.submit-btn:hover {
-  opacity: 0.9;
+.submit-btn:active {
+  opacity: 0.8;
 }
 
 .submit-btn:disabled {

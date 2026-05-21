@@ -4,170 +4,130 @@
 
     <!-- Header -->
     <section id="section-header">
-      <header class="header">
-        <a href="#/hn/home" class="back-btn" aria-label="Go to profile">
-          <img src="/assets/image/4244_332.svg" alt="">
+      <header class="app-header">
+        <div class="header-left">
+          <button class="icon-back-btn" aria-label="Go back" @click="goBack">
+            <img src="/assets/images/35_176.svg" alt="" class="icon-back">
+          </button>
+          <h1 class="header-title">Proteksi Saya</h1>
+        </div>
+        <a class="btn-explore" @click.prevent="goToExplore">
+          Jelajah produk lain
+          <img src="/assets/images/36_248.svg" alt="" class="icon-arrow-up">
         </a>
-        <h1 class="page-title">Mining Hall</h1>
-        <div class="header-spacer"></div>
       </header>
     </section>
 
-    <!-- Hero Section -->
+    <!-- Hero -->
     <section id="section-hero">
-      <div class="timer-section">
-        <p class="timer-label">Reset hall in</p>
-        <div class="timer-box">
-          <div class="time-display" translate="no" data-no-translate="true">{{ timerDisplay }}</div>
-          <div class="time-units">
-            <span>Hours</span>
-            <span>Minutes</span>
-            <span>Seconds</span>
+      <div class="hero-container">
+        <h2 class="hero-title">Proteksi Saya</h2>
+        <p class="hero-subtitle">Lihat detail aset yang Anda miliki.</p>
+
+        <div class="summary-card">
+          <div class="summary-info">
+            <p class="summary-label">Total Nilai Aset</p>
+            <p class="summary-value">{{ totalAssetDisplay }}</p>
           </div>
+          <img src="/assets/images/7210a5369195691e3aa63bd1fb6d8c025d233ccc.png" alt="" class="summary-image">
         </div>
-      </div>
-
-      <div class="main-image-container">
-        <img src="/assets/image/b806113c7073eba602582af3f484970faaea4125.png" alt="Mining Machine" class="main-image">
-      </div>
-
-      <div class="action-section">
-        <button class="claim-btn" :disabled="isLoading || isClaiming" @click="openClaimConfirm">Claim hall</button>
-       
       </div>
     </section>
 
-    <!-- Active Mining Section -->
-    <section id="section-active-mining">
-      <div class="banner-container">
-        <div class="banner-content">
-          <div class="banner-text">
-            <h2>My Active Mining</h2>
-            <p>View and manage your active mining hall</p>
-          </div>
-          <img
-            src="/assets/image/4244_348.svg"
-            alt="Toggle"
-            class="toggle-icon"
-            :class="{ rotated: !showActiveMining }"
-            @click="showActiveMining = !showActiveMining"
-          >
-        </div>
-      </div>
+    <!-- Asset List -->
+    <section id="section-asset-list">
+      <div class="asset-list-container">
+        <h3 class="section-title">Daftar Aset Saya</h3>
 
-      <div v-if="showActiveMining" class="products-list">
-        <div v-if="filteredInvestments.length === 0" class="empty-state">
-          <p class="empty-text">No active mining</p>
+        <div v-if="!isLoading && investments.length === 0" class="empty-state">
+          <p class="empty-text">Belum ada aset proteksi.</p>
         </div>
 
-        <div v-for="inv in filteredInvestments" :key="inv.id" class="product-card">
-          <h3 class="product-title">{{ inv.product_name || 'Product' }}</h3>
-          <div class="product-info-top">
-            <img :src="getProductImage(inv)" alt="Product" class="product-img" @error="onImageError">
-            <div class="stats-columns">
-              <div class="stats-col-left">
-                Cloud Computing<br>
-                Already running<br>
-                Daily hall<br>
-                Amount total
-              </div>
-              <div class="stats-col-right">
-                {{ formatCurrency(inv.daily_profit) }}<br>
-                {{ getDaysActive(inv) }}<br>
-                {{ formatCurrency(inv.total_claimed_profit) }}<br>
-                {{ formatCurrency(inv.total_amount || inv.product_price) }}
-              </div>
-            </div>
+        <div v-for="inv in investments" :key="inv.id" class="asset-card">
+          <div class="ac-image">
+            <img :src="getProductImage(inv)" alt="" class="ac-product-img" @error="onImageError">
           </div>
-          <hr class="card-divider">
-          <div class="status-columns">
-            <div class="status-col-left">
-              Time start<br>
-              Time end<br>
-        
-            </div>
-            <div class="status-col-right">
-              {{ formatDate(inv.created_at || inv.start_date) }}<br>
-              {{ formatDate(inv.expires_at) }}<br>
-        
-            </div>
+          <div class="ac-info">
+            <h4 class="product-name">{{ inv.product_name || 'Produk' }}</h4>
+            <p class="product-category">{{ inv.product_category || 'Proteksi' }}</p>
           </div>
-          <button class="action-btn" @click="openInvestmentDetails(inv)">Check Transaction History</button>
+          <div class="ac-top-right">
+            <div class="status-badge" :class="getStatusBadgeClass(inv)">
+              <img :src="getStatusIcon(inv)" alt="">
+              <span>{{ getStatusText(inv) }}</span>
+            </div>
+            <button class="icon-expand-btn" @click="openInvestmentDetails(inv)">
+              <img :src="getExpandIcon(inv)" alt="" class="icon-expand">
+            </button>
+          </div>
+          <div class="ac-daily">
+            Nilai aset harian: <strong>{{ formatCurrency(inv.daily_profit) }}</strong>
+          </div>
+          <div class="ac-period">
+            <img :src="getClockIcon(inv)" alt="" class="period-clock">
+            <span>Periode: {{ getDurationDays(inv) }} hari</span>
+          </div>
+          <div class="ac-desc">{{ inv.product_description || 'Proteksi aset' }}</div>
+          <div class="ac-dates">
+            Mulai kontrak: {{ formatDate(inv.created_at || inv.start_date) }}<br>
+            Kontrak Selesai: {{ formatDate(inv.expires_at) }}
+          </div>
         </div>
       </div>
+    </section>
+
+    <!-- Footer -->
+    <section id="section-footer">
+      <div class="footer-badges">
+        <div class="summary-badge badge-funds-active">
+          <img src="/assets/images/552b9c2c92e8ecd90fce0a7240313cf5e1b429da.png" alt="">
+          <span>Dana aktif: {{ activeCount }}</span>
+        </div>
+        <div class="summary-badge badge-funds-completed">
+          <img src="/assets/images/4eb13057902734a11ebe69cff84520cbba91cfbf.png" alt="">
+          <span>Dana selesai: {{ completedCount }}</span>
+        </div>
+      </div>
+      <img src="/assets/images/4eb13057902734a11ebe69cff84520cbba91cfbf.png" alt="" class="bg-shield-watermark">
     </section>
   </div>
+
   <FooterBar />
-
-  <Teleport to="body">
-    <div v-if="claimConfirmOpen" class="claim-confirm-overlay" @click.self="closeClaimConfirm">
-      <div class="claim-confirm-card" role="dialog" aria-modal="true" @click.stop>
-        <div class="claim-confirm-top">
-          <img
-            src="/assets/image/b806113c7073eba602582af3f484970faaea4125.png"
-            alt=""
-            class="claim-confirm-image"
-          >
-          <p class="claim-confirm-text">
-            You are about to claim your output. Next claim will be available after reset.
-          </p>
-        </div>
-        <div class="claim-confirm-amount">{{ claimAmountDisplay }}</div>
-        <div class="claim-confirm-actions">
-          <button type="button" class="claim-confirm-btn claim-confirm-btn--primary" :disabled="isClaiming" @click="confirmClaim">
-            {{ isClaiming ? 'Processing...' : 'Claim' }}
-          </button>
-          <button type="button" class="claim-confirm-btn claim-confirm-btn--secondary" :disabled="isClaiming" @click="goHomeFromClaim">Back home</button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
-
-  <SuccessModal v-model="claimSuccessOpen" message="Success" />
-  <ErrorModal v-model="claimErrorOpen" :message="claimErrorMessage" />
+  <ErrorModal v-model="showErrorModal" :message="errorMessage" />
 </template>
 
 <script setup>
-import { ref, computed, onActivated, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onActivated, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { resolveImageUrl } from '@/utils/imageCache'
 import FooterBar from '@/components/partials/AppFooter.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
-import SuccessModal from '@/components/modals/AppSuccessModal.vue'
 import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import { investmentAPI } from '@/services/api'
-import { appSettings, formatAppCurrency } from '@/utils/settings'
+import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 
 const isLoading = ref(false)
-const isClaiming = ref(false)
 const investments = ref([])
-const showActiveMining = ref(true)
-const claimConfirmOpen = ref(false)
-const claimSuccessOpen = ref(false)
-const claimErrorOpen = ref(false)
-const claimErrorMessage = ref('')
-const claimableProfit = ref({ count: 0, total_claimable_amount: '0', items: [] })
-const isClaimableLoading = ref(false)
+const showErrorModal = ref(false)
+const errorMessage = ref('')
 
-// Timer logic
-const now = ref(Date.now())
-let timerInterval = null
+const goBack = () => {
+  try {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+  } catch (_) {}
+  router.push('/hn/home')
+}
 
-const timerDisplay = computed(() => {
-  const nowMs = now.value
-  const endOfDay = new Date(nowMs)
-  endOfDay.setHours(23, 59, 59, 999)
-  const diff = Math.max(0, endOfDay.getTime() - nowMs)
-  const hours = Math.floor(diff / 3600000)
-  const minutes = Math.floor((diff % 3600000) / 60000)
-  const seconds = Math.floor((diff % 60000) / 1000)
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${pad(hours)} : ${pad(minutes)} : ${pad(seconds)}`
-})
+const goToExplore = () => {
+  router.push('/hn/hall/taskhall')
+}
 
-const normalizeInvestmentsResponse = (data) => {
+const normalizeResponse = (data) => {
   if (!data) return { results: [], next: null }
   if (Array.isArray(data)) return { results: data, next: null }
   if (Array.isArray(data.results)) return { results: data.results, next: data.next || null }
@@ -177,46 +137,58 @@ const normalizeInvestmentsResponse = (data) => {
 const fetchInvestments = async () => {
   if (isLoading.value) return
   isLoading.value = true
+  showErrorModal.value = false
   try {
     let page = 1
     const all = []
     let hasNext = true
-
     while (hasNext && page <= 50) {
-      const resp = await investmentAPI.getInvestments({
-        status: 'ACTIVE',
-        page
-      })
-      const parsed = normalizeInvestmentsResponse(resp?.data)
+      const resp = await investmentAPI.getInvestments({ page })
+      const parsed = normalizeResponse(resp?.data)
       all.push(...parsed.results)
       hasNext = Boolean(parsed.next) && parsed.results.length > 0
       page += 1
     }
-
     investments.value = all
-  } catch (_) {
+  } catch (err) {
     investments.value = []
+    errorMessage.value = extractErrorMessage(err)
+    showErrorModal.value = true
   } finally {
     isLoading.value = false
   }
 }
 
-const filteredInvestments = computed(() => {
+const extractErrorMessage = (err) => {
+  const data = err?.response?.data
+  if (!data) return err?.message || 'Gagal memuat data'
+  if (typeof data === 'string') return data
+  if (data.detail) return String(data.detail)
+  if (data.message) return String(data.message)
+  return 'Gagal memuat data'
+}
+
+const activeCount = computed(() => {
   return investments.value.filter((inv) => {
-    const status = String(inv?.status || '').toUpperCase()
-    return status === 'ACTIVE'
-  })
+    const s = String(inv?.status || '').toUpperCase()
+    return s === 'ACTIVE'
+  }).length
+})
+
+const completedCount = computed(() => {
+  return investments.value.filter((inv) => {
+    const s = String(inv?.status || '').toUpperCase()
+    return s === 'COMPLETED' || s === 'EXPIRED'
+  }).length
 })
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return 0
   const raw = String(value).trim()
   if (!raw) return 0
-  let s = raw.replace(/\s+/g, '')
-  s = s.replace(/[^0-9,.-]/g, '')
+  let s = raw.replace(/\s+/g, '').replace(/[^0-9,.-]/g, '')
   const dots = (s.match(/\./g) || []).length
   const commas = (s.match(/,/g) || []).length
-
   if (dots > 0 && commas > 0) {
     const lastDot = s.lastIndexOf('.')
     const lastComma = s.lastIndexOf(',')
@@ -224,67 +196,78 @@ const parseNumber = (value) => {
     const groupSep = decimalSep === '.' ? ',' : '.'
     s = s.split(groupSep).join('')
     if (decimalSep === ',') s = s.replace(',', '.')
-  } else if (dots > 1 && commas === 0) {
+  } else if (dots > 1) {
     s = s.split('.').join('')
-  } else if (commas > 1 && dots === 0) {
+  } else if (commas > 1) {
     s = s.split(',').join('')
   } else if (commas === 1 && dots === 0) {
     const idx = s.indexOf(',')
     const digitsAfter = s.length - idx - 1
     if (digitsAfter === 3) s = s.replace(',', '')
     else s = s.replace(',', '.')
-  } else if (dots === 1 && commas === 0) {
-    const idx = s.indexOf('.')
-    const digitsAfter = s.length - idx - 1
-    if (digitsAfter === 3) s = s.replace('.', '')
   }
-
   const n = Number(s)
   return Number.isFinite(n) ? n : 0
 }
 
-const getFractionDigitsFromRaw = (value) => {
-  const raw = String(value ?? '').trim()
-  const lastSep = Math.max(raw.lastIndexOf('.'), raw.lastIndexOf(','))
-  if (lastSep <= -1) return 0
-  const frac = raw.slice(lastSep + 1).replace(/[^0-9]/g, '')
-  return Math.min(8, frac.length || 0)
-}
-
-const claimAmount = computed(() => {
-  return parseNumber(claimableProfit.value?.total_claimable_amount)
-})
-
-const claimAmountDecimals = computed(() => {
-  return getFractionDigitsFromRaw(claimableProfit.value?.total_claimable_amount)
-})
-
-const getAppDefaultDecimals = () => {
-  const d = Number(appSettings?.currency?.decimals)
-  return Number.isFinite(d) ? Math.max(0, d) : 2
-}
-
-const formatCurrency = (value, decimals = null) => {
+const formatCurrency = (value) => {
   const num = parseNumber(value)
-  let d = decimals
-  if (d === null || d === undefined) {
-    const fromRaw = getFractionDigitsFromRaw(value)
-    d = fromRaw > 0 ? fromRaw : getAppDefaultDecimals()
-  }
-  return formatAppCurrency(num, { decimals: d })
+  return formatAppCurrency(num)
 }
 
-const claimAmountDisplay = computed(() => formatCurrency(claimAmount.value, claimAmountDecimals.value))
+const totalAssetDisplay = computed(() => {
+  const total = investments.value.reduce((sum, inv) => {
+    return sum + parseNumber(inv.total_amount || inv.product_price || 0)
+  }, 0)
+  return formatAppCurrency(total)
+})
 
-const formatDate = (dateString) => {
-  if (!dateString) return '-'
-  const d = new Date(dateString)
+const pad2 = (n) => String(n).padStart(2, '0')
+
+const formatDate = (value) => {
+  if (!value) return '-'
+  const d = new Date(value)
   if (Number.isNaN(d.getTime())) return '-'
-  const pad2 = (n) => String(n).padStart(2, '0')
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}, ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
 }
 
-const fallbackImage = '/assets/image/ec8f4f750f7870953cc451116089e362db722833.png'
+const getDurationDays = (inv) => {
+  return Number(inv?.duration_days || 0)
+}
+
+const isActive = (inv) => {
+  const s = String(inv?.status || '').toUpperCase()
+  return s === 'ACTIVE'
+}
+
+const getStatusBadgeClass = (inv) => {
+  return isActive(inv) ? 'badge-active' : 'badge-completed'
+}
+
+const getStatusText = (inv) => {
+  return isActive(inv) ? 'Berjalan' : 'Selesai'
+}
+
+const getStatusIcon = (inv) => {
+  return isActive(inv)
+    ? '/assets/images/36_208.svg'
+    : '/assets/images/36_244.svg'
+}
+
+const getExpandIcon = (inv) => {
+  return isActive(inv)
+    ? '/assets/images/36_200.svg'
+    : '/assets/images/36_229.svg'
+}
+
+const getClockIcon = (inv) => {
+  return isActive(inv)
+    ? '/assets/images/36_212.svg'
+    : '/assets/images/36_237.svg'
+}
+
+const fallbackImage = '/assets/images/7210a5369195691e3aa63bd1fb6d8c025d233ccc.png'
 
 const getProductImage = (inv) => {
   let raw = String(inv?.product_image || '').trim()
@@ -302,7 +285,7 @@ const getProductImage = (inv) => {
 
 const onImageError = (e) => {
   const el = e?.target
-  if (el && el.src && !String(el.src).includes('ec8f4f750f7870953cc451116089e362db722833')) {
+  if (el && el.src && !el.src.includes('7210a5369195691e3aa63bd1fb6d8c025d233ccc')) {
     el.src = fallbackImage
   }
 }
@@ -312,154 +295,12 @@ const openInvestmentDetails = (inv) => {
   router.push('/hn/hall/outputhall/history')
 }
 
-const getDaysActive = (inv) => {
-  const remaining = Number(inv?.remaining_days ?? 0)
-  const duration = Number(inv?.duration_days ?? 0)
-  if (Number.isFinite(duration) && Number.isFinite(remaining) && duration >= remaining) {
-    return duration - remaining
-  }
-  return 0
-}
-
-const openClaimConfirm = () => {
-  if (isClaiming.value) return
-  ;(async () => {
-    try {
-      await fetchClaimableProfit()
-      if (claimAmount.value <= 0) {
-        claimErrorMessage.value = 'Belum saatnya'
-        claimErrorOpen.value = true
-        return
-      }
-      claimConfirmOpen.value = true
-    } catch (err) {
-      claimErrorMessage.value = extractErrorMessage(err)
-      claimErrorOpen.value = true
-    }
-  })()
-}
-
-const closeClaimConfirm = () => {
-  if (isClaiming.value) return
-  claimConfirmOpen.value = false
-}
-
-const extractErrorMessage = (err) => {
-  const data = err?.response?.data
-  if (!data) return String(err?.message || '').trim() || 'Claim failed'
-  if (typeof data === 'string') return data
-  if (data?.detail) return String(data.detail)
-  if (data?.message) return String(data.message)
-  if (data?.error) return String(data.error)
-  const firstKey = Object.keys(data || {})[0]
-  const firstVal = firstKey ? data[firstKey] : null
-  if (Array.isArray(firstVal) && firstVal.length) return String(firstVal[0])
-  if (firstVal !== null && firstVal !== undefined) return String(firstVal)
-  return 'Claim failed'
-}
-
-const toNumberLoose = (value) => {
-  if (value === null || value === undefined || value === '') return 0
-  const n = Number(String(value).replace(/[^0-9.-]/g, ''))
-  return Number.isFinite(n) ? n : 0
-}
-
-const fetchClaimableProfit = async () => {
-  if (isClaimableLoading.value) return
-  isClaimableLoading.value = true
-  try {
-    const resp = await investmentAPI.getClaimableProfit()
-    const data = resp?.data || {}
-    claimableProfit.value = {
-      count: Number(data?.count ?? 0) || 0,
-      total_claimable_amount: String(data?.total_claimable_amount ?? '0'),
-      items: Array.isArray(data?.items) ? data.items : []
-    }
-  } catch (_) {
-    claimableProfit.value = { count: 0, total_claimable_amount: '0', items: [] }
-  } finally {
-    isClaimableLoading.value = false
-  }
-}
-
-const confirmClaim = async () => {
-  if (isClaiming.value) return
-  claimErrorOpen.value = false
-  claimErrorMessage.value = ''
-
-  isClaiming.value = true
-  try {
-    await fetchClaimableProfit()
-    if (claimAmount.value <= 0) {
-      claimConfirmOpen.value = false
-      claimErrorMessage.value = 'Belum saatnya'
-      claimErrorOpen.value = true
-      return
-    }
-
-    const resp = await investmentAPI.claimProfitAll()
-    const data = resp?.data || {}
-    const claimedCount =
-      toNumberLoose(data?.claimed_count) ||
-      toNumberLoose(data?.count) ||
-      (Array.isArray(data?.claimed) ? data.claimed.length : 0) ||
-      (Array.isArray(data?.items) ? data.items.length : 0)
-    const totalClaimedAmount =
-      toNumberLoose(data?.total_claimed_amount) ||
-      toNumberLoose(data?.total_amount) ||
-      toNumberLoose(data?.total_claimed) ||
-      toNumberLoose(data?.amount)
-    const nothingClaimed = claimedCount <= 0 || totalClaimedAmount <= 0
-
-    try {
-      await fetchInvestments()
-      await fetchClaimableProfit()
-    } catch (_) {}
-    claimConfirmOpen.value = false
-
-    if (nothingClaimed) {
-      claimErrorMessage.value = 'Gagal'
-      claimErrorOpen.value = true
-      return
-    }
-
-    claimSuccessOpen.value = true
-    setTimeout(() => {
-      router.push('/hn/hall/outputhall/history')
-    }, 800)
-  } catch (err) {
-    claimConfirmOpen.value = false
-    claimErrorMessage.value = extractErrorMessage(err)
-    claimErrorOpen.value = true
-  } finally {
-    isClaiming.value = false
-  }
-}
-
-const goHomeFromClaim = () => {
-  if (isClaiming.value) return
-  claimConfirmOpen.value = false
-  router.push('/hn/home')
-}
-
 onMounted(() => {
   fetchInvestments()
-  fetchClaimableProfit()
-  timerInterval = setInterval(() => {
-    now.value = Date.now()
-  }, 1000)
 })
 
 onActivated(() => {
   fetchInvestments()
-  fetchClaimableProfit()
-})
-
-onBeforeUnmount(() => {
-  if (timerInterval) {
-    clearInterval(timerInterval)
-    timerInterval = null
-  }
 })
 </script>
 
@@ -474,323 +315,341 @@ onBeforeUnmount(() => {
   padding: 0;
   max-width: 412px;
   min-height: 100vh;
-  background-image: url('/assets/image/d8005907735c42c2d39c64e885e050497bc21e69.png');
-  background-size: cover;
-  background-position: top center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-color: #eef2f9;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  background-color: #fdfaf4;
+  position: relative;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
   padding-bottom: 80px;
 }
 
-/* Header */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  position: relative;
-  z-index: 2;
+p, h1, h2, h3, h4 {
+  margin: 0;
 }
 
-.back-btn {
+/* Header */
+#section-header {
+  padding: 24px 22px 16px;
+  position: relative;
+  z-index: 10;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-back-btn {
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
-  position: relative;
-  z-index: 3;
-  touch-action: manipulation;
+  justify-content: center;
 }
 
-.back-btn img {
-  width: 20px;
-  height: 20px;
+.icon-back {
+  width: 24px;
+  height: 24px;
 }
 
-.page-title {
-  font-size: 18px;
+.header-title {
+  font-size: 16px;
   font-weight: 600;
   color: #000000;
-  margin: 0;
-  flex: 1;
-  text-align: center;
-  margin-left: -20px;
 }
 
-.header-spacer {
-  width: 20px;
-}
-
-/* Hero Section */
-.timer-section {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.timer-label {
-  color: #555555;
+.btn-explore {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(90deg, #c8971d 0%, #d49a0d 47%, #dba30a 100%);
+  padding: 4px 8px 4px 12px;
+  border-radius: 12px;
+  color: #ffffff;
   font-size: 12px;
-  margin: 0 0 8px 0;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  text-decoration: none;
 }
 
-.timer-box {
-  background-color: #f3f6fc;
-  border: 1px solid #ffffff;
-  border-radius: 5px;
-  width: 191px;
-  height: 64px;
-  margin: 0 auto;
+.icon-arrow-up {
+  width: 16px;
+  height: 16px;
+}
+
+/* Hero */
+#section-hero {
+  padding: 8px 22px 24px;
+  position: relative;
+  z-index: 10;
+}
+
+.hero-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.hero-subtitle {
+  font-size: 14px;
+  color: #635f5f;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: linear-gradient(90deg, #f2c040 0%, #f8dc87 47%, #f5ca4f 100%);
+  border-radius: 10px;
+  padding: 20px;
+  height: 102px;
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.time-display {
-  color: #144cdf;
+.summary-label {
+  color: #ffffff;
+  font-size: 12px;
+  margin-bottom: 4px;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.summary-value {
+  color: #ffffff;
   font-size: 22px;
   font-weight: 700;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum";
-  letter-spacing: 1px;
-  line-height: 1;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.summary-image {
+  position: absolute;
+  right: 5px;
+  top: -35px;
+  width: 142px;
+  height: auto;
+  max-height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+/* Asset List */
+#section-asset-list {
+  padding: 0 22px 24px;
+  position: relative;
+  z-index: 10;
+  flex: 1;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 16px;
+}
+
+.asset-card {
+  display: grid;
+  grid-template-columns: 57px 1fr auto;
+  gap: 10px 12px;
+  padding: 14px;
+  background-color: #fefffe;
+  border-radius: 10px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.ac-image {
+  grid-column: 1;
+  grid-row: 1;
+  width: 57px;
+  height: 70px;
+  background-color: #fef7e3;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ac-product-img {
   width: 100%;
-  white-space: nowrap;
-  text-align: center;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.ac-info {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 2px;
+}
+
+.product-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
   margin-bottom: 2px;
 }
 
-.time-units {
+.product-category {
+  font-size: 11px;
+  color: #818181;
+}
+
+.ac-top-right {
+  grid-column: 3;
+  grid-row: 1;
   display: flex;
-  justify-content: space-between;
-  width: 110px;
-  color: #1b46f5;
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.main-image-container {
-  display: flex;
-  justify-content: center;
-  margin: 30px 0;
-}
-
-.main-image {
-  width: 295px;
-  height: auto;
-  filter: drop-shadow(0px 4px 4px rgba(97, 157, 236, 0.3));
-  animation: float-y 3s ease-in-out infinite;
-  will-change: transform;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .main-image {
-    animation: none;
-  }
-}
-
-@keyframes float-y {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
-}
-
-.action-section {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.claim-btn {
-  background: linear-gradient(90deg, #4085e1 0%, #2757b7 100%);
-  border-radius: 30px;
-  width: 242px;
-  padding: 15px 0;
-  border: none;
-  color: #ffffff;
-  font-size: 19px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.25);
-  transition: transform 0.2s ease;
-  font-family: inherit;
-}
-
-.claim-btn:active {
-  transform: scale(0.98);
-}
-
-.claim-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.eligible-text {
-  color: #ffffff;
-  font-size: 12px;
-  margin-top: 15px;
-  opacity: 0.9;
-}
-
-/* Active Mining Section */
-#section-active-mining {
-  padding: 10px;
-  background: transparent;
-}
-
-.banner-container {
-  position: relative;
-  width: 100%;
-  height: 88px;
-  border-radius: 20px;
-  overflow: hidden;
-  margin-bottom: 20px;
-  background-image: url('/assets/image/343e34909cc9a17c2c445000677852ce7a6419d3.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.banner-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  padding: 0px;
-  position: relative;
-  z-index: 1;
-}
-
-.banner-left-img {
-  width: 180px;
-  height: 62px;
-  object-fit: contain;
-  flex: 0 0 auto;
-  z-index: 1;
-}
-
-.banner-text {
-  text-align: center;
-  min-width: 0;
-}
-
-.banner-text h2 {
-  color: #144cdf;
-  text-align: left;
-  padding-left: 20px;
-  font-size: 14px;
-  font-weight: 700;
-  margin: 0 0 4px 0;
-}
-
-.banner-text p {
-  color: #000000;
-  text-align: center;
-  font-size: 10px;
-  padding-left: 20px;
-  margin: 0;
-}
-
-.toggle-icon {
-  position: absolute;
-  right: 15px;
-  width: 34px;
-  height: 34px;
-  transform: rotate(90deg);
-  transition: transform 0.15s ease;
-  cursor: pointer;
-  flex: 0 0 auto;
-}
-
-.toggle-icon.rotated {
-  transform: rotate(180deg);
-}
-
-.products-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.product-card {
-  background-color: #f9f9fc;
-  border-radius: 10px;
-  padding: 15px 20px;
-  box-shadow: 1px 1px 10px 0px rgba(0, 0, 0, 0.05);
-}
-
-.product-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0 0 12px 0;
-}
-
-.product-info-top {
-  display: flex;
-  gap: 15px;
   align-items: flex-start;
+  gap: 8px;
+  padding-top: 2px;
 }
 
-.product-img {
-  width: 109px;
-  height: 62px;
-  object-fit: fill;
-  border-radius: 4px;
-}
-
-.stats-columns {
+.status-badge {
   display: flex;
-  justify-content: space-between;
-  flex: 1;
-  font-size: 12px;
-  line-height: 1.6;
-  color: #000000;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 500;
 }
 
-.stats-col-right {
-  text-align: right;
-  font-weight: 600;
+.status-badge img {
+  width: 10px;
+  height: 10px;
 }
 
-.card-divider {
+.badge-active {
+  background-color: #e9f2fe;
+  color: #0f32be;
+}
+
+.badge-completed {
+  background-color: #d9d9d9;
+  color: #575757;
+}
+
+.icon-expand-btn {
+  background: none;
   border: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  margin: 15px 0;
-}
-
-.status-columns {
+  padding: 0;
+  cursor: pointer;
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+}
+
+.icon-expand {
+  width: 18px;
+  height: 18px;
+}
+
+.ac-daily {
+  grid-column: 2;
+  grid-row: 2;
   font-size: 12px;
-  line-height: 1.6;
   color: #000000;
+  align-self: center;
 }
 
-.status-col-right {
+.ac-period {
+  grid-column: 3;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 11px;
+  color: #818181;
+}
+
+.period-clock {
+  width: 10px;
+  height: 10px;
+}
+
+.ac-desc {
+  grid-column: 1 / span 2;
+  grid-row: 3;
+  font-size: 11px;
+  color: #818181;
+  align-self: end;
+  margin-top: 4px;
+}
+
+.ac-dates {
+  grid-column: 2 / span 2;
+  grid-row: 3;
+  font-size: 10px;
+  color: #000000;
   text-align: right;
-  font-size: 12px;
-  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 4px;
 }
 
-.action-btn {
-  background-color: #1b46f5;
-  color: #ffffff;
-  border: none;
-  border-radius: 20px;
-  padding: 10px 16px;
+/* Footer */
+#section-footer {
+  padding: 0 22px 40px;
+  position: relative;
+}
+
+.footer-badges {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  z-index: 10;
+}
+
+.summary-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
   font-size: 12px;
   font-weight: 500;
-  cursor: pointer;
-  display: block;
-  margin: 16px 0 0 auto;
-  font-family: 'Inter', sans-serif;
+}
+
+.summary-badge img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.badge-funds-active {
+  background-color: #e1ebe5;
+  color: #008332;
+}
+
+.badge-funds-completed {
+  background-color: #e6e6e6;
+  color: #212121;
+}
+
+.bg-shield-watermark {
+  position: absolute;
+  bottom: -30px;
+  right: -60px;
+  width: 256px;
+  height: 256px;
+  opacity: 0.4;
+  z-index: 0;
+  pointer-events: none;
 }
 
 /* Empty State */
@@ -800,93 +659,7 @@ onBeforeUnmount(() => {
 }
 
 .empty-text {
-  color: rgba(0, 0, 0, 0.5);
+  color: #7d7d7d;
   font-size: 14px;
-}
-
-.claim-confirm-overlay {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.25);
-  z-index: 10000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
-}
-
-.claim-confirm-card {
-  width: 100%;
-  max-width: 360px;
-  background: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
-  padding: 16px 16px 18px;
-}
-
-.claim-confirm-top {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 14px;
-}
-
-.claim-confirm-image {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.claim-confirm-text {
-  margin: 0;
-  color: #000000;
-  font-size: 14px;
-  line-height: 1.35;
-}
-
-.claim-confirm-amount {
-  width: 100%;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  height: 54px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  font-weight: 700;
-  color: #000000;
-  margin-bottom: 14px;
-}
-
-.claim-confirm-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.claim-confirm-btn {
-  flex: 1;
-  height: 44px;
-  border-radius: 22px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  font-family: inherit;
-}
-
-.claim-confirm-btn--primary {
-  background: linear-gradient(180deg, #377fe7 0%, #2a66c6 100%);
-  color: #ffffff;
-  box-shadow: 0 6px 16px rgba(28, 86, 190, 0.35);
-}
-
-.claim-confirm-btn--secondary {
-  background: linear-gradient(180deg, #16b200 0%, #0b8a00 100%);
-  color: #ffffff;
-  box-shadow: 0 6px 16px rgba(11, 138, 0, 0.3);
 }
 </style>

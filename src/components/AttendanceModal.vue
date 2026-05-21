@@ -1,38 +1,40 @@
 <template>
   <Teleport to="body">
     <div v-if="show" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-container">
+      <div class="modal-wrapper">
         <div class="modal-card">
-          <!-- Close Icon -->
-          <button class="close-btn" aria-label="Close" @click="closeModal">
-            <img src="/assets/image/4200_226.svg" alt="Close Icon">
-          </button>
+          <img src="/assets/images/7210a5369195691e3aa63bd1fb6d8c025d233ccc.png" alt="" class="decorative-image">
 
-          <!-- Illustration -->
-          <div class="illustration-wrapper">
-            <img src="/assets/image/daily1.png" alt="Check-in Illustration" class="main-illustration">
+          <h2 class="modal-title">Sudahkah Anda<br>absen hari ini?</h2>
+
+          <div class="rewards-container">
+            <div class="rewards-grid">
+              <div
+                v-for="day in 7"
+                :key="day"
+                class="reward-item"
+                :class="{ checked: isDayChecked(day) }"
+              >
+                <template v-if="isDayChecked(day)">
+                  <img src="/assets/images/2c7d9deec885fca45b0cdc0cdbd2c112e17522ef.png" alt="" class="check-icon">
+                </template>
+                <template v-else>
+                  <span class="day-label">{{ day }} hari</span>
+                  <img src="/assets/images/108294978d9cad25785261933372f80a0602c03d.png" alt="" class="coin-icon">
+                  <span class="coin-value">{{ getDayReward(day) }}</span>
+                </template>
+              </div>
+            </div>
           </div>
 
-          <!-- Text Content -->
-          <div class="content-wrapper">
-            <p class="info-text">
-              Absen direset setiap jam 00:00<br>
-              Absen hari ini:
-            </p>
-            <h2 class="amount-text">{{ rewardAmountDisplay }}</h2>
-          </div>
-
-          <!-- Action Button -->
-          <button class="action-btn" @click="handleCheckIn">
-            Absen
+          <button class="claim-button" :disabled="isClaiming" @click="handleCheckIn">
+            {{ isClaiming ? 'Mengklaim...' : 'Klaim Absen Disini' }}
           </button>
         </div>
       </div>
-      <ErrorModal
-        v-model="showErrorModal"
-        :title="'Check-in Error'"
-        :message="errorMessage"
-      />
+
+      <ErrorModal v-model="showErrorModal" :message="errorMessage" />
+      <SuccessModal v-model="showSuccessModal" :message="successMessage" />
     </div>
   </Teleport>
 </template>
@@ -42,6 +44,7 @@ import { attendanceAPI, authAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import SuccessModal from '@/components/modals/AppSuccessModal.vue'
 import { formatAppCurrency } from '@/utils/settings'
+
 export default {
   name: 'AttendanceModal',
   components: { ErrorModal, SuccessModal },
@@ -50,10 +53,6 @@ export default {
     show: {
       type: Boolean,
       default: false
-    },
-    totalPoints: {
-      type: Number,
-      default: 0
     },
     attendanceData: {
       type: Object,
@@ -68,29 +67,26 @@ export default {
     return {
       showErrorModal: false,
       errorMessage: '',
+      showSuccessModal: false,
+      successMessage: '',
+      isClaiming: false,
       settings: null,
-      totalPointsInternal: 0
-    };
+      streakCount: 0
+    }
   },
   watch: {
     show(val) {
-      console.log('AttendanceModal show changed:', val)
       if (val) {
         this.fetchActiveSettings()
       }
     }
   },
   mounted() {
-    console.log('AttendanceModal mounted')
     if (this.show) {
       this.fetchActiveSettings()
     }
   },
   computed: {
-    displayPoints() {
-      const source = Number(this.totalPointsInternal || this.totalPoints || 0)
-      return this.formatAmount(source)
-    },
     rewardAmountDisplay() {
       if (!this.settings) return formatAppCurrency(0, { decimals: 0 })
       const amount = Number(this.settings.fixed_amount || 0)
@@ -102,26 +98,40 @@ export default {
       try {
         const res = await attendanceAPI.getActiveSettings()
         this.settings = res?.data || null
-      } catch (err) {
-        console.error('Failed to fetch attendance settings:', err)
+        const streak = Number(res?.data?.current_streak ?? this.attendanceData.streak ?? 0)
+        this.streakCount = Number.isFinite(streak) ? streak : 0
+      } catch (_) {
+        this.settings = null
       }
     },
+    isDayChecked(day) {
+      return day <= this.streakCount
+    },
+    getDayReward(day) {
+      if (!this.settings) return '100'
+      const amount = Number(this.settings.fixed_amount || 100)
+      return String(Math.round(amount))
+    },
     closeModal() {
-      this.$emit('close');
+      this.$emit('close')
     },
     async handleCheckIn() {
+      if (this.isClaiming) return
+      this.isClaiming = true
       try {
         const res = await attendanceAPI.claim()
         const data = res?.data || {}
+        const amount = Number(data.amount ?? data.reward ?? this.settings?.fixed_amount ?? 0)
+        this.streakCount = Math.min(7, this.streakCount + 1)
         this.$emit('check-in', {
           checkedDays: this.attendanceData.checkedDays,
           lastCheckIn: new Date().toISOString(),
-          streak: this.attendanceData.streak + 1
+          streak: this.streakCount
         })
+        this.successMessage = `Berhasil mengklaim ${formatAppCurrency(amount, { decimals: 0 })}`
         this.showSuccessModal = true
-        // The modal will close itself after 3s or when clicked, which triggers @confirm -> closeModal
       } catch (err) {
-        let msg = 'Gagal melakukan check-in'
+        let msg = 'Gagal melakukan absen'
         if (err?.response?.data) {
           const d = err.response.data
           if (typeof d === 'string') msg = d
@@ -132,154 +142,155 @@ export default {
         }
         this.errorMessage = msg
         this.showErrorModal = true
-      }
-    },
-    formatAmount(value) {
-      const n = Number(value || 0)
-      if (!Number.isFinite(n)) return '0'
-      return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(n)
-    },
-    async fetchBalanceStatistics(period = 'all-time') {
-      try {
-        const res = await authAPI.getBalanceStatistics(period)
-        const data = res?.data || {}
-        const attendance = Number(data.attendance_total || 0)
-        this.totalPointsInternal = attendance
-      } catch (_) {
-        this.totalPointsInternal = 0
+      } finally {
+        this.isClaiming = false
       }
     }
   },
   created() {
-    this.fetchBalanceStatistics('all-time')
+    this.streakCount = Number(this.attendanceData?.streak ?? 0)
   }
-};
+}
 </script>
 
 <style scoped>
-body {
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f5f5f5;
-}
-
 * {
   box-sizing: border-box;
 }
 
-button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: inherit;
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(129, 129, 129, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 10000;
+  font-family: 'Inter', sans-serif;
 }
-/* CSS for section section:CheckIn */
-#check-in-screen {
-    width: 100%;
-    max-width: 412px; /* Based on root frame width */
-    min-height: 100vh;
-    margin: 0 auto;
-    background-color: #3f3f3f;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-  }
 
-  .modal-container {
-    position: relative;
-    width: 100%;
-    max-width: 364px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    padding: 14px 10px 20px 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  }
+.modal-wrapper {
+  width: 100%;
+  max-width: 412px;
+  display: flex;
+  justify-content: center;
+}
 
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(63, 63, 63, 0.9); /* #3f3f3f with opacity */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    z-index: 10000; /* Increased z-index to ensure visibility */
-    font-family: 'Inter', sans-serif;
-  }
+.modal-card {
+  width: 100%;
+  max-width: 337px;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  padding: 21px 15px 15px 15px;
+  position: relative;
+  margin-top: 34px;
+}
 
-  .close-btn {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-  }
+.decorative-image {
+  position: absolute;
+  top: -34px;
+  right: -9px;
+  width: 154px;
+  height: 123px;
+  z-index: 10;
+  pointer-events: none;
+}
 
-  .close-btn img {
-    width: 100%;
-    height: 100%;
-  }
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 16px 4px;
+  line-height: 1.2;
+  max-width: 215px;
+  position: relative;
+  z-index: 1;
+}
 
-  .illustration-wrapper {
-    margin-top: 10px;
-    margin-bottom: 0px; /* Adjust based on visual overlap */
-    display: flex;
-    justify-content: center;
-  }
+.rewards-container {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.25);
+  padding: 16px 19px 20px 19px;
+  margin-bottom: 28px;
+}
 
-  .main-illustration {
-    width: 204px;
-    height: auto;
-    object-fit: contain;
-  }
+.rewards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 7px;
+  justify-content: flex-start;
+}
 
-  .content-wrapper {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #000000;
-  }
+.reward-item {
+  width: 48px;
+  height: 69px;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+}
 
-  .info-text {
-    font-size: 12px;
-    line-height: 1.5;
-    margin: 0 0 4px 0;
-    opacity: 0.9;
-  }
+.reward-item.checked {
+  background-color: rgba(35, 192, 0, 0.15);
+}
 
-  .amount-text {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0;
-  }
+.day-label {
+  font-size: 10px;
+  color: #000000;
+  margin-bottom: 4px;
+  font-weight: 400;
+  line-height: 1;
+}
 
-  .action-btn {
-    width: 100%;
-    max-width: 343px;
-    height: 48px;
-    border-radius: 30px;
-    background: linear-gradient(90deg, #EFD473 0%, #F6E291 100%);
-    color: #000000;
-    font-weight: 700;
-    font-size: 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.2s;
-    border: none;
-    cursor: pointer;
-  }
+.coin-icon {
+  width: 19px;
+  height: 22px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
 
-  .action-btn:hover {
-    opacity: 0.9;
-  }
+.coin-value {
+  font-size: 10px;
+  color: #000000;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.check-icon {
+  width: 35px;
+  height: 31px;
+  object-fit: contain;
+}
+
+.claim-button {
+  background-color: #975309;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  width: 100%;
+  height: 46px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.claim-button:hover {
+  opacity: 0.9;
+}
+
+.claim-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 </style>

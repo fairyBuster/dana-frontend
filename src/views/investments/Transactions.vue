@@ -1,85 +1,79 @@
 <template>
-  <div class="app-container">
+  <div class="trx-page">
     <!-- Header -->
     <section id="section-header">
-      <header class="app-header">
-        <a href="#/hn/user" class="btn-back" aria-label="Go to profile">
-          <img src="/assets/image/4252_221.svg" alt="Back Icon">
-        </a>
-        <button type="button" ref="menuAnchorEl" class="header-title-group" @click.stop="toggleRecordMenu">
-          <h1 class="header-title">{{ currentRecordLabel }}</h1>
-          <img
-            src="/assets/image/4252_239.svg"
-            alt="Dropdown Icon"
-            class="header-dropdown-icon"
-            :class="{ open: recordMenuOpen }"
-          >
-          <div v-if="recordMenuOpen" class="record-menu" @click.stop>
-            <button
-              v-for="item in recordMenuItems"
-              :key="item.key"
-              type="button"
-              class="record-menu-item"
-              :class="{ active: item.key === currentRecordKey }"
-              @click.stop="selectRecord(item)"
-            >
-              {{ item.label }}
-            </button>
-          </div>
+      <header class="top-nav">
+        <button class="back-btn" aria-label="Go back" @click="goBack">
+          <img src="/assets/images/34_59.svg" alt="">
         </button>
+        <h1 class="nav-title">Riwayat</h1>
       </header>
     </section>
 
-    <!-- Record List -->
-    <section id="section-record-list">
-      <div class="record-content">
-        <!-- Table Header -->
-        <div class="table-header">
-          <div class="th-col th-status">Status</div>
-          <div class="th-col th-amount">Amount</div>
-          <div class="th-col th-type">Type</div>
-        </div>
+    <!-- Title -->
+    <section id="section-title">
+      <div class="title-container">
+        <h2 class="main-title">Riwayat</h2>
+        <p class="subtitle">Lihat semua aktivitas transaksi Anda.</p>
+      </div>
+    </section>
 
-        <!-- Empty State -->
-        <div v-if="transactions.length === 0 && !isLoading" class="empty-state">
-          <p class="empty-text">No mining records yet</p>
-        </div>
+    <!-- Filters -->
+    <section id="section-filters">
+      <div class="filter-group">
+        <button
+          v-for="item in filterItems"
+          :key="item.key"
+          class="filter-btn"
+          :class="{ active: item.key === currentFilterKey }"
+          @click="selectFilter(item)"
+        >
+          {{ item.label }}
+        </button>
+      </div>
+    </section>
 
-        <!-- Record List -->
-        <div class="record-list">
-          <template v-for="(transaction, idx) in transactions" :key="transaction.id">
-            <div class="record-item">
-              <div class="td-col td-status">Succeed</div>
-              <div class="td-col td-amount">{{ transaction.amount }}</div>
-              <div class="td-col td-type">
-                <span class="type-name">{{ transaction.title }}</span>
-                <span class="type-date">{{ transaction.date }}</span>
-              </div>
-            </div>
-            <hr v-if="idx < transactions.length - 1" class="record-divider">
-          </template>
-        </div>
+    <!-- Transactions -->
+    <section id="section-transactions">
+      <div v-if="!isLoading && transactions.length === 0" class="empty-state">
+        <p class="empty-text">Belum ada transaksi.</p>
+      </div>
 
-        <div v-if="showPagination" class="pagination-row">
-          <PaginationBar
-            :page="currentPage"
-            :total-pages="totalPages"
-            :has-prev="hasPrev"
-            :has-next="hasNext"
-            :loading="isLoading"
-            @change="goToPage"
-          />
-        </div>
+      <div class="transaction-list">
+        <article v-for="trx in transactions" :key="trx.id" class="tx-card">
+          <div class="tx-icon-wrapper">
+            <img src="/assets/images/f8648f6433668b71d57f0c9b7251b169b98c2581.png" alt="" class="tx-icon">
+          </div>
+          <div class="tx-info">
+            <h3 class="tx-title">{{ trx.title }}<br>Status: {{ trx.statusText }}</h3>
+            <span class="tx-date">{{ trx.date }}</span>
+          </div>
+          <div class="tx-amount">{{ trx.amount }}</div>
+        </article>
+      </div>
+
+      <div v-if="showPagination" class="pagination-row">
+        <PaginationBar
+          :page="currentPage"
+          :total-pages="totalPages"
+          :has-prev="hasPrev"
+          :has-next="hasNext"
+          :loading="isLoading"
+          @change="goToPage"
+        />
       </div>
     </section>
   </div>
+
+  <LoadingSpinner :visible="isLoading" :overlay="true" message="" />
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { transactionAPI } from '@/services/api'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
+import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
@@ -93,6 +87,24 @@ const totalPages = ref(1)
 const hasNext = ref(false)
 const hasPrev = ref(false)
 
+const filterItems = [
+  { key: 'recharge', label: 'Isi Ulang', to: '/hn/app/charge/history' },
+  { key: 'payout', label: 'Tarik Uang', to: '/hn/app/settlement/history' },
+  { key: 'mining', label: 'Keuntungan', to: '/hn/hall/outputhall/history' },
+  { key: 'commission', label: 'Bonus', to: '/hn/commission/history' },
+  { key: 'other', label: 'Lainnya', to: '/hn/user/history' }
+]
+
+const currentFilterKey = computed(() => {
+  const p = String(route.path || '')
+  const normalized = p.startsWith('/hn/') ? p.slice('/hn'.length) : p
+  if (normalized.startsWith('/app/charge')) return 'recharge'
+  if (normalized.startsWith('/app/settlement')) return 'payout'
+  if (normalized.startsWith('/hall/outputhall')) return 'mining'
+  if (normalized.startsWith('/commission')) return 'commission'
+  return 'other'
+})
+
 const showPagination = computed(() => {
   if (isLoading.value) return false
   if (!transactions.value.length) return false
@@ -100,75 +112,44 @@ const showPagination = computed(() => {
 })
 
 const goBack = () => {
-  router.go(-1)
+  try {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+  } catch (_) {}
+  router.push('/hn/user')
 }
 
-const recordMenuOpen = ref(false)
-const menuAnchorEl = ref(null)
-
-const recordMenuItems = [
-  { key: 'recharge', label: 'Record recharge', to: '/hn/app/charge/history' },
-  { key: 'mining', label: 'Mining record', to: '/hn/hall/outputhall/history' },
-  { key: 'payout', label: 'Payout record', to: '/hn/app/settlement/history' },
-  { key: 'purchase', label: 'Purchase record', to: '/hn/orders' },
-  { key: 'commission', label: 'Commision friend', to: '/hn/commission/history' },
-  { key: 'other', label: 'Other record', to: '/hn/user/history' }
-]
-
-const currentRecordKey = computed(() => {
-  const p = String(route.path || '')
-  const normalized = p.startsWith('/hn/') ? p.slice('/hn'.length) : p
-  if (normalized.startsWith('/app/charge')) return 'recharge'
-  if (normalized.startsWith('/hall/outputhall')) return 'mining'
-  if (normalized.startsWith('/app/settlement')) return 'payout'
-  if (normalized.startsWith('/orders')) return 'purchase'
-  if (normalized.startsWith('/commission')) return 'commission'
-  return 'other'
-})
-
-const currentRecordLabel = computed(() => {
-  const found = recordMenuItems.find((x) => x.key === currentRecordKey.value)
-  return found?.label || 'Other record'
-})
-
-const toggleRecordMenu = () => {
-  recordMenuOpen.value = !recordMenuOpen.value
-}
-
-const closeRecordMenu = () => {
-  recordMenuOpen.value = false
-}
-
-const selectRecord = (item) => {
-  closeRecordMenu()
+const selectFilter = (item) => {
   if (item?.to) router.push(item.to)
 }
 
-const onDocumentClick = (e) => {
-  if (!recordMenuOpen.value) return
-  const anchor = menuAnchorEl.value
-  const target = e?.target
-  if (anchor && target && anchor.contains(target)) return
-  closeRecordMenu()
-}
-
 const pad2 = (n) => String(n).padStart(2, '0')
+
 const formatDateTime = (value) => {
   if (!value) return '-'
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return String(value)
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}.${pad2(d.getMinutes())}`
+  const now = new Date()
+  const isToday = d.toDateString() === now.toDateString()
+  const yesterday = new Date(now)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const isYesterday = d.toDateString() === yesterday.toDateString()
+  const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  if (isToday) return `Hari ini, ${time}`
+  if (isYesterday) return `Kemarin, ${time}`
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${time}`
 }
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return 0
   const raw = String(value).trim()
   if (!raw) return 0
-  let s = raw.replace(/\s+/g, '')
-  s = s.replace(/[^0-9,.-]/g, '')
+  let s = raw.replace(/\s+/g, '').replace(/[^0-9,.-]/g, '')
   const dots = (s.match(/\./g) || []).length
   const commas = (s.match(/,/g) || []).length
-
   if (dots > 0 && commas > 0) {
     const lastDot = s.lastIndexOf('.')
     const lastComma = s.lastIndexOf(',')
@@ -176,46 +157,34 @@ const parseNumber = (value) => {
     const groupSep = decimalSep === '.' ? ',' : '.'
     s = s.split(groupSep).join('')
     if (decimalSep === ',') s = s.replace(',', '.')
-  } else if (dots > 1 && commas === 0) {
+  } else if (dots > 1) {
     s = s.split('.').join('')
-  } else if (commas > 1 && dots === 0) {
+  } else if (commas > 1) {
     s = s.split(',').join('')
   } else if (commas === 1 && dots === 0) {
     const idx = s.indexOf(',')
     const digitsAfter = s.length - idx - 1
     if (digitsAfter === 3) s = s.replace(',', '')
     else s = s.replace(',', '.')
-  } else if (dots === 1 && commas === 0) {
-    const idx = s.indexOf('.')
-    const digitsAfter = s.length - idx - 1
-    if (digitsAfter === 3) s = s.replace('.', '')
   }
-
   const n = Number(s)
   return Number.isFinite(n) ? n : 0
 }
 
-const getFractionDigitsFromRaw = (value) => {
-  if (value === null || value === undefined) return null
-  const raw = String(value).trim()
-  if (!raw) return null
-  const lastDot = raw.lastIndexOf('.')
-  const lastComma = raw.lastIndexOf(',')
-  const lastSep = Math.max(lastDot, lastComma)
-  if (lastSep <= -1) return 0
-  const frac = raw.slice(lastSep + 1).replace(/[^0-9]/g, '')
-  if (!frac) return 0
-  return Math.min(8, frac.length)
-}
-
 const formatUSD = (value) => {
   const num = parseNumber(value)
-  const rawDecimals = getFractionDigitsFromRaw(value)
-  const decimals = rawDecimals === null ? 2 : rawDecimals
-  return formatAppCurrency(num, { decimals })
+  return formatAppCurrency(num)
 }
 
-const normalizeTransactionsResponse = (data) => {
+const mapStatus = (t) => {
+  const s = String(t?.status || t?.state || '').toUpperCase()
+  if (s === 'COMPLETED' || s === 'SUCCESS' || s === 'SETTLED') return 'Settlement selesai'
+  if (s === 'PENDING' || s === 'HOLD') return 'Menunggu settlement'
+  if (s === 'PROCESSING') return 'Sedang proses'
+  return s || '-'
+}
+
+const normalizeResponse = (data) => {
   if (!data) return { results: [], count: 0, next: null, previous: null }
   if (Array.isArray(data)) return { results: data, count: data.length, next: null, previous: null }
   if (Array.isArray(data.results)) {
@@ -225,21 +194,18 @@ const normalizeTransactionsResponse = (data) => {
   return { results: [], count: 0, next: null, previous: null }
 }
 
-const mapToTransaction = (t) => {
-  return {
-    id: t?.id ?? t?.trx_id ?? `${t?.created_at || ''}-${t?.amount || ''}`,
-    date: formatDateTime(t?.created_at),
-    title: t?.product_name || t?.description || 'Mining profit',
-    amount: formatUSD(t?.amount || t?.profit_amount || 0)
-  }
-}
-
 const loadPage = async (page) => {
   isLoading.value = true
   try {
     const resp = await transactionAPI.getTransactions({ type: 'INTEREST', page })
-    const paged = normalizeTransactionsResponse(resp?.data)
-    transactions.value = paged.results.map(mapToTransaction)
+    const paged = normalizeResponse(resp?.data)
+    transactions.value = paged.results.map((t) => ({
+      id: t?.id ?? t?.trx_id ?? `${t?.created_at || ''}-${t?.amount || ''}`,
+      title: t?.product_name || t?.description || 'Keuntungan produk',
+      statusText: mapStatus(t),
+      date: formatDateTime(t?.created_at),
+      amount: formatUSD(t?.amount || t?.profit_amount || 0)
+    }))
     currentPage.value = Math.max(1, Number(page || 1))
     hasNext.value = Boolean(paged.next)
     hasPrev.value = Boolean(paged.previous)
@@ -255,57 +221,43 @@ const loadPage = async (page) => {
 }
 
 const goToPage = (page) => {
-  const p = Math.max(1, Number(page || 1))
-  loadPage(p)
+  loadPage(Math.max(1, Number(page || 1)))
 }
 
 onMounted(() => {
   loadPage(1)
-  document.addEventListener('click', onDocumentClick)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 
 <style scoped>
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.app-container {
+.trx-page {
   font-family: 'Inter', sans-serif;
-  width: 100%;
   max-width: 412px;
   margin: 0 auto;
-  background-color: #f8f8f8;
+  background-color: #fbfaf7;
   min-height: 100vh;
-}
-
-h1, p {
-  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Header */
 #section-header {
-  min-height: 60px;
+  padding: 24px 22px 16px;
 }
 
-.app-header {
+.top-nav {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 18px 16px;
-  position: relative;
-  background-color: #f8f8f8;
+  gap: 16px;
 }
 
-.btn-back {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+.back-btn {
   background: none;
   border: none;
   padding: 0;
@@ -313,187 +265,158 @@ h1, p {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  -webkit-tap-highlight-color: transparent;
 }
 
-.btn-back img {
-  width: 20px;
-  height: 20px;
-  display: block;
-}
-
-.header-title-group {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.header-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.header-dropdown-icon {
+.back-btn img {
   width: 24px;
   height: 24px;
-  transition: transform 0.15s ease;
 }
 
-.header-dropdown-icon.open {
-  transform: rotate(180deg);
-}
-
-.record-menu {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 220px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-  z-index: 50;
-}
-
-.record-menu-item {
-  width: 100%;
-  padding: 10px 12px;
-  background: transparent;
-  border: none;
-  text-align: left;
+.nav-title {
   font-size: 16px;
+  font-weight: 700;
   color: #000000;
+}
+
+/* Title */
+#section-title {
+  padding: 16px 22px;
+}
+
+.main-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 6px 0;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #635f5f;
+  font-weight: 400;
+}
+
+/* Filters */
+#section-filters {
+  padding: 8px 22px 24px;
+}
+
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-btn {
+  width: 92px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid #cfcfcf;
+  background-color: #fefefe;
+  color: #000000;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   font-family: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  transition: all 0.2s ease;
 }
 
-.record-menu-item + .record-menu-item {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+.filter-btn.active {
+  border-color: #f3b73f;
+  color: #f3b73f;
 }
 
-.record-menu-item.active {
-  font-weight: 700;
+.filter-btn:hover {
+  border-color: #f3b73f;
 }
 
-/* Record List */
-#section-record-list {
-  min-height: calc(100vh - 60px);
+/* Transactions */
+#section-transactions {
+  padding: 0 22px 40px;
+  min-height: 60vh;
 }
 
-.record-content {
-  padding: 8px 15px 20px 15px;
-  background-color: #f8f8f8;
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.table-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1.2fr;
-  background-color: #ffffff;
+.tx-card {
+  background-color: #fefffe;
+  border-radius: 10px;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.08);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tx-icon-wrapper {
+  width: 51px;
+  height: 43px;
+  background-color: #ffeeeb;
   border-radius: 5px;
-  padding: 8px 12px;
-  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
 }
 
-.th-col {
+.tx-icon {
+  width: 29px;
+  height: 29px;
+  object-fit: contain;
+}
+
+.tx-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tx-title {
   font-size: 12px;
+  color: #060606;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.tx-date {
+  font-size: 10px;
+  color: #7d7d7d;
+  font-weight: 400;
+}
+
+.tx-amount {
+  font-size: 14px;
+  color: #cf931b;
   font-weight: 700;
-  color: #000000;
+  white-space: nowrap;
 }
 
-.th-status {
-  text-align: left;
-}
-
-.th-amount {
-  text-align: center;
-}
-
-.th-type {
-  text-align: right;
-}
-
+/* Empty State */
 .empty-state {
   padding: 40px 0;
   text-align: center;
 }
 
 .empty-text {
-  color: #b2b2b2;
+  color: #7d7d7d;
   font-size: 14px;
 }
 
-.record-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.record-item {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1.2fr;
-  align-items: center;
-  padding: 8px 12px;
-}
-
-.td-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.td-status {
-  color: #0cb300;
-  font-size: 12px;
-  font-weight: 500;
-  text-align: left;
-}
-
-.td-amount {
-  color: #010101;
-  font-size: 12px;
-  font-weight: 700;
-  text-align: center;
-}
-
-.td-type {
-  align-items: flex-end;
-  text-align: right;
-  gap: 2px;
-}
-
-.type-name {
-  color: #010101;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.type-date {
-  color: rgba(1, 1, 1, 0.4);
-  font-size: 10px;
-  font-weight: 400;
-}
-
-.record-divider {
-  border: none;
-  border-bottom: 1px dashed rgba(0, 0, 0, 0.3);
-  margin: 4px 12px;
-  width: calc(100% - 24px);
-}
-
+/* Pagination */
 .pagination-row {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 16px;
+  margin-top: 20px;
 }
 </style>

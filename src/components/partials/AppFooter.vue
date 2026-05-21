@@ -1,46 +1,35 @@
 <template>
   <section id="section-bottom-nav">
-    <nav class="bottom-nav-container">
-      <router-link to="/hn/home" class="nav-item" :class="{ active: isActive('/home') }">
-        <img
-          src="/assets/image/ffe25a591934a7a193bade6d431223b8869d2cde.png"
-          alt="Home"
-          class="nav-icon"
-          :class="{ 'opacity-low': !isActive('/home') }"
-        >
-        <span class="nav-text">Home</span>
-      </router-link>
+    <div class="bottom-nav-wrapper">
+      <nav class="bottom-nav">
+        <router-link to="/hn/user" class="nav-item" :class="{ active: isActive('/user') }">
+          <img src="/assets/images/1d78a069d6a76e2ec636e530125cf4db307129e3.png" alt="Akun">
+          <span>Akun</span>
+        </router-link>
 
-      <router-link to="/hn/company" class="nav-item" :class="{ active: isActive('/company') }">
-        <img
-          src="/assets/image/3cb24173dc41742eccf595898ca2eed035661785.png"
-          alt="About Us"
-          class="nav-icon"
-          :class="{ 'opacity-low': !isActive('/company') }"
-        >
-        <span class="nav-text">About Us</span>
-      </router-link>
+        <router-link to="/hn/network/community" class="nav-item" :class="{ active: isActive('/network/community') }">
+          <img src="/assets/images/5b2eccc7619171bb782ad486b942686a17d4b9ce.png" alt="Tim Saya">
+          <span>Tim Saya</span>
+        </router-link>
 
-      <router-link to="/hn/user" class="nav-item" :class="{ active: isActive('/user') }">
-        <img
-          src="/assets/image/48b8a39f7811095779bfc9811422446819d34f1b.png"
-          alt="Mine"
-          class="nav-icon"
-          :class="{ 'opacity-low': !isActive('/user') }"
-        >
-        <span class="nav-text">Mine</span>
-      </router-link>
+        <router-link to="/hn/home" class="nav-item center-nav-item" aria-label="Dana Proteksi">
+          <div class="center-btn-bg">
+            <img src="/assets/images/4203ed5d8bff488a8cf30f0b005e7a986e2dcd66.png" alt="Dana Proteksi">
+          </div>
+          <span class="center-label">Dana Proteksi</span>
+        </router-link>
 
-      <router-link to="/hn/shop" class="nav-item" :class="{ active: isActive('/shop') }">
-        <img
-          src="/assets/image/fd891e27e827c0f21ddb395edbc24cfd61c092dc.png"
-          alt="Shop"
-          class="nav-icon"
-          :class="{ 'opacity-low': !isActive('/shop') }"
-        >
-        <span class="nav-text">Shop</span>
-      </router-link>
-    </nav>
+        <router-link to="/hn/company" class="nav-item" :class="{ active: isActive('/company') }">
+          <img src="/assets/images/70e90e171ca2d494dec7257a0f52b7dd0d4457b7.png" alt="Perusahaan">
+          <span>Perusahaan</span>
+        </router-link>
+
+        <router-link to="/hn/home" class="nav-item" :class="{ active: isActive('/home') }">
+          <img src="/assets/images/fef79759a740c692456b4430087bdf71a331718c.png" alt="Beranda">
+          <span>Beranda</span>
+        </router-link>
+      </nav>
+    </div>
   </section>
 </template>
 
@@ -56,7 +45,7 @@ const isActive = (basePath) => {
 </script>
 
 <style scoped>
-#section-bottom-nav {
+.bottom-nav-wrapper {
   position: fixed;
   bottom: 0;
   left: 50%;
@@ -66,43 +55,84 @@ const isActive = (basePath) => {
   z-index: 100;
 }
 
-.bottom-nav-container {
+.bottom-nav {
+  background-color: #fefdfd;
+  box-shadow: 0px -2px 10px 0px rgba(0, 0, 0, 0.05);
+  height: 75px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  height: 48px;
-  background-color: #ffffff;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0 10px;
+  position: relative;
 }
 
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-decoration: none;
-  color: #000000;
-  width: 25%;
-  gap: 4px;
+  width: 65px;
+  margin-top: 10px;
 }
 
-.nav-icon {
-  width: 20px;
-  height: 20px;
+.nav-item img {
+  width: 24px;
+  height: 24px;
   object-fit: contain;
+  margin-bottom: 4px;
+  opacity: 0.4;
+  transition: opacity 0.2s;
 }
 
-.nav-icon.opacity-low {
-  opacity: 0.2;
-}
-
-.nav-text {
+.nav-item span {
   font-size: 10px;
-  line-height: 1;
+  color: #7d7d7d;
+  font-weight: 600;
+  transition: color 0.2s;
 }
 
-.nav-item.active .nav-text {
-  font-weight: 700;
+.nav-item:hover img,
+.nav-item.active img {
+  opacity: 1;
+}
+
+.nav-item:hover span,
+.nav-item.active span {
+  color: #e2c06a;
+}
+
+.center-nav-item {
+  position: relative;
+  margin-top: 0;
+  justify-content: flex-end;
+  height: 100%;
+  padding-bottom: 12px;
+}
+
+.center-btn-bg {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 61px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: #fbfaf7;
+}
+
+.center-btn-bg img {
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  margin-bottom: 0;
+}
+
+.center-label {
+  margin-top: auto;
 }
 </style>
 

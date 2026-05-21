@@ -2,279 +2,182 @@
   <div class="app-container">
     <!-- Header -->
     <section id="section-header">
-      <div class="header-content">
-        <div class="user-profile">
-          <div class="avatar-wrapper">
-            <img src="/assets/image/4195_135.svg" class="avatar-bg" alt="Avatar Background">
-            <img src="/assets/image/Logo02.png" class="avatar-img" alt="Logo">
+      <header class="site-header">
+        <div class="logo-container">
+          <img src="/assets/images/108294978d9cad25785261933372f80a0602c03d.png" alt="" class="logo">
+        </div>
+        <div class="header-actions">
+          <div class="action-item">
+            <img src="/assets/images/f5801c8058fb78330691ba1b7f6aacffd756c5c0.png" alt="" class="action-icon">
+            <span class="action-text">Unduh aplikasi</span>
           </div>
-          <div class="user-details">
-            <div class="uid-row">
-              <span class="uid-text">
-                UID:
-                <span v-if="showUidPlaceholder" class="uid-placeholder"></span>
-                <span v-else class="uid-value">{{ displayUid }}</span>
-              </span>
-              <img
-                src="/assets/image/4182_140.svg"
-                class="copy-icon"
-                :class="{ disabled: showUidPlaceholder }"
-                alt="Copy UID"
-                @click="copyUid"
-              >
+          <div class="action-item" @click="handleLogout">
+            <div class="merged-icon logout-icon-wrap">
+              <img src="/assets/images/51_112.svg" alt="" class="icon-bg">
+              <img src="/assets/images/53_213.svg" alt="" class="icon-fg">
             </div>
-            <span class="site-text">Site: HUE Mining</span>
+            <span class="action-text">Keluar</span>
           </div>
         </div>
-        <img src="/assets/image/4200_222.svg" class="logout-icon" alt="Logout" @click="handleLogout">
+      </header>
+    </section>
+
+    <!-- Account Info -->
+    <section id="section-account-info" class="section-padding">
+      <div class="account-header">
+        <h1 class="page-title">Akun</h1>
+        <p class="page-subtitle">Kelola profil dan pengaturan akun Anda.</p>
+      </div>
+
+      <div class="user-card">
+        <img src="/assets/images/108294978d9cad25785261933372f80a0602c03d.png" alt="" class="user-avatar">
+        <div class="user-details">
+          <h2 class="user-name">{{ displayUsername }}</h2>
+          <p class="user-contact">{{ displayPhone }}<br>ID: {{ displayUid }}</p>
+        </div>
+        <div class="user-vip-status" @click="router.push('/hn/user/person')">
+          <span class="vip-level">{{ vipText }}</span>
+          <img src="/assets/images/49_1111.svg" alt="" class="arrow-icon">
+        </div>
+      </div>
+
+      <div class="vip-upgrade-card" @click="router.push('/hn/user/person')">
+        <img src="/assets/images/33dd6484afb9e890391e4c5b0548521621a35b4a.png" alt="" class="vip-shield">
+        <div class="vip-upgrade-info">
+          <h3 class="vip-upgrade-title">Upgrade ke VIP</h3>
+          <p class="vip-upgrade-desc">Nikmati berbagai keuntungan eksklusif khusus untuk member VIP.</p>
+        </div>
+        <button class="btn-lihat-vip">Lihat VIP</button>
       </div>
     </section>
 
-    <!-- Wallet -->
-    <section id="section-wallet">
-      <div class="balance-card">
-        <div class="balance-info">
-          <div class="balance-label-row">
-            <span class="label-text">Available</span>
-            <div class="currency-selector">
-              <span class="currency-text">{{ currency }}</span>
+    <!-- My Account -->
+    <section id="section-my-account" class="section-padding">
+      <h3 class="section-title">Akun Saya</h3>
+      <div class="white-card">
+        <div class="my-account-grid">
+          <div class="grid-item" @click="router.push('/hn/user/account')">
+            <div class="grid-icon-wrap">
+              <img src="/assets/images/51_120.svg" alt="" class="icon-bg">
+              <img src="/assets/images/bank.png" alt="" class="icon-fg-lg">
             </div>
-            <button type="button" class="balance-eye" @click.stop="toggleBalanceVisibility" aria-label="Toggle balance visibility">
-              <img
-                :src="isBalanceVisible ? 'https://api.iconify.design/mdi/eye.svg?color=%230073FF' : 'https://api.iconify.design/mdi/eye-off.svg?color=%230073FF'"
-                alt=""
-                class="balance-eye-icon"
-              >
-            </button>
+            <span class="item-label">Ikat Bank</span>
           </div>
-          <div class="balance-amount">{{ isBalanceVisible ? balanceCurrencyText : maskedBalanceText }}</div>
-        </div>
-        <img src="/assets/image/wallet.png" class="wallet-img" alt="Wallet Illustration">
-      </div>
-      <div class="stats-container">
-        <div class="stat-item">
-          <span class="stat-label">Recharge balance</span>
-          <span class="stat-value">{{ balanceDepositCurrencyText }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Today's</span>
-          <span class="stat-value">{{ todayIncomeCurrencyText }}</span>
+          <div class="divider"></div>
+          <div class="grid-item" @click="router.push('/hn/hall/taskhall')">
+            <div class="grid-icon-wrap">
+              <img src="/assets/images/51_163.svg" alt="" class="icon-bg">
+              <img src="/assets/images/challege.png" alt="" class="icon-fg-lg">
+            </div>
+            <span class="item-label">Challenge</span>
+          </div>
+          <div class="divider"></div>
+          <div class="grid-item" @click="router.push('/hn/rewards')">
+            <div class="grid-icon-wrap">
+              <img src="/assets/images/51_165.svg" alt="" class="icon-bg">
+              <img src="/assets/images/reward.png" alt="" class="icon-fg-lg">
+            </div>
+            <span class="item-label">Reward</span>
+          </div>
+           <div class="grid-item" @click="showAttendanceModal = true">
+            <div class="grid-icon-wrap">
+              <img src="/assets/images/51_165.svg" alt="" class="icon-bg">
+              <img src="/assets/images/attedance.png" alt="" class="icon-fg-lg">
+            </div>
+            <span class="item-label">Absen Hari ini</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Navigation -->
-    <section id="section-navigation">
-      <div class="tabs-container">
-        <div class="tab active" @click="activeTab = 'account'">
-          <div v-if="activeTab === 'account'" class="tab-indicator"></div>
-          <span>Account</span>
-          <div v-if="activeTab === 'account'" class="tab-underline"></div>
-        </div>
-        <div class="tab" :class="{ active: activeTab === 'settings' }" @click="activeTab = 'settings'">
-          <div v-if="activeTab === 'settings'" class="tab-indicator"></div>
-          <span>Settings</span>
-          <div v-if="activeTab === 'settings'" class="tab-underline"></div>
-        </div>
-        <div class="tab" :class="{ active: activeTab === 'more' }" @click="activeTab = 'more'">
-          <div v-if="activeTab === 'more'" class="tab-indicator"></div>
-          <span>More</span>
-          <div v-if="activeTab === 'more'" class="tab-underline"></div>
+    <!-- Formal Services -->
+    <section id="section-formal-services" class="section-padding">
+      <h3 class="section-title">Layanan</h3>
+      <div class="white-card">
+        <div class="services-grid">
+          <div class="service-item" @click="router.push('/hn/hall/sign')">
+            <img src="/assets/images/Sidebar.png" alt="" class="service-icon">
+            <span class="service-label">Testimoni Nasabah</span>
+          </div>
+          <div class="service-item" @click="router.push('/hn/user/history')">
+            <img src="/assets/images/Smartphone.png" alt="" class="service-icon">
+            <span class="service-label">Legal Perusahaan</span>
+          </div>
+          <div class="service-item" @click="router.push('/hn/network/community')">
+            <img src="/assets/images/Eye.png" alt="" class="service-icon">
+            <span class="service-label">Profil Saya</span>
+          </div>
+          <div class="service-item" @click="router.push('/hn/user/contact')">
+            <img src="/assets/images/Edit.png" alt="" class="service-icon">
+            <span class="service-label">Ubah Kata Sandi</span>
+          </div>
+          <div class="service-item" @click="router.push('/hn/hall/outputhall')">
+            <img src="/assets/images/Book open.png" alt="" class="service-icon">
+            <span class="service-label">Syarat Layanan</span>
+          </div>
+          <div class="service-item" @click="router.push('/hn/settings/device-info')">
+            <img src="/assets/images/Alert triangle.png" alt="" class="service-icon">
+            <span class="service-label">Kebijakan Privasi</span>
+          </div>
         </div>
       </div>
-
-      <ul v-if="activeTab === 'account'" class="menu-list">
-        <li class="menu-item" @click="router.push('/hn/hall/sign')">
-          <div class="menu-left">
-            <img src="/assets/image/a89d4d597bbcfa2080814db6f2b22dc98cc2aa65.png" class="menu-icon" alt="Sign in">
-            <span class="menu-text">Sign in</span>
-          </div>
-          <img src="/assets/image/4200_180.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item readonly">
-          <div class="menu-left">
-            <img src="/assets/image/f9741da13cb7ba61137fbfae1bfdafaa779d6375.png" class="menu-icon" alt="Identity account">
-            <span class="menu-text">Email</span>
-          </div>
-          <span v-if="showEmailPlaceholder" class="menu-value-placeholder"></span>
-          <span v-else class="menu-value">{{ displayEmail }}</span>
-        </li>
-        <li class="menu-item" @click="router.push('/hn/user/person')">
-          <div class="menu-left">
-            <img src="/assets/image/c77f7559be360dd336d02cac1b1feb037dbf2473.png" class="menu-icon" alt="My VIP">
-            <span class="menu-text">My VIP</span>
-          </div>
-          <div class="menu-right">
-            <span v-if="showVipPlaceholder" class="menu-value-placeholder"></span>
-            <span v-else class="menu-value">{{ vipText }}</span>
-            <img src="/assets/image/4200_191.svg" class="menu-arrow" alt="Arrow Right">
-          </div>
-        </li>
-        <li class="menu-item" @click="router.push('/hn/user/history')">
-          <div class="menu-left">
-            <img src="/assets/image/b7f92aac3d47e07c483ba586f4ae265e804616e5.png" class="menu-icon" alt="Record Transaction">
-            <span class="menu-text">Record Transaction</span>
-          </div>
-          <img src="/assets/image/4200_200.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="router.push('/hn/network/community')">
-          <div class="menu-left">
-            <img src="/assets/image/9801361d06ddf02bf17ce55932f161747ec5d791.png" class="menu-icon" alt="Your Community">
-            <span class="menu-text">Your Community</span>
-          </div>
-          <img src="/assets/image/4200_210.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="router.push('/hn/user/contact')">
-          <div class="menu-left">
-            <img src="/assets/image/95222c8971643839be1f21df87741382dab85559.png" class="menu-icon" alt="Company Community">
-            <span class="menu-text">Company Community</span>
-          </div>
-          <img src="/assets/image/4200_216.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="handleKycClick">
-          <div class="menu-left">
-            <img src="/assets/image/85bcea1b2cc4669b33e6a90d1ea50f45593297fa.png" class="menu-icon" alt="Complete Verification">
-            <span class="menu-text">Complete Verification</span>
-          </div>
-          <img src="/assets/image/4200_226.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-      </ul>
-
-      <ul v-if="activeTab === 'settings'" class="menu-list">
-        <li class="menu-item" @click="router.push('/hn/user/account')">
-          <div class="menu-left">
-            <img src="/assets/image/f9741da13cb7ba61137fbfae1bfdafaa779d6375.png" class="menu-icon" alt="My Data">
-            <span class="menu-text">Bind Payout Account</span>
-          </div>
-          <img src="/assets/image/4200_180.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="router.push('/hn/user/change')">
-          <div class="menu-left">
-            <img src="/assets/image/85bcea1b2cc4669b33e6a90d1ea50f45593297fa.png" class="menu-icon" alt="Add Bank Account">
-            <span class="menu-text">Change Password</span>
-          </div>
-          <img src="/assets/image/4200_191.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="showUsernameModal = true">
-          <div class="menu-left">
-            <img src="/assets/image/usr.png" class="menu-icon" alt="Account Security">
-            <span class="menu-text">Username</span>
-          </div>
-          <img src="/assets/image/4200_200.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="handleDeleteCache">
-          <div class="menu-left">
-            <img src="/assets/image/cache.png" class="menu-icon" alt="Account Security">
-            <span class="menu-text">Delete Cache</span>
-          </div>
-          <img src="/assets/image/4200_200.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-      </ul>
-
-      <ul v-if="activeTab === 'more'" class="menu-list">
-        <li class="menu-item" @click="router.push('/hn/user/help')">
-          <div class="menu-left">
-            <img src="/assets/image/help.png" class="menu-icon" alt="Help Center">
-            <span class="menu-text">Help Center</span>
-          </div>
-          <img src="/assets/image/4200_210.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="router.push('/hn/hall/outputhall')">
-          <div class="menu-left">
-            <img src="/assets/image/my-mining.png" class="menu-icon" alt="Rewarded Tasks">
-            <span class="menu-text">My Mining</span>
-          </div>
-          <img src="/assets/image/4200_216.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="router.push('/hn/settings/device-info')">
-          <div class="menu-left">
-            <img src="/assets/image/detail.png" class="menu-icon" alt="My Portfolio">
-            <span class="menu-text">Detail Information</span>
-          </div>
-          <img src="/assets/image/4200_226.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="router.push('/hn/hall/sign')">
-          <div class="menu-left">
-            <img src="/assets/image/daily.png" class="menu-icon" alt="Help Center">
-            <span class="menu-text">Daily Sign In</span>
-          </div>
-          <img src="/assets/image/4200_210.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="router.push('/hn/legal/agreement')">
-          <div class="menu-left">
-            <img src="/assets/image/customer.png" class="menu-icon" alt="Rewarded Tasks">
-            <span class="menu-text">Customer Agreement</span>
-          </div>
-          <img src="/assets/image/4200_216.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-        <li class="menu-item" @click="router.push('/hn/legal/privacy')">
-          <div class="menu-left">
-            <img src="/assets/image/privacy.png" class="menu-icon" alt="My Portfolio">
-            <span class="menu-text">Privacy Policy</span>
-          </div>
-          <img src="/assets/image/4200_226.svg" class="menu-arrow" alt="Arrow Right">
-        </li>
-      </ul>
     </section>
-  </div>
 
-  <FooterBar />
+    <!-- Security Banner -->
+    <section id="section-security-banner" class="section-padding">
+      <div class="security-banner">
+        <div class="banner-content">
+          <h3 class="banner-title">Keamanan akun Anda adalah prioritas kami</h3>
+          <p class="banner-desc">Pastikan informasi akun Anda selalu terkini dan aman.</p>
+          <button class="btn-learn-more" @click="router.push('/hn/legal/privacy')">
+            Pelajari lebih lanjut
+            <img src="/assets/images/49_1111.svg" alt="" class="btn-arrow">
+          </button>
+        </div>
+        <div class="banner-image-container">
+          <img src="/assets/images/9f4d7b8ace034cd96bb6b037dd50538b5db64b68.png" alt="" class="banner-image">
+        </div>
+      </div>
+    </section>
+
+    <FooterBar />
     <ErrorModal v-model="showErrorModal" :message="errorMessage" />
-    <EditUsernameModal 
-      v-model="showUsernameModal" 
-      :current-username="accountInfo?.username || ''" 
+    <EditUsernameModal
+      v-model="showUsernameModal"
+      :current-username="accountInfo?.username || ''"
       @success="handleUsernameUpdate"
     />
-  </template>
+    <AttendanceModal :show="showAttendanceModal" @close="showAttendanceModal = false" />
+  </div>
+</template>
 
 <script setup>
 import { computed, onActivated, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import FooterBar from '../../components/partials/AppFooter.vue'
+import FooterBar from '@/components/partials/AppFooter.vue'
 import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import EditUsernameModal from '@/components/modals/EditUsernameModal.vue'
+import AttendanceModal from '@/components/AttendanceModal.vue'
 import { authAPI } from '@/services/api'
 import { appSettings, formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
-const isBalanceVisible = ref(true)
-const activeTab = ref('account')
-const currency = ref(String(appSettings.currency?.currency_code || 'USD'))
-
-watch(
-  () => appSettings.currency?.currency_code,
-  (v) => {
-    const next = String(v || 'USD')
-    if (currency.value !== next) currency.value = next
-  },
-  { immediate: true }
-)
 
 const accountInfo = ref(null)
 const currentRank = ref(null)
 const currentTitle = ref(null)
-const balanceStats = ref(null)
-const todayStats = ref(null)
 const isRefreshing = ref(false)
 const lastRefreshedAt = ref(0)
 
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 const showUsernameModal = ref(false)
-
-const handleKycClick = () => {
-  errorMessage.value = 'KYC is not active'
-  showErrorModal.value = true
-}
+const showAttendanceModal = ref(false)
 
 const handleUsernameUpdate = (newUsername) => {
   if (accountInfo.value) {
     accountInfo.value.username = newUsername
   }
-}
-
-const toggleBalanceVisibility = () => {
-  isBalanceVisible.value = !isBalanceVisible.value
 }
 
 const rawUid = computed(() => {
@@ -284,37 +187,27 @@ const rawUid = computed(() => {
   return uid
 })
 
-const showUidPlaceholder = computed(() => rawUid.value === null)
-
 const displayUid = computed(() => {
-  if (rawUid.value === null) return ''
+  if (rawUid.value === null) return '-'
   return String(rawUid.value)
 })
 
-const rawPhone = computed(() => {
+const displayUsername = computed(() => {
   const d = accountInfo.value || {}
-  const p = String(d.phone || d.phone_number || d.user_phone || '').trim()
-  return p || null
+  const name = String(d.username || d.name || '').trim()
+  return name || 'Pengguna'
 })
-
-const showPhonePlaceholder = computed(() => rawPhone.value === null)
 
 const displayPhone = computed(() => {
-  if (rawPhone.value === null) return ''
-  return String(rawPhone.value)
-})
-
-const rawEmail = computed(() => {
   const d = accountInfo.value || {}
-  const e = String(d.email || d.user_email || d.mail || '').trim()
-  return e || null
+  const p = String(d.phone || d.phone_number || d.user_phone || '').trim()
+  return p || '-'
 })
-
-const showEmailPlaceholder = computed(() => rawEmail.value === null)
 
 const displayEmail = computed(() => {
-  if (rawEmail.value === null) return ''
-  return String(rawEmail.value)
+  const d = accountInfo.value || {}
+  const e = String(d.email || d.user_email || d.mail || '').trim()
+  return e || '-'
 })
 
 const showVipPlaceholder = computed(() => {
@@ -324,103 +217,17 @@ const showVipPlaceholder = computed(() => {
 })
 
 const vipText = computed(() => {
-  if (showVipPlaceholder.value) return ''
+  if (showVipPlaceholder.value) return 'VIP-0'
   const title = String(currentTitle.value || '').trim()
   if (title) return title
   const r = currentRank.value
-  if (r === null || r === undefined || r === '') return '0'
+  if (r === null || r === undefined || r === '') return 'VIP-0'
   const n = Number(r)
-  return Number.isFinite(n) ? String(n) : String(r)
+  return Number.isFinite(n) ? `VIP-${n}` : String(r)
 })
-
-const toNumber = (v) => {
-  const n = Number(String(v ?? 0).replace(/[^0-9.-]/g, ''))
-  return Number.isFinite(n) ? n : 0
-}
-
-const formatMaskedCurrency = (mask = '*****') => {
-  const cfg = appSettings.currency || {}
-  const symbol = String(cfg.symbol || '')
-  const symbolPosition = String(cfg.symbol_position || 'prefix')
-  const symbolSpace = Boolean(cfg.symbol_space ?? false)
-  const space = symbol && symbolSpace ? ' ' : ''
-
-  if (!symbol) return mask
-  if (symbolPosition === 'suffix') return `${mask}${space}${symbol}`
-  return `${symbol}${space}${mask}`
-}
-
-const maskedBalanceText = computed(() => formatMaskedCurrency('*****'))
-
-const pickFirstNumber = (...values) => {
-  for (const v of values) {
-    const n = toNumber(v)
-    if (n !== 0) return n
-  }
-  return 0
-}
-
-const balanceUsd = computed(() => {
-  const acc = accountInfo.value || {}
-  const stats = balanceStats.value || {}
-  return pickFirstNumber(
-    acc.balance,
-    acc.available_balance,
-    acc.wallet_balance,
-    acc.current_balance,
-    acc.balance_amount,
-    stats.balance,
-    stats.available_balance,
-    stats.wallet_balance
-  )
-})
-
-const balanceDepositUsd = computed(() => {
-  const acc = accountInfo.value || {}
-  const stats = balanceStats.value || {}
-  return pickFirstNumber(
-    acc.balance_deposit,
-    acc.deposit_balance,
-    stats.balance_deposit,
-    stats.deposit_balance
-  )
-})
-
-const balanceCurrencyText = computed(() => formatAppCurrency(balanceUsd.value))
-const balanceDepositCurrencyText = computed(() => formatAppCurrency(balanceDepositUsd.value))
-const todayIncomeCurrencyText = computed(() => formatAppCurrency(todayStats.value?.total_income))
-
-const copyUid = () => {
-  if (showUidPlaceholder.value) return
-  navigator.clipboard.writeText(displayUid.value).catch(() => {})
-}
 
 const handleLogout = () => {
   router.push('/hn/console')
-}
-
-const handleDeleteCache = async () => {
-  try {
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_scheme')
-    localStorage.removeItem('refresh_token')
-    localStorage.removeItem('mt_api_key')
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const key = localStorage.key(i)
-      if (!key) continue
-      if (key.startsWith('mt_cache_v1_')) localStorage.removeItem(key)
-    }
-    try { sessionStorage.clear() } catch (_) {}
-    if (typeof caches !== 'undefined' && caches?.keys) {
-      const keys = await caches.keys()
-      await Promise.all(keys.map((k) => caches.delete(k)))
-    }
-    router.replace('/hn/console')
-    try { window.location.reload() } catch (_) {}
-  } catch (_) {
-    errorMessage.value = 'Failed to delete cache'
-    showErrorModal.value = true
-  }
 }
 
 const fetchAccountInfo = async () => {
@@ -443,33 +250,13 @@ const fetchRankStatus = async () => {
   }
 }
 
-const fetchBalanceStats = async () => {
-  try {
-    const resp = await authAPI.getBalanceStatistics('all-time')
-    balanceStats.value = resp?.data || null
-  } catch (_) {
-    balanceStats.value = null
-  }
-}
-
-const fetchTodayStats = async () => {
-  try {
-    const resp = await authAPI.getBalanceStatistics('today')
-    todayStats.value = resp?.data || null
-  } catch (_) {
-    todayStats.value = null
-  }
-}
-
 const refreshProfileData = async () => {
   if (isRefreshing.value) return
   isRefreshing.value = true
   try {
     await Promise.all([
       fetchAccountInfo(),
-      fetchRankStatus(),
-      fetchBalanceStats(),
-      fetchTodayStats()
+      fetchRankStatus()
     ])
   } finally {
     lastRefreshedAt.value = Date.now()
@@ -486,25 +273,35 @@ onActivated(() => {
   if (now - lastRefreshedAt.value < 300) return
   refreshProfileData()
 })
-
 </script>
 
 <style scoped>
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 .app-container {
-  margin: 0 auto;
-  padding: 0;
   font-family: 'Inter', sans-serif;
-  background-color: #f8f8f8;
+  width: 100%;
   max-width: 412px;
-  min-height: 100vh;
+  background-color: #fdfaf4;
   position: relative;
-  padding-bottom: 68px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  min-height: 100vh;
+  padding-bottom: 80px;
   overflow-x: hidden;
+  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.section-padding {
+  padding: 0 20px;
+}
+
+h1, h2, h3, h4, p {
+  margin: 0;
 }
 
 a {
@@ -512,40 +309,62 @@ a {
   color: inherit;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-h1, h2, h3, p {
-  margin: 0;
+button {
+  border: none;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 /* Header */
-#section-header {
-  padding: 25px 20px 15px;
-}
-
-.header-content {
+.site-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  padding: 20px 20px 10px 20px;
 }
 
-.user-profile {
+.logo {
+  width: 152px;
+  height: auto;
+  object-fit: contain;
+}
+
+.header-actions {
   display: flex;
+  gap: 20px;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  text-align: center;
+  cursor: pointer;
 }
 
-.avatar-wrapper {
+.action-icon {
+  width: 39px;
+  height: 39px;
+  margin-bottom: 4px;
+  border-radius: 20px;
+}
+
+.action-text {
+  font-size: 10px;
+  color: #000000;
+  max-width: 60px;
+  line-height: 1.2;
+}
+
+.logout-icon-wrap {
   position: relative;
-  width: 31px;
-  height: 29px;
+  width: 37px;
+  height: 37px;
+  margin: 0 auto 4px;
 }
 
-.avatar-bg {
+.logout-icon-wrap .icon-bg {
   position: absolute;
   top: 0;
   left: 0;
@@ -553,329 +372,291 @@ h1, h2, h3, p {
   height: 100%;
 }
 
-.avatar-img {
+.logout-icon-wrap .icon-fg {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 95px;
-  height: 47px;
-  object-fit: contain;
+  width: 24px;
+  height: 24px;
 }
 
-.user-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.uid-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.uid-text {
-  font-size: 16px;
-  color: #000;
-  font-weight: 500;
-}
-
-.uid-placeholder {
-  display: inline-block;
-  width: 92px;
-  height: 18px;
-  background: #f6f0dd;
-  border-radius: 8px;
-  margin-left: 0px;
-  vertical-align: middle;
-}
-
-.uid-value {
-  margin-left: 6px;
-}
-
-.copy-icon {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-}
-
-.copy-icon.disabled {
-  opacity: 0.35;
-  pointer-events: none;
-}
-
-.site-text {
-  font-size: 12px;
-  color: #737373;
-}
-
-.logout-icon {
-  width: 26px;
-  height: 31px;
-  cursor: pointer;
-}
-
-/* Wallet */
-#section-wallet {
-  padding: 0 20px;
-}
-
-.balance-card {
-  background: linear-gradient(90deg, #f1faf9 0%, #f8fbfb 50%, #f1fbf9 100%);
-  border: 1px solid #ededed;
-  border-radius: 10px;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-  overflow: visible;
-}
-
-.balance-info {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  z-index: 2;
-}
-
-.balance-label-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.label-text {
-  font-size: 14px;
-  color: #000;
-}
-
-.currency-selector {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  padding: 0;
-  position: relative;
-  z-index: 3;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.balance-eye {
-  width: 18px;
-  height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.balance-eye-icon {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-.currency-text {
-  font-size: 12px;
-  color: #767676;
-}
-
-.arrow-down {
-  width: 14px;
-  height: 14px;
-  transform: rotate(270deg);
-}
-
-.currency-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 140px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-  z-index: 9999;
-}
-
-.currency-menu-item {
-  width: 100%;
-  padding: 10px 12px;
-  background: transparent;
-  border: none;
-  text-align: left;
-  font-size: 14px;
-  color: #000000;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.currency-menu-item + .currency-menu-item {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.currency-menu-item.active {
-  font-weight: 700;
-}
-
-.balance-amount {
-  font-size: 24px;
-  font-weight: 700;
-  color: #000;
-  margin-top: 4px;
-}
-
-.wallet-img {
-  width: 296px;
-  height: 66px;
-  padding-left: 90px;
-  object-fit: contain;
-  z-index: 1;
-}
-
-.stats-container {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  padding: 20px 10px;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stat-label {
-  font-size: 15px;
-  color: #000;
-}
-
-.stat-value {
-  font-size: 15px;
-  font-weight: 700;
-  color: #000;
-}
-
-/* Navigation */
-#section-navigation {
-  padding: 10px 0;
-}
-
-.tabs-container {
-  display: flex;
-  align-items: center;
-  padding: 0 28px;
-  gap: 35px;
+/* Account Info */
+#section-account-info .account-header {
   margin-bottom: 15px;
 }
 
-.tab {
-  font-size: 14px;
-  color: #686868;
-  cursor: pointer;
-  position: relative;
-  padding: 5px 0;
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 4px;
 }
 
-.tab.active {
-  color: #000;
-  font-weight: 500;
+.page-subtitle {
+  font-size: 12px;
+  color: #635f5f;
 }
 
-.tab-indicator {
-  position: absolute;
-  left: -11px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 20px;
-  background-color: #1b46f5;
-}
-
-.tab-underline {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #000;
-}
-
-.menu-list {
+.user-card {
+  background-color: #fdf5e6;
+  border: 1px solid #f3b73f;
+  border-radius: 10px;
+  padding: 15px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
-.menu-item {
+.user-avatar {
+  width: 53px;
+  height: 62px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 15px;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.user-contact {
+  font-size: 10px;
+  color: #000000;
+  line-height: 1.4;
+}
+
+.user-vip-status {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.vip-level {
+  font-size: 14px;
+  font-weight: 700;
+  color: #875a00;
+  font-style: italic;
+  margin-right: 5px;
+}
+
+.arrow-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.vip-upgrade-card {
+  background-color: #fdf5e6;
+  border: 1px solid #f3b73f;
+  border-radius: 10px;
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  cursor: pointer;
+}
+
+.vip-shield {
+  width: 70px;
+  height: 52px;
+  object-fit: contain;
+  margin-right: 10px;
+}
+
+.vip-upgrade-info {
+  flex: 1;
+}
+
+.vip-upgrade-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.vip-upgrade-desc {
+  font-size: 9px;
+  color: #000000;
+  line-height: 1.3;
+  max-width: 160px;
+}
+
+.btn-lihat-vip {
+  background-color: #f0b03d;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+/* My Account */
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.white-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.1);
+  padding: 15px 10px;
+  margin-bottom: 25px;
+}
+
+.my-account-grid {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 28px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
-.menu-item.readonly {
-  cursor: default;
-}
-
-.menu-item.readonly:active {
-  background-color: transparent;
-}
-
-.menu-item:active {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.menu-left {
+.grid-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 15px;
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
 }
 
-.menu-icon {
-  width: 24px;
-  height: 24px;
+.grid-icon-wrap {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 8px;
+}
+
+.grid-icon-wrap .icon-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.grid-icon-wrap .icon-fg-lg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 29px;
+  height: 27px;
   object-fit: contain;
 }
 
-.menu-text {
-  font-size: 14px;
-  color: #000;
+.item-label {
+  font-size: 10px;
+  color: #000000;
 }
 
-.menu-right {
+.divider {
+  width: 1px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Formal Services */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px 10px;
+}
+
+.service-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+}
+
+.service-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 8px;
+}
+
+.service-label {
+  font-size: 10px;
+  color: #000000;
+  max-width: 90px;
+}
+
+/* Security Banner */
+#section-security-banner {
+  margin-bottom: 30px;
+}
+
+.security-banner {
+  background-color: #fcf3df;
+  border-radius: 10px;
+  padding: 15px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  position: relative;
+  overflow: hidden;
 }
 
-.menu-value {
+.banner-content {
+  flex: 1;
+  z-index: 2;
+  max-width: 60%;
+}
+
+.banner-title {
   font-size: 14px;
-  color: #686868;
+  font-weight: 700;
+  color: #060606;
+  margin-bottom: 8px;
+  line-height: 1.3;
 }
 
-.menu-value-placeholder {
-  display: inline-block;
-  width: 96px;
+.banner-desc {
+  font-size: 10px;
+  color: #494949;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.btn-learn-more {
+  background: linear-gradient(90deg, #f4c142 0%, #f5ca51 100%);
+  border-radius: 10px;
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.btn-arrow {
+  width: 16px;
   height: 16px;
-  background: #f6f0dd;
-  border-radius: 8px;
+  margin-left: 4px;
 }
 
-.menu-arrow {
-  width: 18px;
-  height: 18px;
-  transform: rotate(0deg);
+.banner-image-container {
+  position: absolute;
+  right: -10px;
+  bottom: 0;
+  width: 151px;
+  height: 97px;
+  z-index: 1;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 </style>

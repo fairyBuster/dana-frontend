@@ -1,161 +1,143 @@
 <template>
-  <div class="app-container">
+  <div class="withdraw-page">
     <!-- Header -->
     <section id="section-header">
-      <header class="app-header">
-        <img src="/assets/image/4283_619.svg" alt="Back" class="back-icon" @click="goBack">
-        <h1 class="header-title">Payout</h1>
+      <header class="header">
+        <button class="back-btn" aria-label="Go back" @click="goBack">
+          <img src="/assets/images/21_33.svg" alt="">
+        </button>
+        <h1 class="header-title">Dana saya</h1>
       </header>
     </section>
 
-    <!-- Channel Payout -->
-    <section id="section-channel-payout">
-      <div class="channel-payout-content">
-        <h2 class="section-title" style="margin-bottom: 16px;">Choose channel payout</h2>
-        <div class="channel-grid">
-          <div
-            class="channel-card"
-            :class="{ active: selectedChannel === 'USDT' }"
-            @click="selectedChannel = 'USDT'"
-          >
-            <img src="/assets/image/65dd62c6e1300473a49c744e825c21008d000875.png" alt="USDT" class="channel-icon">
-            <span class="channel-name">USDT</span>
-            <div v-if="selectedChannel === 'USDT'" class="badge">OK</div>
+    <!-- Hero -->
+    <section id="section-hero">
+      <div class="hero-content">
+        <h2 class="hero-title">Tarik Dana</h2>
+        <p class="hero-subtitle">Tarik saldo Anda dengan aman dan cepat.</p>
+
+        <div class="balance-card">
+          <div class="balance-info">
+            <p class="balance-label">Saldo Tersedia</p>
+            <p class="balance-amount">{{ balanceDisplay }}</p>
+            <p class="balance-desc">Dana siap ditarik ke rekening Anda.</p>
           </div>
-          <div
-            class="channel-card"
-            :class="{ active: selectedChannel === 'IDR' }"
-            @click="selectedChannel = 'IDR'"
-          >
-            <img src="/assets/image/d85fb29e4e19dd899589dbf989e615ca933f1f52.png" alt="Rupiah IDR" class="channel-icon">
-            <span class="channel-name">Rupiah IDR</span>
-            <div v-if="selectedChannel === 'IDR'" class="badge">OK</div>
-          </div>
+          <img src="/assets/images/9f4d7b8ace034cd96bb6b037dd50538b5db64b68.png" alt="" class="balance-img">
         </div>
       </div>
     </section>
 
-    <!-- Choose Channel (Bank) -->
-    <section id="section-choose-channel">
-      <div class="choose-channel-content">
-        <div class="section-title-wrapper">
-          <div class="section-indicator"></div>
-          <h2 class="section-title">Choose channel</h2>
-        </div>
-        <div v-if="selectedUserBank" class="bank-card" @click="handleBankSelectClick">
-          <div class="bank-info">
-            <div class="bank-owner">{{ selectedUserBank.account_name || '-' }}</div>
-            <div class="bank-details">{{ selectedUserBank.account_number || '-' }}<br>{{ selectedUserBank.bank_name || selectedUserBank.bank_code || '-' }}</div>
+    <!-- Account -->
+    <section id="section-account">
+      <div class="section-container">
+        <div class="card">
+          <h3 class="card-title">Pilih Rekening Tujuan</h3>
+
+          <div v-if="selectedUserBank" class="selected-bank-card" @click="handleBankSelectClick">
+            <div class="selected-bank-info">
+              <span class="selected-bank-name">{{ selectedUserBank.account_name || '-' }}</span>
+              <span class="selected-bank-number">{{ selectedUserBank.account_number || '-' }}</span>
+              <span class="selected-bank-code">{{ selectedUserBank.bank_name || selectedUserBank.bank_code || '-' }}</span>
+            </div>
+            <img src="/assets/images/f8648f6433668b71d57f0c9b7251b169b98c2581.png" alt="" class="icon-wallet">
           </div>
-          <img src="/assets/image/a7278a84dccf299c032e11e26c6bad56b79f5ef7.png" alt="Selected" class="check-icon">
-        </div>
-        <div v-else class="bank-card" @click="handleBankSelectClick">
-          <div class="bank-info">
-            <div class="bank-owner">Select bank account</div>
-            <div class="bank-details">No bank account selected</div>
-          </div>
-          <img src="/assets/image/a7278a84dccf299c032e11e26c6bad56b79f5ef7.png" alt="Select" class="check-icon">
+
+          <button v-else class="add-account-btn" @click="handleBankSelectClick">
+            <div class="add-account-left">
+              <img src="/assets/images/24_195.svg" alt="" class="icon-plus">
+              <span class="add-account-text">Tambah rekening baru</span>
+            </div>
+            <img src="/assets/images/f8648f6433668b71d57f0c9b7251b169b98c2581.png" alt="" class="icon-wallet">
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- Enter Amount -->
-    <section id="section-enter-amount">
-      <div class="enter-amount-content">
-        <div class="section-title-wrapper">
-          <div class="section-indicator"></div>
-          <h2 class="section-title">Enter the payout amount</h2>
-        </div>
-        <div class="input-group">
-          <div class="input-field">
-            <span class="currency-label">USDT</span>
-            <div class="separator"></div>
+    <!-- Amount -->
+    <section id="section-amount">
+      <div class="section-container">
+        <div class="card">
+          <h3 class="card-title">Masukkan Nominal</h3>
+
+          <div class="input-wrapper">
             <input
               type="text"
               class="amount-input"
-              :value="displayUsdtAmount"
-              :readonly="selectedChannel !== 'USDT'"
-              inputmode="decimal"
-              @input="formatUsdtInput"
-              placeholder="Please enter your amount"
-            >
-          </div>
-          <div class="input-field">
-            <span class="currency-label">IDR</span>
-            <div class="separator"></div>
-            <input
-              type="text"
-              class="amount-input"
-              :value="displayIdrAmount"
-              :readonly="selectedChannel !== 'IDR'"
+              placeholder="Masukkan jumlah tarik dana yang Anda inginkan"
+              :value="displayAmount"
+              @input="handleAmountInput"
               inputmode="numeric"
-              @input="formatIdrInput"
-              placeholder="Please enter your amount with rupiah"
             >
           </div>
+
+          <div class="quick-amounts">
+            <button
+              v-for="amt in quickAmounts"
+              :key="amt.value"
+              class="quick-amount-btn"
+              :class="{ active: selectedQuickAmount === amt.value }"
+              @click="selectQuickAmount(amt.value)"
+            >
+              {{ amt.label }}
+            </button>
+          </div>
+
+          <div class="info-box">
+            <img src="/assets/images/0124373b87358a593909a03ffafd020b5948dccd.png" alt="" class="info-icon">
+            <span class="info-text">Minimum penarikan Rp 30.000</span>
+          </div>
         </div>
-        <p v-if="selectedChannel === 'USDT' && numericAmount > 0 && numericAmount < MIN_WITHDRAW_USDT" class="min-hint">
-          Minimum 13 USDT
-        </p>
       </div>
     </section>
 
     <!-- Summary -->
     <section id="section-summary">
-      <div class="summary-content">
-        <div class="summary-box">
-          <!-- <div class="summary-row">
-            <span>Minimum Payout</span>
-            <span class="val-with-line">{{ selectedChannel === 'USDT' ? 'USDT 3' : 'IDR 35,000' }}</span>
-          </div> -->
-          <div class="summary-row" style="margin-top: 8px;">
-            <span>Payout fee</span>
-            <span></span>
+      <div class="section-container">
+        <div class="card">
+          <h3 class="card-title">Ringkasan Penarikan</h3>
+
+          <div class="summary-details">
+            <div class="summary-row">
+              <span class="summary-label">Nominal Penarikan</span>
+              <span class="summary-value">{{ summaryNominal }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Biaya Admin</span>
+              <span class="summary-value">{{ summaryFee }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Estimasi Tiba</span>
+              <span class="summary-value">1-24 jam</span>
+            </div>
           </div>
-          <div class="summary-row">
-            <span>IDR</span>
-            <span>12%</span>
-          </div>
-          <div class="summary-row">
-            <span>USDT</span>
-            <span>USDT 3</span>
+
+          <hr class="summary-divider">
+
+          <div class="summary-total">
+            <span class="total-label">Total Diterima</span>
+            <span class="total-value">{{ summaryTotal }}</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Action -->
-    <section id="section-action">
-      <div class="action-content">
-        <button class="btn-payout" @click="handleWithdraw" :disabled="!isValidAmount || isSubmitting">
+    <!-- Footer -->
+    <section id="section-footer">
+      <footer class="footer">
+        <div class="info-box footer-info">
+          <img src="/assets/images/0124373b87358a593909a03ffafd020b5948dccd.png" alt="" class="info-icon">
+          <span class="info-text">Penarikan akan diproses setelah verifikasi selesai.</span>
+        </div>
+
+        <button
+          class="submit-btn"
+          :disabled="!isValidAmount || isSubmitting"
+          @click="handleWithdraw"
+        >
           <LoadingSpinner v-if="isSubmitting" :visible="true" message="" />
-          <span v-else>Payout</span>
+          <span v-else>Tarik Uang Sekarang</span>
         </button>
-      </div>
-    </section>
-
-    <!-- Instructions -->
-    <section id="section-instructions">
-      <div class="instructions-content">
-        <div class="instructions-box">
-          
-          <ul class="instructions-list">
-            <li> 🔹 The minimum withdrawal amount is USDT 3 for the IDR withdrawal channel.</li>
-            <li> 🔹 The minimum withdrawal amount is USDT 13 for the USDT withdrawal channel.</li>
-            <li> 🔹 All withdrawal transactions are processed automatically in real-time.</li>
-            <li> 🔹 Please ensure that your withdrawal account or wallet information is correct before submitting a withdrawal request.</li>
-            <li> 🔹 After completing the withdrawal request, refresh the page and check your account balance.</li>
-            <li> 🔹 Withdrawals below the minimum amount cannot be processed.</li>
-            <li> 🔹 All withdrawal transactions are handled directly through the official HUE company system.</li>
-            <li> 🔹 All withdrawal activities must only be carried out through the official HUE platform. Users are advised not to trust unreasonable offers or transactions outside the company.</li>
-            <li> 🔹 For security and verification purposes, please keep your withdrawal receipt or transaction proof for future reference if needed.</li>
-            <li> 🔹 By making a withdrawal, users are considered to have agreed to all HUE withdrawal rules and policies.</li>
-          </ul>
-          <p class="instructions-text">
-            Every withdrawal on HUE is processed automatically in real-time, and users are not required to report or submit any additional confirmation unless the withdrawal has not been received. Users are encouraged to document their withdrawal transactions through the official chat channel for positive and official activity purposes. Please ensure that all withdrawal activities are carried out only through the official HUE platform and keep your transaction proof for security and verification purposes when needed.
-          </p>
-        </div>
-      </div>
+      </footer>
     </section>
   </div>
 
@@ -165,27 +147,34 @@
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
 
-      <template v-if="(filteredUserBanks?.length || 0) > 0">
+      <template v-if="(userBanks?.length || 0) > 0">
         <div
-          v-for="bank in filteredUserBanks"
-          :key="bank?.id || `${bank?.bank_code || ''}-${bank?.account_number || ''}`"
+          v-for="bank in userBanks"
+          :key="bank?.id || `${bank?.bank_code}-${bank?.account_number}`"
           class="account-card"
           @click="selectBank(bank)"
         >
           <div class="account-details">
-            <span class="account-label">Bank Account</span>
+            <span class="account-label">Rekening Bank</span>
             <span class="account-number">{{ bank?.account_number || '-' }}</span>
             <span class="account-bank">{{ bank?.bank_name || bank?.bank_code || '-' }}</span>
             <span class="account-name">{{ bank?.account_name || '-' }}</span>
           </div>
-          <img class="radio-icon" src="/assets/image/a7278a84dccf299c032e11e26c6bad56b79f5ef7.png" alt="Selected">
+          <img
+            v-if="selectedUserBankId === bank?.id"
+            src="/assets/images/f8648f6433668b71d57f0c9b7251b169b98c2581.png"
+            alt=""
+            class="radio-icon"
+          >
         </div>
+
+        <button type="button" class="btn-add" @click="handleAddBank">Tambah Rekening Baru</button>
       </template>
 
       <template v-else>
-        <h3 class="sheet-title">Withdrawal Account</h3>
-        <p class="sheet-desc">No withdrawal account available for this channel.</p>
-        <button type="button" class="btn-add" @click="handleAddBank">Add Withdrawal Account</button>
+        <h3 class="sheet-title">Rekening Penarikan</h3>
+        <p class="sheet-desc">Belum ada rekening tersedia. Tambahkan rekening baru.</p>
+        <button type="button" class="btn-add" @click="handleAddBank">Tambah Rekening Baru</button>
       </template>
     </div>
   </section>
@@ -208,10 +197,12 @@ import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import { appSettings, formatAppCurrency, getRateToIdr } from '@/utils/settings'
 
 const router = useRouter()
+
 const withdrawableBalance = ref(0)
 const userBanks = ref([])
 const selectedUserBankId = ref(null)
 const withdrawAmount = ref('')
+const selectedQuickAmount = ref(null)
 const isSubmitting = ref(false)
 const serviceId = ref(null)
 const successModalOpen = ref(false)
@@ -221,11 +212,23 @@ const successMessage = ref('')
 const errorMessage = ref('')
 const isRefreshing = ref(false)
 const lastRefreshedAt = ref(0)
-const selectedChannel = ref('IDR')
-let successRedirectTimeoutId = 0
-let hasRedirectedAfterSuccess = false
 const usdtToIdrRate = ref(getRateToIdr() || 16000)
 const currencyRateLoaded = ref(false)
+let successRedirectTimeoutId = 0
+let hasRedirectedAfterSuccess = false
+
+const quickAmounts = [
+  { value: 30000, label: 'Rp 30.000' },
+  { value: 500000, label: 'Rp 500.000' },
+  { value: 1000000, label: 'Rp 1.000.000' },
+  { value: 5000000, label: 'Rp 5.000.000' }
+]
+
+const SERVICE_FEE_RATE = 0.10
+const MIN_WITHDRAW_IDR = 30000
+const MAX_WITHDRAW_IDR = 100000000
+const MIN_WITHDRAW_USDT_FOR_IDR = 3
+const MAX_WITHDRAW_USDT = 1000000
 
 watch(
   () => appSettings.currency?.rate_to_idr,
@@ -236,172 +239,102 @@ watch(
   { immediate: true }
 )
 
-const SERVICE_FEE_RATE = 0.10
-const MAX_WITHDRAW_IDR = 100000000
-const MIN_WITHDRAW_USDT_FOR_IDR = 3
-const MIN_WITHDRAW_USDT = 13
-const MAX_WITHDRAW_USDT = 1000000
-
-const normalizeCurrencyCode = (value) => {
-  const raw = String(value || '').trim().toUpperCase()
-  if (raw === 'IDR') return 'IDR'
-  if (raw === 'USD' || raw === 'USDT') return raw
-  return ''
-}
-
-const mapCurrencyToChannel = (currencyCode) => {
-  const code = normalizeCurrencyCode(currencyCode)
-  if (code === 'IDR') return 'IDR'
-  if (code === 'USD' || code === 'USDT') return 'USDT'
-  return selectedChannel.value
-}
-
-const isBankCompatibleWithChannel = (bank, channel) => {
-  const code = normalizeCurrencyCode(bank?.currency_code)
-  if (channel === 'IDR') return code === 'IDR'
-  if (channel === 'USDT') return code === 'USD' || code === 'USDT'
-  return true
-}
-
-const parseUsdtDecimal = (value) => {
+const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return 0
-  const raw = String(value).trim()
-  if (!raw) return 0
-
-  let s = raw.replace(/\s+/g, '')
-  s = s.replace(/[^0-9.,]/g, '')
-  if (!s) return 0
-
-  const hasDot = s.includes('.')
-  const hasComma = s.includes(',')
-  if (hasDot && hasComma) {
-    const lastDot = s.lastIndexOf('.')
-    const lastComma = s.lastIndexOf(',')
-    const decimalSep = lastDot > lastComma ? '.' : ','
-    const groupSep = decimalSep === '.' ? ',' : '.'
-    s = s.split(groupSep).join('')
-    if (decimalSep === ',') s = s.replace(',', '.')
-  } else if (!hasDot && hasComma) {
-    s = s.replace(',', '.')
-  } else if (hasDot && !hasComma) {
-    // ok
-  }
-
-  const firstDot = s.indexOf('.')
-  if (firstDot >= 0) {
-    const before = s.slice(0, firstDot).replace(/\./g, '')
-    const after = s.slice(firstDot + 1).replace(/\./g, '')
-    s = `${before}.${after}`
-  }
-
-  const parts = s.split('.')
-  const intPart = (parts[0] || '').replace(/^0+(?=\d)/, '') || '0'
-  const fracPart = (parts[1] || '').slice(0, 8)
-  const normalized = fracPart.length ? `${intPart}.${fracPart}` : intPart
-
-  const n = Number(normalized)
+  const n = Number(String(value).replace(/[^0-9.-]/g, ''))
   return Number.isFinite(n) ? n : 0
 }
 
 const numericAmount = computed(() => {
-  const raw = String(withdrawAmount.value || '').trim()
-  if (!raw) return 0
-  if (selectedChannel.value === 'USDT') return parseUsdtDecimal(raw)
-  const digits = raw.replace(/[^0-9]/g, '')
-  return Number.parseInt(digits, 10) || 0
+  const raw = String(withdrawAmount.value || '').replace(/[^0-9]/g, '')
+  return Number.parseInt(raw, 10) || 0
 })
 
-const idrAmountNumber = computed(() => {
-  const amount = numericAmount.value
-  if (!amount) return 0
-  if (selectedChannel.value === 'IDR') return amount
-  return Math.round(amount * Number(usdtToIdrRate.value || 0))
-})
+const displayAmount = computed(() => withdrawAmount.value || '')
 
-const usdtAmountNumber = computed(() => {
-  const amount = numericAmount.value
-  if (!amount) return 0
-  if (selectedChannel.value === 'USDT') return amount
-  const rate = Number(usdtToIdrRate.value || 0)
-  if (!rate) return 0
-  const decimals = Number.isFinite(Number(appSettings.currency?.decimals)) ? Number(appSettings.currency.decimals) : 2
-  return Number((amount / rate).toFixed(Math.max(0, Math.min(8, decimals))))
-})
-
-const minWithdrawIdr = computed(() => {
-  const rate = Number(usdtToIdrRate.value || 0)
-  if (!rate) return 0
-  return Math.ceil(MIN_WITHDRAW_USDT_FOR_IDR * rate)
-})
+const balanceDisplay = computed(() => formatAppCurrency(withdrawableBalance.value * (usdtToIdrRate.value || 16000)))
 
 const usdAmountToSubmit = computed(() => {
-  if (selectedChannel.value === 'USDT') return Number(numericAmount.value || 0)
-  return Number(usdtAmountNumber.value || 0)
+  const rate = Number(usdtToIdrRate.value || 0)
+  if (!rate) return 0
+  return Number((numericAmount.value / rate).toFixed(2))
 })
 
-const displayUsdtAmount = computed(() => {
-  if (selectedChannel.value === 'USDT') {
-    return String(withdrawAmount.value || '')
-  }
-  const num = usdtAmountNumber.value
-  if (!num) return ''
-  return formatAppCurrency(num, { symbol: '', decimals: 2 })
+const summaryNominal = computed(() => {
+  if (!numericAmount.value) return 'Rp 0'
+  return formatAppCurrency(numericAmount.value, { symbol: 'Rp', decimals: 0 })
 })
 
-const displayIdrAmount = computed(() => {
-  if (selectedChannel.value === 'IDR') {
-    return String(withdrawAmount.value || '')
-  }
-  const num = idrAmountNumber.value
-  if (!num) return ''
-  return formatAppCurrency(num, { symbol: '', decimals: 0 })
+const summaryFee = computed(() => {
+  if (!numericAmount.value) return 'Rp 0'
+  const fee = Math.round(numericAmount.value * SERVICE_FEE_RATE)
+  return formatAppCurrency(fee, { symbol: 'Rp', decimals: 0 })
 })
 
-const feeAmount = computed(() => {
-  return Math.round(numericAmount.value * SERVICE_FEE_RATE)
-})
-
-const afterFeeAmount = computed(() => {
-  return Math.max(0, numericAmount.value - feeAmount.value)
+const summaryTotal = computed(() => {
+  if (!numericAmount.value) return 'Rp 0'
+  const fee = Math.round(numericAmount.value * SERVICE_FEE_RATE)
+  const total = Math.max(0, numericAmount.value - fee)
+  return formatAppCurrency(total, { symbol: 'Rp', decimals: 0 })
 })
 
 const isValidAmount = computed(() => {
   if (isSubmitting.value) return false
   if (!selectedUserBankId.value) return false
-  if (selectedUserBank.value && !isBankCompatibleWithChannel(selectedUserBank.value, selectedChannel.value)) return false
   const amount = numericAmount.value
-  if (amount <= 0) return false
-  if (selectedChannel.value === 'USDT') {
-    if (amount < MIN_WITHDRAW_USDT || amount > MAX_WITHDRAW_USDT) return false
-    if (amount > withdrawableBalance.value) return false
-    return true
-  }
+  if (amount < MIN_WITHDRAW_IDR || amount > MAX_WITHDRAW_IDR) return false
   const rate = Number(usdtToIdrRate.value || 0)
   if (!rate) return false
-  const minIdr = minWithdrawIdr.value
-  if (minIdr > 0 && amount < minIdr) return false
-  if (amount > MAX_WITHDRAW_IDR) return false
   const amountUsd = amount / rate
   if (amountUsd < MIN_WITHDRAW_USDT_FOR_IDR || amountUsd > MAX_WITHDRAW_USDT) return false
   if (amountUsd > withdrawableBalance.value) return false
   return true
 })
 
+const selectedUserBank = computed(() => {
+  const id = selectedUserBankId.value
+  return (userBanks.value || []).find((b) => String(b?.id) === String(id)) || null
+})
+
 const goBack = () => {
-  router.go(-1)
+  try {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+  } catch (_) {}
+  router.push('/hn/user')
 }
 
-const goToBindBank = () => {
-  router.push('/hn/user/account')
+const handleAmountInput = (event) => {
+  const raw = event?.target?.value?.replace(/[^0-9]/g, '') || ''
+  if (!raw) {
+    withdrawAmount.value = ''
+    selectedQuickAmount.value = null
+    return
+  }
+  const num = Number.parseInt(raw, 10)
+  if (!Number.isFinite(num) || num <= 0) {
+    withdrawAmount.value = ''
+    selectedQuickAmount.value = null
+    return
+  }
+  withdrawAmount.value = formatAppCurrency(num, { symbol: '', decimals: 0 })
+  const match = quickAmounts.find(a => a.value === num)
+  selectedQuickAmount.value = match ? match.value : null
+}
+
+const selectQuickAmount = (value) => {
+  selectedQuickAmount.value = value
+  withdrawAmount.value = formatAppCurrency(value, { symbol: '', decimals: 0 })
+}
+
+const handleBankSelectClick = () => {
+  isBottomSheetOpen.value = true
 }
 
 const closeBottomSheet = () => {
   isBottomSheetOpen.value = false
-}
-
-const handleAddBank = () => {
-  closeBottomSheet()
-  goToBindBank()
 }
 
 const selectBank = (bank) => {
@@ -411,208 +344,9 @@ const selectBank = (bank) => {
   closeBottomSheet()
 }
 
-const handleBankSelectClick = () => {
-  isBottomSheetOpen.value = true
-}
-
-const formatUsdtInput = (event) => {
-  if (selectedChannel.value !== 'USDT') return
-  let raw = String(event?.target?.value ?? '')
-  raw = raw.replace(/\s+/g, '')
-  raw = raw.replace(/[^0-9.,]/g, '')
-  if (!raw) {
-    withdrawAmount.value = ''
-    return
-  }
-
-  const hasDot = raw.includes('.')
-  const hasComma = raw.includes(',')
-  if (hasDot && hasComma) {
-    const lastDot = raw.lastIndexOf('.')
-    const lastComma = raw.lastIndexOf(',')
-    const decimalSep = lastDot > lastComma ? '.' : ','
-    const groupSep = decimalSep === '.' ? ',' : '.'
-    raw = raw.split(groupSep).join('')
-    if (decimalSep === ',') raw = raw.replace(',', '.')
-  } else if (!hasDot && hasComma) {
-    raw = raw.replace(',', '.')
-  }
-
-  if (raw.startsWith('.')) raw = `0${raw}`
-  const firstDot = raw.indexOf('.')
-  if (firstDot >= 0) {
-    const before = raw.slice(0, firstDot).replace(/\./g, '')
-    let after = raw.slice(firstDot + 1).replace(/\./g, '')
-    after = after.slice(0, 8)
-    withdrawAmount.value = after.length ? `${before || '0'}.${after}` : `${before || '0'}.`
-    return
-  }
-
-  const normalizedInt = raw.replace(/^0+(?=\d)/, '') || '0'
-  withdrawAmount.value = normalizedInt
-}
-
-const formatIdrInput = (event) => {
-  if (selectedChannel.value !== 'IDR') return
-  const raw = event?.target?.value?.replace(/[^0-9]/g, '') || ''
-  if (!raw) {
-    withdrawAmount.value = ''
-    return
-  }
-  const n = Number.parseInt(raw, 10)
-  withdrawAmount.value = Number.isFinite(n) ? formatAppCurrency(n, { symbol: '', decimals: 0 }) : ''
-}
-
-const formatCurrency = (value) => {
-  const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : Number(value || 0)
-  if (!Number.isFinite(num)) return '0'
-  return formatAppCurrency(num, { symbol: '', decimals: 0 })
-}
-
-const parseNumber = (value) => {
-  if (value === null || value === undefined || value === '') return 0
-  const n = Number(String(value).replace(/[^0-9.-]/g, ''))
-  return Number.isFinite(n) ? n : 0
-}
-
-const normalizeWithdrawErrorMessage = (err) => {
-  const data = err?.response?.data
-  const nfe = data?.non_field_errors
-  const nfeText = Array.isArray(nfe) ? String(nfe[0] || '') : String(nfe || '')
-  const nfeLower = nfeText.toLowerCase().replace(/\s+/g, ' ').trim()
-  const hasNoActiveProductId =
-    nfeLower.includes('setidaknya') && nfeLower.includes('produk') && nfeLower.includes('aktif')
-  const hasNoActiveProductEn =
-    nfeLower.includes('at least') && nfeLower.includes('active') && nfeLower.includes('product')
-  if (hasNoActiveProductId || hasNoActiveProductEn) return 'No active cloud yet'
-  const raw =
-    (typeof data === 'string' && data) ||
-    data?.detail ||
-    data?.message ||
-    err?.message ||
-    ''
-  const s = String(raw || '').toLowerCase()
-  if (
-    s.includes('saldo') ||
-    s.includes('balance') ||
-    s.includes('insufficient') ||
-    s.includes('tidak cukup') ||
-    s.includes('kurang')
-  ) {
-    return 'Make sure the withdrawal amount matches your available balance.'
-  }
-  if (s.includes('1 kali') || s.includes('sekali') || s.includes('daily') || s.includes('hari')) {
-    return 'You can only make 1 withdrawal per day.'
-  }
-  if (s.includes('minimum') || s.includes('maksimum') || s.includes('maximum') || s.includes('min')) {
-    return 'Make sure your withdrawal amount is within the allowed range.'
-  }
-  if (raw) return String(raw)
-  return 'Request failed, please refresh the page'
-}
-
-const fetchAccountInfo = async () => {
-  try {
-    const resp = await authAPI.getAccountInfo()
-    withdrawableBalance.value = parseNumber(resp?.data?.balance)
-  } catch (_) {
-    withdrawableBalance.value = 0
-  }
-}
-
-const fetchDefaultService = async () => {
-  try {
-    const resp = await withdrawalAPI.getServices()
-    const data = resp?.data
-    const list = Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : []
-    const first = list?.[0]
-    if (first?.id) serviceId.value = first.id
-    const candidates = [
-      first?.usdt_to_idr_rate,
-      first?.usd_to_idr_rate,
-      first?.exchange_rate,
-      first?.rate,
-      first?.idr_rate,
-      first?.idr_per_usdt
-    ]
-    const picked = candidates.map((v) => parseNumber(v)).find((n) => n >= 1000 && n <= 1000000) || 0
-    if (!currencyRateLoaded.value && picked) usdtToIdrRate.value = picked
-  } catch (_) {
-    serviceId.value = null
-  }
-}
-
-const fetchCurrencySettings = async () => {
-  try {
-    const resp = await authAPI.getCurrencySettings()
-    const data = resp?.data
-    if (!data || typeof data !== 'object') return
-
-    appSettings.currency = {
-      currency_code: String(data.currency_code || appSettings.currency?.currency_code || 'USD'),
-      rate_to_idr: String(data.rate_to_idr || appSettings.currency?.rate_to_idr || '1'),
-      symbol: String(data.symbol || appSettings.currency?.symbol || ''),
-      symbol_position: String(data.symbol_position || appSettings.currency?.symbol_position || 'prefix'),
-      symbol_space: Boolean(data.symbol_space ?? appSettings.currency?.symbol_space),
-      thousand_sep: String(data.thousand_sep || appSettings.currency?.thousand_sep || ','),
-      decimal_sep: String(data.decimal_sep || appSettings.currency?.decimal_sep || '.'),
-      decimals: Number.isFinite(Number(data.decimals)) ? Number(data.decimals) : Number(appSettings.currency?.decimals || 2)
-    }
-
-    const next = getRateToIdr()
-    if (next > 0) {
-      usdtToIdrRate.value = next
-      currencyRateLoaded.value = true
-    }
-  } catch (_) {
-  }
-}
-
-const normalizeUserBanksResponse = (data) => {
-  if (!data) return []
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data.results)) return data.results
-  return []
-}
-
-const selectedUserBank = computed(() => {
-  const id = selectedUserBankId.value
-  return (userBanks.value || []).find((b) => String(b?.id) === String(id)) || null
-})
-
-const filteredUserBanks = computed(() => {
-  const list = userBanks.value || []
-  return list.filter((b) => isBankCompatibleWithChannel(b, selectedChannel.value))
-})
-
-const fetchUserBanks = async () => {
-  try {
-    const resp = await bankAPI.getUserBanks()
-    const list = normalizeUserBanksResponse(resp?.data)
-    userBanks.value = list
-    const defaultBank = list.find((b) => Boolean(b?.is_default))
-    const pick = defaultBank || list[0] || null
-    selectedUserBankId.value = pick?.id ?? null
-  } catch (_) {
-    userBanks.value = []
-    selectedUserBankId.value = null
-  }
-}
-
-const refreshWithdrawData = async () => {
-  if (isRefreshing.value) return
-  isRefreshing.value = true
-  try {
-    await Promise.all([
-      fetchAccountInfo(),
-      fetchCurrencySettings(),
-      fetchDefaultService(),
-      fetchUserBanks()
-    ])
-  } finally {
-    lastRefreshedAt.value = Date.now()
-    isRefreshing.value = false
-  }
+const handleAddBank = () => {
+  closeBottomSheet()
+  router.push('/hn/user/account')
 }
 
 const handleSuccessConfirm = () => {
@@ -625,15 +359,34 @@ const handleSuccessConfirm = () => {
   router.push('/hn/home')
 }
 
+const normalizeWithdrawErrorMessage = (err) => {
+  const data = err?.response?.data
+  const nfe = data?.non_field_errors
+  const nfeText = Array.isArray(nfe) ? String(nfe[0] || '') : String(nfe || '')
+  const nfeLower = nfeText.toLowerCase().replace(/\s+/g, ' ').trim()
+  if ((nfeLower.includes('setidaknya') && nfeLower.includes('produk') && nfeLower.includes('aktif')) ||
+      (nfeLower.includes('at least') && nfeLower.includes('active') && nfeLower.includes('product'))) {
+    return 'Belum ada proteksi aktif'
+  }
+  const raw = (typeof data === 'string' && data) || data?.detail || data?.message || err?.message || ''
+  const s = String(raw || '').toLowerCase()
+  if (s.includes('saldo') || s.includes('balance') || s.includes('insufficient') || s.includes('tidak cukup')) {
+    return 'Pastikan nominal penarikan sesuai dengan saldo tersedia.'
+  }
+  if (s.includes('1 kali') || s.includes('sekali') || s.includes('daily') || s.includes('hari')) {
+    return 'Anda hanya dapat melakukan 1 penarikan per hari.'
+  }
+  if (s.includes('minimum') || s.includes('maksimum') || s.includes('maximum') || s.includes('min')) {
+    return 'Pastikan nominal penarikan dalam batas yang diizinkan.'
+  }
+  if (raw) return String(raw)
+  return 'Permintaan gagal, silakan coba lagi'
+}
+
 const handleWithdraw = async () => {
   if (!isValidAmount.value) return
   if (!selectedUserBankId.value) {
-    errorMessage.value = 'Please select a bank account'
-    errorModalOpen.value = true
-    return
-  }
-  if (selectedUserBank.value && !isBankCompatibleWithChannel(selectedUserBank.value, selectedChannel.value)) {
-    errorMessage.value = 'Selected bank account does not match the payout channel'
+    errorMessage.value = 'Silakan pilih rekening tujuan'
     errorModalOpen.value = true
     return
   }
@@ -647,7 +400,7 @@ const handleWithdraw = async () => {
       pin: '',
       service_id: serviceId.value ?? 0
     })
-    successMessage.value = 'Your request has been received by the system.'
+    successMessage.value = 'Permintaan penarikan Anda telah diterima sistem.'
     hasRedirectedAfterSuccess = false
     successModalOpen.value = true
     if (successRedirectTimeoutId) {
@@ -668,6 +421,79 @@ const handleWithdraw = async () => {
   }
 }
 
+const fetchAccountInfo = async () => {
+  try {
+    const resp = await authAPI.getAccountInfo()
+    withdrawableBalance.value = parseNumber(resp?.data?.balance)
+  } catch (_) {
+    withdrawableBalance.value = 0
+  }
+}
+
+const fetchDefaultService = async () => {
+  try {
+    const resp = await withdrawalAPI.getServices()
+    const data = resp?.data
+    const list = Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : []
+    const first = list?.[0]
+    if (first?.id) serviceId.value = first.id
+    const candidates = [first?.usdt_to_idr_rate, first?.usd_to_idr_rate, first?.exchange_rate, first?.rate, first?.idr_rate]
+    const picked = candidates.map((v) => parseNumber(v)).find((n) => n >= 1000 && n <= 1000000) || 0
+    if (!currencyRateLoaded.value && picked) usdtToIdrRate.value = picked
+  } catch (_) {
+    serviceId.value = null
+  }
+}
+
+const fetchCurrencySettings = async () => {
+  try {
+    const resp = await authAPI.getCurrencySettings()
+    const data = resp?.data
+    if (!data || typeof data !== 'object') return
+    appSettings.currency = {
+      currency_code: String(data.currency_code || appSettings.currency?.currency_code || 'USD'),
+      rate_to_idr: String(data.rate_to_idr || appSettings.currency?.rate_to_idr || '1'),
+      symbol: String(data.symbol || appSettings.currency?.symbol || ''),
+      symbol_position: String(data.symbol_position || appSettings.currency?.symbol_position || 'prefix'),
+      symbol_space: Boolean(data.symbol_space ?? appSettings.currency?.symbol_space),
+      thousand_sep: String(data.thousand_sep || appSettings.currency?.thousand_sep || ','),
+      decimal_sep: String(data.decimal_sep || appSettings.currency?.decimal_sep || '.'),
+      decimals: Number.isFinite(Number(data.decimals)) ? Number(data.decimals) : Number(appSettings.currency?.decimals || 2)
+    }
+    const next = getRateToIdr()
+    if (next > 0) {
+      usdtToIdrRate.value = next
+      currencyRateLoaded.value = true
+    }
+  } catch (_) {}
+}
+
+const fetchUserBanks = async () => {
+  try {
+    const resp = await bankAPI.getUserBanks()
+    const data = resp?.data
+    const list = Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : []
+    userBanks.value = list
+    const defaultBank = list.find((b) => Boolean(b?.is_default))
+    const pick = defaultBank || list[0] || null
+    selectedUserBankId.value = pick?.id ?? null
+  } catch (_) {
+    userBanks.value = []
+    selectedUserBankId.value = null
+  }
+}
+
+const refreshWithdrawData = async () => {
+  if (isRefreshing.value) return
+  isRefreshing.value = true
+  try {
+    await Promise.all([fetchAccountInfo(), fetchCurrencySettings(), fetchDefaultService(), fetchUserBanks()])
+  } finally {
+    lastRefreshedAt.value = Date.now()
+    isRefreshing.value = false
+  }
+}
+
 onBeforeUnmount(() => {
   if (successRedirectTimeoutId) {
     window.clearTimeout(successRedirectTimeoutId)
@@ -684,31 +510,6 @@ onActivated(() => {
   if (now - lastRefreshedAt.value < 300) return
   refreshWithdrawData()
 })
-
-watch(
-  () => selectedUserBank.value?.currency_code,
-  (next, prev) => {
-    if (next === prev) return
-    if (!selectedUserBank.value) return
-    const nextChannel = mapCurrencyToChannel(selectedUserBank.value?.currency_code)
-    if (nextChannel !== selectedChannel.value) {
-      selectedChannel.value = nextChannel
-      withdrawAmount.value = ''
-    }
-  }
-)
-
-watch(
-  () => selectedChannel.value,
-  (next, prev) => {
-    if (next === prev) return
-    withdrawAmount.value = ''
-    if (selectedUserBank.value && !isBankCompatibleWithChannel(selectedUserBank.value, next)) {
-      const first = (userBanks.value || []).find((b) => isBankCompatibleWithChannel(b, next)) || null
-      selectedUserBankId.value = first?.id ?? null
-    }
-  }
-)
 </script>
 
 <style scoped>
@@ -718,326 +519,387 @@ watch(
   padding: 0;
 }
 
-.app-container {
+.withdraw-page {
   font-family: 'Inter', sans-serif;
   margin: 0 auto;
-  padding: 0;
-  background-color: #f8f8f8;
+  max-width: 412px;
+  background-color: #fbfaf7;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 100%;
-}
-
-h1, h2, h3, p {
-  margin: 0;
-}
-
-section {
-  width: 100%;
-}
-
-.section-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.section-indicator {
-  width: 4px;
-  height: 16px;
-  background-color: #1b46f5;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #000000;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Header */
-.app-header {
+.header {
+  display: flex;
+  align-items: center;
+  padding: 24px 20px;
+  gap: 16px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 0;
-  position: relative;
 }
 
-.back-icon {
-  position: absolute;
-  left: 10px;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
+.back-btn img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .header-title {
   font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+}
+
+/* Hero */
+.hero-content {
+  padding: 0 20px 24px;
+}
+
+.hero-title {
+  font-size: 24px;
   font-weight: 700;
-  color: #000000;
+  color: #000;
+  margin: 0 0 8px 0;
 }
 
-/* Channel Payout */
-.channel-payout-content {
-  padding: 16px 20px;
+.hero-subtitle {
+  font-size: 14px;
+  color: #635f5f;
+  margin: 0 0 24px 0;
 }
 
-.channel-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.channel-card {
-  background-color: #ffffff;
-  border-radius: 5px;
-  padding: 16px;
+.balance-card {
+  background: linear-gradient(90deg, #f4c142 0%, #f8dd89 46.63%, #f5ca51 100%);
+  border-radius: 10px;
+  padding: 20px;
+  position: relative;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: 12px;
+}
+
+.balance-info {
   position: relative;
-  border: 2px solid transparent;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  cursor: pointer;
-  transition: border-color 0.2s;
+  z-index: 2;
+  width: 65%;
 }
 
-.channel-card.active {
-  border-color: #1b46f5;
+.balance-label {
+  color: #fff;
+  font-size: 14px;
+  margin: 0 0 4px 0;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15);
 }
 
-.channel-icon {
-  width: 53px;
-  height: 53px;
-  object-fit: contain;
+.balance-amount {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15);
 }
 
-.channel-name {
-  font-size: 12px;
-  color: #000000;
-  font-weight: 600;
-}
-
-.badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: #1b46f5;
-  color: #ffffff;
+.balance-desc {
+  color: #7d7d7d;
   font-size: 10px;
-  padding: 2px 6px;
-  border-bottom-left-radius: 5px;
-  font-weight: 600;
+  margin: 0;
 }
 
-/* Choose Channel (Bank) */
-.choose-channel-content {
-  padding: 16px 20px;
+.balance-img {
+  position: absolute;
+  right: -10px;
+  top: -40px;
+  width: 180px;
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
 }
 
-.bank-card {
-  background-color: #ffffff;
-  border: 1px solid #f4f4f4;
-  border-radius: 5px;
+/* Account */
+#section-account .section-container {
+  padding: 0 20px 24px;
+}
+
+#section-account .card {
+  background-color: #fefefe;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.08);
   padding: 16px;
+}
+
+#section-account .card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #060606;
+  margin: 0 0 16px 0;
+}
+
+.add-account-btn {
+  width: 100%;
+  background-color: #fefefe;
+  border: 1px solid #cfcfcf;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+.add-account-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-plus {
+  width: 20px;
+  height: 20px;
+}
+
+.add-account-text {
+  font-size: 14px;
+  color: #060606;
+}
+
+.icon-wallet {
+  width: 24px;
+  height: 24px;
+}
+
+.selected-bank-card {
+  width: 100%;
+  background-color: #fefefe;
+  border: 1px solid #f4bd40;
+  border-radius: 10px;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
 }
 
-.bank-info {
+.selected-bank-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
-.bank-owner {
-  font-size: 14px;
-  color: #000000;
-  font-weight: 600;
-}
-
-.bank-details {
-  font-size: 14px;
-  color: #707070;
-  line-height: 1.4;
-}
-
-.check-icon {
-  width: 25px;
-  height: 25px;
-  object-fit: contain;
-}
-
-/* Enter Amount */
-.enter-amount-content {
-  padding: 16px 20px;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.input-field {
-  background-color: #ffffff;
-  border: 1px solid #eaeaea;
-  border-radius: 20px;
-  padding: 15px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.currency-label {
+.selected-bank-name {
   font-size: 14px;
   font-weight: 600;
-  color: #000000;
-  width: 36px;
+  color: #060606;
 }
 
-.separator {
-  width: 1px;
-  height: 16px;
-  background-color: #777777;
-  opacity: 0.5;
+.selected-bank-number {
+  font-size: 12px;
+  color: #635f5f;
 }
 
-.placeholder-text {
+.selected-bank-code {
+  font-size: 12px;
+  color: #8a8888;
+}
+
+/* Amount */
+#section-amount .section-container {
+  padding: 0 20px 24px;
+}
+
+#section-amount .card {
+  background-color: #fefefe;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+}
+
+#section-amount .card-title {
   font-size: 14px;
-  color: #aaaaaa;
+  font-weight: 600;
+  color: #060606;
+  margin: 0 0 16px 0;
+}
+
+.input-wrapper {
+  margin-bottom: 16px;
 }
 
 .amount-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  color: #000000;
-  outline: none;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #cfcfcf;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #333;
+  background-color: #fefefe;
   font-family: 'Inter', sans-serif;
-  min-width: 0;
 }
 
 .amount-input::placeholder {
-  color: #aaaaaa;
+  color: #635f5f;
 }
 
-.amount-input[readonly] {
-  color: #777777;
+.amount-input:focus {
+  outline: none;
+  border-color: #f4bd40;
 }
 
-.min-hint {
-  margin-top: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #d32f2f;
+.quick-amounts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.quick-amount-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #fefefe;
+  border: 1px solid #cfcfcf;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #000;
+  cursor: pointer;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.quick-amount-btn.active {
+  border-color: #f4bd40;
+  color: #f4bd40;
+}
+
+.quick-amount-btn:hover {
+  border-color: #f4bd40;
+}
+
+.info-box {
+  background-color: #fbefd8;
+  border-radius: 5px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.info-text {
+  font-size: 12px;
+  color: #635f5f;
 }
 
 /* Summary */
-.summary-content {
-  padding: 16px 20px;
+#section-summary .section-container {
+  padding: 0 20px 24px;
 }
 
-.summary-box {
-  background-color: #f1f5ff;
-  border-radius: 5px;
+#section-summary .card {
+  background-color: #fefefe;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.08);
   padding: 16px;
+}
+
+#section-summary .card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #060606;
+  margin: 0 0 16px 0;
+}
+
+.summary-details {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 14px;
-  color: #727272;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
+  font-size: 12px;
+  color: #8a8888;
+}
+
+.summary-divider {
+  border: none;
+  border-top: 1px dashed rgba(0, 0, 0, 0.5);
+  margin: 0 0 16px 0;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
-.val-with-line {
-  border-bottom: 1px solid #000000;
-  padding-bottom: 2px;
-  min-width: 50px;
-  text-align: right;
-  color: #444444;
+.total-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #060606;
 }
 
-/* Action */
-.action-content {
-  padding: 16px 20px;
-}
-
-.btn-payout {
-  width: 100%;
-  background-color: #1b46f5;
-  color: #ffffff;
-  border: none;
-  border-radius: 5px;
-  padding: 16px;
+.total-value {
   font-size: 16px;
   font-weight: 700;
+  color: #060606;
+}
+
+/* Footer */
+.footer {
+  padding: 0 20px 40px;
+  margin-top: auto;
+}
+
+.footer-info {
+  margin-bottom: 16px;
+}
+
+.submit-btn {
+  width: 100%;
+  background-color: #f3b73f;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
-  transition: background-color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.2s ease;
 }
 
-.btn-payout:hover {
-  background-color: #1538c4;
+.submit-btn:active {
+  opacity: 0.8;
 }
 
-.btn-payout:disabled {
+.submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* Instructions */
-.instructions-content {
-  padding: 16px 10px;
-}
-
-.instructions-box {
-  background: linear-gradient(360deg, rgba(255, 255, 255, 0.47) 0%, rgba(190, 215, 249, 0.47) 100%);
-  border: 1px solid #ffffff;
-  border-radius: 5px;
-  padding: 16px;
-}
-
-.instructions-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #000000;
-  margin-bottom: 8px;
-}
-
-.instructions-text {
-  font-size: 14px;
-  color: #5e5e5e;
-  line-height: 1.6;
-}
-
-.instructions-list {
-  margin: 0 0 10px 0;
-  padding: 0;
-  font-size: 14px;
-  color: #5e5e5e;
-  line-height: 1.6;
-  list-style: none;
-}
-
-.instructions-list li + li {
-  margin-top: 6px;
 }
 
 /* Bottom Sheet */
@@ -1051,7 +913,6 @@ section {
   height: 100vh;
   pointer-events: none;
   z-index: 2000;
-  background: transparent;
 }
 
 #section-bottom-sheet .overlay {
@@ -1060,7 +921,7 @@ section {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(217, 217, 217, 0.6);
+  background-color: rgba(0, 0, 0, 0.4);
   pointer-events: auto;
 }
 
@@ -1069,7 +930,7 @@ section {
   bottom: 0;
   left: 0;
   width: 100%;
-  min-height: 50vh;
+  min-height: 40vh;
   background-color: #ffffff;
   border-radius: 24px 24px 0 0;
   padding: 16px 20px 40px;
@@ -1104,31 +965,31 @@ section {
 
 #section-bottom-sheet .account-label {
   font-size: 12px;
-  color: #1b46f5;
+  color: #f4bd40;
   font-weight: 600;
 }
 
 #section-bottom-sheet .account-number {
   font-size: 16px;
   font-weight: 700;
-  color: #000000;
+  color: #000;
 }
 
 #section-bottom-sheet .account-bank,
 #section-bottom-sheet .account-name {
   font-size: 12px;
-  color: #000000;
+  color: #000;
 }
 
 #section-bottom-sheet .radio-icon {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
 }
 
 #section-bottom-sheet .sheet-title {
   font-size: 22px;
   font-weight: 700;
-  color: #000000;
+  color: #000;
   margin: 0 0 12px 0;
   text-align: center;
 }
@@ -1143,12 +1004,11 @@ section {
 
 #section-bottom-sheet .btn-add {
   width: 100%;
-  max-width: 387px;
-  background-color: #1b46f5;
+  background-color: #f3b73f;
   color: #ffffff;
   border: none;
-  border-radius: 20px;
-  height: 58px;
+  border-radius: 10px;
+  height: 50px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -1156,6 +1016,6 @@ section {
   justify-content: center;
   align-items: center;
   font-family: 'Inter', sans-serif;
-  margin: 0 auto;
+  margin-top: 12px;
 }
 </style>

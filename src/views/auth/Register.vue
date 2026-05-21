@@ -1,73 +1,46 @@
 <template>
   <div class="app-container">
-    <!-- Top Bar Section -->
-    <section id="section-topbar">
-      <div class="topbar-container">
-        <div class="topbar-icons">
-          <a href="/assets/android/hue.apk" download>
-          <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
-          </a>
-          <div ref="langWrapEl" class="lang-wrap">
-            <button
-              ref="langBtnEl"
-              type="button"
-              class="lang-btn"
-              aria-label="Language"
-              :aria-expanded="langMenuOpen ? 'true' : 'false'"
-              @click.stop="toggleLangMenu"
-            >
-              <img src="/assets/image/4255_215.svg" alt="Language" class="icon-globe">
-            </button>
-            <div v-if="langMenuOpen" class="lang-menu" @click.stop>
-              <button type="button" class="lang-item" @click="changeLanguage('en')">English</button>
-              <button type="button" class="lang-item" @click="changeLanguage('id')">Indonesia</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- Header Section -->
+    <section id="section-header" class="header-section">
+      <div class="container header-container">
+        <div class="header-content">
+          <img class="brand-logo" src="/assets/images/108294978d9cad25785261933372f80a0602c03d.png" alt="Dana Proteksi">
+          <p class="brand-tagline">Aman, Transparan dan Terpercaya</p>
 
-    <!-- Hero Section -->
-    <section id="section-hero">
-      <div class="hero-container">
-        <div class="hero-content">
-          <img src="/assets/image/Logo01.png" alt="HUE Logo" class="hero-logo">
-          <div class="hero-text">
-            <h1 class="hero-title">{{ ui.heroTitle }}</h1>
-            <p class="hero-subtitle">{{ ui.heroSubtitle }}</p>
-          </div>
+          <h1 class="page-title">{{ ui.heroTitle }}</h1>
+          <p class="page-subtitle">{{ ui.heroSubtitle }}</p>
         </div>
-        <!-- <router-link to="/pages/register" class="hero-link">
-          {{ ui.heroLink }}
-          <img src="/assets/image/4255_218.svg" alt="Arrow Right" class="icon-arrow-right">
-        </router-link> -->
+        <img class="hero-illustration" src="/assets/images/7210a5369195691e3aa63bd1fb6d8c025d233ccc.png" alt="Security Illustration">
       </div>
     </section>
 
     <!-- Form Section -->
-    <section id="section-form">
-      <div class="form-container">
+    <section id="section-form" class="form-section">
+      <div class="container">
         <form class="registration-form" novalidate @submit.prevent="handleRequestOtpAndOpenModal">
+
+          <!-- Username / Signature -->
+          <div class="form-group">
+            <label class="form-label">{{ ui.signatureLabel }}</label>
+            <div class="input-wrapper">
+              <img class="input-icon-left" src="/assets/images/8_309.svg" alt="">
+              <input
+                type="text"
+                class="form-input"
+                v-model="formData.username"
+                :placeholder="ui.signaturePlaceholder"
+              >
+            </div>
+          </div>
 
           <!-- Phone -->
           <div class="form-group">
-            <label>{{ ui.phoneLabel }}</label>
+            <label class="form-label">{{ ui.phoneLabel }}</label>
             <div class="input-wrapper">
-              <button type="button" class="country-code" @click="showCountrySelector = true">
-              
-                <img
-                  v-if="selectedCountry.flagUrl"
-                  :src="selectedCountry.flagUrl"
-                  :alt="selectedCountry.name + ' flag'"
-                  class="country-flag-img"
-                >
-                
-             
-                <span>+{{ selectedCountry.dialCode }}</span>
-                <img src="/assets/image/4255_184.svg" alt="Chevron Down" class="country-chevron">
-              </button>
+              <img class="input-icon-left" src="/assets/images/8_313.svg" alt="">
               <input
                 type="tel"
+                class="form-input"
                 v-model="formData.phone"
                 :placeholder="ui.phonePlaceholder"
                 @blur="checkPhoneError"
@@ -78,10 +51,12 @@
 
           <!-- Email -->
           <div class="form-group">
-            <label>{{ ui.emailLabel }}</label>
+            <label class="form-label">{{ ui.emailLabel }}</label>
             <div class="input-wrapper">
+              <img class="input-icon-left" src="/assets/images/8_309.svg" alt="">
               <input
                 type="email"
+                class="form-input"
                 v-model="formData.email"
                 :placeholder="ui.emailPlaceholder"
               >
@@ -90,76 +65,52 @@
 
           <!-- Password -->
           <div class="form-group">
-            <label>{{ ui.passwordLabel }}</label>
-            <div class="input-wrapper has-icon">
-              <img src="/assets/image/f51b62d18e83856386037eeaceb597d4f4226181.png" alt="Lock" class="input-icon-left">
+            <label class="form-label">{{ ui.passwordLabel }}</label>
+            <div class="input-wrapper">
+              <img class="input-icon-left" src="/assets/images/8_317.svg" alt="">
               <input
                 :type="passwordFieldType"
+                class="form-input has-right-icon"
                 v-model="formData.password"
                 :placeholder="ui.passwordPlaceholder"
               >
-              <button
-                type="button"
-                class="password-toggle"
-                :aria-label="passwordFieldType === 'password' ? 'Show password' : 'Hide password'"
+              <img
+                class="input-icon-right"
+                src="/assets/images/8_109.svg"
+                alt="Toggle Password Visibility"
                 @click="togglePasswordVisibility"
               >
-                <img
-                  :src="passwordFieldType === 'password'
-                    ? 'https://api.iconify.design/mdi/eye.svg?color=%237B7474'
-                    : 'https://api.iconify.design/mdi/eye-off.svg?color=%237B7474'"
-                  alt=""
-                  class="input-icon-right"
-                >
-              </button>
             </div>
           </div>
 
           <!-- Confirm Password -->
           <div class="form-group">
-            <label>{{ ui.confirmPasswordLabel }}</label>
-            <div class="input-wrapper has-icon">
-              <img src="/assets/image/f51b62d18e83856386037eeaceb597d4f4226181.png" alt="Lock" class="input-icon-left">
+            <label class="form-label">{{ ui.confirmPasswordLabel }}</label>
+            <div class="input-wrapper">
+              <img class="input-icon-left" src="/assets/images/8_319.svg" alt="">
               <input
                 :type="password2FieldType"
+                class="form-input has-right-icon"
                 v-model="formData.password2"
                 :placeholder="ui.confirmPasswordPlaceholder"
               >
-              <button
-                type="button"
-                class="password-toggle"
-                :aria-label="password2FieldType === 'password' ? 'Show password' : 'Hide password'"
+              <img
+                class="input-icon-right"
+                src="/assets/images/8_113.svg"
+                alt="Toggle Password Visibility"
                 @click="togglePassword2Visibility"
-              >
-                <img
-                  :src="password2FieldType === 'password'
-                    ? 'https://api.iconify.design/mdi/eye.svg?color=%237B7474'
-                    : 'https://api.iconify.design/mdi/eye-off.svg?color=%237B7474'"
-                  alt=""
-                  class="input-icon-right"
-                >
-              </button>
-            </div>
-          </div>
-
-          <!-- Signature / Username -->
-          <div class="form-group">
-            <label>{{ ui.signatureLabel }}</label>
-            <div class="input-wrapper">
-              <input
-                type="text"
-                v-model="formData.username"
-                :placeholder="ui.signaturePlaceholder"
               >
             </div>
           </div>
 
           <!-- Referral Code -->
           <div class="form-group">
-            <label>{{ ui.referralLabel }}</label>
+            <label class="form-label">{{ ui.referralLabel }}</label>
             <div class="input-wrapper">
+              <img class="input-icon-left" src="/assets/images/8_324.svg" alt="">
               <input
                 type="text"
+                class="form-input"
                 v-model="formData.referralCode"
                 :placeholder="ui.referralPlaceholder"
                 required
@@ -167,38 +118,72 @@
             </div>
           </div>
 
-          <!-- Terms Checkbox -->
-          <div class="terms-checkbox">
-            <div class="checkbox-custom" @click="isTermsAccepted = !isTermsAccepted">
-              <div class="checkbox-bg" :class="{ active: isTermsAccepted }"></div>
-              <img v-if="isTermsAccepted" src="/assets/image/a84c69a218ab38138fa855a6c1a8a8dfc114da81.png" alt="Check" class="checkbox-mark">
-            </div>
-            <p class="terms-text">
-              {{ ui.agreementPrefix }}
-              <router-link to="/hn/legal/agreement">{{ ui.customerAgreement }}</router-link>,
-              <router-link to="/hn/legal/terms">{{ ui.termsOfService }}</router-link>
-              {{ ui.andWord }}
-              <router-link to="/hn/legal/privacy">{{ ui.privacyPolicy }}</router-link>
-            </p>
-          </div>
-
-          <!-- Submit Button -->
-          <button type="submit" class="btn-primary" :disabled="isLoading || isRequestingOtp">
-            <LoadingSpinner v-if="isLoading" :visible="true" message="" />
-            <span v-else>{{ ui.signUp }}</span>
-          </button>
         </form>
       </div>
     </section>
 
-    <!-- Footer Section -->
-    <section id="section-footer">
-      <div class="footer-container">
-        <div class="footer-links">
-          <span>{{ ui.alreadyHaveAccount }}</span> <router-link to="/hn/console">{{ ui.signIn }}</router-link>
+    <!-- Actions Section -->
+    <section id="section-actions" class="actions-section">
+      <div class="container">
+
+        <!-- Terms Checkbox -->
+        <div class="terms-container">
+          <div class="checkbox-wrapper" @click="isTermsAccepted = !isTermsAccepted">
+            <div class="custom-checkbox" :class="{ active: isTermsAccepted }">
+              <img v-if="isTermsAccepted" src="/assets/images/I8_281_51859_5632.svg" alt="Checked">
+            </div>
+          </div>
+          <p class="terms-text">
+            {{ ui.agreementPrefix }}
+            <strong @click="$router.push('/hn/legal/privacy')">{{ ui.privacyPolicy }}</strong>
+            {{ ui.andWord }}
+            <strong @click="$router.push('/hn/legal/terms')">{{ ui.termsOfService }}</strong>
+          </p>
         </div>
-        <div class="footer-copyright">
-          &copy; 2026 HUE System. All rights reserved.
+
+        <!-- Slider Captcha -->
+        <div class="slider-container" ref="sliderCaptchaRef">
+          <div class="slider-track" :class="{ 'slider-verified': sliderVerified }">
+            <span class="slider-text">{{ sliderVerified ? ui.sliderVerified : ui.sliderHint }}</span>
+          </div>
+          <img
+            class="slider-thumb"
+            src="/assets/images/9aafab34419c92ae6d76b07f598384e4b00a88a6.png"
+            alt="Slide to continue"
+            :style="{ left: sliderLeft + 'px' }"
+            @mousedown="onSliderStart"
+            @touchstart.prevent="onSliderStart"
+          >
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-group">
+          <button type="button" class="btn btn-primary" :disabled="isLoading || isRequestingOtp" @click="handleRequestOtpAndOpenModal">
+            <LoadingSpinner v-if="isLoading" :visible="true" message="" />
+            <span v-else>{{ ui.signUp }}</span>
+          </button>
+          <button type="button" class="btn btn-secondary" @click="$router.push('/hn/console')">
+            {{ ui.signIn }}
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Footer Section -->
+    <section id="section-footer" class="footer-section">
+      <div class="container">
+        <div class="security-info">
+          <div class="security-header">
+            <img class="shield-icon" src="/assets/images/3134047e5168616d4f5f4ce9af921913fa739acd.png" alt="Security Shield">
+            <h3 class="security-title">Aman, Terpercaya, Melindungi Anda</h3>
+          </div>
+          <p class="security-desc">Data Anda terenkripsi dan terlindungi dengan standar keamanan tinggi</p>
+        </div>
+
+        <div class="partner-logos">
+          <img src="/assets/images/9247fb3a0182399d464f5e73d0e66665b07f1ca5.png" alt="Bappebti Logo" class="logo-bappebti">
+          <img src="/assets/images/a648e454f7e6e93caec0f833a59b7dcec155605e.png" alt="OJK Logo" class="logo-ojk">
         </div>
       </div>
     </section>
@@ -269,57 +254,61 @@ const route = useRoute()
 const { locale } = useI18n()
 
 const EN_UI = Object.freeze({
-  heroTitle: 'Join HUE and access advanced Cloud system features!',
-  heroSubtitle: 'Join thousands of users and experience smart Cloud-powered resource management',
+  heroTitle: 'Create Account',
+  heroSubtitle: 'Fill in your details to create a new account',
   heroLink: 'Sign up to console with email',
-  phoneLabel: 'Phone',
-  phonePlaceholder: 'Mobile phone number',
+  phoneLabel: 'Phone Number',
+  phonePlaceholder: '08xxxxxxxxx',
   emailLabel: 'Email',
-  emailPlaceholder: 'Please enter email',
+  emailPlaceholder: 'Enter your email',
   passwordLabel: 'Password',
-  passwordPlaceholder: 'Please enter password',
-  confirmPasswordLabel: 'Confirm password',
-  confirmPasswordPlaceholder: 'Please re-enter password',
-  signatureLabel: 'Signature',
-  signaturePlaceholder: 'Please enter username',
+  passwordPlaceholder: 'Create password',
+  confirmPasswordLabel: 'Confirm Password',
+  confirmPasswordPlaceholder: 'Repeat your password',
+  signatureLabel: 'Full Name',
+  signaturePlaceholder: 'Enter your mobile number',
   referralToggle: "Referrer's Referral Code",
-  referralLabel: 'Referral Code',
-  referralPlaceholder: 'Enter referral code',
-  agreementPrefix: 'I have read and agree to the',
+  referralLabel: 'Referral Code (required)',
+  referralPlaceholder: 'Enter invitation code',
+  agreementPrefix: 'I agree to the',
   customerAgreement: 'Customer Agreement',
   termsOfService: 'Terms of Service',
   andWord: 'and',
   privacyPolicy: 'Privacy Policy',
-  signUp: 'Sign up',
+  signUp: 'Register',
   alreadyHaveAccount: 'Already have account?',
-  signIn: 'Sign in'
+  signIn: 'Sign In',
+  sliderHint: 'Slide the arrow to continue',
+  sliderVerified: 'Verified'
 })
 
 const ID_UI_FALLBACK = Object.freeze({
-  heroTitle: 'Bergabung dengan HUE dan akses fitur sistem Cloud canggih!',
-  heroSubtitle: 'Bergabunglah dengan ribuan pengguna dan rasakan manajemen sumber daya berbasis Cloud yang cerdas',
+  heroTitle: 'Buat Akun',
+  heroSubtitle: 'Isi data diri Anda untuk membuat akun baru',
   heroLink: 'Daftar ke konsol dengan email',
-  phoneLabel: 'Nomor',
-  phonePlaceholder: 'Nomor ponsel',
+  phoneLabel: 'Nomor Handphone',
+  phonePlaceholder: '08xxxxxxxxx',
   emailLabel: 'Email',
-  emailPlaceholder: 'Silakan masukkan email',
-  passwordLabel: 'Kata sandi',
-  passwordPlaceholder: 'Silakan masukkan kata sandi',
-  confirmPasswordLabel: 'Konfirmasi kata sandi',
-  confirmPasswordPlaceholder: 'Silakan masukkan ulang kata sandi',
-  signatureLabel: 'Nama pengguna',
-  signaturePlaceholder: 'Silakan masukkan nama pengguna',
+  emailPlaceholder: 'Masukkan email Anda',
+  passwordLabel: 'Password',
+  passwordPlaceholder: 'Buat password',
+  confirmPasswordLabel: 'Konfirmasi Password',
+  confirmPasswordPlaceholder: 'Ulangi password Anda',
+  signatureLabel: 'Nama Lengkap',
+  signaturePlaceholder: 'Masukkan nomor ponsel Anda',
   referralToggle: 'Kode Referral Pengundang',
-  referralLabel: 'Kode Referral',
-  referralPlaceholder: 'Masukkan kode referral',
-  agreementPrefix: 'Saya telah membaca dan menyetujui',
+  referralLabel: 'Kode Referral (wajib)',
+  referralPlaceholder: 'Masukkan kode undangan',
+  agreementPrefix: 'Saya setuju dengan',
   customerAgreement: 'Perjanjian Pelanggan',
-  termsOfService: 'Ketentuan Layanan',
+  termsOfService: 'Syarat Layanan',
   andWord: 'dan',
   privacyPolicy: 'Kebijakan Privasi',
   signUp: 'Daftar',
   alreadyHaveAccount: 'Sudah punya akun?',
-  signIn: 'Masuk'
+  signIn: 'Masuk',
+  sliderHint: 'Geser panah ini untuk melanjutkan login',
+  sliderVerified: 'Terverifikasi'
 })
 
 const ui = ref({ ...EN_UI })
@@ -500,6 +489,50 @@ const otpActiveOverride = ref(null)
 const otpRequiredOverride = ref(null)
 const OTP_COOLDOWN_MS = 120000
 const lastOtpRequestAt = ref(0)
+
+// Slider captcha state
+const sliderCaptchaRef = ref(null)
+const sliderLeft = ref(-10)
+const sliderVerified = ref(false)
+let sliderStartX = 0
+let sliderStartLeft = 0
+
+const onSliderStart = (e) => {
+  if (sliderVerified.value) return
+  const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX
+  sliderStartX = clientX
+  sliderStartLeft = sliderLeft.value
+  document.addEventListener('mousemove', onSliderMove)
+  document.addEventListener('mouseup', onSliderEnd)
+  document.addEventListener('touchmove', onSliderMove)
+  document.addEventListener('touchend', onSliderEnd)
+}
+
+const onSliderMove = (e) => {
+  const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX
+  const diff = clientX - sliderStartX
+  const trackEl = sliderCaptchaRef.value?.querySelector('.slider-track')
+  const maxLeft = (trackEl?.offsetWidth || 354) - 56
+  let newLeft = sliderStartLeft + diff
+  if (newLeft < -10) newLeft = -10
+  if (newLeft > maxLeft) newLeft = maxLeft
+  sliderLeft.value = newLeft
+}
+
+const onSliderEnd = () => {
+  document.removeEventListener('mousemove', onSliderMove)
+  document.removeEventListener('mouseup', onSliderEnd)
+  document.removeEventListener('touchmove', onSliderMove)
+  document.removeEventListener('touchend', onSliderEnd)
+  const trackEl = sliderCaptchaRef.value?.querySelector('.slider-track')
+  const maxLeft = (trackEl?.offsetWidth || 354) - 56
+  if (sliderLeft.value >= maxLeft - 10) {
+    sliderLeft.value = maxLeft
+    sliderVerified.value = true
+  } else {
+    sliderLeft.value = -10
+  }
+}
 
 try {
   const saved = Number(localStorage.getItem('last_otp_request_at') || 0)
@@ -757,6 +790,10 @@ const handleRequestOtpAndOpenModal = async () => {
 
   if (!isTermsAccepted.value) {
     return showError('Please agree to the Customer Agreement, Terms of Service and Privacy Policy.')
+  }
+
+  if (!sliderVerified.value) {
+    return showError('Please complete the slider verification.')
   }
 
   if (!generatedCaptcha.value) {
@@ -1033,197 +1070,376 @@ const handleRegister = async (opts = {}) => {
 <style scoped>
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 .app-container {
   font-family: 'Inter', sans-serif;
+  width: 100%;
   max-width: 100%;
-  margin: 0 auto;
-  background-color: #fefefe;
+  background: linear-gradient(180deg, #FEFDFE 0%, #FDF8EA 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  align-items: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  width: 100%;
+  max-width: 412px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+input, button {
+  font-family: 'Inter', sans-serif;
 }
 
 a {
   text-decoration: none;
 }
 
-input {
-  font-family: inherit;
+/* Header Section */
+.header-section {
+  width: 100%;
+  max-width: 412px;
+  padding-top: 40px;
+  padding-bottom: 20px;
 }
 
-/* Top Bar Section */
-.topbar-container {
-  padding: 20px 35px 10px;
-  
-  display: flex;
-  justify-content: flex-end;
-  min-height: auto;
-}
-
-.topbar-icons {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.icon-download,
-.icon-globe {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-}
-
-.lang-wrap {
+.header-container {
   position: relative;
 }
 
-.lang-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.header-content {
+  position: relative;
+  z-index: 2;
+  max-width: 60%;
 }
 
-.lang-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
-  padding: 6px;
-  min-width: 140px;
-  z-index: 2000;
-}
-
-.lang-item {
-  width: 100%;
-  background: transparent;
-  border: none;
-  text-align: left;
-  padding: 10px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #000000;
-  cursor: pointer;
-  border-radius: 8px;
-  font-family: inherit;
-}
-
-.lang-item:hover {
-  background: rgba(33, 77, 243, 0.08);
-}
-
-/* Hero Section */
-.hero-container {
-  padding: 10px 20px;
-  min-height: auto;
-}
-
-.hero-content {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-  align-items: flex-start;
-}
-
-.hero-logo {
-  width: 56px;
-  height: 58px;
+.brand-logo {
+  height: 67px;
   object-fit: contain;
-  flex-shrink: 0;
+  margin-bottom: 0;
 }
 
-.hero-text {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.brand-tagline {
+  font-size: 10px;
+  color: #635f5f;
+  margin-top: 0;
+  margin-bottom: 24px;
+  margin-left: 4px;
 }
 
-.hero-title {
-  font-size: 18px;
+.page-title {
+  font-size: 24px;
   font-weight: 700;
   color: #000000;
-  margin: 0;
-  line-height: 1.3;
+  margin: 0 0 8px 0;
 }
 
-.hero-subtitle {
-  font-size: 14px;
-  color: #494747;
+.page-subtitle {
+  font-size: 12px;
+  color: #635f5f;
   margin: 0;
   line-height: 1.4;
 }
 
-.hero-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: #0073ff;
-  font-size: 15px;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.icon-arrow-right {
-  width: 16px;
-  height: 16px;
+.hero-illustration {
+  position: absolute;
+  top: 20px;
+  right: -10px;
+  width: 154px;
+  height: auto;
+  z-index: 1;
 }
 
 /* Form Section */
-.form-container {
-  padding: 0px 20px 0;
-  min-height: auto;
+.form-section {
+  width: 100%;
+  max-width: 412px;
+  padding-top: 10px;
 }
 
 .registration-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin-bottom: 20px;
 }
 
-.form-group label {
-  font-size: 14px;
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
   color: #000000;
-  font-weight: 500;
+  margin-bottom: 8px;
+  margin-left: 4px;
 }
 
 .input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  height: 43px;
-  padding: 0 15px;
 }
 
-.input-wrapper input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  color: #000;
+.input-icon-left {
+  position: absolute;
+  left: 16px;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
+
+.input-icon-right {
+  position: absolute;
+  right: 16px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.form-input {
   width: 100%;
+  height: 53px;
+  background-color: #ffffff;
+  border: 1px solid #ababab;
+  border-radius: 15px;
+  padding: 0 44px;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #000000;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-.input-wrapper input::placeholder {
-  color: rgba(0, 0, 0, 0.37);
+.form-input:focus {
+  border-color: #f4bd40;
 }
 
+.form-input::placeholder {
+  color: #635f5f;
+}
+
+.form-input.has-right-icon {
+  padding-right: 44px;
+}
+
+/* Actions Section */
+.actions-section {
+  width: 100%;
+  max-width: 412px;
+  padding-top: 10px;
+  padding-bottom: 30px;
+}
+
+.terms-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+
+.checkbox-wrapper {
+  padding-top: 2px;
+  cursor: pointer;
+}
+
+.custom-checkbox {
+  width: 18px;
+  height: 18px;
+  background-color: #d9d9d9;
+  border-radius: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.custom-checkbox.active {
+  background-color: #f4bd40;
+}
+
+.custom-checkbox img {
+  width: 14px;
+  height: 14px;
+}
+
+.terms-text {
+  font-size: 12px;
+  color: #635f5f;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.terms-text strong {
+  color: #a67c00;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Slider Captcha */
+.slider-container {
+  position: relative;
+  height: 60px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.slider-track {
+  width: 100%;
+  height: 30px;
+  background-color: #f4bd40;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 5px;
+  transition: background-color 0.3s;
+}
+
+.slider-track.slider-verified {
+  background-color: #4caf50;
+}
+
+.slider-text {
+  font-size: 12px;
+  color: #4f4f4f;
+  margin-left: 20px;
+  user-select: none;
+}
+
+.slider-track.slider-verified .slider-text {
+  color: #ffffff;
+  margin-left: 0;
+}
+
+.slider-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 60px;
+  cursor: pointer;
+  z-index: 2;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn {
+  width: 100%;
+  height: 60px;
+  border-radius: 15px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.2s;
+}
+
+.btn:active {
+  opacity: 0.8;
+}
+
+.btn-primary {
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #000000;
+  border: 1px solid #978d00;
+}
+
+/* Footer Section */
+.footer-section {
+  width: 100%;
+  max-width: 412px;
+  padding-top: 20px;
+  padding-bottom: 40px;
+  margin-top: auto;
+}
+
+.security-info {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.security-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.shield-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.security-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+.security-desc {
+  font-size: 10px;
+  color: #9a9a9a;
+  margin: 0;
+  line-height: 1.4;
+  padding: 0 20px;
+}
+
+.partner-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-bappebti {
+  height: 21px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logo-ojk {
+  height: 26px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* OTP Modal */
 #section-otp-modal {
   position: fixed;
   top: 0;
@@ -1236,8 +1452,6 @@ input {
   align-items: center;
   z-index: 3000;
   padding: 20px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .otp-modal-container {
@@ -1261,7 +1475,6 @@ input {
 
 .otp-card-header {
   width: 100%;
-  padding-right: 0px;
   display: flex;
   justify-content: center;
 }
@@ -1274,7 +1487,6 @@ input {
   line-height: 1.4;
   color: #000000;
   font-weight: 500;
-  z-index: 2;
 }
 
 .otp-input-box {
@@ -1342,211 +1554,5 @@ input {
 
 .otp-action:hover {
   opacity: 0.9;
-}
-
-.country-code {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-right: 10px;
-  font-size: 13px;
-  color: #000;
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
-}
-
-.country-code img {
-  width: 12px;
-  height: 12px;
-}
-
-.country-code span {
-  line-height: 1;
-}
-
-.country-chevron {
-  width: 12px;
-  height: 12px;
-  flex: 0 0 auto;
-  display: block;
-}
-
-.country-code::after {
-  content: '';
-  width: 1px;
-  height: 16px;
-  background-color: rgba(0, 0, 0, 0.1);
-  margin-left: 8px;
-}
-
-.country-flag {
-  font-size: 14px;
-  line-height: 1;
-}
-
-.country-flag-img {
-  width: 22px;
-  height: 16px;
-  object-fit: cover;
-  border-radius: 2px;
-}
-
-.input-icon-left {
-  width: 20px;
-  margin-right: 10px;
-  opacity: 0.7;
-}
-
-.input-icon-right {
-  width: 20px;
-  cursor: pointer;
-  opacity: 0.7;
-}
-
-.password-toggle {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  width: 20px;
-  height: 20px;
-  flex: 0 0 auto;
-}
-
-/* Referral Toggle */
-.referral-toggle {
-  display: flex;
-  background: none;
-  align-items: center;
-  gap: 5px;
-  font-size: 15px;
-  color: #000;
-  cursor: pointer;
-  margin-top: 5px;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-.referral-toggle img {
-  width: 20px;
-}
-
-/* Terms Checkbox */
-.terms-checkbox {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
-.checkbox-custom {
-  position: relative;
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  margin-top: 2px;
-  cursor: pointer;
-}
-
-.checkbox-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #d9d9d9;
-  border-radius: 50%;
-  transition: background-color 0.2s;
-}
-
-.checkbox-bg.active {
-  background-color: #1b46f5;
-}
-
-.checkbox-mark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 10px;
-  height: 10px;
-  z-index: 1;
-}
-
-.terms-text {
-  font-size: 14px;
-  color: #000;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.terms-text a {
-  color: #0073ff;
-  text-decoration: none;
-}
-
-/* Submit Button */
-.btn-primary {
-  background-color: #1b46f5;
-  color: #ffffff;
-  border: none;
-  border-radius: 5px;
-  height: 53px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin-top: 10px;
-  transition: background-color 0.2s;
-}
-
-.btn-primary:hover {
-  background-color: #1538c4;
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Footer Section */
-.footer-container {
-  padding: 30px 35px 40px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  justify-content: space-between;
-  min-height: 200px;
-}
-
-.footer-links {
-  font-size: 15px;
-  color: #000;
-  margin-top: 10px;
-}
-
-.footer-links a {
-  color: #0073ff;
-  text-decoration: none;
-}
-
-.footer-copyright {
-  font-size: 14px;
-  color: #000;
-  
-  margin-top: auto;
 }
 </style>

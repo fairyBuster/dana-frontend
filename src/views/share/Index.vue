@@ -1,98 +1,131 @@
 <template>
   <div class="app-container">
-    <!-- Header -->
-    <section id="section-header">
-      <header class="header">
-        <button class="back-btn" @click="goBack" aria-label="Go back">
-          <img src="/assets/image/168_753.svg" alt="Back">
-        </button>
-        <h1 class="header-title">Invite friends</h1>
-      </header>
-    </section>
-
-    <!-- QR Code -->
-    <section id="section-qrcode">
-      <div class="qr-container">
-        <p class="qr-instruction">Long press the QR code to save to the phone album</p>
-       
-        <div class="qr-image-wrapper" :class="qrStyle === 'card' ? 'is-card' : ''">
-          <div ref="qrEl" class="qr-render" @click="handleQrClick"></div>
+    <!-- Hero -->
+    <section id="section-hero">
+      <div class="hero-section">
+        <div class="hero-content">
+          <h1 class="hero-title">Tim saya</h1>
+          <p class="hero-subtitle">Pantau perkembangan tim dan bagikan link undangan Anda.</p>
+        </div>
+        <div class="hero-image">
+          <img src="/assets/images/9f4d7b8ace034cd96bb6b037dd50538b5db64b68.png" alt="">
         </div>
       </div>
     </section>
 
-    <!-- Invite Links -->
-    <section id="section-invite-links">
-      <div class="links-container">
-        <div class="link-box">
-          <span class="link-label">Invite code</span>
-          <span class="link-value code-value">{{ referralCode || '-' }}</span>
-          <button class="copy-btn" aria-label="Copy invite code" @click="copyCode">
-            <img src="/assets/image/1cc75236b99b7283315da53f09fb85a865206d41.png" alt="Copy">
-          </button>
-        </div>
-        <div class="link-box">
-          <span class="link-value url-value" translate="no" data-no-translate="true">{{ inviteLink }}</span>
-          <button class="copy-btn" aria-label="Copy link" @click="copyLink">
-            <img src="/assets/image/1cc75236b99b7283315da53f09fb85a865206d41.png" alt="Copy">
-          </button>
+    <!-- Stats -->
+    <section id="section-stats">
+      <div class="section-inner">
+        <div class="stats-card">
+          <div class="stat-column">
+            <div class="stat-header">
+              <div class="stat-icon">
+                <img src="/assets/images/46_756.svg" class="icon-bg" alt="">
+                <img src="/assets/images/46_770.svg" class="icon-fg" alt="">
+              </div>
+              <span class="stat-title">Total Tim</span>
+            </div>
+            <div class="stat-value">{{ teamStats.totalMembers }}</div>
+            <div class="stat-unit">orang</div>
+          </div>
+
+          <div class="stat-column">
+            <div class="stat-header">
+              <img src="/assets/images/46_779.svg" class="stat-icon-single" alt="">
+              <span class="stat-title">Anggota aktif</span>
+            </div>
+            <div class="stat-value">{{ teamStats.activeMembers }}</div>
+            <div class="stat-unit">orang</div>
+          </div>
+
+          <div class="stat-column last">
+            <div class="stat-header">
+              <img src="/assets/images/46_803.svg" class="stat-icon-single" alt="">
+              <span class="stat-title">Bonus Tim</span>
+            </div>
+            <div class="stat-value">{{ teamStats.totalBonus }}</div>
+            <div class="stat-unit">Total bonus terkumpul</div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Article -->
-    <section id="section-article">
-      <div class="article-container">
-        <h2 class="article-title">HUE Referral &amp; Team Commission Program</h2>
-        <p class="article-text">
-          HUE (Hybrid Unified Edge) provides a structured multi-level referral and team commission program designed to support community growth and reward active members who participate in expanding the HUE cloud computing ecosystem.<br><br>
-          Through this program, members may receive referral rewards and team-based commission benefits generated through eligible network activities and verified platform transactions up to three referral levels.
-        </p>
-        
-        <p class="article-text">
-          <strong>Referral Invitation Commission</strong><br><br>
-          Members who successfully invite new users to join HUE using their official referral link or invitation code may receive commission rewards whenever eligible cloud computing or infrastructure service packages are activated within their referral network.<br><br>
-          🔹 Level 1 Referral Commission — 10%<br>
-          Receive 10% commission from eligible package activations made directly by members you personally invite to HUE.<br><br>
-          🔹 Level 2 Referral Commission — 3%<br>
-          Receive 3% commission from eligible package activations made by members invited through your Level 1 referral network.<br><br>
-          🔹 Level 3 Referral Commission — 1%<br>
-          Receive 1% commission from eligible package activations made through your Level 2 referral network.<br><br>
-          
-          <strong>Daily Team Activity Commission</strong><br><br>
-          In addition to referral activation rewards, HUE also provides daily network activity commissions based on operational outputs generated through eligible team participation within the platform ecosystem.<br><br>
-          🔹 Level 1 Daily Team Commission — 3%<br>
-          Receive 3% commission from eligible operational outputs generated by your direct referral members.<br><br>
-          🔹 Level 2 Daily Team Commission — 2%<br>
-          Receive 2% commission from eligible operational outputs generated by your second-level referral members.<br><br>
-          🔹 Level 3 Daily Team Commission — 1%<br>
-          Receive 1% commission from eligible operational outputs generated by your third-level referral members.<br><br>
-          
-          <strong>Automatic Real-Time System</strong><br><br>
-          All referral rewards, team commissions, and network activity records are processed automatically by the official HUE system in real-time without requiring manual processing or external reporting.<br><br>
-          Members may monitor their referral activity, commission history, operational outputs, and team statistics directly through the HUE platform dashboard.<br><br>
-          
-          <strong>Program Benefits</strong><br><br>
-          By participating in the HUE referral program, members may benefit from:<br><br>
-          ✔️ Team-building opportunities within the HUE ecosystem<br>
-          ✔️ Automated referral and activity commission distribution<br>
-          ✔️ Real-time commission tracking and monitoring<br>
-          ✔️ Transparent operational processing<br>
-          ✔️ Long-term ecosystem participation opportunities<br>
-          ✔️ Official platform support and system monitoring<br><br>
-          
-          <strong>Important Referral Rules</strong><br><br>
-          🔹 All referral activities must be conducted exclusively through the official HUE platform and referral system.<br>
-          🔹 Members are prohibited from using misleading promotions, false information, impersonation, or unauthorized external activities in the name of HUE.<br>
-          🔹 Commission rewards are only valid for verified and successfully recorded transactions within the HUE system.<br>
-          🔹 HUE reserves the right to review, suspend, restrict, or terminate rewards in cases involving fraud, abuse, manipulation, suspicious activity, or violations of platform policies.<br>
-          🔹 Members are encouraged to maintain professional, transparent, and responsible communication while introducing HUE services and platform opportunities.<br><br>
-          
-          <strong>Program Agreement</strong><br><br>
-          By participating in the HUE Referral &amp; Team Commission Program, all members acknowledge and agree to comply with all HUE policies, referral regulations, operational rules, and platform terms established by HUE (Hybrid Unified Edge).
-        </p>
+    <!-- Invite Link -->
+    <section id="section-invite-link">
+      <div class="section-inner">
+        <div class="invite-card">
+          <div class="invite-header">
+            <div class="invite-icon-block"></div>
+            <h2 class="invite-title">Link Undangan</h2>
+          </div>
+          <div class="invite-actions">
+            <div class="invite-input-wrapper">
+              <span class="invite-url" translate="no">{{ inviteLink }}</span>
+            </div>
+            <button class="btn-action btn-copy" @click="copyLink" aria-label="Copy">
+              <img src="/assets/images/46_843.svg" alt="">
+            </button>
+            <button class="btn-action btn-share" @click="shareLink" aria-label="Share">
+              <img src="/assets/images/46_848.svg" alt="">
+            </button>
+          </div>
+          <div class="invite-code-wrapper">
+            <span class="invite-code-text">Kode undangan: {{ referralCode || '-' }}</span>
+          </div>
+        </div>
       </div>
     </section>
+
+    <!-- Team Bonus -->
+    <section id="section-team-bonus">
+      <div class="section-inner">
+        <div class="bonus-card">
+          <h2 class="bonus-title">Bonus Tim</h2>
+          <div class="bonus-levels">
+            <div class="level-box level-1">
+              <span class="level-name">Level 1</span>
+              <span class="level-value">{{ commissionLevels.level1 }}%</span>
+            </div>
+            <div class="level-box level-2">
+              <span class="level-name">Level 2</span>
+              <span class="level-value">{{ commissionLevels.level2 }}%</span>
+            </div>
+            <div class="level-box level-3">
+              <span class="level-name">Level 3</span>
+              <span class="level-value">{{ commissionLevels.level3 }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Member List -->
+    <section id="section-member-list">
+      <div class="section-inner">
+        <div class="member-list-card">
+          <span class="member-list-title">Daftar Anggota</span>
+          <router-link to="/hn/network/community" class="member-list-link" aria-label="Lihat semua anggota">
+            Lihat semua
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="#cd8c09" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </router-link>
+        </div>
+      </div>
+    </section>
+
+    <!-- Invite Banner -->
+    <section id="section-invite-banner">
+      <div class="section-inner">
+        <div class="invite-banner-card">
+          <div class="banner-content">
+            <h3 class="banner-title">Undang teman dan dapatkan bonus tim!</h3>
+            <p class="banner-subtitle">Bagikan link undangan Anda untuk mendapatkan bonus dari setiap anggota aktif.</p>
+          </div>
+          <button class="btn-invite-now" @click="shareLink">Undang</button>
+        </div>
+      </div>
+    </section>
+
+    <FooterBar />
   </div>
 
   <SuccessModal
@@ -103,25 +136,41 @@
 </template>
 
 <script setup>
-import { onActivated, onMounted, ref } from 'vue'
+import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '@/services/api'
-import { getFrontendUrl } from '@/utils/settings'
+import { getFrontendUrl, formatAppCurrency } from '@/utils/settings'
+import FooterBar from '@/components/partials/AppFooter.vue'
 import SuccessModal from '@/components/modals/AppSuccessModal.vue'
 
 const router = useRouter()
 const referralCode = ref('')
 const inviteLink = ref('')
 const frontendBaseUrl = ref('')
-const qrStyle = ref('card')
 const successModalOpen = ref(false)
 const successMessage = ref('')
-const qrEl = ref(null)
-let qrInstance = null
+const accountData = ref(null)
 
-const goBack = () => {
-  router.go(-1)
-}
+const teamStats = computed(() => {
+  const data = accountData.value || {}
+  const total = Number(data.team_count ?? data.total_team ?? 0)
+  const active = Number(data.active_team ?? data.active_members ?? 0)
+  const bonus = Number(data.team_bonus ?? data.total_commission ?? 0)
+  return {
+    totalMembers: total,
+    activeMembers: active,
+    totalBonus: bonus > 0 ? formatAppCurrency(bonus, { decimals: 0 }) : 'Rp 0'
+  }
+})
+
+const commissionLevels = computed(() => {
+  const data = accountData.value || {}
+  return {
+    level1: data.commission_level1 ?? data.level1_rate ?? 33,
+    level2: data.commission_level2 ?? data.level2_rate ?? 2,
+    level3: data.commission_level3 ?? data.level3_rate ?? 1
+  }
+})
 
 const ensureFrontendBaseUrl = async () => {
   if (frontendBaseUrl.value) return frontendBaseUrl.value
@@ -133,7 +182,6 @@ const ensureFrontendBaseUrl = async () => {
       return frontendBaseUrl.value
     }
   } catch (_) {}
-
   frontendBaseUrl.value = getFrontendUrl()
   return frontendBaseUrl.value
 }
@@ -152,74 +200,32 @@ const loadAccountInfo = async () => {
   try {
     const resp = await authAPI.getAccountInfo()
     const data = resp?.data || {}
+    accountData.value = data
     referralCode.value = String(data.referral_code || '').trim()
     inviteLink.value = buildInviteLink(referralCode.value)
-    await generateQr(inviteLink.value)
   } catch (_) {
     referralCode.value = ''
     inviteLink.value = buildInviteLink('')
-    await generateQr(inviteLink.value)
   }
-}
-
-const generateQr = async (value) => {
-  const text = String(value || '').trim()
-  if (!text) return
-  try {
-    const Ctor = window?.QRCodeStyling
-    if (!Ctor || !qrEl.value) return
-
-    const options = {
-      width: 280,
-      height: 280,
-      type: 'canvas',
-      data: text,
-      margin: 0,
-      qrOptions: { errorCorrectionLevel: 'H' },
-      backgroundOptions: { color: '#e9f0ff' },
-      dotsOptions: { color: '#1b46f5', type: 'dots' },
-      cornersSquareOptions: { color: '#1b46f5', type: 'extra-rounded' },
-      cornersDotOptions: { color: '#1b46f5', type: 'dot' }
-    }
-
-    if (!qrInstance) {
-      qrInstance = new Ctor(options)
-      qrEl.value.innerHTML = ''
-      qrInstance.append(qrEl.value)
-      return
-    }
-
-    qrInstance.update(options)
-  } catch (_) {
-    if (qrEl.value) qrEl.value.innerHTML = ''
-  }
-}
-
-const setQrStyle = async (style) => {
-  qrStyle.value = style
-  if (inviteLink.value) await generateQr(inviteLink.value)
 }
 
 const copyLink = () => {
   navigator.clipboard.writeText(inviteLink.value).then(() => {
-    successMessage.value = 'Copy'
+    successMessage.value = 'Link berhasil disalin'
     successModalOpen.value = true
-  }).catch(err => {
-    console.error('Failed to copy link:', err)
-  })
+  }).catch(() => {})
 }
 
-const copyCode = () => {
-  navigator.clipboard.writeText(referralCode.value).then(() => {
-    successMessage.value = 'Code copied successfully'
-    successModalOpen.value = true
-  }).catch(err => {
-    console.error('Failed to copy code:', err)
-  })
-}
-
-const handleQrClick = () => {
-  copyLink()
+const shareLink = () => {
+  if (navigator.share) {
+    navigator.share({
+      title: 'Dana Proteksi',
+      text: `Bergabung bersama saya di Dana Proteksi! Gunakan kode undangan: ${referralCode.value}`,
+      url: inviteLink.value
+    }).catch(() => {})
+  } else {
+    copyLink()
+  }
 }
 
 onMounted(() => {
@@ -242,234 +248,356 @@ onActivated(() => {
   font-family: 'Inter', sans-serif;
   width: 100%;
   max-width: 412px;
+  background-color: #fdfaf4;
   min-height: 100vh;
-  background-color: #f8f8f8;
   position: relative;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
+  padding-bottom: 80px;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-section {
-  width: 100%;
-}
-
-img {
-  max-width: 100%;
-  display: block;
+h1, h2, h3, p {
+  margin: 0;
 }
 
 button {
   font-family: inherit;
-}
-
-/* Header */
-.header {
-  display: flex;
-  align-items: center;
-  padding: 13px 2px;
-  position: relative;
-  min-height: 48px;
-}
-
-.back-btn {
-  background: none;
   border: none;
+  background: none;
   cursor: pointer;
   padding: 0;
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
 }
 
-.header-title {
-  width: 100%;
-  text-align: center;
-  font-size: 16px;
+.section-inner {
+  padding: 0 24px;
+  margin-bottom: 16px;
+}
+
+/* Hero */
+.hero-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 40px 24px 20px 24px;
+}
+
+.hero-content {
+  flex: 1;
+  padding-right: 16px;
+}
+
+.hero-title {
+  font-size: 24px;
   font-weight: 700;
   color: #000000;
-  margin: 0;
+  margin-bottom: 8px;
 }
 
-/* QR Code */
-.qr-container {
-  padding-top: 37px;
-  padding-left: 26px;
-  padding-right: 26px;
-  text-align: center;
+.hero-subtitle {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #635f5f;
+}
+
+.hero-image {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.hero-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Stats */
+.stats-card {
+  background: linear-gradient(90deg, #F4C142 0%, #F8DD89 46.63%, #F5CA51 100%);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.stat-column {
   display: flex;
   flex-direction: column;
+  flex: 1;
+}
+
+.stat-column.last {
+  flex: 1.5;
+}
+
+.stat-header {
+  display: flex;
   align-items: center;
-}
-
-.qr-instruction {
-  font-size: 14px;
-  color: #000000;
-  margin-bottom: 23px;
-  line-height: 1.4;
-  max-width: 305px;
-}
-
-.qr-style-row {
-  display: inline-flex;
   gap: 8px;
   margin-bottom: 12px;
 }
 
-.qr-style-btn {
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(27, 70, 245, 0.35);
-  background: rgba(255, 255, 255, 0.7);
-  color: #000000;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+.stat-icon {
+  position: relative;
+  width: 36px;
+  height: 36px;
 }
 
-.qr-style-btn.active {
-  border-color: #1b46f5;
-  background: rgba(27, 70, 245, 0.1);
-  color: #1b46f5;
-}
-
-.qr-image-wrapper {
-  width: 152px;
-  height: 152px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #ffffff;
-  display: grid;
-  place-items: center;
-}
-
-.qr-image-wrapper.is-card {
-  padding: 8px;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-}
-
-.qr-render {
+.icon-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
 }
 
-.qr-render :deep(canvas),
-.qr-render :deep(svg),
-.qr-render :deep(img) {
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 6px;
+.icon-fg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
 }
 
-/* Invite Links */
-.links-container {
-  padding-top: 27px;
-  padding-left: 26px;
-  padding-right: 26px;
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
+.stat-icon-single {
+  width: 36px;
+  height: 36px;
 }
 
-.link-box {
+.stat-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 2px;
+}
+
+.stat-unit {
+  font-size: 10px;
+  color: #4e4e4e;
+}
+
+/* Invite Link */
+.invite-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.05);
+}
+
+.invite-header {
   display: flex;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.47);
-  border: 1px solid #1b46f5;
-  border-radius: 20px;
-  padding: 0 8px 0 15px;
-  height: 45px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
-.link-label {
+.invite-icon-block {
+  width: 32px;
+  height: 26px;
+  background-color: #fcf2dd;
+  border-radius: 5px;
+}
+
+.invite-title {
   font-size: 14px;
+  font-weight: 600;
   color: #000000;
-  font-weight: 600;
 }
 
-.link-value {
-  color: #1b46f5;
-  font-weight: 600;
+.invite-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.code-value {
-  font-size: 16px;
-  margin-left: auto;
-  margin-right: 6px;
+.invite-input-wrapper {
+  flex: 1;
+  border: 0.5px solid #9a9a9a;
+  border-radius: 5px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  height: 30px;
+  overflow: hidden;
 }
 
-.url-value {
-  font-size: 14px;
+.invite-url {
+  font-size: 11px;
+  color: #000000;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
-  margin-right: 6px;
 }
 
-.copy-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
+.btn-action {
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
+  align-items: center;
 }
 
-.copy-btn img {
-  width: 10px;
-  height: 10px;
+.btn-action img {
+  width: 16px;
+  height: 16px;
   object-fit: contain;
 }
 
-/* Article */
-.article-container {
-  padding-top: 27px;
-  padding-left: 26px;
-  padding-right: 26px;
-  padding-bottom: 40px;
+.btn-copy {
+  border: 0.5px solid #9a9a9a;
+  background-color: transparent;
 }
 
-.article-title {
-  font-size: 22px;
+.btn-share {
+  background-color: #f3b73f;
+}
+
+.invite-code-wrapper {
+  display: inline-block;
+  background-color: #fdfaf5;
+  border: 0.5px solid #dadada;
+  border-radius: 5px;
+  padding: 4px 12px;
+}
+
+.invite-code-text {
+  font-size: 11px;
+  color: #000000;
+}
+
+/* Team Bonus */
+.bonus-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.05);
+}
+
+.bonus-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 16px;
+}
+
+.bonus-levels {
+  display: flex;
+  gap: 12px;
+}
+
+.level-box {
+  flex: 1;
+  border-radius: 5px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.level-1 {
+  background-color: #f8fafe;
+  border: 1px solid #b4dcff;
+}
+
+.level-2 {
+  background-color: #fcfef8;
+  border: 1px solid #a8e0ba;
+}
+
+.level-3 {
+  background-color: #faf9fc;
+  border: 1px solid #b7adff;
+}
+
+.level-name {
+  font-size: 11px;
+  color: #000000;
+}
+
+.level-value {
+  font-size: 18px;
   font-weight: 700;
   color: #000000;
-  margin-bottom: 10px;
 }
 
-.article-text {
-  font-size: 15px;
-  line-height: 1.5;
+/* Member List */
+.member-list-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.member-list-title {
+  font-size: 14px;
+  font-weight: 600;
   color: #000000;
-  margin-bottom: 10px;
-  text-align: justify;
 }
 
-.article-placeholder {
-  background-color: #d9d9d9;
-  border-radius: 2px;
-  height: 158px;
-  width: 100%;
-  margin-bottom: 9px;
+.member-list-link {
+  font-size: 12px;
+  color: #cd8c09;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Invite Banner */
+#section-invite-banner .section-inner {
+  margin-bottom: 24px;
+}
+
+.invite-banner-card {
+  background-color: #fdf5e6;
+  border: 1px solid #f3b73f;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.banner-content {
+  flex: 1;
+}
+
+.banner-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.banner-subtitle {
+  font-size: 10px;
+  color: #000000;
+  line-height: 1.4;
+}
+
+.btn-invite-now {
+  background: linear-gradient(90deg, #F4C142 0%, #F8DD89 47%, #F5CA51 100%);
+  border-radius: 10px;
+  padding: 8px 16px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 </style>

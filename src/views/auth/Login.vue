@@ -1,154 +1,125 @@
 <template>
   <div class="app-container">
-    <!-- Header Section -->
-    <section id="section-header">
-      <div class="header-actions">
-        <a href="/assets/android/hue.apk" download>
-          <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
-        </a>
-        <div ref="langWrapEl" class="lang-wrap">
-          <button
-            ref="langBtnEl"
-            type="button"
-            class="lang-btn"
-            aria-label="Language"
-            :aria-expanded="langMenuOpen ? 'true' : 'false'"
-            @click.stop="toggleLangMenu"
-          >
-            <img src="/assets/image/4023_135.svg" alt="Language" class="icon-globe">
-          </button>
-          <div v-if="langMenuOpen" class="lang-menu" @click.stop>
-            <button type="button" class="lang-item" @click="changeLanguage('en')">English</button>
-            <button type="button" class="lang-item" @click="changeLanguage('id')">Indonesia</button>
-          </div>
-        </div>
+    <!-- Hero Section -->
+    <section id="section-hero" class="mobile-section">
+      <div class="hero-image-wrapper">
+        <img src="/assets/images/bc9739ea709a0d916c1ee09c79b13d9fe4735cbb.png" alt="Security Shield and Wallet Background" class="hero-image">
       </div>
     </section>
 
-    <!-- Hero Section -->
-    <section id="section-hero">
-      <div class="hero-content">
-        <img src="/assets/image/Logo01.png" alt="HUE Logo" class="hero-logo">
-        <div class="hero-text">
-          <h1 class="hero-title">{{ ui.heroTitle }}</h1>
-          <p class="hero-subtitle">{{ ui.heroSubtitle }}</p>
-        </div>
+    <!-- Header Section -->
+    <section id="section-header" class="mobile-section">
+      <div class="header-content">
+        <img src="/assets/images/108294978d9cad25785261933372f80a0602c03d.png" alt="Dana Proteksi Logo" class="brand-logo">
+        <h2 class="brand-subtitle">{{ ui.heroSubtitle }}</h2>
       </div>
     </section>
 
     <!-- Login Form Section -->
-    <section id="section-login-form">
-      <div class="login-container">
-        <button type="button" class="switch-login-type" @click="toggleLoginMode">
-          {{ switchLoginLabel }}
-          <img src="/assets/image/4024_190.svg" alt="Arrow Right">
-        </button>
+    <section id="section-login-form" class="mobile-section">
+      <div class="form-container">
+        <!-- Phone Input -->
+        <div v-if="loginMode === 'phone'" class="input-group">
+          <img src="/assets/images/8_326.svg" alt="User Icon" class="icon-left user-icon">
+          <input
+            type="tel"
+            v-model="formData.phone"
+            :placeholder="ui.phonePlaceholder"
+            class="form-input"
+            @blur="checkPhoneError"
+            @focus="clearPhoneError"
+          >
+        </div>
 
-        <form class="login-form" @submit.prevent="handleLogin" novalidate>
+        <!-- Email Input -->
+        <div v-else class="input-group">
+          <img src="/assets/images/8_326.svg" alt="User Icon" class="icon-left user-icon">
+          <input
+            type="text"
+            v-model="formData.email"
+            :placeholder="ui.emailPlaceholder"
+            class="form-input"
+            inputmode="email"
+            autocomplete="email"
+            autocapitalize="off"
+            spellcheck="false"
+            @blur="checkEmailError"
+            @focus="clearEmailError"
+          >
+        </div>
 
-          <!-- Phone Input -->
-          <div v-if="loginMode === 'phone'" class="form-group">
-            <label>{{ ui.phoneLabel }}</label>
-            <div class="input-wrapper">
-              <button type="button" class="country-code"  @click="showCountrySelector = true">
-                <img
-                  v-if="selectedCountry.flagUrl"
-                  :src="selectedCountry.flagUrl"
-                  :alt="selectedCountry.name + ' flag'"
-                  class="country-flag-img"
-                >
-                
-                <span>+{{ selectedCountry.dialCode }}</span>
-                <img src="/assets/image/13_212.svg" alt="Chevron Down" class="country-chevron">
-              </button>
-              <input
-                type="tel"
-                v-model="formData.phone"
-                :placeholder="ui.phonePlaceholder"
-                @blur="checkPhoneError"
-                @focus="clearPhoneError"
-              >
-            </div>
+        <!-- Password Input -->
+        <div class="input-group">
+          <img src="/assets/images/8_329.svg" alt="Lock Icon" class="icon-left lock-icon">
+          <input
+            :type="passwordFieldType"
+            v-model="formData.password"
+            :placeholder="ui.passwordPlaceholder"
+            class="form-input"
+          >
+          <img
+            src="/assets/images/6_40.svg"
+            alt="Toggle Password Visibility"
+            class="icon-right"
+            @click="togglePasswordVisibility"
+          >
+        </div>
+
+        <!-- Slider Captcha -->
+        <div class="slider-captcha" ref="sliderCaptchaRef">
+          <div class="slider-track" :class="{ 'slider-verified': sliderVerified }">
+            <span class="slider-text">{{ sliderVerified ? ui.sliderVerified : ui.sliderHint }}</span>
           </div>
+          <img
+            src="/assets/images/9aafab34419c92ae6d76b07f598384e4b00a88a6.png"
+            alt="Drag Arrow to Login"
+            class="slider-thumb"
+            :style="{ left: sliderLeft + 'px' }"
+            @mousedown="onSliderStart"
+            @touchstart.prevent="onSliderStart"
+          >
+        </div>
 
-          <div v-else class="form-group">
-            <label>{{ ui.emailLabel }}</label>
-            <div class="input-wrapper">
-              <input
-                type="text"
-                v-model="formData.email"
-                :placeholder="ui.emailPlaceholder"
-                inputmode="email"
-                autocomplete="email"
-                autocapitalize="off"
-                spellcheck="false"
-                @blur="checkEmailError"
-                @focus="clearEmailError"
-              >
-            </div>
-          </div>
+        <!-- Forgot Password -->
+        <div class="forgot-password-wrapper">
+          <a href="#" class="forgot-password-link" @click.prevent="handleForgotPassword">{{ ui.forgotPassword }}</a>
+        </div>
 
-          <!-- Password Input -->
-          <div class="form-group">
-            <label>{{ ui.passwordLabel }}</label>
-            <div class="input-wrapper">
-              <img src="/assets/image/f51b62d18e83856386037eeaceb597d4f4226181.png" alt="Lock" class="icon-lock">
-              <input
-                :type="passwordFieldType"
-                v-model="formData.password"
-                :placeholder="ui.passwordPlaceholder"
-              >
-              <button
-                type="button"
-                class="password-toggle"
-                :aria-label="passwordFieldType === 'password' ? 'Show password' : 'Hide password'"
-                @click="togglePasswordVisibility"
-              >
-                <img
-                  :src="passwordFieldType === 'password'
-                    ? 'https://api.iconify.design/mdi/eye.svg?color=%237B7474'
-                    : 'https://api.iconify.design/mdi/eye-off.svg?color=%237B7474'"
-                  alt=""
-                  class="icon-eye"
-                >
-              </button>
-            </div>
-          </div>
-
-          <!-- Agreement Checkbox -->
-          <div class="agreement-wrapper">
-            <div class="checkbox" :class="{ checked: isTermsAccepted }" @click="isTermsAccepted = !isTermsAccepted">
-              <svg v-if="isTermsAccepted" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            </div>
-            <p class="agreement-text">
-              {{ ui.agreementPrefix }}
-              <router-link to="/hn/legal/agreement">{{ ui.customerAgreement }}</router-link>,
-              <router-link to="/hn/legal/terms">{{ ui.termsOfService }}</router-link>
-              {{ ui.andWord }}
-              <router-link to="/hn/legal/privacy">{{ ui.privacyPolicy }}</router-link>
-            </p>
-          </div>
-
-          <!-- Submit Button -->
-          <button type="submit" class="btn-submit" :disabled="isLoading">
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button type="button" class="btn-primary" :disabled="isLoading" @click="handleLogin">
             <LoadingSpinner v-if="isLoading" :visible="true" message="" />
             <span v-else>{{ ui.submit }}</span>
           </button>
-
-          <!-- Register Link -->
-          <div class="register-link">
-            {{ ui.noAccount }}
-            <router-link to="/hn/network">{{ ui.createAccount }}</router-link>
-          </div>
-        </form>
+          <button type="button" class="btn-secondary" @click="$router.push('/hn/network')">
+            {{ ui.createAccount }}
+          </button>
+        </div>
       </div>
     </section>
 
     <!-- Footer Section -->
-    <section id="section-footer">
-      <p class="copyright">&copy; 2026 HUE System. All rights reserved.</p>
+    <section id="section-footer" class="mobile-section">
+      <div class="footer-container">
+        <p class="terms-text">
+          {{ ui.agreementPrefix }}
+          <span class="highlight" @click="$router.push('/hn/legal/privacy')">{{ ui.privacyPolicy }}</span>
+          {{ ui.andWord }}
+          <span class="highlight" @click="$router.push('/hn/legal/terms')">{{ ui.termsOfService }}</span>
+        </p>
+
+        <div class="security-block">
+          <div class="security-header">
+            <img src="/assets/images/3134047e5168616d4f5f4ce9af921913fa739acd.png" alt="Security Shield" class="shield-icon">
+            <h3 class="security-title">Aman, Terpercaya, Melindungi Anda</h3>
+          </div>
+          <p class="security-desc">Data Anda terenkripsi dan terlindungi dengan standar keamanan tinggi</p>
+          <div class="security-logos">
+            <img src="/assets/images/9247fb3a0182399d464f5e73d0e66665b07f1ca5.png" alt="BAPPEBTI Logo" class="logo-bappebti">
+            <img src="/assets/images/a648e454f7e6e93caec0f833a59b7dcec155605e.png" alt="OJK Logo" class="logo-ojk">
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Modals -->
@@ -184,44 +155,50 @@ const { locale } = useI18n()
 
 const EN_UI = Object.freeze({
   heroTitle: 'Start HUE and access advanced Cloud system features!',
-  heroSubtitle: 'Join thousands of users and experience smart Cloud-powered resource management',
+  heroSubtitle: 'Sign in to access your account securely',
   signInWithEmail: 'Sign in to console with email',
   signInWithPhone: 'Sign in to console with phone',
   phoneLabel: 'Phone',
-  phonePlaceholder: 'Mobile phone number',
+  phonePlaceholder: 'Enter your mobile number',
   emailLabel: 'Email',
   emailPlaceholder: 'Email address',
   passwordLabel: 'Password',
-  passwordPlaceholder: 'Please enter password',
-  agreementPrefix: 'I have read and agree to the',
+  passwordPlaceholder: 'Password',
+  agreementPrefix: 'I agree to the',
   customerAgreement: 'Customer Agreement',
   termsOfService: 'Terms of Service',
   andWord: 'and',
   privacyPolicy: 'Privacy Policy',
-  submit: 'Submit',
+  submit: 'Sign In',
   noAccount: 'No account?',
-  createAccount: 'Create account'
+  createAccount: 'Register',
+  forgotPassword: 'Forgot password?',
+  sliderHint: 'Slide the arrow to continue login',
+  sliderVerified: 'Verified'
 })
 
 const ID_UI_FALLBACK = Object.freeze({
   heroTitle: 'Mulai HUE dan akses fitur sistem Cloud canggih!',
-  heroSubtitle: 'Bergabunglah dengan ribuan pengguna dan rasakan manajemen sumber daya berbasis Cloud yang cerdas',
+  heroSubtitle: 'Masuk untuk mengakses akun Anda dengan aman',
   signInWithEmail: 'Masuk ke konsol dengan email',
   signInWithPhone: 'Masuk ke konsol dengan nomor',
   phoneLabel: 'Nomor',
-  phonePlaceholder: 'Nomor ponsel',
+  phonePlaceholder: 'Masukkan nomor ponsel Anda',
   emailLabel: 'Email',
   emailPlaceholder: 'Alamat email',
   passwordLabel: 'Kata sandi',
-  passwordPlaceholder: 'Silakan masukkan kata sandi',
-  agreementPrefix: 'Saya telah membaca dan menyetujui',
+  passwordPlaceholder: 'Kata sandi',
+  agreementPrefix: 'Saya setuju dengan',
   customerAgreement: 'Perjanjian Pelanggan',
-  termsOfService: 'Ketentuan Layanan',
+  termsOfService: 'Syarat Layanan',
   andWord: 'dan',
   privacyPolicy: 'Kebijakan Privasi',
-  submit: 'Kirim',
+  submit: 'Masuk',
   noAccount: 'Belum punya akun?',
-  createAccount: 'Buat akun'
+  createAccount: 'Daftar',
+  forgotPassword: 'Lupa kata sandi?',
+  sliderHint: 'Geser panah ini untuk melanjutkan login',
+  sliderVerified: 'Terverifikasi'
 })
 
 const ui = ref({ ...EN_UI })
@@ -394,6 +371,50 @@ const generatedCaptcha = ref('')
 const showCountrySelector = ref(false)
 const selectedCountry = ref({ name: 'Indonesia', code: 'ID', dialCode: '62', flag: '🇮🇩' })
 
+// Slider captcha state
+const sliderCaptchaRef = ref(null)
+const sliderLeft = ref(-5)
+const sliderVerified = ref(false)
+let sliderStartX = 0
+let sliderStartLeft = 0
+
+const onSliderStart = (e) => {
+  if (sliderVerified.value) return
+  const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX
+  sliderStartX = clientX
+  sliderStartLeft = sliderLeft.value
+  document.addEventListener('mousemove', onSliderMove)
+  document.addEventListener('mouseup', onSliderEnd)
+  document.addEventListener('touchmove', onSliderMove)
+  document.addEventListener('touchend', onSliderEnd)
+}
+
+const onSliderMove = (e) => {
+  const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX
+  const diff = clientX - sliderStartX
+  const trackEl = sliderCaptchaRef.value?.querySelector('.slider-track')
+  const maxLeft = (trackEl?.offsetWidth || 354) - 56
+  let newLeft = sliderStartLeft + diff
+  if (newLeft < -5) newLeft = -5
+  if (newLeft > maxLeft) newLeft = maxLeft
+  sliderLeft.value = newLeft
+}
+
+const onSliderEnd = () => {
+  document.removeEventListener('mousemove', onSliderMove)
+  document.removeEventListener('mouseup', onSliderEnd)
+  document.removeEventListener('touchmove', onSliderMove)
+  document.removeEventListener('touchend', onSliderEnd)
+  const trackEl = sliderCaptchaRef.value?.querySelector('.slider-track')
+  const maxLeft = (trackEl?.offsetWidth || 354) - 56
+  if (sliderLeft.value >= maxLeft - 10) {
+    sliderLeft.value = maxLeft
+    sliderVerified.value = true
+  } else {
+    sliderLeft.value = -5
+  }
+}
+
 const langMenuOpen = ref(false)
 const langWrapEl = ref(null)
 const langBtnEl = ref(null)
@@ -516,8 +537,8 @@ const handleLogin = async () => {
     return
   }
 
-  if (!isTermsAccepted.value) {
-    generalError.value = 'Please agree to the Customer Agreement, Terms of Service and Privacy Policy.'
+  if (!sliderVerified.value) {
+    generalError.value = 'Please complete the slider verification.'
     showErrorModal.value = true
     return
   }
@@ -695,372 +716,359 @@ watch(
   font-family: 'Inter', sans-serif;
   width: 100%;
   max-width: 100%;
-  background-color: #ffffff;
+  background-color: #f5f5f5;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  align-items: center;
   margin: 0 auto;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.mobile-section {
+  max-width: 412px;
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+}
+
+input, button {
+  font-family: 'Inter', sans-serif;
 }
 
 a {
   text-decoration: none;
 }
 
-input {
-  font-family: inherit;
+/* Hero Section */
+#section-hero {
+  position: relative;
+}
+
+.hero-image-wrapper {
+  position: absolute;
+  top: -60px;
+  left: 0;
+  width: 100%;
+  height: 483px;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
 }
 
 /* Header Section */
 #section-header {
-  padding: 15px 5px 0;
-  margin-right: 15px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 2px;
-}
-
-.header-actions {
-  display: flex;
-  gap: 24px;
-  justify-content: flex-end;
-  width: 100%;
-}
-
-.lang-wrap {
-  position: relative;
-}
-
-.lang-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-download {
-  width: 23px;
-  height: 23px;
-  object-fit: contain;
-  cursor: pointer;
-}
-
-.icon-globe {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-}
-
-.lang-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
-  padding: 6px;
-  min-width: 140px;
-  z-index: 2000;
-}
-
-.lang-item {
-  width: 100%;
-  background: transparent;
-  border: none;
-  text-align: left;
-  padding: 10px 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #000000;
-  cursor: pointer;
-  border-radius: 8px;
-  font-family: inherit;
-}
-
-.lang-item:hover {
-  background: rgba(33, 77, 243, 0.08);
-}
-
-/* Hero Section */
-#section-hero {
-  padding: 34px 24px 20px;
-}
-
-.hero-content {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.hero-logo {
-  width: 56px;
-  height: 58px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.hero-text {
+  z-index: 2;
+  background-color: #fefefe;
+  border-radius: 40px 40px 0 0;
+  margin-top: 278px;
+  padding-top: 37px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
 }
 
-.hero-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: #000000;
-  line-height: 1.3;
+.header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.hero-subtitle {
-  margin: 0;
+.brand-logo {
+  width: 178px;
+  height: 67px;
+  object-fit: contain;
+  margin-bottom: 14px;
+}
+
+.brand-subtitle {
+  color: #635f5f;
   font-size: 14px;
-  color: #494747;
+  font-weight: 400;
+  text-align: center;
+  max-width: 265px;
+  margin: 0;
   line-height: 1.4;
 }
 
 /* Login Form Section */
 #section-login-form {
-  padding: 20px 20px;
-  flex-grow: 1;
-}
-
-.switch-login-type {
-  display: inline-flex;
-  align-items: center;
-  background: transparent;
-  border: none;
-  gap: 4px;
-  color: #0073ff;
-  font-size: 15px;
-  font-weight: 500;
-  margin-bottom: 24px;
-}
-
-.switch-login-type img {
-  width: 14px;
-  height: 14px;
-}
-
-.login-form {
+  z-index: 2;
+  background-color: #fefefe;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  align-items: center;
+  padding-top: 19px;
 }
 
-.form-group {
+.form-container {
+  width: 374px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.form-group label {
-  font-size: 14px;
-  color: #000000;
-  font-weight: 500;
-}
-
-.input-wrapper {
-  position: relative;
-  display: flex;
   align-items: center;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  height: 43px;
-  padding: 0 12px;
+  padding: 0 19px;
 }
 
-.country-code {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  color: #000000;
-  padding-right: 12px;
-  margin-right: 12px;
-  position: relative;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
-}
-
-.country-code::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 16px;
-  width: 1px;
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.country-code img {
-  width: 12px;
-  height: 12px;
-}
-
-.country-code span {
-  line-height: 1;
-}
-
-.country-chevron {
-  width: 12px;
-  height: 12px;
-  flex: 0 0 auto;
-  display: block;
-}
-
-.country-flag {
-  font-size: 14px;
-  line-height: 1;
-}
-
-.country-flag-img {
-  width: 18px;
-  height: 12px;
-  object-fit: cover;
-  border-radius: 2px;
-}
-
-.icon-lock {
-  width: 21px;
-  height: 21px;
-  object-fit: contain;
-  margin-right: 12px;
-}
-
-.input-wrapper input {
-  flex-grow: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 14px;
-  color: #000000;
-  padding: 0;
+.input-group {
   width: 100%;
+  height: 60px;
+  background-color: #fdfcf8;
+  border: 1px solid #ababab;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  margin-bottom: 7px;
 }
 
-.input-wrapper input::placeholder {
-  color: rgba(0, 0, 0, 0.37);
+.icon-left {
+  margin-right: 15px;
+  object-fit: contain;
 }
 
-.icon-eye {
-  width: 25px;
-  height: 25px;
-  display: block;
-  margin-left: 12px;
+.user-icon {
+  width: 20px;
+  height: 20px;
 }
-.password-toggle {
-  background: transparent;
+
+.lock-icon {
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+  margin-right: 17px;
+}
+
+.icon-right {
+  width: 16px;
+  height: 16px;
+  margin-left: 15px;
+  cursor: pointer;
+}
+
+.form-input {
+  flex: 1;
   border: none;
-  padding: 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  width: 25px;
-  height: 25px;
-  flex: 0 0 auto;
-}
-
-/* Agreement */
-.agreement-wrapper {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.checkbox {
-  width: 19px;
-  height: 19px;
-  border: 1px solid #000000;
-  border-radius: 100px;
-  flex-shrink: 0;
-  margin-top: 2px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  transition: background-color 0.2s;
-}
-
-.checkbox.checked {
-  background-color: #1b46f5;
-  border-color: #1b46f5;
-}
-
-.agreement-text {
-  margin: 0;
+  background: transparent;
+  color: #333333;
   font-size: 14px;
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: #635f5f;
+}
+
+/* Slider Captcha */
+.slider-captcha {
+  width: 100%;
+  height: 60px;
+  position: relative;
+  margin-top: 12px;
+  margin-bottom: 18px;
+}
+
+.slider-track {
+  position: absolute;
+  top: 15px;
+  right: 0;
+  width: 100%;
+  height: 30px;
+  background-color: #f4bd40;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.slider-track.slider-verified {
+  background-color: #4caf50;
+}
+
+.slider-text {
+  color: #4f4f4f;
+  font-size: 12px;
+  font-weight: 500;
+  user-select: none;
+}
+
+.slider-track.slider-verified .slider-text {
+  color: #ffffff;
+}
+
+.slider-thumb {
+  position: absolute;
+  top: 0;
+  width: 56px;
+  height: 60px;
+  z-index: 2;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Forgot Password */
+.forgot-password-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 19px;
+  padding-right: 7px;
+}
+
+.forgot-password-link {
   color: #000000;
-  line-height: 1.4;
+  font-size: 14px;
+  text-decoration: none;
+  font-weight: 600;
 }
 
-.agreement-text a {
-  color: #0073ff;
+/* Action Buttons */
+.action-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
-/* Submit Button */
-.btn-submit {
-  background-color: #1b46f5;
+.btn-primary {
+  width: 100%;
+  height: 60px;
+  background-color: #000000;
   color: #ffffff;
   border: none;
-  border-radius: 5px;
-  height: 53px;
+  border-radius: 15px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 20px;
-  width: 100%;
+  transition: opacity 0.2s;
   display: flex;
-  justify-content: center;
   align-items: center;
-  transition: background-color 0.2s ease;
+  justify-content: center;
 }
 
-.btn-submit:hover {
-  background-color: #1539c9;
+.btn-primary:active {
+  opacity: 0.8;
 }
 
-.btn-submit:disabled {
+.btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.register-link {
-  text-align: center;
-  font-size: 15px;
+.btn-secondary {
+  width: 100%;
+  height: 60px;
+  background-color: transparent;
   color: #000000;
-  margin-top: 20px;
+  border: 1px solid #978d00;
+  border-radius: 15px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.register-link a {
-  color: #0073ff;
+.btn-secondary:active {
+  background-color: #f9f9f9;
 }
 
 /* Footer Section */
 #section-footer {
-  padding: 20px;
-  text-align: center;
-  margin-top: auto;
-  padding-bottom: 40px;
+  z-index: 2;
+  background-color: #fefefe;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 7px;
+  padding-bottom: 60px;
+  min-height: 250px;
 }
 
-.copyright {
-  margin: 0;
-  font-size: 14px;
+.footer-container {
+  width: 374px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 19px;
+}
+
+.terms-text {
+  color: #9a9a9a;
+  font-size: 12px;
+  text-align: center;
+  margin: 0 0 39px 0;
+}
+
+.highlight {
+  color: #978d00;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.security-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 2px;
+}
+
+.security-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.shield-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.security-title {
   color: #000000;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.security-desc {
+  color: #9a9a9a;
+  font-size: 12px;
+  margin: 0 0 7px 39px;
+  line-height: 1.4;
+  max-width: 308px;
+}
+
+.security-logos {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 33px;
+}
+
+.logo-bappebti {
+  width: 84px;
+  height: 21px;
+  object-fit: contain;
+}
+
+.logo-ojk {
+  width: 42px;
+  height: 26px;
+  object-fit: contain;
 }
 </style>

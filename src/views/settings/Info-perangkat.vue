@@ -1,68 +1,60 @@
 <template>
-  <div class="app-container">
+  <div class="mobile-container">
     <!-- Header -->
     <section id="section-header">
-      <header class="header">
-        <button class="back-btn" @click="goBack" aria-label="Go back">
-          <img src="/assets/image/4280_552.svg" alt="Back">
-        </button>
-        <h1 class="title">About Us</h1>
+      <header class="profile-header">
+        <img src="/assets/images/54_311.svg" alt="Back" class="icon-back" @click="goBack">
+        <h1 class="header-title">Profil Saya</h1>
       </header>
     </section>
 
-    <!-- Logo -->
-    <section id="section-logo">
-      <div class="logo-container">
-        <div class="logo-box">
-          <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="HUE Logo" class="logo-img">
+    <!-- Hero -->
+    <section id="section-hero">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h2 class="hero-title">Profil</h2>
+          <p class="hero-subtitle">Lihat data Anda disini</p>
         </div>
-        <h2 class="app-name">HUE</h2>
+        <img src="/assets/images/7210a5369195691e3aa63bd1fb6d8c025d233ccc.png" alt="" class="hero-image">
       </div>
     </section>
 
-    <!-- Actions -->
-    <section id="section-actions">
-      <div class="action-row" @click="syncUpdates">
-        <img src="/assets/image/163ded71fa3ded61681ee0f37f5fc6e9217ad3de.png" alt="Sync Icon" class="action-icon">
-        <span class="action-text">Check for Sync Updates</span>
-        <img src="/assets/image/4283_657.svg" alt="Arrow Right" class="action-arrow">
-      </div>
-    </section>
+    <!-- Profile Details -->
+    <section id="section-profile-details">
+      <div class="details-list">
+        <div class="detail-item">
+          <div class="detail-label">ID Pengguna</div>
+          <div class="detail-value">{{ displayUid }}</div>
+        </div>
+        <div class="divider"></div>
 
-    <!-- Info -->
-    <section id="section-info">
-      <div class="info-list">
-        <div class="info-item">
-          <div class="info-label">App Version</div>
-          <div class="info-value">{{ appVersion }}</div>
+        <div class="detail-item">
+          <div class="detail-label">Bank Pencairan Dana</div>
+          <div class="detail-value">{{ displayBank }}</div>
         </div>
-        <div class="info-item">
-          <div class="info-label">Information of Device</div>
-          <div class="info-value">{{ deviceInfo }}</div>
+        <div class="divider"></div>
+
+        <div class="detail-item">
+          <div class="detail-label">VIP Saat Ini</div>
+          <div class="detail-value">{{ displayVip }}</div>
         </div>
-        <div class="info-item">
-          <div class="info-label">UTC</div>
-          <div class="info-value">{{ utcTime }}</div>
+        <div class="divider"></div>
+
+        <div class="detail-item">
+          <div class="detail-label">Nama Saya</div>
+          <div class="detail-value">{{ displayUsername }}</div>
         </div>
-        <div class="info-item">
-          <div class="info-label">Username</div>
-          <div class="info-value">{{ userInfo.username || '-' }}</div>
+        <div class="divider"></div>
+
+        <div class="detail-item">
+          <div class="detail-label">Nomor Saya</div>
+          <div class="detail-value">{{ displayPhone }}</div>
         </div>
-        <div class="info-item">
-          <div class="info-label">Phone</div>
-          <div class="info-value">{{ userInfo.phone || '-' }}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Email</div>
-          <div class="info-value">{{ userInfo.email || '-' }}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Registration Date</div>
-          <div class="info-value">{{ formattedRegistrationDate || '-' }}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Referral By</div>
-          <div class="info-value">{{ userInfo.referral_by_phone || '-' }}</div>
+        <div class="divider"></div>
+
+        <div class="detail-item">
+          <div class="detail-label">Dana Proteksi Saya</div>
+          <div class="detail-value">{{ displayProtectionStatus }}</div>
         </div>
       </div>
     </section>
@@ -70,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '@/services/api'
 
@@ -79,63 +71,88 @@ const router = useRouter()
 const userInfo = ref({
   phone: '',
   referral_by_phone: '',
-  root_parent_phone: '',
   username: '',
   email: '',
-  registration_date: ''
+  registration_date: '',
+  referral_code: '',
+  id: '',
+  bank_name: '',
+  bank_account: '',
+  current_rank: null,
+  current_title: '',
+  has_active_investment: false
 })
 
-const formattedRegistrationDate = ref('')
 const isLoading = ref(false)
-const errorMessage = ref('')
-const utcTime = ref('')
-let utcTimer = null
 
-const appVersion = ref('1.11.0, 20260501')
+const displayUid = computed(() => {
+  const d = userInfo.value
+  const uid = d.referral_code || d.id || d.user_id || ''
+  return uid ? String(uid) : '-'
+})
 
-const deviceInfo = ref('Mobile')
+const displayBank = computed(() => {
+  const d = userInfo.value
+  const bankName = d.bank_name || d.payout_bank || ''
+  const bankAccount = d.bank_account || d.payout_account || ''
+  if (bankName && bankAccount) return `${bankName}-${bankAccount}`
+  if (bankName) return bankName
+  if (bankAccount) return bankAccount
+  return 'Belum terhubung'
+})
 
-const updateUtcTime = () => {
-  const now = new Date()
-  const y = now.getUTCFullYear()
-  const m = String(now.getUTCMonth() + 1).padStart(2, '0')
-  const d = String(now.getUTCDate()).padStart(2, '0')
-  const h = String(now.getUTCHours()).padStart(2, '0')
-  const min = String(now.getUTCMinutes()).padStart(2, '0')
-  const s = String(now.getUTCSeconds()).padStart(2, '0')
-  utcTime.value = `${y}-${m}-${d}`
-}
+const displayVip = computed(() => {
+  const d = userInfo.value
+  const title = String(d.current_title || '').trim()
+  if (title) return title
+  const rank = d.current_rank
+  if (rank === null || rank === undefined || rank === '') return 'VIP 0'
+  const n = Number(rank)
+  return Number.isFinite(n) ? `VIP ${n}` : String(rank)
+})
 
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = date.getFullYear()
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  return `${day}/${month}/${year} ${hours}:${minutes}`
-}
+const displayUsername = computed(() => {
+  const d = userInfo.value
+  const name = String(d.username || d.name || '').trim()
+  return name || '-'
+})
+
+const displayPhone = computed(() => {
+  const d = userInfo.value
+  const p = String(d.phone || d.phone_number || d.user_phone || '').trim()
+  return p || '-'
+})
+
+const displayProtectionStatus = computed(() => {
+  const d = userInfo.value
+  if (d.has_active_investment) return 'Aktif'
+  return 'Tidak aktif'
+})
 
 const fetchAccountInfo = async () => {
   isLoading.value = true
-  errorMessage.value = ''
   try {
     const response = await authAPI.getAccountInfo()
-    userInfo.value = response.data
-    if (response.data.created_at || response.data.registration_date) {
-      formattedRegistrationDate.value = formatDate(response.data.created_at || response.data.registration_date)
+    if (response?.data) {
+      userInfo.value = { ...userInfo.value, ...response.data }
     }
-  } catch (error) {
-    console.error('Error fetching account info:', error)
-    errorMessage.value = 'Failed to fetch device information'
+  } catch (_) {
+    // silent fail
   } finally {
     isLoading.value = false
   }
 }
 
-const syncUpdates = () => {
-  window.location.reload()
+const fetchRankStatus = async () => {
+  try {
+    const resp = await authAPI.getRankStatus()
+    if (resp?.data) {
+      userInfo.value.current_rank = resp.data.current_rank ?? null
+      userInfo.value.current_title = resp.data.current_title ?? ''
+    }
+  } catch (_) {
+    // silent fail
+  }
 }
 
 const goBack = () => {
@@ -143,155 +160,118 @@ const goBack = () => {
 }
 
 onMounted(() => {
-  fetchAccountInfo()
-  updateUtcTime()
-  utcTimer = setInterval(updateUtcTime, 1000)
-})
-
-onBeforeUnmount(() => {
-  if (utcTimer) clearInterval(utcTimer)
+  Promise.all([fetchAccountInfo(), fetchRankStatus()])
 })
 </script>
 
 <style scoped>
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.app-container {
+.mobile-container {
   font-family: 'Inter', sans-serif;
-  margin: 0 auto;
-  padding: 0;
+  width: 100%;
   max-width: 412px;
-  background-color: #f8f8f8;
   min-height: 100vh;
-  position: relative;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  background-color: #fdfaf4;
+  padding: 0 22px;
+  margin: 0 auto;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Header */
-.header {
+.profile-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 14px 10px;
+  padding: 20px 0;
+  gap: 12px;
+}
+
+.icon-back {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000;
+}
+
+/* Hero */
+.hero-content {
   position: relative;
-  height: 50px;
+  height: 130px;
+  margin-top: 10px;
 }
 
-.back-btn {
+.hero-text {
   position: absolute;
-  left: 10px;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
+  top: 36px;
+  left: 0;
+  z-index: 2;
 }
 
-.back-btn img {
-  width: 20px;
-  height: 20px;
-}
-
-.title {
-  font-size: 17px;
+.hero-title {
+  font-size: 24px;
   font-weight: 700;
-  color: #000000;
-  margin: 0;
-}
-
-/* Logo */
-.logo-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 31px;
-}
-
-.logo-box {
-  width: 88px;
-  height: 82px;
-  background-color: #cfdef5;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.logo-img {
-  width: 44px;
-  height: 46px;
-  object-fit: contain;
-}
-
-.app-name {
-  margin-top: 8px;
-  font-size: 17px;
-  font-weight: 700;
-  color: #000000;
-  margin-bottom: 0;
-}
-
-/* Actions */
-.action-row {
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  margin-top: 27px;
-  cursor: pointer;
-}
-
-.action-icon {
-  width: 25px;
-  height: 25px;
-  margin-right: 15px;
-}
-
-.action-text {
-  flex-grow: 1;
-  font-size: 15px;
-  color: #000000;
-  font-weight: 400;
-}
-
-.action-arrow {
-  width: 20px;
-  height: 20px;
-}
-
-/* Info */
-.info-list {
-  padding: 0 10px;
-  margin-top: 20px;
-}
-
-.info-item {
-  padding-bottom: 13px;
-  margin-bottom: 8px;
-  border-bottom: 1px dotted #999;
-}
-
-.info-item:last-child {
-  margin-bottom: 0;
-  border-bottom: none;
-}
-
-.info-label {
-  font-size: 15px;
   color: #000000;
   margin-bottom: 4px;
-  font-weight: 400;
 }
 
-.info-value {
-  font-size: 13px;
+.hero-subtitle {
+  font-size: 14px;
+  color: #635f5f;
+}
+
+.hero-image {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 154px;
+  height: 123px;
+  object-fit: contain;
+  z-index: 1;
+}
+
+/* Profile Details */
+#section-profile-details {
+  padding-bottom: 40px;
+  flex-grow: 1;
+}
+
+.details-list {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.detail-value {
+  font-size: 14px;
   color: #737373;
-  font-weight: 400;
+}
+
+.divider {
+  height: 0;
+  border-bottom: 1px dotted #000000;
+  opacity: 0.3;
+  margin: 12px 0;
 }
 </style>

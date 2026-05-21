@@ -1,56 +1,56 @@
 <template>
-  <div class="app-container">
+  <div class="trx-page">
     <!-- Header -->
     <section id="section-header">
-      <header class="app-header">
-        <button type="button" class="back-btn" aria-label="Go to profile" @click.stop="goToProfile">
-          <img src="/assets/image/4252_299.svg" alt="Back">
+      <header class="top-nav">
+        <button class="back-btn" aria-label="Go back" @click="goBack">
+          <img src="/assets/images/34_100.svg" alt="">
         </button>
-        <button type="button" ref="menuAnchorEl" class="title-group" @click.stop="toggleRecordMenu">
-          <h1>{{ currentRecordLabel }}</h1>
-          <img
-            src="/assets/image/4252_317.svg"
-            alt="Toggle dropdown"
-            class="dropdown-icon"
-            :class="{ open: recordMenuOpen }"
-          >
-          <div v-if="recordMenuOpen" class="record-menu" @click.stop>
-            <button
-              v-for="item in recordMenuItems"
-              :key="item.key"
-              type="button"
-              class="record-menu-item"
-              :class="{ active: item.key === currentRecordKey }"
-              @click.stop="selectRecord(item)"
-            >
-              {{ item.label }}
-            </button>
-          </div>
-        </button>
+        <h1 class="nav-title">Riwayat</h1>
       </header>
     </section>
 
-    <!-- Commission List -->
-    <section id="section-commission-list">
-      <div class="table-header">
-        <div class="col-status">Status</div>
-        <div class="col-amount">Amount</div>
-        <div class="col-type">Type</div>
+    <!-- Hero -->
+    <section id="section-hero">
+      <div class="hero-content">
+        <h2 class="page-title">Riwayat</h2>
+        <p class="page-subtitle">Lihat semua aktivitas transaksi Anda.</p>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section id="section-filters">
+      <div class="filters-container">
+        <button
+          v-for="item in filterItems"
+          :key="item.key"
+          class="filter-chip"
+          :class="{ active: item.key === currentFilterKey }"
+          @click="selectFilter(item)"
+        >
+          {{ item.label }}
+        </button>
+      </div>
+    </section>
+
+    <!-- History List -->
+    <section id="section-history">
+      <div v-if="!isLoading && commissions.length === 0" class="empty-state">
+        <p class="empty-text">Belum ada transaksi.</p>
       </div>
 
-      <div v-if="commissions.length === 0 && !isLoading" class="empty-state">
-        <p class="empty-text">No commission records yet</p>
-      </div>
-
-      <div class="list-body">
-        <div v-for="commission in commissions" :key="commission.id" class="list-item">
-          <div class="col-status status-success">Succeed</div>
-          <div class="col-amount font-bold">{{ commission.amount }}</div>
-          <div class="col-type">
-            <div class="type-phone">{{ commission.memberId }}</div>
-            <div class="type-date">{{ commission.date }}</div>
+      <div class="history-list">
+        <article v-for="commission in commissions" :key="commission.id" class="history-card">
+          <div class="card-icon-wrapper">
+            <div class="icon-bg"></div>
+            <img src="/assets/images/f8648f6433668b71d57f0c9b7251b169b98c2581.png" alt="" class="icon-img">
           </div>
-        </div>
+          <div class="card-details">
+            <h3 class="card-title">Bonus dari {{ commission.memberId }}<br>{{ commission.productName }}</h3>
+            <span class="card-date">{{ commission.date }}</span>
+          </div>
+          <div class="card-amount">{{ commission.amount }}</div>
+        </article>
       </div>
 
       <div v-if="commissions.length > 0 && hasMore" class="pagination-row">
@@ -66,14 +66,16 @@
     </section>
 
     <ErrorModal v-model="errorModalOpen" :message="errorMessage" />
+    <LoadingSpinner :visible="isLoading" :overlay="true" message="" />
   </div>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { transactionAPI } from '@/services/api'
 import ErrorModal from '@/components/modals/AppErrorModal.vue'
+import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import PaginationBar from '@/components/partials/PaginationBar.vue'
 import { formatAppCurrency } from '@/utils/settings'
 
@@ -90,71 +92,65 @@ const visibleCount = ref(pageSize)
 const hasMore = ref(true)
 const nextFetchPage = ref(1)
 
-/* Record menu dropdown */
-const recordMenuOpen = ref(false)
-const menuAnchorEl = ref(null)
-
-const recordMenuItems = [
-  { key: 'recharge', label: 'Record recharge', to: '/hn/app/charge/history' },
-  { key: 'mining', label: 'Mining record', to: '/hn/hall/outputhall/history' },
-  { key: 'payout', label: 'Payout record', to: '/hn/app/settlement/history' },
-  { key: 'purchase', label: 'Purchase record', to: '/hn/orders' },
-  { key: 'commission', label: 'Commision friend', to: '/hn/commission/history' },
-  { key: 'other', label: 'Other record', to: '/hn/user/history' }
+const filterItems = [
+  { key: 'recharge', label: 'Isi Ulang', to: '/hn/app/charge/history' },
+  { key: 'payout', label: 'Tarik Uang', to: '/hn/app/settlement/history' },
+  { key: 'mining', label: 'Keuntungan', to: '/hn/hall/outputhall/history' },
+  { key: 'commission', label: 'Bonus', to: '/hn/commission/history' },
+  { key: 'other', label: 'Lainnya', to: '/hn/user/history' }
 ]
 
-const currentRecordKey = computed(() => {
+const currentFilterKey = computed(() => {
   const p = String(route.path || '')
   const normalized = p.startsWith('/hn/') ? p.slice('/hn'.length) : p
   if (normalized.startsWith('/app/charge')) return 'recharge'
-  if (normalized.startsWith('/hall/outputhall')) return 'mining'
   if (normalized.startsWith('/app/settlement')) return 'payout'
-  if (normalized.startsWith('/orders')) return 'purchase'
+  if (normalized.startsWith('/hall/outputhall')) return 'mining'
   if (normalized.startsWith('/commission')) return 'commission'
   return 'other'
 })
 
-const currentRecordLabel = computed(() => {
-  const found = recordMenuItems.find((x) => x.key === currentRecordKey.value)
-  return found?.label || 'Other record'
-})
-
-const toggleRecordMenu = () => {
-  recordMenuOpen.value = !recordMenuOpen.value
-}
-
-const closeRecordMenu = () => {
-  recordMenuOpen.value = false
-}
-
-const selectRecord = (item) => {
-  closeRecordMenu()
-  if (item?.to) router.push(item.to)
-}
-
-const onDocumentClick = (e) => {
-  if (!recordMenuOpen.value) return
-  const anchor = menuAnchorEl.value
-  const target = e?.target
-  if (anchor && target && anchor.contains(target)) return
-  closeRecordMenu()
-}
-
-const goToProfile = () => {
+const goBack = () => {
+  try {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+  } catch (_) {}
   router.push('/hn/user')
 }
 
+const selectFilter = (item) => {
+  if (item?.to) router.push(item.to)
+}
+
 const COMMISSION_TYPES = ['PURCHASE_COMMISSION', 'PROFIT_COMMISSION']
+
+const pad2 = (n) => String(n).padStart(2, '0')
+
+const formatDateTime = (value) => {
+  if (!value) return '-'
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return String(value)
+  const now = new Date()
+  const isToday = d.toDateString() === now.toDateString()
+  const yesterday = new Date(now)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const isYesterday = d.toDateString() === yesterday.toDateString()
+  const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  if (isToday) return `Hari ini, ${time}`
+  if (isYesterday) return `Kemarin, ${time}`
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${time}`
+}
 
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return 0
   const raw = String(value).trim()
   if (!raw) return 0
-  let s = raw.replace(/\s+/g, '')
-  s = s.replace(/[^0-9,.-]/g, '')
+  let s = raw.replace(/\s+/g, '').replace(/[^0-9,.-]/g, '')
   const dots = (s.match(/\./g) || []).length
   const commas = (s.match(/,/g) || []).length
-
   if (dots > 0 && commas > 0) {
     const lastDot = s.lastIndexOf('.')
     const lastComma = s.lastIndexOf(',')
@@ -162,43 +158,32 @@ const parseNumber = (value) => {
     const groupSep = decimalSep === '.' ? ',' : '.'
     s = s.split(groupSep).join('')
     if (decimalSep === ',') s = s.replace(',', '.')
-  } else if (dots > 1 && commas === 0) {
+  } else if (dots > 1) {
     s = s.split('.').join('')
-  } else if (commas > 1 && dots === 0) {
+  } else if (commas > 1) {
     s = s.split(',').join('')
   } else if (commas === 1 && dots === 0) {
     const idx = s.indexOf(',')
     const digitsAfter = s.length - idx - 1
     if (digitsAfter === 3) s = s.replace(',', '')
     else s = s.replace(',', '.')
-  } else if (dots === 1 && commas === 0) {
-    const idx = s.indexOf('.')
-    const digitsAfter = s.length - idx - 1
-    if (digitsAfter === 3) s = s.replace('.', '')
   }
-
   const n = Number(s)
   return Number.isFinite(n) ? n : 0
 }
 
-const getFractionDigitsFromRaw = (value) => {
-  if (value === null || value === undefined) return null
-  const raw = String(value).trim()
-  if (!raw) return null
-  const lastDot = raw.lastIndexOf('.')
-  const lastComma = raw.lastIndexOf(',')
-  const lastSep = Math.max(lastDot, lastComma)
-  if (lastSep <= -1) return 0
-  const frac = raw.slice(lastSep + 1).replace(/[^0-9]/g, '')
-  if (!frac) return 0
-  return Math.min(8, frac.length)
-}
-
 const formatUSD = (value) => {
   const num = parseNumber(value)
-  const rawDecimals = getFractionDigitsFromRaw(value)
-  const decimals = rawDecimals === null ? 2 : rawDecimals
-  return formatAppCurrency(num, { decimals })
+  return formatAppCurrency(num)
+}
+
+const extractErrorMessage = (err) => {
+  const data = err?.response?.data
+  if (!data) return err?.message || 'Gagal memuat data, silakan coba lagi'
+  if (typeof data === 'string') return data
+  if (data.detail) return String(data.detail)
+  if (data.message) return String(data.message)
+  return 'Gagal memuat data, silakan coba lagi'
 }
 
 const normalizeTransactionsResponse = (data) => {
@@ -208,31 +193,13 @@ const normalizeTransactionsResponse = (data) => {
   return []
 }
 
-const pad2 = (n) => String(n).padStart(2, '0')
-const formatDateTime = (value) => {
-  if (!value) return '-'
-  const d = new Date(value)
-  if (Number.isNaN(d.getTime())) return String(value)
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}.${pad2(d.getMinutes())}`
-}
-
-const extractErrorMessage = (err) => {
-  const data = err?.response?.data
-  if (!data) return err?.message || 'Request failed, please refresh the page'
-  if (typeof data === 'string') return data
-  if (data.detail) return String(data.detail)
-  const firstKey = Object.keys(data)[0]
-  const firstVal = data[firstKey]
-  if (Array.isArray(firstVal) && firstVal.length) return String(firstVal[0])
-  if (firstVal) return String(firstVal)
-  return 'Request failed, please refresh the page'
-}
-
 const mapTransactionToCommission = (trx) => {
   const memberId = trx?.upline_phone || trx?.user_phone || trx?.trx_id || '-'
+  const productName = trx?.product_name || trx?.description || 'Komisi anggota'
   return {
     id: trx?.id ?? trx?.trx_id,
-    memberId: memberId,
+    memberId,
+    productName,
     date: formatDateTime(trx?.created_at),
     amount: formatUSD(trx?.amount),
     createdAtRaw: trx?.created_at || null
@@ -255,7 +222,6 @@ const dedupeAndMap = (transactions) => {
     seen.add(k)
     mapped.push({ trx, mapped: mapTransactionToCommission(trx) })
   }
-
   mapped.sort((a, b) => {
     const da = new Date(a.trx?.created_at || 0).getTime()
     const db = new Date(b.trx?.created_at || 0).getTime()
@@ -285,8 +251,8 @@ const loadPage = async (page) => {
     if (append.length) {
       const merged = [...allCommissions.value, ...append]
       merged.sort((a, b) => {
-        const da = new Date(a?.createdAtRaw || a?.date || 0).getTime()
-        const db = new Date(b?.createdAtRaw || b?.date || 0).getTime()
+        const da = new Date(a?.createdAtRaw || 0).getTime()
+        const db = new Date(b?.createdAtRaw || 0).getTime()
         return db - da
       })
       allCommissions.value = merged
@@ -336,11 +302,6 @@ const loadMore = async () => {
 
 onMounted(() => {
   fetchCommissionTransactions()
-  document.addEventListener('click', onDocumentClick)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 
@@ -351,205 +312,191 @@ onBeforeUnmount(() => {
   padding: 0;
 }
 
-.app-container {
+.trx-page {
   font-family: 'Inter', sans-serif;
-  background-color: #f8f8f8;
   max-width: 412px;
-  min-height: 100vh;
   margin: 0 auto;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  background-color: #fbfaf7;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, p {
-  margin: 0;
+button {
+  font-family: inherit;
 }
 
 /* Header */
-#section-header {
-  width: 100%;
-}
-
-.app-header {
+#section-header .top-nav {
   display: flex;
   align-items: center;
-  padding: 18px 16px;
-  position: relative;
-  min-height: 60px;
+  padding: 24px 22px;
+  gap: 8px;
 }
 
-.back-btn {
+#section-header .back-btn {
   background: none;
   border: none;
+  padding: 0;
   cursor: pointer;
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-  z-index: 2;
-}
-
-.back-btn img {
-  width: 20px;
-  height: 20px;
-  display: block;
-}
-
-.title-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  cursor: pointer;
-  position: relative;
-}
-
-.title-group h1 {
-  font-size: 18px;
-  font-weight: 700;
-  color: #000000;
-}
-
-.dropdown-icon {
   width: 24px;
   height: 24px;
-  cursor: pointer;
-  transition: transform 0.15s ease;
 }
 
-.dropdown-icon.open {
-  transform: rotate(180deg);
-}
-
-.record-menu {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 220px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-  z-index: 50;
-}
-
-.record-menu-item {
-  width: 100%;
-  padding: 10px 12px;
-  background: transparent;
-  border: none;
-  text-align: left;
+.nav-title {
   font-size: 16px;
-  color: #000000;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.record-menu-item + .record-menu-item {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.record-menu-item.active {
   font-weight: 700;
+  color: #000000;
 }
 
-/* Commission List */
-#section-commission-list {
-  padding: 8px 16px 32px 16px;
-  min-height: calc(100vh - 64px);
+/* Hero */
+#section-hero .hero-content {
+  padding: 24px 22px 16px;
 }
 
-.table-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1.5fr;
-  background-color: #ffffff;
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.page-subtitle {
+  font-size: 12px;
+  color: #635f5f;
+  font-weight: 400;
+}
+
+/* Filters */
+#section-filters .filters-container {
+  padding: 0 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 6px;
+}
+
+.filter-chip {
+  width: 92px;
+  height: 30px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid #cfcfcf;
+  background-color: #fefefe;
+  color: #000000;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.filter-chip.active {
+  border-color: #f3b73f;
+  color: #f3b73f;
+}
+
+.filter-chip:hover {
+  border-color: #f3b73f;
+}
+
+/* History */
+#section-history {
+  min-height: calc(100vh - 250px);
+}
+
+#section-history .history-list {
+  padding: 32px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-card {
+  background-color: #fefffe;
+  border-radius: 10px;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.08);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-icon-wrapper {
+  position: relative;
+  width: 51px;
+  height: 43px;
+  flex-shrink: 0;
+}
+
+.icon-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #e2ecff;
   border-radius: 5px;
-  padding: 12px 16px;
-  margin-bottom: 8px;
+}
+
+.icon-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 29px;
+  height: 29px;
+  object-fit: contain;
+}
+
+.card-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #060606;
+  line-height: 1.3;
+}
+
+.card-date {
+  font-size: 10px;
+  color: #7d7d7d;
+  font-weight: 400;
+}
+
+.card-amount {
   font-size: 12px;
   font-weight: 700;
-  color: #000000;
+  color: #20407c;
+  white-space: nowrap;
 }
 
-.col-status { text-align: left; }
-.col-amount { text-align: center; }
-.col-type { text-align: right; }
-
+/* Empty State */
 .empty-state {
-  padding: 40px 0;
+  padding: 40px 22px;
   text-align: center;
 }
 
 .empty-text {
-  color: #b2b2b2;
+  color: #7d7d7d;
   font-size: 14px;
 }
 
-.list-item {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1.5fr;
-  align-items: center;
-  padding: 16px 8px;
-  position: relative;
-}
-
-.list-item::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 8px;
-  right: 8px;
-  border-bottom: 1px dotted #888888;
-}
-
-.status-success {
-  color: #0cb300;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.font-bold {
-  font-weight: 700;
-  font-size: 13px;
-  color: #010101;
-  text-align: center;
-}
-
-.col-type {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.type-phone {
-  font-size: 13px;
-  font-weight: 600;
-  color: #010101;
-  margin-bottom: 4px;
-}
-
-.type-date {
-  font-size: 11px;
-  color: rgba(1, 1, 1, 0.4);
-}
-
+/* Pagination */
 .pagination-row {
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 16px 0 0;
+  padding: 0 22px 32px;
 }
 </style>

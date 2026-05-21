@@ -4,68 +4,98 @@
 
     <!-- Header -->
     <section id="section-header">
-      <header class="header">
-        <button class="back-btn" @click="goBack" aria-label="Go back">
-          <img src="/assets/image/4369_339.svg" alt="Back">
-        </button>
-        <h1 class="page-title">See Featured</h1>
+      <img src="/assets/images/d12178a34823422429be6c52b5ae0c8d2966fadb.png" class="header-illustration" alt="">
+      <header class="top-nav">
+        <img src="/assets/images/46_697.svg" alt="Back" class="back-icon" @click="goBack">
+        <span class="nav-title">Detail Pembayaran</span>
       </header>
     </section>
 
-    <!-- Breadcrumb -->
-    <section id="section-breadcrumb">
-      <nav class="breadcrumb">
-        <div class="breadcrumb-item">
-          <img src="/assets/image/fd891e27e827c0f21ddb395edbc24cfd61c092dc.png" alt="Shop" class="shop-icon">
-          <span>Shop</span>
-        </div>
-        <img src="/assets/image/4369_347.svg" alt=">" class="separator-icon">
-        <div class="breadcrumb-item">
-          <span>Cloud Computing</span>
-        </div>
-        <img src="/assets/image/4369_351.svg" alt=">" class="separator-icon">
-        <div class="breadcrumb-item active">
-          <span>See Featured</span>
-        </div>
-      </nav>
+    <!-- Hero -->
+    <section id="section-hero">
+      <div class="hero-content">
+        <h1 class="page-title">Detail Pembayaran</h1>
+        <p class="page-subtitle">Periksa detail produk dan lanjutkan pembayaran Anda.</p>
+      </div>
     </section>
 
-    <!-- Content -->
-    <section id="section-content">
-      <div class="content-bg">
-        <div class="content-wrapper">
-          <div class="info-card">
-            <p class="card-title" style="padding-bottom: 5px;">Beneficial ownership of the assets</p>
-            
-            <hr class="card-divider">
-            <p class="card-text">
-              Dear user,<br>
-              To continue with verification, please confirm that you are the rightful owner of the assets associated with your HUE account and activities.
-            </p>
+    <!-- Product -->
+    <section id="section-product" v-if="product">
+      <div class="product-card">
+        <div class="product-top">
+          <div class="product-image-placeholder">
+            <img
+              :src="getProductImage(product)"
+              :alt="product.name || 'Produk'"
+              class="product-thumb"
+              @error="handleProductImageError"
+            >
           </div>
+          <div class="product-info">
+            <h2 class="product-name">{{ product.name || '-' }}</h2>
+            <p class="product-desc">{{ product.description || 'Produk proteksi aset digital' }}</p>
+            <p class="product-price">{{ formatPrice(product.price) }}</p>
+          </div>
+        </div>
 
-
-          <label class="confirmation-checkbox">
-            <div class="checkbox-custom" @click.prevent="toggleConfirm">
-              <div class="checkbox-bg" :class="{ checked: isConfirmed }"></div>
-              <img v-if="isConfirmed" src="/assets/image/a84c69a218ab38138fa855a6c1a8a8dfc114da81.png" alt="Check" class="check-icon">
+        <div class="product-stats">
+          <div class="stat-item">
+            <img src="/assets/images/46_711.svg" alt="" class="stat-icon">
+            <div class="stat-text">
+              <span class="stat-label">Periode</span>
+              <span class="stat-value">{{ durationText }}</span>
             </div>
-            <span class="checkbox-text" @click.prevent="toggleConfirm">I confirm that I am the authorized owner of the assets to be used.</span>
-            <input type="checkbox" class="hidden-input" :checked="isConfirmed">
-          </label>
-
-          <div class="action-container">
-            <button class="primary-btn" :disabled="!isConfirmed || isPurchasing" @click="confirmPurchase">
-              {{ isPurchasing ? 'Processing...' : 'Start Cloud' }}
-            </button>
           </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <img src="/assets/images/46_716.svg" alt="" class="stat-icon">
+            <div class="stat-text">
+              <span class="stat-label">Proteksi harian</span>
+              <span class="stat-value">{{ profitPerDay }}</span>
+            </div>
+          </div>
+        </div>
+
+        <hr class="card-divider">
+
+        <div class="product-total">
+          <div class="total-info">
+            <img src="/assets/images/0124373b87358a593909a03ffafd020b5948dccd.png" alt="" class="info-icon">
+            <span class="total-label">Estimasi hasil akhir keseluruhan proteksi</span>
+          </div>
+          <span class="total-price">{{ totalEstimate }}</span>
         </div>
       </div>
     </section>
 
+    <!-- Summary -->
+    <section id="section-summary" v-if="product">
+      <div class="summary-card">
+        <h3 class="summary-title">Rincian Pembayaran</h3>
+        <div class="summary-row">
+          <span class="summary-label">Harga Produk</span>
+          <span class="summary-value">{{ formatPrice(product.price) }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <section id="section-footer" v-if="product">
+      <div class="terms-checkbox" @click="toggleConfirm">
+        <div class="checkbox-box" :class="{ unchecked: !isConfirmed }">
+          <img v-if="isConfirmed" src="/assets/images/I46_738_51859_5632.svg" alt="">
+        </div>
+        <p class="terms-text">Saya setuju dengan <span class="highlight">Kebijakan Privasi</span> dan <span class="highlight">Syarat Layanan</span></p>
+      </div>
+
+      <button class="pay-button" :disabled="!isConfirmed || isPurchasing" @click="confirmPurchase">
+        {{ isPurchasing ? 'Memproses...' : 'Bayar Sekarang' }}
+      </button>
+    </section>
+
     <ConfirmationModal
       v-model="showPurchaseModal"
-      message="Are you sure you want to purchase this asset?"
+      message="Apakah Anda yakin ingin membeli produk ini?"
       :amount="purchaseAmountDisplay"
       @confirm="executePurchase"
     />
@@ -88,6 +118,7 @@ import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import ConfirmationModal from '@/components/modals/ConfirmationModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import { appSettings, formatAppCurrency } from '@/utils/settings'
+import { resolveImageUrl } from '@/utils/imageCache'
 
 const router = useRouter()
 const route = useRoute()
@@ -111,15 +142,12 @@ const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return null
   const raw = String(value).trim()
   if (!raw) return null
-
   const s = raw.replace(/\s+/g, '')
   const sign = s.startsWith('-') ? '-' : ''
   const unsigned = s.replace(/^[+-]/, '')
-
   const lastDot = unsigned.lastIndexOf('.')
   const lastComma = unsigned.lastIndexOf(',')
   const lastSep = Math.max(lastDot, lastComma)
-
   if (lastSep > -1) {
     const intPart = unsigned.slice(0, lastSep).replace(/[.,]/g, '').replace(/[^0-9]/g, '')
     const fracPart = unsigned.slice(lastSep + 1).replace(/[^0-9]/g, '')
@@ -127,7 +155,6 @@ const parseNumber = (value) => {
     const n = Number(normalized)
     return Number.isFinite(n) ? n : null
   }
-
   const digitsOnly = unsigned.replace(/[^0-9]/g, '')
   if (!digitsOnly) return null
   const n = Number(`${sign}${digitsOnly}`)
@@ -147,6 +174,12 @@ const getAppDefaultDecimals = () => {
   return Number.isFinite(d) ? Math.max(0, d) : 0
 }
 
+const formatPrice = (value) => {
+  const n = parseNumber(value)
+  if (n === null) return formatAppCurrency(0, { decimals: 0 })
+  return formatAppCurrency(n, { decimals: 0 })
+}
+
 const purchaseAmountDisplay = computed(() => {
   const priceRaw = product.value?.price
   const n = parseNumber(priceRaw)
@@ -156,26 +189,8 @@ const purchaseAmountDisplay = computed(() => {
   return formatAppCurrency(n, { decimals })
 })
 
-const formatPrice = (value) => {
-  const n = parseNumber(value)
-  if (n === null) return formatAppCurrency(0, { decimals: 0 })
-  return formatAppCurrency(n, { decimals: 0 })
-}
-
-const formatCurrencyPlaceholder = (text) => {
-  const cfg = appSettings.currency || {}
-  const symbol = String(cfg.symbol || '')
-  const symbolPosition = String(cfg.symbol_position || 'prefix')
-  const symbolSpace = Boolean(cfg.symbol_space ?? false)
-  const space = symbol && symbolSpace ? ' ' : ''
-
-  if (!symbol) return String(text || '')
-  if (symbolPosition === 'suffix') return `${text}${space}${symbol}`
-  return `${symbol}${space}${text}`
-}
-
 const profitPerDay = computed(() => {
-  if (!product.value) return `${formatCurrencyPlaceholder('-')}/day`
+  if (!product.value) return '-'
   const profitType = String(product.value?.profit_type || '').toLowerCase()
   if (profitType === 'random') {
     const min = parseNumber(product.value?.profit_random_min)
@@ -185,29 +200,43 @@ const profitPerDay = computed(() => {
   }
   const rate = parseNumber(product.value?.profit_rate)
   if (rate !== null && rate > 0) return formatAppCurrency(rate, { decimals: 0 })
-  return formatCurrencyPlaceholder('-')
+  return '-'
 })
 
 const durationText = computed(() => {
   const d = parseNumber(product.value?.duration)
   if (d === null) return '-'
-  return `${d} Days`
+  return `${d} Hari`
 })
 
-const dueDateText = computed(() => {
-  const d = parseNumber(product.value?.duration)
-  if (d === null) return '-'
-  const due = new Date()
-  due.setDate(due.getDate() + d)
-  return `${String(due.getDate()).padStart(2, '0')}/${String(due.getMonth() + 1).padStart(2, '0')}/${due.getFullYear()}`
+const totalEstimate = computed(() => {
+  if (!product.value) return '-'
+  const profitType = String(product.value?.profit_type || '').toLowerCase()
+  const duration = parseNumber(product.value?.duration) || 0
+  let dailyProfit = 0
+  if (profitType === 'random') {
+    const max = parseNumber(product.value?.profit_random_max)
+    dailyProfit = max !== null ? max : 0
+  } else {
+    const rate = parseNumber(product.value?.profit_rate)
+    dailyProfit = rate !== null ? rate : 0
+  }
+  const total = dailyProfit * duration
+  if (total <= 0) return '-'
+  return formatAppCurrency(total, { decimals: 0 })
 })
 
-const availabilityText = computed(() => {
-  const enabled = product.value?.stock_enabled
-  const stock = parseNumber(product.value?.stock)
-  if (enabled && stock !== null && stock <= 0) return 'Sold out'
-  return 'Available'
-})
+const getProductImage = (prod) => {
+  const raw = String(prod?.image || '').trim()
+  const resolved = raw ? resolveImageUrl(raw) : ''
+  return resolved || '/assets/images/1ea41e69edf9909600bc1dea02f90a88a2cbf679.png'
+}
+
+const handleProductImageError = (e) => {
+  const el = e?.target
+  if (!el) return
+  el.src = '/assets/images/1ea41e69edf9909600bc1dea02f90a88a2cbf679.png'
+}
 
 const fetchProduct = async () => {
   const id = Number(route.params.id)
@@ -252,22 +281,13 @@ const extractPurchaseErrorMessage = (data) => {
 
   const s = combined.toLowerCase()
   if (s.includes('no news matches to this query') || s.includes('no product matches to this query') || s.includes('no matches to this query')) {
-    return 'Refresh your connection or logout first.'
+    return 'Silakan refresh koneksi atau logout terlebih dahulu.'
   }
-  if (
-    s.includes('balance') ||
-    s.includes('insufficient') ||
-    s.includes('saldo')
-  ) {
-    return 'Please top up your balance first.'
+  if (s.includes('balance') || s.includes('insufficient') || s.includes('saldo')) {
+    return 'Silakan isi ulang saldo Anda terlebih dahulu.'
   }
-  if (
-    s.includes('batas pembelian tercapai') ||
-    s.includes('hanya bisa membeli produk ini') ||
-    s.includes('purchase limit') ||
-    s.includes('maximum')
-  ) {
-    return 'Limit'
+  if (s.includes('batas pembelian tercapai') || s.includes('hanya bisa membeli produk ini') || s.includes('purchase limit') || s.includes('maximum')) {
+    return 'Batas pembelian tercapai'
   }
 
   return combined
@@ -289,11 +309,11 @@ const executePurchase = async () => {
     })
     const inv = resp?.data
     redirectInvestmentId.value = inv?.id ?? inv?.investment_id ?? null
-    successMessage.value = 'Success'
+    successMessage.value = 'Berhasil'
     successModalOpen.value = true
   } catch (err) {
     const data = err?.response?.data
-    errorMessage.value = extractPurchaseErrorMessage(data) || 'Purchase failed'
+    errorMessage.value = extractPurchaseErrorMessage(data) || 'Pembelian gagal'
     errorModalOpen.value = true
   } finally {
     isPurchasing.value = false
@@ -314,205 +334,318 @@ const handleSuccessConfirm = () => {
 <style scoped>
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 .app-container {
   font-family: 'Inter', sans-serif;
-  width: 100%;
-  max-width: 100%;
-  background-color: #f8f8f8;
-  min-height: 100vh;
+  max-width: 412px;
   margin: 0 auto;
+  background-color: #fdfaf4;
+  min-height: 100vh;
+  position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Header */
-#section-header .header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 50px;
+section {
+  padding: 0 20px;
   position: relative;
-  padding: 0 19px;
 }
 
-#section-header .back-btn {
+/* Header */
+#section-header {
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+
+.header-illustration {
   position: absolute;
-  left: 19px;
-  background: none;
-  border: none;
-  padding: 0;
+  top: 0;
+  right: 0;
+  width: 171px;
+  height: 123px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.back-icon {
+  width: 24px;
+  height: 24px;
   cursor: pointer;
+}
+
+.nav-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+}
+
+/* Hero */
+#section-hero {
+  padding-top: 10px;
+  padding-bottom: 20px;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #635f5f;
+  line-height: 1.4;
+  max-width: 280px;
+}
+
+/* Product */
+#section-product {
+  padding-bottom: 16px;
+}
+
+.product-card {
+  background-color: #fdf7ed;
+  border: 1px solid #ffe9bd;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.product-top {
+  display: flex;
+  gap: 16px;
+}
+
+.product-image-placeholder {
+  width: 57px;
+  height: 70px;
+  background-color: #dadada;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
-#section-header .back-btn img {
-  width: 20px;
-  height: 20px;
+.product-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
 }
 
-#section-header .page-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0;
-}
-
-/* Breadcrumb */
-#section-breadcrumb .breadcrumb {
-  display: flex;
-  align-items: center;
-  padding: 10px 23px;
-  gap: 8px;
-}
-
-#section-breadcrumb .breadcrumb-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #939393;
-}
-
-#section-breadcrumb .breadcrumb-item.active {
-  color: #000000;
-  font-weight: 700;
-}
-
-#section-breadcrumb .shop-icon {
-  width: 21px;
-  height: 21px;
-  object-fit: contain;
-}
-
-#section-breadcrumb .separator-icon {
-  width: 17px;
-  height: 17px;
-}
-
-/* Content */
-#section-content .content-bg {
-  min-height: calc(100vh - 100px);
-}
-
-#section-content .content-wrapper {
-  padding: 10px 23px 40px 23px;
-}
-
-#section-content .info-card {
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.25);
-  padding: 20px 15px 15px 11px;
-  margin-bottom: 15px;
-}
-
-#section-content .card-divider {
-  border: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.2);
-  margin: 0 0 10px 0;
-}
-
-#section-content .card-text {
-  font-size: 14px;
-  color: #737373;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.detail-rows {
+.product-info {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: center;
+  gap: 4px;
 }
 
-.detail-row {
+.product-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.product-desc {
+  font-size: 12px;
+  color: #635f5f;
+}
+
+.product-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #c88600;
+}
+
+.product-stats {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  padding-left: 73px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.stat-icon {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+.stat-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: #000000;
+}
+
+.stat-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 24px;
+  background-color: rgba(0, 0, 0, 0.1);
+  margin: 0 16px;
+}
+
+.card-divider {
+  border: none;
+  border-top: 1px solid #f3b73f;
+  opacity: 0.5;
+  margin: 16px 0;
+}
+
+.product-total {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.detail-label {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.5);
-}
-
-.detail-value {
-  font-size: 14px;
-  color: #000000;
-  font-weight: 700;
-}
-
-/* Checkbox */
-.confirmation-checkbox {
+.total-info {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  cursor: pointer;
-  margin-bottom: 35px;
-  padding: 0 6px;
+  gap: 8px;
+  max-width: 200px;
 }
 
-.checkbox-custom {
-  position: relative;
-  width: 19px;
-  height: 19px;
-  flex-shrink: 0;
+.info-icon {
+  width: 16px;
+  height: 16px;
   margin-top: 2px;
 }
 
-.checkbox-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #cccccc;
-  border-radius: 50%;
+.total-label {
+  font-size: 11px;
+  line-height: 1.3;
+  color: #000000;
+}
+
+.total-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #c88600;
+}
+
+/* Summary */
+#section-summary {
+  padding-bottom: 24px;
+}
+
+.summary-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.summary-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 12px 0;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #000000;
+}
+
+.summary-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+}
+
+/* Footer */
+#section-footer {
+  padding-bottom: 40px;
+}
+
+.terms-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 0 4px;
+  cursor: pointer;
+}
+
+.checkbox-box {
+  width: 18px;
+  height: 18px;
+  background-color: #f4bd40;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
   transition: background-color 0.2s;
 }
 
-.checkbox-bg.checked {
-  background-color: #1b46f5;
+.checkbox-box.unchecked {
+  background-color: #cccccc;
 }
 
-.check-icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.checkbox-box img {
   width: 14px;
   height: 14px;
-  object-fit: contain;
 }
 
-.hidden-input {
-  display: none;
-}
-
-.checkbox-text {
+.terms-text {
   font-size: 12px;
-  color: #000000;
-  line-height: 1.4;
+  color: #635f5f;
+  line-height: 1.5;
 }
 
-/* Action Button */
-.action-container {
-  display: flex;
-  justify-content: center;
+.terms-text .highlight {
+  color: #c88600;
+  font-weight: 600;
 }
 
-.primary-btn {
-  width: 177px;
-  height: 45px;
-  border-radius: 15px;
-  background: linear-gradient(180deg, #4084e0 0%, #2656b5 100%);
+.pay-button {
+  width: 100%;
+  height: 48px;
+  background-color: #f3b740;
   color: #ffffff;
   border: none;
-  font-size: 16px;
+  border-radius: 5px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -522,11 +655,11 @@ const handleSuccessConfirm = () => {
   transition: opacity 0.2s;
 }
 
-.primary-btn:hover {
+.pay-button:hover {
   opacity: 0.9;
 }
 
-.primary-btn:disabled {
+.pay-button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }

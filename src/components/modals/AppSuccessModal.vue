@@ -1,9 +1,10 @@
 <template>
   <Teleport to="body">
     <div v-if="modelValue" class="modal-overlay" @click="close">
-      <div class="modal-card" role="dialog" aria-modal="true" @click.stop="close">
-        <img src="/assets/image/check.png" alt="" class="modal-icon">
-        <p class="modal-message">{{ message || 'Pendaftaran akun sudah selesai. Silakan masuk akun sekarang.' }}</p>
+      <div class="modal-card" role="dialog" aria-modal="true" @click.stop>
+        <img src="/assets/images/6d25aa7241ebdc9bae19772ad0bb54aa2fb6ef3d.png" alt="" class="modal-image">
+        <p class="modal-text">{{ message || 'Berhasil!' }}</p>
+        <button class="modal-button" @click="close">Tutup</button>
       </div>
     </div>
   </Teleport>
@@ -15,7 +16,7 @@ import { onDeactivated } from 'vue'
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   title: { type: String, default: 'Informasi' },
-  message: { type: String, default: 'Pendaftaran akun sudah selesai. Silakan masuk akun sekarang.' }
+  message: { type: String, default: 'Berhasil!' }
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm'])
@@ -31,49 +32,66 @@ onDeactivated(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
 .modal-overlay {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgba(99, 95, 95, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  padding: calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+  padding: 20px;
+  font-family: 'Inter', sans-serif;
 }
 
 .modal-card {
-  width: 100%;
-  max-width: 180px;
-  background-color: #262626;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1);
+  width: 276px;
+  background-color: #fefefe;
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: 'Inter', sans-serif;
-  padding: 24px 16px;
-  gap: 16px;
-  cursor: pointer;
+  padding: 29px 18px 17px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.modal-icon {
-  width: 46px;
-  height: 46px;
+.modal-image {
+  width: 106px;
+  height: 75px;
   object-fit: contain;
 }
 
-.modal-message {
+.modal-text {
+  margin: 13px 0 0 0;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.modal-button {
+  margin-top: 16px;
+  width: 100%;
+  height: 39px;
+  background-color: #f4bd40;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   color: #ffffff;
   font-size: 14px;
-  line-height: 1.4;
-  margin: 0;
-  text-align: center;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
   padding: 0;
+  font-family: inherit;
+  transition: background-color 0.2s ease;
+}
+
+.modal-button:hover {
+  background-color: #e0a830;
 }
 </style>

@@ -1,89 +1,104 @@
 <template>
-  <div class="policy-container">
-    <section id="section-header" class="mobile-container">
-      <header class="top-nav">
-        <button type="button" class="back-btn" aria-label="Go back" @click="goBack">
-          <img src="/assets/image/4026_575.svg" alt="Back Icon">
-        </button>
-        <h1 class="page-title">Privacy Policy</h1>
-      </header>
+  <div class="policy-page">
+    <section id="section-header">
+      <div class="app-container">
+        <header class="page-header">
+          <a href="#" class="back-button" aria-label="Go back" @click.prevent="goBack">
+            <img src="/assets/images/8_401.svg" alt="" aria-hidden="true">
+          </a>
+          <h1 class="page-title">Kebijakan Privasi</h1>
+        </header>
+      </div>
     </section>
-
-    <section id="section-content" class="mobile-container">
-      <h2 class="main-heading">PRIVACY POLICY (HUE)</h2>
-      <div class="policy-text-block">
-        <p>1. Introduction<br>
-        HUE (Hybrid Unified Edge) respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you use our platform and services.</p>
-
-        <p>2. Information We Collect<br>
-        We may collect the following information:</p>
-        <ul>
-          <li>Personal information (such as email address and phone number)</li>
-          <li>Account-related data (username, account activity, and system logs)</li>
-          <li>Technical data (IP address, browser information, device type, and access information)</li>
-        </ul>
-
-        <p>3. How We Use Your Information<br>
-        Your information may be used to:</p>
-        <ul>
-          <li>Provide, maintain, and improve HUE services</li>
-          <li>Enhance system performance and user experience</li>
-          <li>Ensure platform security and prevent unauthorized activities</li>
-          <li>Communicate important updates, notifications, or operational information</li>
-        </ul>
-
-        <p>4. Data Protection<br>
-        We implement appropriate administrative and technical security measures to protect your data from unauthorized access, misuse, alteration, or disclosure. However, no online system or transmission method can be guaranteed to be completely secure, and users are encouraged to maintain the security of their own accounts and devices.</p>
-
-        <p>5. Data Sharing<br>
-        HUE does not sell, trade, or share your personal information with third parties, except:</p>
-        <ul>
-          <li>When required by applicable laws or regulations</li>
-          <li>To protect system integrity, platform security, or prevent fraud and abuse</li>
-          <li>When necessary for operational or compliance purposes</li>
-        </ul>
-
-        <p>6. Cookies and Tracking Technologies<br>
-        We may use cookies and similar technologies to:</p>
-        <ul>
-          <li>Improve platform functionality and performance</li>
-          <li>Analyze usage patterns and operational metrics</li>
-          <li>Enhance overall user experience</li>
-        </ul>
-        <p>Users may manage browser cookie settings independently through their device or browser preferences.</p>
-
-        <p>7. User Responsibility<br>
-        Users are responsible for:</p>
-        <ul>
-          <li>Keeping account credentials and authentication information secure</li>
-          <li>Ensuring the accuracy of submitted personal information</li>
-          <li>Maintaining the confidentiality of account access</li>
-        </ul>
-
-        <p>8. Data Retention<br>
-        We retain user information only for as long as necessary to provide services, maintain operational integrity, comply with legal obligations, and resolve disputes when required.</p>
-
-        <p>9. No Affiliation<br>
-        HUE operates independently and is not affiliated with, endorsed by, or associated with any third-party organizations, institutions, or companies unless explicitly stated.</p>
-
-        <p>10. Updates to This Policy<br>
-        We may update or modify this Privacy Policy from time to time. Continued use of HUE services following any updates constitutes acceptance of the revised policy.</p>
-
-        <p>11. Contact<br>
-        If you have any questions regarding this Privacy Policy or your personal data, please contact the HUE support team.</p>
+    <section id="section-content">
+      <div class="app-container">
+        <article class="privacy-content">
+          <div class="text-body">Selamat datang di Dana Proteksi. Kami menghargai privasi setiap pengguna dan berkomitmen untuk melindungi data pribadi yang diberikan melalui website dan layanan kami.
+Kebijakan Privasi ini menjelaskan bagaimana Dana Proteksi mengumpulkan, menggunakan, menyimpan, dan melindungi informasi pengguna saat mengakses layanan kami.
+1. Informasi yang Kami Kumpulkan
+Kami dapat mengumpulkan beberapa informasi dari pengguna, termasuk namun tidak terbatas pada:
+ Nama lengkap
+ Alamat email
+ Nomor handphone
+ Informasi akun pengguna
+ Data aktivitas penggunaan layanan
+ Informasi perangkat, browser, alamat IP, dan data teknis lainnya
+ Informasi tambahan yang diberikan pengguna saat menghubungi layanan pelanggan
+Kami hanya mengumpulkan informasi yang diperlukan untuk mendukung penggunaan layanan dan meningkatkan keamanan sistem.
+2. Penggunaan Informasi
+Informasi yang dikumpulkan dapat digunakan untuk:
+ Membuat dan mengelola akun pengguna
+ Memverifikasi identitas dan aktivitas akun
+ Memberikan akses ke layanan Dana Proteksi
+ Meningkatkan kualitas layanan dan pengalaman pengguna
+ Menjaga keamanan sistem dari penyalahgunaan, akses tidak sah, atau aktivitas mencurigakan
+ Mengirimkan informasi penting terkait akun, layanan, atau pembaruan sistem
+ Menanggapi pertanyaan, permintaan, atau keluhan pengguna
+Dana Proteksi tidak akan menggunakan data pengguna untuk tujuan yang bertentangan dengan hukum atau kebijakan layanan kami.
+3. Perlindungan Data
+Kami menerapkan langkah-langkah keamanan yang wajar untuk melindungi informasi pengguna dari akses tidak sah, perubahan, pengungkapan, kehilangan, atau penyalahgunaan.
+Langkah perlindungan tersebut dapat mencakup penggunaan sistem keamanan, pembatasan akses internal, pemantauan aktivitas, serta teknologi pendukung lain yang bertujuan menjaga kerahasiaan data pengguna.
+Meskipun demikian, pengguna memahami bahwa tidak ada sistem digital yang sepenuhnya bebas dari risiko. Oleh karena itu, pengguna juga bertanggung jawab untuk menjaga kerahasiaan informasi akun, termasuk password, kode verifikasi, dan data login lainnya.
+4. Kerahasiaan Akun
+Pengguna bertanggung jawab untuk menjaga keamanan akun masing-masing. Dana Proteksi tidak pernah meminta password, PIN, kode OTP, atau data sensitif lainnya melalui pesan pribadi, telepon tidak resmi, atau pihak ketiga.
+Apabila pengguna menemukan aktivitas mencurigakan atau dugaan penyalahgunaan akun, pengguna disarankan untuk segera menghubungi layanan bantuan resmi Dana Proteksi.
+5. Penggunaan Cookies
+Website Dana Proteksi dapat menggunakan cookies atau teknologi serupa untuk meningkatkan pengalaman pengguna, menyimpan preferensi, menganalisis aktivitas website, dan membantu menjaga keamanan layanan.
+Pengguna dapat mengatur penggunaan cookies melalui pengaturan browser masing-masing. Namun, menonaktifkan cookies tertentu dapat memengaruhi fungsi dan kenyamanan penggunaan layanan.
+6. Pembagian Informasi kepada Pihak Ketiga
+Dana Proteksi tidak menjual, menyewakan, atau memperdagangkan data pribadi pengguna kepada pihak lain.
+Namun, kami dapat membagikan informasi tertentu kepada pihak ketiga apabila diperlukan untuk:
+ Mendukung operasional layanan
+ Memenuhi kewajiban hukum atau permintaan otoritas yang berwenang
+ Melindungi hak, keamanan, dan kepentingan Dana Proteksi maupun pengguna
+ Mencegah tindakan penyalahgunaan, penipuan, atau pelanggaran terhadap ketentuan layanan
+Setiap pembagian informasi dilakukan secara terbatas dan sesuai dengan kebutuhan yang sah.
+7. Penyimpanan Data
+Data pengguna akan disimpan selama akun masih aktif atau selama diperlukan untuk tujuan layanan, keamanan, administrasi, hukum, dan kepatuhan.
+Apabila data sudah tidak diperlukan, Dana Proteksi dapat menghapus, membatasi, atau menyamarkan informasi tersebut sesuai dengan kebijakan internal dan ketentuan yang berlaku.
+8. Hak Pengguna
+Pengguna dapat mengajukan permintaan terkait data pribadi, seperti:
+ Memperbarui informasi akun
+ Meminta koreksi data yang tidak akurat
+ Mengajukan pertanyaan mengenai penggunaan data
+ Meminta peninjauan terhadap informasi tertentu yang tersimpan di sistem kami
+Permintaan tersebut dapat diajukan melalui kontak resmi Dana Proteksi.
+9. Keamanan Transaksi dan Aktivitas
+Dana Proteksi berupaya menjaga keamanan setiap aktivitas pengguna di dalam layanan. Kami dapat melakukan pemantauan terhadap aktivitas tertentu untuk mencegah tindakan yang melanggar hukum, penyalahgunaan sistem, akses tidak sah, atau aktivitas mencurigakan lainnya.
+Pengguna dilarang menggunakan layanan Dana Proteksi untuk kegiatan yang merugikan pihak lain, melanggar hukum, atau bertentangan dengan ketentuan layanan.
+10. Tautan ke Website Lain
+Website Dana Proteksi dapat memuat tautan ke website pihak ketiga. Kami tidak bertanggung jawab atas kebijakan privasi, keamanan, atau konten dari website pihak ketiga tersebut.
+Pengguna disarankan untuk membaca kebijakan privasi masing-masing website sebelum memberikan informasi pribadi.
+11. Perubahan Kebijakan Privasi
+Dana Proteksi dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu sesuai dengan kebutuhan layanan, perubahan sistem, atau ketentuan yang berlaku.
+Setiap perubahan akan dipublikasikan melalui halaman ini. Pengguna disarankan untuk memeriksa halaman Kebijakan Privasi secara berkala.
+12. Hubungi Kami
+Apabila pengguna memiliki pertanyaan, permintaan, atau keluhan terkait Kebijakan Privasi ini, pengguna dapat menghubungi kami melalui:
+Dana Proteksi  Email: [email perusahaan]  Website: [alamat website]  Layanan Bantuan: [kontak/halaman bantuan]
+Dengan menggunakan layanan Dana Proteksi, pengguna dianggap telah membaca, memahami, dan menyetujui Kebijakan Privasi ini.</div>
+        </article>
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
 const goBack = () => {
-  router.go(-1)
+  try {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+  } catch (_) {
+  }
+
+  const token = String(localStorage.getItem('auth_token') || '').trim()
+  router.push(token ? '/hn/user' : '/hn/console')
 }
 
 const handleScroll = () => {
@@ -99,127 +114,80 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.policy-container {
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f0f2f5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-}
-
 * {
   box-sizing: border-box;
 }
 
-.mobile-container {
+.policy-page {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app-container {
   width: 100%;
-  max-width: 100%;
-  background-color: #ffffff;
+  max-width: 412px;
+  min-height: auto;
+  background: linear-gradient(180deg, #FEFDFE 0%, #FDF8EA 100%);
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
-/* Header Section */
-#section-header {
-  padding: 19px 15px 0 15px;
-}
-
-.top-nav {
+/* Header */
+.page-header {
   display: flex;
   align-items: center;
-  width: 100%;
-  position: relative;
-  justify-content: center;
+  padding: 25px 19px;
 }
 
-.back-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+.back-button {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 20px;
   height: 20px;
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
-.back-btn img {
+.back-button img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
 .page-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #000000;
   margin: 0;
-  line-height: 1.2;
-  text-align: center;
-  max-width: 100%;
-}
-
-.back-btn {
-  position: absolute;
-  left: 0;
-}
-
-/* Content Section */
-#section-content {
-  padding: 20px 25px 40px 25px;
-  flex-grow: 1;
-}
-
-.main-heading {
-  font-size: 16px;
+  margin-left: 28px;
+  font-size: 20px;
   font-weight: 700;
   color: #000000;
-  margin: 0 0 15px 0;
+  line-height: 1.2;
 }
 
-.policy-text-block {
-  font-size: 15px;
+/* Content */
+#section-content .app-container {
+  min-height: auto;
+  box-shadow: none;
+  background: transparent;
+}
+
+.privacy-content {
+  padding: 18px 23px 60px 21px;
+}
+
+.text-body {
+  color: #0e0e0e;
+  font-size: 13px;
   line-height: 1.5;
-  color: #000000;
   white-space: pre-wrap;
   word-wrap: break-word;
-}
-
-.policy-list {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.policy-item {
-  margin: 0 0 14px 0;
-}
-
-.policy-title {
-  font-size: 12px;
-  font-weight: 700;
-  margin: 0 0 6px 0;
-  line-height: 1.3;
-}
-
-.policy-text {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #000000;
-  margin: 0 0 8px 0;
-}
-
-.policy-bullets {
-  margin: 0 0 8px 0;
-  padding-left: 18px;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.policy-bullets li {
-  margin: 0 0 6px 0;
 }
 </style>

@@ -1,36 +1,79 @@
 <template>
   <div class="app-container">
-    <header class="app-header">
-      <button class="btn-back" @click="goBack" aria-label="Go back">
-        <img src="/assets/image/13_655.svg" alt="Back icon">
-      </button>
-      <h1 class="header-title">Change password</h1>
-    </header>
-
-    <main class="app-content">
-      <form class="password-form" @submit.prevent="handleChangePassword">
-        <div class="input-group">
-          <label for="verificationCode">Verification code</label>
-          <input type="text" id="verificationCode" v-model="form.oldPassword" placeholder="Please request code verification from customer service">
-        </div>
-
-        <div class="input-group">
-          <label for="newPassword">Set new password</label>
-          <input type="password" id="newPassword" v-model="form.newPassword" placeholder="Please input your new password">
-        </div>
-
-        <div class="input-group">
-          <label for="confirmPassword">Confirmation new password</label>
-          <input type="password" id="confirmPassword" v-model="form.confirmPassword" placeholder="Please input again your new password">
-        </div>
-
-        <p class="form-warning">Please double-check all your passwords before resetting!</p>
-
-        <button type="submit" class="btn-submit" :disabled="loading">
-          {{ loading ? 'Processing...' : 'Submit' }}
+    <!-- Header -->
+    <section id="section-header">
+      <div class="header-container">
+        <button class="back-button" aria-label="Go back" @click="goBack">
+          <img src="/assets/images/68_198.svg" alt="">
         </button>
+        <h1 class="header-title">Ubah kata sandi</h1>
+      </div>
+    </section>
+
+    <!-- Hero -->
+    <section id="section-hero">
+      <div class="hero-container">
+        <div class="hero-text-content">
+          <h2 class="hero-title">Ubah kata sandi</h2>
+          <p class="hero-description">Untuk keamanan Anda silakan ubah secara berkala kata sandi Anda.</p>
+        </div>
+        <div class="hero-image-wrapper">
+          <img src="/assets/images/9f4d7b8ace034cd96bb6b037dd50538b5db64b68.png" alt="" class="hero-image">
+        </div>
+      </div>
+    </section>
+
+    <!-- Form -->
+    <section id="section-form">
+      <form class="form-wrapper" @submit.prevent="handleChangePassword">
+        <div class="form-item">
+          <div class="form-label">Nomor akun terdaftar</div>
+          <input
+            type="text"
+            class="form-input"
+            :value="phone"
+            readonly
+            placeholder="Masukkan nomor telepon Anda"
+          >
+        </div>
+        <div class="form-item">
+          <div class="form-label">Kata sandi lama</div>
+          <input
+            v-model="form.oldPassword"
+            type="password"
+            class="form-input"
+            placeholder="Masukkan kata sandi lama"
+          >
+        </div>
+        <div class="form-item">
+          <div class="form-label">Kata sandi baru</div>
+          <input
+            v-model="form.newPassword"
+            type="password"
+            class="form-input"
+            placeholder="Masukkan kata sandi baru"
+          >
+        </div>
+        <div class="form-item">
+          <div class="form-label">Konfirmasi kata sandi baru</div>
+          <input
+            v-model="form.confirmPassword"
+            type="password"
+            class="form-input"
+            placeholder="Konfirmasi kata sandi baru"
+          >
+        </div>
       </form>
-    </main>
+    </section>
+
+    <!-- Actions -->
+    <section id="section-actions">
+      <div class="actions-wrapper">
+        <button class="submit-button" :disabled="loading" @click="handleChangePassword">
+          {{ loading ? 'Memproses...' : 'Ubah sekarang' }}
+        </button>
+      </div>
+    </section>
   </div>
 
   <ErrorModal v-model="showErrorModal" :message="errorMessage" />
@@ -75,25 +118,25 @@ const fetchUserInfo = async () => {
 
 const handleChangePassword = async () => {
   if (!form.oldPassword || !form.newPassword || !form.confirmPassword) {
-    errorMessage.value = 'All fields are required'
+    errorMessage.value = 'Semua kolom wajib diisi'
     showErrorModal.value = true
     return
   }
 
   if (form.newPassword !== form.confirmPassword) {
-    errorMessage.value = 'New password and confirmation do not match'
+    errorMessage.value = 'Kata sandi baru dan konfirmasi tidak cocok'
     showErrorModal.value = true
     return
   }
 
   if (form.oldPassword === form.newPassword) {
-    errorMessage.value = 'New password must be different from the verification code'
+    errorMessage.value = 'Kata sandi baru harus berbeda dari kata sandi lama'
     showErrorModal.value = true
     return
   }
 
   if (!phone.value) {
-    errorMessage.value = 'Failed to fetch user data. Please refresh the page.'
+    errorMessage.value = 'Gagal memuat data pengguna. Silakan segarkan halaman.'
     showErrorModal.value = true
     return
   }
@@ -108,7 +151,7 @@ const handleChangePassword = async () => {
 
     await authAPI.resetPassword(payload)
 
-    successMessage.value = 'Password changed successfully'
+    successMessage.value = 'Kata sandi berhasil diubah'
     showSuccessModal.value = true
 
     form.oldPassword = ''
@@ -121,7 +164,7 @@ const handleChangePassword = async () => {
     } else if (typeof apiError === 'string') {
       errorMessage.value = apiError
     } else {
-      errorMessage.value = 'Failed to change password. Please check your input.'
+      errorMessage.value = 'Gagal mengubah kata sandi. Silakan periksa kembali.'
     }
     showErrorModal.value = true
   } finally {
@@ -145,138 +188,178 @@ onMounted(() => {
   padding: 0;
 }
 
+img {
+  max-width: 100%;
+  display: block;
+}
+
 .app-container {
   font-family: 'Inter', sans-serif;
-  width: 100%;
   max-width: 412px;
-  background-color: #f8f8f8;
+  margin: 0 auto;
   min-height: 100vh;
-  padding: 22px 26px;
+  background-color: #fdfaf4;
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, p {
-  margin: 0;
-}
-
-.app-header {
+/* Header */
+.header-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative;
-  margin-bottom: 37px;
-  width: 100%;
+  padding: 20px 16px;
+  gap: 16px;
 }
 
-.btn-back {
-  position: absolute;
-  left: 0;
-  background: transparent;
+.back-button {
+  background: none;
   border: none;
   padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.btn-back img {
-  width: 20px;
-  height: 20px;
-  display: block;
+  width: 24px;
+  height: 24px;
 }
 
 .header-title {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000000;
   margin: 0;
-  text-align: center;
 }
 
-.app-content {
-  flex: 1;
+/* Hero */
+#section-hero {
+  position: relative;
+}
+
+.hero-container {
+  padding: 16px 16px 32px 16px;
+  display: flex;
+  position: relative;
+  min-height: 120px;
+}
+
+.hero-text-content {
+  width: 60%;
+  z-index: 2;
+}
+
+.hero-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.hero-description {
+  font-size: 12px;
+  color: #635f5f;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.hero-image-wrapper {
+  position: absolute;
+  right: 0;
+  top: -40px;
+  width: 182px;
+  height: 118px;
+  z-index: 1;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Form */
+#section-form {
+  background-color: #ffffff;
+}
+
+.form-wrapper {
+  padding: 8px 0;
   display: flex;
   flex-direction: column;
 }
 
-.password-form {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+.form-item {
+  display: grid;
+  grid-template-columns: 85px 1fr;
+  gap: 16px;
+  padding: 16px;
+  align-items: start;
 }
 
-.input-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
-  width: 100%;
-}
-
-.input-group label {
-  font-size: 14px;
-  font-weight: 500;
+.form-label {
+  font-size: 12px;
+  font-weight: 700;
   color: #000000;
-  margin-bottom: 8px;
-}
-
-.input-group input {
-  background-color: #f5f5f5;
-  border: none;
-  border-radius: 4px;
-  padding: 14px 15px;
-  font-size: 14px;
-  color: #000000;
-  font-family: 'Inter', sans-serif;
-  width: 100%;
-  outline: none;
-  transition: background-color 0.2s ease;
-}
-
-.input-group input:focus {
-  background-color: #ebebeb;
-}
-
-.input-group input::placeholder {
-  color: rgba(0, 0, 0, 0.37);
-}
-
-.form-warning {
-  font-size: 14px;
-  color: #000000;
-  margin-top: 17px;
-  margin-bottom: 17px;
   line-height: 1.4;
 }
 
-.btn-submit {
-  background-color: #1b46f5;
+.form-input {
+  font-size: 12px;
+  font-weight: 400;
+  color: #000000;
+  line-height: 1.4;
+  padding: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+.form-input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.form-input:read-only {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Actions */
+#section-actions {
+  flex-grow: 1;
+  min-height: 200px;
+}
+
+.actions-wrapper {
+  padding: 24px 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submit-button {
+  background: linear-gradient(90deg, rgba(244, 193, 66, 1) 0%, rgba(213, 173, 48, 1) 46.63%, rgba(245, 202, 81, 1) 100%);
   color: #ffffff;
   border: none;
-  border-radius: 5px;
-  padding: 15px;
-  font-size: 16px;
+  border-radius: 10px;
+  padding: 0;
+  font-size: 14px;
   font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  width: 100%;
   cursor: pointer;
+  width: 188px;
+  height: 41px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  transition: background-color 0.2s ease;
+  justify-content: center;
+  font-family: inherit;
+  transition: opacity 0.2s ease;
 }
 
-.btn-submit:hover {
-  background-color: #1538c4;
+.submit-button:active {
+  opacity: 0.8;
 }
 
-.btn-submit:active {
-  background-color: #102a96;
-}
-
-.btn-submit:disabled {
+.submit-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

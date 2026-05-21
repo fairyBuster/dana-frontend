@@ -1,80 +1,96 @@
 <template>
-  <div class="terms-container">
-    <section id="section-terms-of-service">
+  <div class="terms-page">
+    <section id="section-terms">
       <div class="app-container">
         <header class="header">
-          <button type="button" class="back-button" aria-label="Go back" @click="goBack">
-            <img src="/assets/image/4026_567.svg" alt="Back" width="20" height="20">
-          </button>
-          <h1 class="header-title">Terms of Service</h1>
+          <img src="/assets/images/9_20.svg" alt="Back" class="back-icon" @click="goBack">
+          <h1 class="page-title">Syarat Layanan</h1>
         </header>
-
-        <main class="main-content">
-          <h2 class="main-title">TERMS OF SERVICE (HUE)</h2>
-          <div class="terms-text">
-            <p>1. Acceptance of Terms<br>
-            By accessing or using HUE (Hybrid Unified Edge), you agree to be bound by these Terms of Service. If you do not agree, you must discontinue use of the platform.</p>
-
-            <p>2. Service Overview<br>
-            HUE provides a cloud computing and digital infrastructure system designed for resource management, distributed computing, and operational optimization. All system processes, outputs, and performance are generated dynamically based on internal systems and real-time operational conditions.</p>
-
-            <p>3. Eligibility<br>
-            You must be at least 18 years old and have the legal capacity to use this platform. By using HUE, you confirm that you meet these requirements.</p>
-
-            <p>4. Account Registration<br>
-            Users are required to:</p>
-            <ul>
-              <li>Provide accurate and up-to-date information</li>
-              <li>Maintain the confidentiality of account credentials</li>
-              <li>Be fully responsible for all activities under their account</li>
-            </ul>
-            <p>HUE is not responsible for unauthorized access resulting from user negligence or compromised credentials.</p>
-
-            <p>5. User Conduct<br>
-            You agree not to:</p>
-            <ul>
-              <li>Engage in phishing, fraud, or deceptive practices</li>
-              <li>Exploit, hack, abuse, or disrupt system operations</li>
-              <li>Use the platform for unlawful or unauthorized purposes</li>
-              <li>Create multiple or fake accounts for manipulation or misuse</li>
-            </ul>
-            <p>HUE enforces a strict zero-tolerance policy toward violations of platform rules and security standards.</p>
-
-            <p>6. Risk Disclosure<br>
-            HUE operates as a cloud-based automated infrastructure system. Operational outputs and system performance may vary depending on real-time conditions and are not guaranteed. Users acknowledge that all decisions and activities are performed at their own discretion and risk.</p>
-
-            <p>7. System Integrity<br>
-            We are committed to maintaining a secure, transparent, and compliant platform environment. HUE reserves the right to monitor platform activity and take necessary actions to protect operational integrity and system security.</p>
-
-            <p>8. No Affiliation<br>
-            HUE operates independently and is not affiliated with, endorsed by, or associated with any third-party companies, organizations, or financial institutions unless explicitly stated.</p>
-
-            <p>9. Limitation of Liability<br>
-            HUE shall not be held liable for:</p>
-            <ul>
-              <li>Variations in system performance or operational outputs</li>
-              <li>User decisions or misuse of the platform</li>
-              <li>External factors beyond system control</li>
-            </ul>
-            <p>All services are provided "as is" without warranties or guarantees of specific results.</p>
-
-            <p>10. Account Suspension & Termination<br>
-            We reserve the right to suspend or terminate accounts that:</p>
-            <ul>
-              <li>Violate these Terms</li>
-              <li>Engage in suspicious, harmful, or abusive activities</li>
-              <li>Pose risks to platform security, operations, or integrity</li>
-            </ul>
-
-            <p>11. Modifications<br>
-            HUE may update or modify these Terms at any time. Continued use of the platform constitutes acceptance of any revised terms and policies.</p>
-
-            <p>12. Governing Terms<br>
-            These Terms are governed by applicable laws and regulations. Users agree to comply with all relevant legal and regulatory requirements within their jurisdiction.</p>
-
-            <p>13. Contact<br>
-            For questions, assistance, or support, please contact the HUE support team.</p>
-          </div>
+        <main class="content">
+          <div class="terms-text">Selamat datang di Dana Proteksi. Dengan mengakses, mendaftar, atau menggunakan layanan Dana Proteksi, pengguna dianggap telah membaca, memahami, dan menyetujui seluruh Syarat Layanan ini.
+Syarat Layanan ini mengatur penggunaan website, akun, fitur, informasi, dan layanan digital yang disediakan oleh Dana Proteksi.
+1. Definisi
+Dalam Syarat Layanan ini:
+Dana Proteksi adalah platform digital yang menyediakan layanan informasi, pengelolaan, pemantauan, dan perlindungan aktivitas dana pengguna melalui sistem yang tersedia di website.
+Pengguna adalah setiap orang yang mengakses, mendaftar, atau menggunakan layanan Dana Proteksi.
+Akun adalah akses pribadi yang dibuat oleh pengguna untuk menggunakan layanan Dana Proteksi.
+Layanan adalah seluruh fitur, informasi, sistem, halaman, dan fasilitas digital yang disediakan oleh Dana Proteksi.
+2. Persetujuan Pengguna
+Dengan menggunakan layanan Dana Proteksi, pengguna menyatakan bahwa:
+ Telah membaca dan memahami Syarat Layanan ini.
+ Setuju untuk mematuhi seluruh ketentuan yang berlaku.
+ Memberikan informasi yang benar, akurat, dan dapat dipertanggungjawabkan.
+ Bertanggung jawab atas seluruh aktivitas yang terjadi melalui akun pengguna.
+ Tidak menggunakan layanan untuk tindakan yang melanggar hukum atau merugikan pihak lain.
+Apabila pengguna tidak menyetujui Syarat Layanan ini, pengguna disarankan untuk tidak menggunakan layanan Dana Proteksi.
+3. Pendaftaran Akun
+Untuk menggunakan fitur tertentu, pengguna mungkin diminta untuk membuat akun dengan memberikan informasi yang diperlukan, seperti nama, email, nomor handphone, dan data lain yang dibutuhkan.
+Pengguna bertanggung jawab untuk memastikan bahwa seluruh informasi yang diberikan adalah benar, lengkap, dan terbaru.
+Dana Proteksi berhak menolak, membatasi, menangguhkan, atau menonaktifkan akun apabila ditemukan informasi yang tidak benar, aktivitas mencurigakan, penyalahgunaan layanan, atau pelanggaran terhadap ketentuan ini.
+4. Keamanan Akun
+Pengguna bertanggung jawab penuh untuk menjaga kerahasiaan informasi akun, termasuk username, email, password, kode verifikasi, OTP, dan data login lainnya.
+Dana Proteksi tidak pernah meminta password, PIN, kode OTP, atau informasi sensitif lainnya melalui pesan pribadi, telepon tidak resmi, atau pihak ketiga.
+Apabila terjadi akses tidak sah, kehilangan akun, atau aktivitas mencurigakan, pengguna wajib segera menghubungi layanan bantuan resmi Dana Proteksi.
+5. Penggunaan Layanan
+Pengguna setuju untuk menggunakan layanan Dana Proteksi hanya untuk tujuan yang sah dan sesuai dengan ketentuan yang berlaku.
+Pengguna dilarang untuk:
+ Menggunakan layanan untuk aktivitas penipuan, manipulasi, pencucian uang, atau tindakan ilegal lainnya.
+ Mengakses sistem secara tidak sah.
+ Mengganggu, merusak, atau membebani sistem Dana Proteksi.
+ Menggunakan bot, script otomatis, scraping, eksploitasi celah sistem, atau metode teknis lain tanpa izin.
+ Menyebarkan informasi palsu, menyesatkan, atau merugikan pihak lain.
+ Menggunakan identitas orang lain tanpa izin.
+ Melakukan tindakan yang dapat merusak reputasi, keamanan, atau operasional Dana Proteksi.
+6. Ketersediaan Layanan
+Dana Proteksi berupaya menyediakan layanan secara stabil, aman, dan dapat diakses oleh pengguna. Namun, pengguna memahami bahwa layanan digital dapat mengalami gangguan, pembaruan, pemeliharaan, keterlambatan, atau kendala teknis tertentu.
+Dana Proteksi tidak bertanggung jawab atas kerugian yang timbul akibat gangguan layanan yang disebabkan oleh faktor di luar kendali, termasuk namun tidak terbatas pada gangguan jaringan, perangkat pengguna, penyedia layanan pihak ketiga, force majeure, serangan siber, atau pemeliharaan sistem.
+7. Informasi dan Konten
+Seluruh informasi yang tersedia di website Dana Proteksi disediakan untuk tujuan layanan, edukasi, dan informasi umum.
+Dana Proteksi berupaya memastikan informasi yang ditampilkan akurat dan terbaru. Namun, Dana Proteksi tidak menjamin bahwa seluruh informasi selalu bebas dari kesalahan, keterlambatan, atau kekurangan.
+Pengguna disarankan untuk membaca setiap informasi dengan teliti sebelum mengambil keputusan atau menggunakan fitur tertentu.
+8. Batasan Tanggung Jawab
+Dana Proteksi tidak bertanggung jawab atas kerugian yang timbul akibat:
+ Kelalaian pengguna dalam menjaga keamanan akun.
+ Kesalahan pengguna dalam memasukkan data.
+ Penggunaan layanan yang tidak sesuai dengan ketentuan.
+ Penyalahgunaan akun oleh pihak lain akibat kelalaian pengguna.
+ Gangguan teknis, jaringan, perangkat, atau sistem pihak ketiga.
+ Tindakan pihak luar yang berada di luar kendali Dana Proteksi.
+Pengguna menggunakan layanan Dana Proteksi dengan kesadaran dan tanggung jawab pribadi.
+9. Privasi dan Perlindungan Data
+Penggunaan data pribadi pengguna diatur dalam Kebijakan Privasi Dana Proteksi.
+Dengan menggunakan layanan ini, pengguna menyetujui pengumpulan, penggunaan, penyimpanan, dan perlindungan data sesuai dengan Kebijakan Privasi yang berlaku.
+Pengguna disarankan untuk membaca Kebijakan Privasi secara lengkap sebelum menggunakan layanan Dana Proteksi.
+10. Hak Kekayaan Intelektual
+Seluruh logo, nama, desain, tampilan, teks, ikon, elemen visual, fitur, sistem, dan konten yang terdapat pada website Dana Proteksi merupakan milik Dana Proteksi atau pihak yang memberikan izin penggunaan.
+Pengguna dilarang menyalin, menggunakan, mengubah, mendistribusikan, menjual, atau memanfaatkan konten Dana Proteksi untuk kepentingan komersial tanpa izin tertulis.
+11. Penangguhan dan Penghentian Akun
+Dana Proteksi berhak menangguhkan, membatasi, atau menghentikan akses pengguna apabila pengguna:
+ Melanggar Syarat Layanan ini.
+ Memberikan informasi palsu atau tidak valid.
+ Melakukan aktivitas mencurigakan.
+ Menggunakan layanan untuk tujuan ilegal.
+ Mengganggu keamanan atau operasional sistem.
+ Melakukan tindakan yang merugikan Dana Proteksi, pengguna lain, atau pihak ketiga.
+Keputusan penangguhan atau penghentian akun dapat dilakukan tanpa pemberitahuan terlebih dahulu apabila diperlukan untuk menjaga keamanan layanan.
+12. Perubahan Layanan
+Dana Proteksi berhak untuk mengubah, menambah, mengurangi, memperbarui, atau menghentikan sebagian maupun seluruh fitur layanan sewaktu-waktu sesuai kebutuhan operasional, keamanan, pengembangan sistem, atau kebijakan internal.
+Pengguna memahami bahwa perubahan tersebut dapat dilakukan untuk meningkatkan kualitas, keamanan, dan efektivitas layanan.
+13. Tautan Pihak Ketiga
+Website Dana Proteksi dapat memuat tautan menuju website atau layanan pihak ketiga.
+Dana Proteksi tidak bertanggung jawab atas isi, keamanan, kebijakan, atau layanan yang disediakan oleh pihak ketiga tersebut.
+Pengguna disarankan untuk membaca syarat layanan dan kebijakan privasi pihak ketiga sebelum menggunakan layanan mereka.
+14. Larangan Penyalahgunaan Nama Dana Proteksi
+Pengguna atau pihak lain dilarang menggunakan nama, logo, identitas, atau atribut Dana Proteksi untuk tujuan penipuan, promosi tidak resmi, penyalahgunaan, atau aktivitas yang dapat merugikan pengguna lain.
+Dana Proteksi tidak bertanggung jawab atas tindakan pihak yang mengatasnamakan Dana Proteksi di luar kanal resmi.
+15. Perubahan Syarat Layanan
+Dana Proteksi dapat memperbarui Syarat Layanan ini dari waktu ke waktu sesuai dengan perubahan layanan, kebutuhan operasional, atau ketentuan yang berlaku.
+Setiap perubahan akan dipublikasikan melalui halaman ini. Pengguna disarankan untuk memeriksa halaman Syarat Layanan secara berkala.
+Dengan tetap menggunakan layanan setelah perubahan dilakukan, pengguna dianggap telah menyetujui Syarat Layanan yang telah diperbarui.
+16. Hubungi Kami
+Apabila pengguna memiliki pertanyaan, keluhan, atau permintaan terkait Syarat Layanan ini, pengguna dapat menghubungi kami melalui:
+Dana Proteksi  Email: [email perusahaan]  Website: [alamat website]  Layanan Bantuan: [kontak/halaman bantuan]
+Dengan menggunakan layanan Dana Proteksi, pengguna dianggap telah membaca, memahami, dan menyetujui seluruh Syarat Layanan ini.</div>
         </main>
       </div>
     </section>
@@ -113,123 +129,67 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.terms-container {
+* {
+  box-sizing: border-box;
+}
+
+.terms-page {
   font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f0f0f0;
+  background-color: #f5f5f5;
   display: flex;
   justify-content: center;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-#section-terms-of-service {
-  width: 100%;
+#section-terms {
   display: flex;
   justify-content: center;
+  width: 100%;
 }
 
 .app-container {
   width: 100%;
-  max-width: 100%;
-  background-color: #ffffff;
+  max-width: 412px;
   min-height: 100vh;
-  color: #000000;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
+  background: linear-gradient(180deg, #FEFDFE 0%, #FDF8EA 100%);
+  position: relative;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
 }
 
 .header {
   display: flex;
-  align-items: center;
-  padding: 19px 15px;
-  position: relative;
-  justify-content: center;
+  align-items: flex-start;
+  padding: 25px 19px 0;
 }
 
-.back-button {
-  background: transparent;
-  border: none;
-  padding: 0;
+.back-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-top: 6px;
 }
 
-.header-title {
-  font-size: 18px;
+.page-title {
+  margin: 0 0 0 28px;
+  font-size: 22px;
   font-weight: 700;
-  margin: 0;
+  line-height: 33px;
   color: #000000;
-  line-height: 1.2;
-  text-align: center;
-  max-width: 100%;
 }
 
-.back-button {
-  position: absolute;
-  left: 15px;
-}
-
-.main-content {
-  padding: 11px 22px 40px 22px;
-  flex-grow: 1;
-}
-
-.main-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin: 0 0 13px 0;
-  line-height: 1.2;
+.content {
+  padding: 18px 21px 40px 21px;
 }
 
 .terms-text {
-  font-size: 15px;
+  color: #0e0e0e;
+  font-size: 14px;
   line-height: 1.5;
   white-space: pre-wrap;
-  color: #000000;
-}
-
-.terms-list {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.term-item {
-  margin: 0 0 14px 0;
-}
-
-.term-title {
-  font-size: 12px;
-  font-weight: 700;
-  margin: 0 0 6px 0;
-  line-height: 1.3;
-}
-
-.term-text {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #000000;
-  margin: 0 0 8px 0;
-}
-
-.term-bullets {
-  margin: 0 0 8px 0;
-  padding-left: 18px;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.term-bullets li {
-  margin: 0 0 6px 0;
+  word-wrap: break-word;
 }
 </style>

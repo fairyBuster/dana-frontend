@@ -1,113 +1,126 @@
 <template>
   <div class="app-container">
-    <!-- Header Section -->
+    <!-- Header -->
     <section id="section-header">
       <header class="app-header">
-        <button class="btn-back" @click="goBack" aria-label="Go back">
-          <img src="/assets/image/358_135.svg" alt="Back">
-        </button>
-        <h1 class="header-title">Task Hall</h1>
-        <div class="header-placeholder"></div>
+        <img src="/assets/images/61_330.svg" alt="" class="icon-back" @click="goBack">
+        <h1 class="header-title">Challenge</h1>
       </header>
     </section>
 
-    <!-- Hero Section -->
+    <!-- Hero -->
     <section id="section-hero">
-      <div class="hero-banner">
+      <div class="hero-container">
         <div class="hero-content">
-          <div class="hero-badge">
-            <img src="/assets/image/4230_135.svg" alt="Repeatable">
-            <span>REPEATABLE TASK</span>
+          <h2 class="hero-title">Misi Undang<br>Teman</h2>
+          <p class="hero-desc">Selesaikan challenge undangan dan raih bonus tambahan.</p>
+        </div>
+        <img src="/assets/images/f462977532c9ff3d01b3c239760208eb37fc3160.png" alt="" class="hero-image">
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section id="section-stats">
+      <div class="stats-card">
+        <div class="stat-item">
+          <div class="stat-icon-wrapper">
+            <img src="/assets/images/62_344.svg" class="bg-ellipse" alt="">
+            <img src="/assets/images/62_347.svg" class="fg-icon" alt="">
           </div>
-
-          <h2 class="hero-title">Complete, Claim, Repeat</h2>
-          <p class="hero-subtitle">Complete the requirements and claim your reward.</p>
-
-          <!-- <div class="hero-progress-wrapper">
-            <span class="progress-label">Your Progress</span>
-            <div class="progress-track">
-              <div class="progress-fill" :style="{ width: overallProgressPercent + '%' }"></div>
-            </div>
-            <span class="progress-value">{{ overallProgressText }}</span>
-          </div> -->
+          <div class="stat-label">Total Undangan</div>
+          <div class="stat-value">{{ totalInvites }}</div>
+          <div class="stat-sub">teman tim pertama</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon-wrapper">
+            <img src="/assets/images/62_345.svg" class="bg-ellipse" alt="">
+            <img src="/assets/images/62_378.svg" class="fg-icon" alt="">
+          </div>
+          <div class="stat-label">Challenge Selesai</div>
+          <div class="stat-value">{{ completedCount }}</div>
+          <div class="stat-sub">tantangan</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon-wrapper">
+            <img src="/assets/images/62_346.svg" class="bg-ellipse" alt="">
+            <img src="/assets/images/62_402.svg" class="fg-icon" alt="">
+          </div>
+          <div class="stat-label">Bonus Challenge Terkumpul</div>
+          <div class="stat-value">{{ totalBonusText }}</div>
+          <div class="stat-sub">Total bonus terkumpul</div>
         </div>
       </div>
     </section>
 
-    <!-- Requirements Section -->
-    <section id="section-requirements">
-      <div class="requirements-card">
-        <div class="req-header">
-          <h3>Requirements</h3>
-          <p>Complete all steps below to claim your reward.</p>
+    <!-- Invite Link -->
+    <section id="section-invite">
+      <div class="invite-card">
+        <div class="invite-header">
+          <div class="icon-wrapper">
+            <img src="/assets/images/62_370.svg" alt="">
+          </div>
+          <h3 class="invite-title">Link Undangan</h3>
         </div>
+        <div class="invite-actions">
+          <div class="input-box">{{ inviteLink }}</div>
+          <button class="btn-action btn-copy" @click="copyLink">
+            <img src="/assets/images/62_365.svg" alt="">
+          </button>
+          <button class="btn-action btn-share" @click="shareLink">
+            <img src="/assets/images/62_363.svg" alt="">
+          </button>
+        </div>
+        <div class="invite-code-wrapper">
+          <div class="invite-code">
+            Kode undangan: <span class="highlight">{{ inviteCode }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <ul class="task-list">
-          <li
-            v-for="(mission, index) in sortedMissions"
-            :key="mission.id"
-            class="task-item"
-          >
-            <div class="task-icon-wrapper">
-              <div class="task-icon">
-                <img src="/assets/image/4230_163.svg" class="icon-bg" alt="">
-                <img v-if="mission.claimed" src="/assets/image/4230_161.svg" class="icon-fg" alt="">
-                <span v-else class="icon-text">{{ index + 1 }}</span>
+    <!-- Rewards -->
+    <section id="section-rewards">
+      <div class="rewards-card">
+        <h3 class="rewards-title">Hadiah Challenge</h3>
+        <div class="rewards-grid">
+          <template v-for="(mission, idx) in sortedMissions" :key="mission.id">
+            <div class="reward-item">
+              <div class="reward-header">
+                <img src="/assets/images/62_419.svg" alt="">
+                <span>{{ getMissionLabel(mission) }}</span>
               </div>
-              <div v-if="index < sortedMissions.length - 1" class="task-line"></div>
-            </div>
-            <div class="task-content">
-              <h4 class="task-title">{{ mission.title || 'Mission title' }}</h4>
-              <p class="task-desc">{{ mission.description || mission.title }}</p>
-            </div>
-            <div class="task-status">
-              <div v-if="isMissionCompleted(mission)" class="status-badge completed">
-                <img src="/assets/image/4231_173.svg" alt="Check">
-                <span>Completed</span>
+              <div class="reward-amount">{{ formatCurrency(mission.reward) }}</div>
+              <div v-if="isMissionCompleted(mission)" class="reward-status success">
+                <div class="status-dot"></div> Tercapai
               </div>
-              <template v-else>
-                <span class="status-text">{{ formatCurrency(mission.reward) }}</span>
-               
-                <div class="task-progress-track">
-                  <div class="task-progress-fill" :style="{ width: getMissionProgressPercent(mission) + '%' }"></div>
+              <div v-else class="reward-progress">
+                <div class="progress-text">{{ getMissionProgressText(mission) }}</div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" :style="{ width: getMissionProgressPercent(mission) + '%' }"></div>
                 </div>
-                 <span class="status-text">{{ getMissionProgressText(mission) }}</span>
-              </template>
+              </div>
             </div>
-          </li>
+            <div v-if="idx < sortedMissions.length - 1 && (idx + 1) % 3 !== 0" class="arrow-wrapper">
+              <img src="/assets/images/62_434.svg" alt="">
+            </div>
+          </template>
 
-          <li v-if="!sortedMissions.length" class="empty-state">
-            <p class="empty-text">No tasks available</p>
-          </li>
-        </ul>
-
-        <button class="btn-see-all" @click="goBack">Back to Home</button>
-      </div>
-    </section>
-
-    <!-- Info Section -->
-    <section id="section-info">
-      <div class="info-banner">
-        <div class="info-content">
-          <h3 class="info-title">HUE Mining System</h3>
-          <p class="info-desc">Complete daily missions to earn rewards and level up your account.</p>
+          <div v-if="!sortedMissions.length" class="empty-state">
+            <p>Belum ada challenge tersedia</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Claim Section -->
-    <section id="section-claim">
-      <div class="claim-banner">
-        <p class="claim-title">Ready to claim your reward?</p>
-        <button
-          class="btn-claim"
-          :disabled="!hasClaimable || isClaiming"
-          @click="claimNextMission"
-        >
-          <img src="/assets/image/4231_173.svg" alt="Claim">
-          <span>{{ isClaiming ? 'Claiming...' : 'Claim Reward' }}</span>
-        </button>
-      </div>
+    <!-- Footer -->
+    <section id="section-footer">
+      <button
+        class="btn-claim"
+        :disabled="!hasClaimable || isClaiming"
+        @click="claimNextMission"
+      >
+        {{ isClaiming ? 'Mengklaim...' : 'Klaim Hadiah' }}
+      </button>
     </section>
   </div>
 
@@ -118,7 +131,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { authAPI, missionAPI } from '@/services/api'
+import { authAPI, missionAPI, commissionAPI } from '@/services/api'
 import SuccessModal from '@/components/modals/AppSuccessModal.vue'
 import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import { formatAppCurrency } from '@/utils/settings'
@@ -128,6 +141,7 @@ const router = useRouter()
 const accountInfo = ref(null)
 const rankStatus = ref(null)
 const missions = ref([])
+const downlineStats = ref(null)
 const isClaiming = ref(false)
 const successModalOpen = ref(false)
 const successMessage = ref('')
@@ -144,29 +158,60 @@ const toNumber = (value) => {
   return Number.isFinite(n) ? n : 0
 }
 
-const displayUsername = computed(() => {
-  const d = accountInfo.value || {}
-  const username = String(d.username || d.full_name || d.name || '').trim()
-  return username || ''
-})
-
-const currentLevel = computed(() => {
-  const d = rankStatus.value || {}
-  const title = String(d.current_title || '').trim()
-  if (title) return title
-  const n = toNumber(d.current_rank)
-  return Number.isFinite(n) ? `LV${n}` : 'LV0'
-})
-
 const formatCurrency = (value) => {
   const num = toNumber(value)
   const hasFraction = Math.abs(num % 1) > 1e-9
   return formatAppCurrency(num, { decimals: hasFraction ? 2 : 0 })
 }
 
-const isMissionRepeatable = (mission) => {
-  return Boolean(mission?.is_repeatable)
+// Stats
+const totalInvites = computed(() => {
+  const d = downlineStats.value || accountInfo.value || {}
+  return toNumber(d.total_downlines ?? d.downlines_total ?? d.total_referrals ?? 0)
+})
+
+const completedCount = computed(() => {
+  return sortedMissions.value.filter(m => isMissionCompleted(m)).length
+})
+
+const totalBonusText = computed(() => {
+  const total = sortedMissions.value
+    .filter(m => isMissionCompleted(m))
+    .reduce((acc, m) => acc + toNumber(m.reward), 0)
+  return formatCurrency(total)
+})
+
+// Invite
+const inviteCode = computed(() => {
+  const d = accountInfo.value || {}
+  return String(d.referral_code || d.invite_code || d.id || '').trim() || '-'
+})
+
+const inviteLink = computed(() => {
+  const code = inviteCode.value
+  if (!code || code === '-') return '-'
+  const base = window.location.origin
+  return `${base}/#/invite/${code}`
+})
+
+const copyLink = () => {
+  if (!inviteLink.value || inviteLink.value === '-') return
+  navigator.clipboard.writeText(inviteLink.value).catch(() => {})
 }
+
+const shareLink = async () => {
+  if (!inviteLink.value || inviteLink.value === '-') return
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Dana Proteksi', text: 'Gabung sekarang!', url: inviteLink.value })
+    } catch (_) {}
+  } else {
+    copyLink()
+  }
+}
+
+// Missions
+const isMissionRepeatable = (mission) => Boolean(mission?.is_repeatable)
 
 const isMissionCompleted = (mission) => {
   if (isMissionRepeatable(mission)) return false
@@ -198,24 +243,13 @@ const getMissionRequirement = (mission) => {
 const getMissionCurrent = (mission) => {
   const req = getMissionRequirement(mission)
   if (req <= 0) return getMissionProgress(mission)
-
   const rawRemaining = mission?.remaining
   const hasRemaining = rawRemaining !== null && rawRemaining !== undefined && rawRemaining !== ''
   if (hasRemaining) {
     const rem = toNumber(rawRemaining)
     if (Number.isFinite(rem)) return Math.min(req, Math.max(0, req - rem))
   }
-
   return Math.min(req, Math.max(0, getMissionProgress(mission)))
-}
-
-const getMissionRemaining = (mission) => {
-  const fromApi = toNumber(mission?.remaining)
-  if (fromApi > 0) return fromApi
-  const req = getMissionRequirement(mission)
-  const prog = getMissionProgress(mission)
-  if (req <= 0) return 0
-  return Math.max(0, req - prog)
 }
 
 const getMissionProgressPercent = (mission) => {
@@ -231,16 +265,21 @@ const getMissionProgressText = (mission) => {
   return `${getMissionCurrent(mission)}/${req}`
 }
 
-const overallProgressPercent = computed(() => {
-  if (!sortedMissions.value.length) return 0
-  const total = sortedMissions.value.reduce((acc, m) => acc + getMissionProgressPercent(m), 0)
-  return Math.round(total / sortedMissions.value.length)
-})
+const getMissionLabel = (mission) => {
+  const req = getMissionRequirement(mission)
+  if (req > 0) return `${req} Teman`
+  const title = String(mission?.title || '').trim()
+  return title || 'Challenge'
+}
 
-const overallProgressText = computed(() => {
-  const completed = sortedMissions.value.filter(m => isMissionCompleted(m)).length
-  return `${completed}/${sortedMissions.value.length}`
-})
+const getMissionRemaining = (mission) => {
+  const fromApi = toNumber(mission?.remaining)
+  if (fromApi > 0) return fromApi
+  const req = getMissionRequirement(mission)
+  const prog = getMissionProgress(mission)
+  if (req <= 0) return 0
+  return Math.max(0, req - prog)
+}
 
 const hasClaimable = computed(() => {
   return sortedMissions.value.some(m => isMissionCurrentlyClaimable(m))
@@ -265,23 +304,21 @@ const sortedMissions = computed(() => {
     const reqB = getMissionRequirement(b)
     if (reqA !== reqB) return reqA - reqB
 
-    const idA = Number(a?.id ?? 0)
-    const idB = Number(b?.id ?? 0)
-    return idA - idB
+    return Number(a?.id ?? 0) - Number(b?.id ?? 0)
   })
   return list
 })
 
 const extractErrorMessage = (err) => {
   const data = err?.response?.data
-  if (!data) return err?.message || 'Request failed, please refresh'
+  if (!data) return err?.message || 'Permintaan gagal, silakan coba lagi'
   if (typeof data === 'string') return data
   if (data.detail) return String(data.detail)
   const firstKey = Object.keys(data)[0]
   const firstVal = data[firstKey]
   if (Array.isArray(firstVal) && firstVal.length) return String(firstVal[0])
   if (firstVal) return String(firstVal)
-  return 'Request failed, please refresh'
+  return 'Permintaan gagal, silakan coba lagi'
 }
 
 const fetchAccountInfo = async () => {
@@ -315,6 +352,15 @@ const fetchMissions = async () => {
   }
 }
 
+const fetchDownlineStats = async () => {
+  try {
+    const resp = await commissionAPI.getDownlineStats()
+    downlineStats.value = resp?.data || null
+  } catch (_) {
+    downlineStats.value = null
+  }
+}
+
 const claimNextMission = async () => {
   if (isClaiming.value) return
   const mission = sortedMissions.value.find(m => isMissionCurrentlyClaimable(m))
@@ -327,7 +373,7 @@ const claimNextMission = async () => {
     const resp = await missionAPI.claimMission(mission.id)
     const data = resp?.data || {}
     const amount = toNumber(data.reward_amount ?? data.reward ?? mission.reward)
-    successMessage.value = `Successfully claimed ${formatCurrency(amount)}`
+    successMessage.value = `Berhasil mengklaim ${formatCurrency(amount)}`
     successModalOpen.value = true
     await fetchMissions()
   } catch (err) {
@@ -339,7 +385,7 @@ const claimNextMission = async () => {
 }
 
 onMounted(() => {
-  Promise.all([fetchAccountInfo(), fetchRankStatus(), fetchMissions()])
+  Promise.all([fetchAccountInfo(), fetchRankStatus(), fetchMissions(), fetchDownlineStats()])
 })
 </script>
 
@@ -351,436 +397,400 @@ onMounted(() => {
 }
 
 .app-container {
-  --color-bg-main: #f8f8f8;
-  --color-white: #ffffff;
-  --color-black: #000000;
-  --color-text-dark: #464343;
-  --color-primary: #1b46f5;
-  --color-primary-dark: #144cdf;
-  --color-primary-light: #1f44dc;
-  --color-success-bg: #e7f5f0;
-  --color-gray-light: #dbdbdb;
-  --color-gray-border: #bababa;
-
   font-family: 'Inter', sans-serif;
-  width: 100%;
   max-width: 412px;
-  background-color: var(--color-bg-main);
+  background-color: #fdfaf4;
   position: relative;
-  overflow-x: hidden;
   min-height: 100vh;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  padding-bottom: 80px;
+  overflow-x: hidden;
   margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-button {
-  font-family: 'Inter', sans-serif;
+/* Header */
+#section-header .app-header {
+  display: flex;
+  align-items: center;
+  padding: 20px 24px;
+  gap: 16px;
+}
+
+.icon-back {
+  width: 24px;
+  height: 24px;
   cursor: pointer;
-  border: none;
-  outline: none;
 }
 
-ul {
-  list-style: none;
+.header-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000000;
 }
 
-h1, h2, h3, h4, p {
-  margin: 0;
+/* Hero */
+#section-hero .hero-container {
+  position: relative;
+  padding: 10px 24px 30px;
+  min-height: 160px;
 }
 
-/* Header Section */
-.app-header {
+.hero-content {
+  width: 60%;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.hero-desc {
+  font-size: 12px;
+  color: #635f5f;
+  line-height: 1.4;
+  max-width: 180px;
+}
+
+.hero-image {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 210px;
+  z-index: 1;
+}
+
+/* Stats */
+#section-stats {
+  padding: 0 20px;
+  margin-bottom: 20px;
+}
+
+.stats-card {
+  background: linear-gradient(90deg, #f4c142 0%, #f8dd89 46.63%, #f5ca51 100%);
+  border-radius: 10px;
+  padding: 16px 12px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  background-color: var(--color-bg-main);
+  align-items: flex-start;
 }
 
-.btn-back {
-  background: transparent;
-  padding: 4px;
+.stat-item {
+  flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  text-align: center;
+  padding: 0 4px;
 }
 
-.btn-back img {
+.stat-icon-wrapper {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 8px;
+}
+
+.bg-ellipse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fg-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 20px;
   height: 20px;
 }
 
-.header-title {
-  font-size: 16px;
+.stat-label {
+  font-size: 10px;
+  color: #000000;
   font-weight: 600;
-  color: var(--color-black);
-}
-
-.header-placeholder {
-  width: 28px;
-}
-
-/* Hero Section */
-#section-hero {
-  padding: 0 16px 16px;
-}
-
-.hero-banner {
-  background-image: url('/assets/image/54a14378a7f46725b906d7ba3fd996dedeeed4f4.png');
-  width: 100%;
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 16px;
-  padding: 40px 10px;
-  color: var(--color-white);
-  position: relative;
-  overflow: hidden;
-  margin-top: -20px;
-  margin-bottom: -20px;
+  margin-bottom: 4px;
+  min-height: 24px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
 }
 
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background-color: rgba(255, 255, 255, 0.4);
-  padding: 4px 8px;
-  border-radius: 20px;
-
-  align-self: flex-start;
-}
-
-.hero-badge img {
-  width: 12px;
-  height: 12px;
-}
-
-.hero-badge span {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-.hero-title {
-  font-size: 22px;
+.stat-value {
+  font-size: 14px;
   font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 6px;
-  max-width: 200px;
+  color: #000000;
+  margin-bottom: 2px;
 }
 
-.hero-subtitle {
-  font-size: 12px;
-  font-weight: 400;
-  opacity: 0.9;
-  max-width: 180px;
-  line-height: 1.4;
+.stat-sub {
+  font-size: 9px;
+  color: #4e4e4e;
+}
+
+/* Invite Link */
+#section-invite {
+  padding: 0 20px;
   margin-bottom: 20px;
 }
 
-.hero-progress-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: rgba(255, 255, 255, 0.4);
-  padding: 6px 12px;
-  border-radius: 20px;
-  width: fit-content;
-}
-
-.progress-label {
-  font-size: 10px;
-  font-weight: 500;
-}
-
-.progress-track {
-  width: 88px;
-  height: 6px;
-  background-color: var(--color-primary-dark);
+.invite-card {
+  background-color: #ffffff;
   border-radius: 10px;
-  position: relative;
-  overflow: hidden;
+  padding: 16px;
+  box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.1);
 }
 
-.progress-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background-color: var(--color-white);
-  border-radius: 10px;
-  transition: width 0.3s;
-}
-
-.progress-value {
-  font-size: 10px;
-  font-weight: 600;
-}
-
-/* Requirements Section */
-#section-requirements {
-  padding: 0 16px 16px;
-}
-
-.requirements-card {
-  background-color: var(--color-white);
-  border-radius: 10px;
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-}
-
-.req-header {
-  margin-bottom: 24px;
-}
-
-.req-header h3 {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--color-black);
-  margin-bottom: 4px;
-}
-
-.req-header p {
-  font-size: 14px;
-  color: var(--color-black);
-  opacity: 0.7;
-}
-
-.task-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-bottom: 24px;
-}
-
-.task-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.task-icon-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.task-icon {
-  width: 40px;
-  height: 40px;
-  position: relative;
+.invite-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.task-icon .icon-bg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.task-icon .icon-fg {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  z-index: 1;
-}
-
-.task-icon .icon-text {
-  position: absolute;
-  z-index: 1;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-black);
-}
-
-.task-line {
-  position: absolute;
-  top: 40px;
-  bottom: -20px;
-  width: 1px;
-  background-color: var(--color-gray-border);
-  z-index: 0;
-}
-
-.task-content {
-  flex: 1;
-  padding-top: 4px;
-  min-width: 0;
-}
-
-.task-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-black);
-  margin-bottom: 4px;
-}
-
-.task-desc {
-  font-size: 14px;
-  color: var(--color-black);
-  opacity: 0.6;
-}
-
-.task-status {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  padding-top: 4px;
-  flex-shrink: 0;
-}
-
-.status-badge.completed {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background-color: var(--color-success-bg);
-  padding: 4px 8px;
-  border-radius: 20px;
-}
-
-.status-badge.completed img {
-  width: 12px;
-  height: 12px;
-}
-
-.status-badge.completed span {
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--color-text-dark);
-}
-
-.status-text {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-primary);
-  margin-bottom: 4px;
-}
-
-.task-progress-track {
-  width: 74px;
-  height: 6px;
-  background-color: var(--color-gray-light);
-  border-radius: 10px;
-  position: relative;
-  overflow: hidden;
-}
-
-.task-progress-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background-color: var(--color-primary-light);
-  border-radius: 10px;
-  transition: width 0.3s;
-}
-
-.btn-see-all {
-  width: 100%;
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 12px;
-  border-radius: 30px;
-  text-align: center;
-  transition: opacity 0.2s;
-}
-
-.btn-see-all:active {
-  opacity: 0.8;
-}
-
-/* Info Section */
-#section-info {
-  padding: 0 16px 16px;
-}
-
-.info-banner {
-  background-image: url('/assets/image/d0e10a0dbf286808cb8fb9c02f1cd15da31de7e1.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 12px;
-  min-height: 87px;
-  display: flex;
-  align-items: center;
-  padding: 16px 20px 16px 105px;
-}
-
-.info-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.info-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--color-primary-dark);
-}
-
-.info-desc {
-  font-size: 14px;
-  line-height: 1.4;
-  color: var(--color-black);
-  opacity: 0.8;
-}
-
-/* Claim Section */
-#section-claim {
-  padding: 0 16px 24px;
-}
-
-.claim-banner {
-  background-image: url('/assets/image/c9bb02deee6d6747247a2ebf4049bb0b5108fcd0.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 20px;
-  min-height: 116px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.claim-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-white);
+  gap: 10px;
   margin-bottom: 12px;
 }
 
-.btn-claim {
-  background-color: #fefefe;
-  color: var(--color-primary-dark);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 10px 24px;
-  border-radius: 20px;
+.icon-wrapper {
+  background-color: #fcf2dd;
+  border-radius: 5px;
+  width: 32px;
+  height: 26px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 306px;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.1s;
 }
 
-.btn-claim:active {
-  transform: scale(0.98);
+.icon-wrapper img {
+  width: 16px;
+  height: 16px;
+}
+
+.invite-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.invite-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input-box {
+  flex: 1;
+  border: 0.5px solid #9a9a9a;
+  border-radius: 5px;
+  padding: 0 12px;
+  font-size: 12px;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 30px;
+}
+
+.btn-action {
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  border: none;
+}
+
+.btn-copy {
+  background-color: transparent;
+  border: 0.5px solid #9a9a9a !important;
+}
+
+.btn-share {
+  background-color: #f3b73f;
+}
+
+.btn-action img {
+  width: 16px;
+  height: 16px;
+}
+
+.invite-code-wrapper {
+  display: flex;
+}
+
+.invite-code {
+  background-color: #fdfaf5;
+  border: 0.5px solid #dadada;
+  border-radius: 5px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: #000000;
+}
+
+.highlight {
+  color: #f3b73f;
+  font-weight: 600;
+}
+
+/* Rewards */
+#section-rewards {
+  padding: 0 20px;
+}
+
+.rewards-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 20px 16px;
+  box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.1);
+}
+
+.rewards-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 16px;
+}
+
+.rewards-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 16px 4px;
+  align-items: center;
+}
+
+.reward-item {
+  background-color: #fcf9ee;
+  border: 1px solid #e6d2aa;
+  border-radius: 10px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.reward-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.reward-header img {
+  width: 16px;
+  height: 16px;
+}
+
+.reward-amount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.reward-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.reward-status.success {
+  color: #008332;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #00b144;
+  border-radius: 50%;
+}
+
+.reward-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.progress-text {
+  font-size: 10px;
+  color: #000000;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 5px;
+  background-color: #cfcfcf;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #f3b73f;
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+.arrow-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-wrapper img {
+  width: 16px;
+  height: 16px;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px;
+  color: #737373;
+  font-size: 13px;
+}
+
+/* Footer */
+#section-footer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 412px;
+  padding: 20px;
+  background-color: #fdfaf4;
+  z-index: 10;
+}
+
+.btn-claim {
+  width: 100%;
+  background-color: #976709;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  transition: opacity 0.2s ease;
 }
 
 .btn-claim:disabled {
@@ -788,19 +798,7 @@ h1, h2, h3, h4, p {
   cursor: not-allowed;
 }
 
-.btn-claim img {
-  width: 16px;
-  height: 16px;
-}
-
-/* Empty State */
-.empty-state {
-  padding: 40px 0;
-  text-align: center;
-}
-
-.empty-text {
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 14px;
+.btn-claim:not(:disabled):active {
+  opacity: 0.85;
 }
 </style>

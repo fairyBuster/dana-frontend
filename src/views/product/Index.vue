@@ -2,52 +2,39 @@
   <div class="app-container">
     <!-- Header -->
     <section id="section-header">
-      <header class="top-bar">
-        <div class="top-bar-left">
-          <img src="/assets/image/Logo01.png" alt="Logo" class="logo">
-          <span class="masked-account">{{ maskedAccount }}</span>
-          <img src="/assets/image/4364_188.svg" alt="Show" class="icon-sm" @click="toggleAccount">
-        </div>
-        <div class="top-bar-right">
-           <a href="/assets/android/hue.apk" download>
-            <img src="/assets/image/16636ddcfe5bc7cbc19b06c1725abcf55b1768ac.png" alt="Download" class="icon-download">
-          </a>
-          <div ref="langWrapEl" class="lang-wrap">
-            <button
-              ref="langBtnEl"
-              type="button"
-              class="lang-btn"
-              aria-label="Language"
-              :aria-expanded="langMenuOpen ? 'true' : 'false'"
-              @click.stop="toggleLangMenu"
-            >
-              <img src="/assets/image/4364_186.svg" alt="Language" class="icon-md">
-            </button>
-            <div v-if="langMenuOpen" class="lang-menu" @click.stop>
-              <button type="button" class="lang-item" @click="changeLanguage('en')">English</button>
-              <button type="button" class="lang-item" @click="changeLanguage('id')">Indonesia</button>
-            </div>
-          </div>
-        </div>
+      <header class="main-header">
+        <img src="/assets/images/108294978d9cad25785261933372f80a0602c03d.png" alt="Dana Proteksi" class="header-logo">
       </header>
-      <div v-if="tabs.length" class="tabs-container">
-        <div
+    </section>
+
+    <!-- Hero -->
+    <section id="section-hero">
+      <div class="hero-container">
+        <h1 class="hero-title">Dana Proteksi</h1>
+        <p class="hero-subtitle">Pilih produk perlindungan yang sesuai dengan kebutuhan Anda.</p>
+      </div>
+    </section>
+
+    <!-- Categories -->
+    <section id="section-categories">
+      <div class="categories-container">
+        <button
           v-for="(tab, idx) in tabs"
           :key="idx"
-          class="tab"
-          :class="{ active: activeTab === idx, inactive: activeTab !== idx }"
+          class="category-btn"
+          :class="{ active: activeTab === idx }"
           @click="setActiveTab(idx)"
         >
           {{ tab.label }}
-        </div>
+        </button>
       </div>
     </section>
 
     <!-- Product List -->
-    <section id="section-products">
+    <section id="section-product-list">
       <div class="product-list-container">
         <div v-if="sortedProducts.length === 0" class="empty-state">
-          <p class="empty-text">Not available sold cloud</p>
+          <p class="empty-text">Tidak ada produk tersedia</p>
         </div>
 
         <div
@@ -56,76 +43,45 @@
           class="product-card"
           @click="buyProduct(product)"
         >
-          <div class="badge">{{ isOutOfStock(product) ? 'Sold out' : `Stock: ${product.stock || 0}` }}</div>
-          <h3 class="product-title">{{ product.name || '-' }}</h3>
-          <div class="card-content">
-            <div class="image-wrapper">
+          <div class="card-main">
+            <div class="card-image-placeholder">
               <img
                 :src="getProductImage(product)"
-                :alt="product.name || 'Product'"
-                class="product-image"
+                :alt="product.name || 'Produk'"
+                class="card-product-img"
                 loading="lazy"
-                decoding="async"
-                referrerpolicy="no-referrer"
                 @error="handleProductImageError"
               >
             </div>
-            
-            <div class="info-wrapper">
-              
-              <div class="stats-grid">
-                <div class="stat-col">
-                  <div class="stat-item">
-                    <span class="stat-label">Mining Output</span>
-                    <span class="stat-value"><span class="text-blue">{{ formatProfitValue(product) }}</span> <span class="text-sm">/day</span></span>
-                  </div>
+            <div class="card-details">
+              <h2 class="product-name">{{ product.name || '-' }}</h2>
+              <p class="product-desc">{{ product.description || 'Produk proteksi aset digital' }}</p>
+              <div class="product-meta">
+                <div class="meta-item">
+                  <span class="meta-label"><img src="/assets/images/44_560.svg" alt=""> Mulai dari</span>
+                  <span class="meta-value">{{ formatPrice(product.price) }}</span>
                 </div>
-                <div class="stat-col">
-                  <div class="stat-item">
-                    <span class="stat-label">Rental Period</span>
-                    <span class="stat-value"><span class="text-blue">{{ product.duration || '-' }}</span> <span class="text-sm">/day</span></span>
-                  </div>
+                <div class="meta-divider"></div>
+                <div class="meta-item">
+                  <span class="meta-label"><img src="/assets/images/44_570.svg" alt=""> Periode</span>
+                  <span class="meta-value">{{ product.duration || '-' }} Hari</span>
                 </div>
+                <button class="btn-select" @click.stop="buyProduct(product)" :disabled="isOutOfStock(product)">
+                  Pilih Produk <img src="/assets/images/44_579.svg" alt="">
+                </button>
               </div>
-                <br>
-               <div class="stats-grid">
-                <div class="stat-col">
-                  <div class="stat-item">
-                    <span class="stat-label">Mining Speed</span>
-                    <span class="stat-value" style="font-size: 14px; font-style: italic;"><span translate="no" class="notranslate">{{ getMiningSpeedText(product) }}</span></span>
-                  </div>
-                </div>
-                <div class="stat-col">
-                  <div class="stat-item">
-                    <span class="stat-label">Mining Duration</span>
-                    <span class="stat-value" style="font-size: 14px; font-style: italic;"><span translate="no" class="notranslate">≈24 hour</span></span>
-                  </div>
-                </div>
-                
-              </div>
-                <br>
-               <div class="stats-grid">
-                <div class="stat-col">
-                  <div class="stat-item">
-                    <span class="stat-label">Block reward(s)</span>
-                    <span class="stat-value" style="font-size: 12px; font-style: italic;"><span>Added to the blockchain, on average, every 00 AM</span></span>
-                  </div>
-                </div>
-              
-                
-              </div>
-
             </div>
           </div>
-          <div class="divider"></div>
           <div class="card-footer">
-            <div class="price-wrap">
-              <span class="price-label">Price:</span>
-              <span class="price-value">{{ formatPrice(product.price) }}</span>
+            <div class="footer-item">
+              <span class="footer-label">Proteksi harian</span>
+              <span class="footer-value">{{ formatProfitValue(product) }}</span>
             </div>
-            <button class="btn-buy" :disabled="isOutOfStock(product)" @click.stop="buyProduct(product)">
-              {{ isOutOfStock(product) ? 'Sold Out' : 'Featured' }}
-            </button>
+            <div class="footer-divider"></div>
+            <div class="footer-item right-align">
+              <span class="footer-label">Estimasi Keseluruhan</span>
+              <span class="footer-value">{{ formatTotalEstimate(product) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -136,85 +92,34 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { authAPI, productAPI } from '@/services/api'
+import { productAPI } from '@/services/api'
 import FooterBar from '@/components/partials/AppFooter.vue'
 import { resolveImageUrl } from '@/utils/imageCache'
-import { setLanguage } from '@/i18n'
 import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
-const { locale } = useI18n()
 
 const products = ref([])
 const activeTab = ref(0)
 const tabs = ref([
-  { label: 'Cloud Computing', key: 'active' },
-  { label: 'Sold out', key: 'inactive' }
+  { label: 'Semua', key: 'all' },
+  { label: 'Tersedia', key: 'active' },
+  { label: 'Habis', key: 'inactive' }
 ])
-const accountVisible = ref(false)
-const accountInfo = ref(null)
 
-const langMenuOpen = ref(false)
-const langWrapEl = ref(null)
-const langBtnEl = ref(null)
-
-const getPhone = (data) => {
-  const d = data || {}
-  const p = String(d.phone || d.phone_number || d.user_phone || '').trim()
-  return p
-}
-
-const maskPhone = (phone) => {
-  const p = String(phone || '').trim()
-  if (!p) return '**********'
-  const digits = p.replace(/\D/g, '')
-  if (!digits) return '**********'
-  const masked = '*'.repeat(digits.length)
-  return p.startsWith('') ? `${masked}` : masked
-}
-
-const maskedAccount = computed(() => {
-  const phone = getPhone(accountInfo.value)
-  return accountVisible.value ? (phone || '-') : maskPhone(phone)
-})
-
-const toggleAccount = () => {
-  accountVisible.value = !accountVisible.value
-}
-
-const toggleLangMenu = () => {
-  langMenuOpen.value = !langMenuOpen.value
-}
-
-const changeLanguage = (lang) => {
-  setLanguage(lang)
-  locale.value = lang
-  langMenuOpen.value = false
-}
-
-const onDocumentClick = (event) => {
-  if (!langMenuOpen.value) return
-  const target = event.target
-  if (langWrapEl.value?.contains(target) || langBtnEl.value?.contains(target)) return
-  langMenuOpen.value = false
-}
-
+/* ─── Helpers ─── */
 const parseNumber = (value) => {
   if (value === null || value === undefined || value === '') return null
   const raw = String(value).trim()
   if (!raw) return null
-
   const s = raw.replace(/\s+/g, '')
   const sign = s.startsWith('-') ? '-' : ''
   const unsigned = s.replace(/^[+-]/, '')
-
   const lastDot = unsigned.lastIndexOf('.')
   const lastComma = unsigned.lastIndexOf(',')
   const lastSep = Math.max(lastDot, lastComma)
-
   if (lastSep > -1) {
     const intPart = unsigned.slice(0, lastSep).replace(/[.,]/g, '').replace(/[^0-9]/g, '')
     const fracPart = unsigned.slice(lastSep + 1).replace(/[^0-9]/g, '')
@@ -222,7 +127,6 @@ const parseNumber = (value) => {
     const n = Number(normalized)
     return Number.isFinite(n) ? n : null
   }
-
   const digitsOnly = unsigned.replace(/[^0-9]/g, '')
   if (!digitsOnly) return null
   const n = Number(`${sign}${digitsOnly}`)
@@ -263,11 +167,20 @@ const formatProfitValue = (product) => {
   return '-'
 }
 
-const getMiningSpeedText = (product) => {
-  const price = parseNumber(product?.price)
-  const p = price === null ? 0 : Math.max(0, price)
-  const speed = Math.min(99.9999, Math.max(0.01, p * 0.006949))
-  return `≈${speed.toFixed(4)} PH/s`
+const formatTotalEstimate = (product) => {
+  const profitType = String(product?.profit_type || '').toLowerCase()
+  const duration = parseNumber(product?.duration) || 0
+  let dailyProfit = 0
+  if (profitType === 'random') {
+    const max = parseNumber(product?.profit_random_max)
+    dailyProfit = max !== null ? max : 0
+  } else {
+    const rate = parseNumber(product?.profit_rate)
+    dailyProfit = rate !== null ? rate : 0
+  }
+  const total = dailyProfit * duration
+  if (total <= 0) return '-'
+  return formatAppCurrency(total, { decimals: 0 })
 }
 
 const isOutOfStock = (product) => {
@@ -285,9 +198,10 @@ const normalizeProductsResponse = (data) => {
 }
 
 const filteredProducts = computed(() => {
-  const key = String(tabs.value?.[activeTab.value]?.key || 'active').toLowerCase()
+  const key = String(tabs.value?.[activeTab.value]?.key || 'all').toLowerCase()
   if (key === 'inactive') return products.value.filter((p) => isOutOfStock(p))
-  return products.value.filter((p) => !isOutOfStock(p))
+  if (key === 'active') return products.value.filter((p) => !isOutOfStock(p))
+  return products.value
 })
 
 const sortedProducts = computed(() => {
@@ -298,11 +212,9 @@ const sortedProducts = computed(() => {
     const pa = priceA === null ? Number.POSITIVE_INFINITY : priceA
     const pb = priceB === null ? Number.POSITIVE_INFINITY : priceB
     if (pa !== pb) return pa - pb
-
     const outA = isOutOfStock(a)
     const outB = isOutOfStock(b)
     if (outA !== outB) return outA ? 1 : -1
-
     const idA = Number(a?.id ?? 0)
     const idB = Number(b?.id ?? 0)
     return idA - idB
@@ -319,28 +231,19 @@ const setActiveTab = (idx) => {
 const getProductImage = (product) => {
   const raw = String(product?.image || '').trim()
   const resolved = raw ? resolveImageUrl(raw) : ''
-  return resolved || '/assets/image/1ea41e69edf9909600bc1dea02f90a88a2cbf679.png'
+  return resolved || '/assets/images/1ea41e69edf9909600bc1dea02f90a88a2cbf679.png'
 }
 
 const handleProductImageError = (e) => {
   const el = e?.target
   if (!el) return
-  el.src = '/assets/image/1ea41e69edf9909600bc1dea02f90a88a2cbf679.png'
+  el.src = '/assets/images/1ea41e69edf9909600bc1dea02f90a88a2cbf679.png'
 }
 
 const buyProduct = (product) => {
   if (!product || !product.id) return
   if (isOutOfStock(product)) return
   router.push({ name: 'ProductDetails', params: { id: String(product.id) } })
-}
-
-const fetchAccountInfo = async () => {
-  try {
-    const resp = await authAPI.getAccountInfo()
-    accountInfo.value = resp?.data || null
-  } catch (_) {
-    accountInfo.value = null
-  }
 }
 
 const fetchProducts = async () => {
@@ -372,12 +275,6 @@ const fetchProducts = async () => {
 
 onMounted(() => {
   fetchProducts()
-  fetchAccountInfo()
-  document.addEventListener('click', onDocumentClick)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 
@@ -390,278 +287,230 @@ onBeforeUnmount(() => {
 
 .app-container {
   font-family: 'Inter', sans-serif;
-  max-width: 100%;
+  max-width: 412px;
   margin: 0 auto;
-  background-color: #f8f8f8;
+  background-color: #fdfaf4;
   position: relative;
   min-height: 100vh;
-  padding-bottom: 60px;
+  padding-bottom: 80px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-.icon-download {
-  width: 23px;
-  height: 23px;
-  object-fit: contain;
-  cursor: pointer;
-}
+
 /* Header */
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
+.main-header {
+  padding: 28px 20px 10px 20px;
 }
 
-.top-bar-left,
-.top-bar-right {
+.header-logo {
+  height: 52px;
+  width: auto;
+  display: block;
+}
+
+/* Hero */
+.hero-container {
+  padding: 10px 20px;
+}
+
+.hero-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #000000;
+}
+
+.hero-subtitle {
+  font-size: 13px;
+  color: #635f5f;
+  line-height: 1.4;
+}
+
+/* Categories */
+.categories-container {
+  padding: 12px 20px;
   display: flex;
-  align-items: center;
   gap: 12px;
 }
 
-.logo {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-}
-
-.masked-account {
-  font-size: 16px;
-  font-weight: 500;
-  color: #000000;
-  letter-spacing: 1px;
-}
-
-.icon-sm {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-.icon-md {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-}
-
-.lang-wrap {
-  position: relative;
-}
-
-.lang-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.lang-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: #ffffff;
+.category-btn {
+  padding: 6px 16px;
   border-radius: 10px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
-  padding: 6px;
-  min-width: 140px;
-  z-index: 2000;
-}
-
-.lang-item {
-  width: 100%;
-  background: transparent;
-  border: none;
-  text-align: left;
-  padding: 10px 12px;
   font-size: 12px;
   font-weight: 600;
-  color: #000000;
   cursor: pointer;
-  border-radius: 8px;
+  background-color: #fefefe;
+  border: 1px solid #cfcfcf;
+  color: #000000;
   font-family: inherit;
+  transition: all 0.2s;
 }
 
-.lang-item:hover {
-  background: rgba(33, 77, 243, 0.08);
-}
-
-.tabs-container {
-  display: flex;
-  gap: 24px;
-  padding: 8px 24px 16px;
-}
-
-.tab {
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  padding-bottom: 4px;
-}
-
-.tab.active {
-  color: #000000;
-}
-
-.tab.inactive {
-  color: #737373;
+.category-btn.active {
+  border-color: #f3b73f;
+  color: #f3b73f;
 }
 
 /* Product List */
 .product-list-container {
-  padding: 8px 10px;
+  padding: 10px 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: calc(100vh - 100px);
 }
 
 .product-card {
   background-color: #ffffff;
   border-radius: 10px;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.04);
-  position: relative;
+  box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.1);
   padding: 16px;
-  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   cursor: pointer;
 }
 
-.badge {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-color: #1b46f5;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 12px;
-  border-top-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-.card-content {
+.card-main {
   display: flex;
   gap: 16px;
+}
+
+.card-image-placeholder {
+  width: 57px;
+  height: 70px;
+  background-color: #fef7e3;
+  border-radius: 5px;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
-.image-wrapper {
-  flex: 0 0 130px;
-}
-
-.product-image {
+.card-product-img {
   width: 100%;
-  height: auto;
-  object-fit: fill;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
 }
 
-.info-wrapper {
+.card-details {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.product-title {
-  font-size: 18px;
-  font-weight: 400;
-  color: #1e1e1e;
-  margin-top: -10px;
-  text-align: center;
+.product-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 2px;
+}
+
+.product-desc {
+  font-size: 11px;
+  color: #635f5f;
   margin-bottom: 12px;
 }
 
-.stats-grid {
+.product-meta {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.stat-col {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  flex: 1;
-}
-
-.stat-item {
+.meta-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-height: 28px;
 }
 
-.stat-label {
-  font-size: 10px;
-  color: #737373;
-  font-style: italic;
-}
-
-.stat-value {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.text-blue {
-  color: #2d5eaf;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.text-sm {
+.meta-label {
   font-size: 9px;
-  color: #737373;
-  font-weight: 400;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.divider {
-  border-top: 1px dashed #e0e0e0;
-  margin: 3px 0;
+.meta-label img {
+  width: 12px;
+  height: 12px;
+}
+
+.meta-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.meta-divider {
+  width: 1px;
+  height: 24px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.btn-select {
+  background: linear-gradient(90deg, #f4c142 0%, #f4c142 47%, #f5ca51 100%);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 6px 8px 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.btn-select img {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .card-footer {
+  background-color: #ecf3fc;
+  border-radius: 8px;
+  padding: 10px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.price-wrap {
+.footer-item {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.price-label {
+.footer-item.right-align {
+  text-align: right;
+}
+
+.footer-label {
+  font-size: 10px;
+  color: #000;
+}
+
+.footer-value {
   font-size: 12px;
-  color: #737373;
-}
-
-.price-value {
-  font-size: 22px;
   font-weight: 700;
-  color: #2d5eaf;
+  color: #000000;
 }
 
-.btn-buy {
-  background: linear-gradient(90deg, #4084e0 0%, #2656b5 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 15px;
-  padding: 8px 20px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  font-family: inherit;
-}
-
-.btn-buy:hover {
-  opacity: 0.9;
-}
-
-.btn-buy:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.footer-divider {
+  width: 1px;
+  height: 20px;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .empty-state {
