@@ -55,7 +55,7 @@ export default defineConfig(async ({ mode }) => {
       port: 5174,
       host: true,
       // Allow dev server to be accessed via specified hosts
-      allowedHosts: ['localhost:8000','localhost:5174','console.hueccompute.com','console.huenode.com','roguecdn.online',''],
+      allowedHosts: ['localhost:8000','localhost:5174','frontend.scagerwebsite.uk','backend.scagerwebsite.ukcd'],
       proxy: {
         '/api': {
           target: proxyTarget,

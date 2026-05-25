@@ -115,8 +115,8 @@
           </div>
           <p class="security-desc">Data Anda terenkripsi dan terlindungi dengan standar keamanan tinggi</p>
           <div class="security-logos">
-            <img src="/assets/images/9247fb3a0182399d464f5e73d0e66665b07f1ca5.png" alt="BAPPEBTI Logo" class="logo-bappebti">
-            <img src="/assets/images/a648e454f7e6e93caec0f833a59b7dcec155605e.png" alt="OJK Logo" class="logo-ojk">
+            <img src="/assets/images/bappeti.png" alt="BAPPEBTI Logo" class="logo-bappebti">
+            <img src="/assets/images/ojk.png" alt="OJK Logo" class="logo-ojk">
           </div>
         </div>
       </div>
@@ -750,10 +750,10 @@ a {
 
 .hero-image-wrapper {
   position: absolute;
-  top: -60px;
+  top: -230px;
   left: 0;
   width: 100%;
-  height: 483px;
+  height: 603px;
   z-index: 1;
   overflow: hidden;
 }
@@ -761,7 +761,7 @@ a {
 .hero-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   object-position: center top;
 }
 
@@ -996,12 +996,12 @@ a {
 }
 
 .footer-container {
-  width: 374px;
+  width: 100%;
   max-width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 19px;
+  padding: 0 1px;
 }
 
 .terms-text {
@@ -1022,18 +1022,21 @@ a {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding-left: 2px;
+  padding-left: 10px;
 }
 
 .security-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0px;
+  margin-left: -15px;
   margin-bottom: 0;
 }
 
 .shield-icon {
-  width: 32px;
+  width: 55px;
+  margin-left: 10px;
+  margin-right: -10px;
   height: 32px;
   object-fit: contain;
 }
@@ -1048,9 +1051,9 @@ a {
 .security-desc {
   color: #9a9a9a;
   font-size: 12px;
-  margin: 0 0 7px 39px;
+  margin: 0 0 15px 39px;
   line-height: 1.4;
-  max-width: 308px;
+  max-width: 100%;
 }
 
 .security-logos {
@@ -1061,14 +1064,16 @@ a {
 }
 
 .logo-bappebti {
-  width: 84px;
+  width: 80px;
   height: 21px;
+  margin-left: -20px;
   object-fit: contain;
 }
 
 .logo-ojk {
-  width: 42px;
+  width: 70px;
   height: 26px;
+  margin-left: -20px;
   object-fit: contain;
 }
 </style>

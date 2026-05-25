@@ -1,13 +1,13 @@
-<template>
+<!-- <template>
   <div class="index-container">
-    <!-- Header Section -->
+   
     <section id="section-header" class="header-section">
       <div class="container">
         <header class="header">
           <router-link to="/hn/home" class="logo-link">
             <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="HUE Logo" class="logo">
           </router-link>
-          <!-- <button
+          <button
             ref="menuBtnEl"
             class="menu-btn"
             aria-label="Toggle menu"
@@ -19,29 +19,27 @@
           <div v-if="menuOpen" ref="menuEl" class="header-menu" @click.stop>
             <button type="button" class="header-menu-item" @click="goTo('/hn/console')">Login</button>
             <button type="button" class="header-menu-item" @click="goTo('/hn/network')">Register</button>
-          </div> -->
+          </div>
         </header>
       </div>
     </section>
 
   
-
-    <!-- Hero Section -->
     <section id="section-hero" class="hero-section">
       <div class="container">
         <div class="hero">
           <div class="hero-content">
             <h1 class="hero-title">The Next Generation of Mining</h1>
             <p class="hero-subtitle">HUE is a decentralized mining platform that makes simple, secure, and accessible for everyone.</p>
-            <!-- <router-link to="/hn/network" class="hero-btn">
+            <router-link to="/hn/network" class="hero-btn">
               Start Mining
               <img src="/assets/image/4287_723.svg" alt="" class="btn-icon">
-            </router-link> -->
+            </router-link>
           </div>
         </div>
       </div>
     </section>
-      <!-- Stats Section -->
+ 
     <section id="section-stats" class="stats-section scroll-reveal">
       <div class="container">
         <div class="stats-wrapper">
@@ -50,7 +48,7 @@
       </div>
     </section>
 
-    <!-- About Section -->
+  
     <section id="section-about" class="about-section scroll-reveal">
       <div class="container">
         <div class="about-container">
@@ -66,7 +64,6 @@
       </div>
     </section>
 
-    <!-- Features Section -->
     <section id="section-features" class="features-section scroll-reveal">
       <div class="container">
         <div class="features-wrapper">
@@ -75,7 +72,6 @@
       </div>
     </section>
 
-    <!-- How It Works Section -->
     <section id="section-how-it-works" class="hiw-section scroll-reveal">
       <div class="container">
         <div class="hiw-wrapper">
@@ -84,7 +80,6 @@
       </div>
     </section>
 
-    <!-- Footer Section -->
     <section id="section-footer" class="footer-section scroll-reveal">
       <div class="container">
         <footer class="footer">
@@ -112,7 +107,7 @@
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'

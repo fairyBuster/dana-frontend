@@ -170,24 +170,28 @@
       </div>
     </section>
 
-    <!-- Footer Section -->
-    <section id="section-footer" class="footer-section">
-      <div class="container">
-        <div class="security-info">
+   <section id="section-footer" class="mobile-section">
+      <div class="footer-container">
+        <p class="terms-text">
+          {{ ui.agreementPrefix }}
+          <span class="highlight" @click="$router.push('/hn/legal/privacy')">{{ ui.privacyPolicy }}</span>
+          {{ ui.andWord }}
+          <span class="highlight" @click="$router.push('/hn/legal/terms')">{{ ui.termsOfService }}</span>
+        </p>
+
+        <div class="security-block">
           <div class="security-header">
-            <img class="shield-icon" src="/assets/images/3134047e5168616d4f5f4ce9af921913fa739acd.png" alt="Security Shield">
+            <img src="/assets/images/3134047e5168616d4f5f4ce9af921913fa739acd.png" alt="Security Shield" class="shield-icon">
             <h3 class="security-title">Aman, Terpercaya, Melindungi Anda</h3>
           </div>
           <p class="security-desc">Data Anda terenkripsi dan terlindungi dengan standar keamanan tinggi</p>
-        </div>
-
-        <div class="partner-logos">
-          <img src="/assets/images/9247fb3a0182399d464f5e73d0e66665b07f1ca5.png" alt="Bappebti Logo" class="logo-bappebti">
-          <img src="/assets/images/a648e454f7e6e93caec0f833a59b7dcec155605e.png" alt="OJK Logo" class="logo-ojk">
+          <div class="security-logos">
+            <img src="/assets/images/bappeti.png" alt="BAPPEBTI Logo" class="logo-bappebti">
+            <img src="/assets/images/ojk.png" alt="OJK Logo" class="logo-ojk">
+          </div>
         </div>
       </div>
     </section>
-
     <!-- Modals -->
     <div v-if="otpActive && otpModalOpen" id="section-otp-modal" @click.self="closeOtpModal">
       <div class="otp-modal-container">
@@ -1162,7 +1166,7 @@ a {
 .form-section {
   width: 100%;
   max-width: 412px;
-  padding-top: 10px;
+  padding-top: 5px;
 }
 
 .registration-form {
@@ -1237,14 +1241,14 @@ a {
   width: 100%;
   max-width: 412px;
   padding-top: 10px;
-  padding-bottom: 30px;
+  padding-bottom: 0px;
 }
 
 .terms-container {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 4px;
   padding: 0 4px;
 }
 
@@ -1290,7 +1294,7 @@ a {
 .slider-container {
   position: relative;
   height: 60px;
-  margin-bottom: 30px;
+  margin-bottom: 0px;
   display: flex;
   align-items: center;
 }
@@ -1378,64 +1382,96 @@ a {
 }
 
 /* Footer Section */
-.footer-section {
-  width: 100%;
-  max-width: 412px;
-  padding-top: 20px;
-  padding-bottom: 40px;
-  margin-top: auto;
+#section-footer {
+  z-index: 2;
+  background-color: #fefefe;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 7px;
+  padding-bottom: 60px;
+  min-height: 250px;
 }
 
-.security-info {
+.footer-container {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1px;
+}
+
+.terms-text {
+  color: #9a9a9a;
+  font-size: 12px;
   text-align: center;
-  margin-bottom: 16px;
+  margin: 0 0 39px 0;
+}
+
+.highlight {
+  color: #978d00;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.security-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 10px;
 }
 
 .security-header {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 0px;
+  margin-left: -15px;
+  margin-bottom: 0;
 }
 
 .shield-icon {
-  width: 32px;
+  width: 55px;
+  margin-left: 10px;
+  margin-right: -10px;
   height: 32px;
   object-fit: contain;
 }
 
 .security-title {
-  font-size: 13px;
-  font-weight: 700;
   color: #000000;
+  font-size: 14px;
+  font-weight: 700;
   margin: 0;
 }
 
 .security-desc {
-  font-size: 10px;
   color: #9a9a9a;
-  margin: 0;
+  font-size: 12px;
+  margin: 0 0 15px 39px;
   line-height: 1.4;
-  padding: 0 20px;
+  max-width: 100%;
 }
 
-.partner-logos {
+.security-logos {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 16px;
+  gap: 4px;
+  margin-left: 33px;
 }
 
 .logo-bappebti {
+  width: 80px;
   height: 21px;
-  width: auto;
+  margin-left: -20px;
   object-fit: contain;
 }
 
 .logo-ojk {
+  width: 70px;
   height: 26px;
-  width: auto;
+  margin-left: -20px;
   object-fit: contain;
 }
 
