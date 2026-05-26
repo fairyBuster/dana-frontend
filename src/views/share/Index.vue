@@ -21,18 +21,23 @@
             <div class="stat-header">
               <div class="stat-icon">
                 <img src="/assets/images/46_756.svg" class="icon-bg" alt="">
-                <img src="/assets/images/46_770.svg" class="icon-fg" alt="">
+                <img src="/assets/images/User check.png" class="icon-fg" alt="">
               </div>
               <span class="stat-title">Total Tim</span>
             </div>
-            <div class="stat-value">{{ teamStats.totalMembers }}</div>
-            <div class="stat-unit">orang</div>
+            <div class="card-value">
+              <div class="stat-value">{{ teamStats.totalMembers }}</div>
+              <div class="stat-unit">orang</div>
+            </div>
           </div>
 
           <div class="stat-column">
             <div class="stat-header">
-              <img src="/assets/images/46_779.svg" class="stat-icon-single" alt="">
-              <span class="stat-title">Anggota aktif</span>
+              <div class="stat-icon">
+                <img src="/assets/images/46_756.svg" class="icon-bg" alt="">
+                <img src="/assets/images/Users.png" class="icon-fg" alt="">
+              </div>
+              <span class="stat-title">Anggota </span>
             </div>
             <div class="stat-value">{{ teamStats.activeMembers }}</div>
             <div class="stat-unit">orang</div>
@@ -40,7 +45,11 @@
 
           <div class="stat-column last">
             <div class="stat-header">
-              <img src="/assets/images/46_803.svg" class="stat-icon-single" alt="">
+               <div class="stat-icon">
+                <img src="/assets/images/46_756.svg" class="icon-bg" alt="">
+                <img src="/assets/images/User plus.png" class="icon-fg" alt="">
+              </div>
+      
               <span class="stat-title">Bonus Tim</span>
             </div>
             <div class="stat-value">{{ teamStats.totalBonus }}</div>
@@ -117,8 +126,11 @@
       <div class="section-inner">
         <div class="invite-banner-card">
           <div class="banner-content">
-            <h3 class="banner-title">Undang teman dan dapatkan bonus tim!</h3>
-            <p class="banner-subtitle">Bagikan link undangan Anda untuk mendapatkan bonus dari setiap anggota aktif.</p>
+            <img src="/assets/images/image 88.png" alt="" class="banner-icon">
+            <div class="banner-text">
+              <h3 class="banner-title">Undang teman dan dapatkan bonus tim!</h3>
+              <p class="banner-subtitle">Bagikan link undangan Anda untuk mendapatkan bonus dari setiap anggota aktif.</p>
+            </div>
           </div>
           <button class="btn-invite-now" @click="shareLink">Undang</button>
         </div>
@@ -151,6 +163,17 @@ const successModalOpen = ref(false)
 const successMessage = ref('')
 const accountData = ref(null)
 
+const formatRupiah = (value) => {
+  return formatAppCurrency(value, {
+    symbol: 'Rp',
+    symbol_position: 'prefix',
+    symbol_space: true,
+    thousand_sep: '.',
+    decimal_sep: ',',
+    decimals: 0
+  })
+}
+
 const teamStats = computed(() => {
   const data = accountData.value || {}
   const total = Number(data.team_count ?? data.total_team ?? 0)
@@ -159,7 +182,7 @@ const teamStats = computed(() => {
   return {
     totalMembers: total,
     activeMembers: active,
-    totalBonus: bonus > 0 ? formatAppCurrency(bonus, { decimals: 0 }) : 'Rp 0'
+    totalBonus: formatRupiah(bonus)
   }
 })
 
@@ -211,7 +234,7 @@ const loadAccountInfo = async () => {
 
 const copyLink = () => {
   navigator.clipboard.writeText(inviteLink.value).then(() => {
-    successMessage.value = 'Link berhasil disalin'
+    successMessage.value = 'Link undangan berhasil disalin'
     successModalOpen.value = true
   }).catch(() => {})
 }
@@ -222,6 +245,9 @@ const shareLink = () => {
       title: 'Dana Proteksi',
       text: `Bergabung bersama saya di Dana Proteksi! Gunakan kode undangan: ${referralCode.value}`,
       url: inviteLink.value
+    }).then(() => {
+      successMessage.value = 'Link undangan berhasil dibagikan'
+      successModalOpen.value = true
     }).catch(() => {})
   } else {
     copyLink()
@@ -328,6 +354,18 @@ button {
   flex: 1;
 }
 
+.card-value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-column .stat-value,
+.stat-column .stat-unit {
+  text-align: center;
+}
+
 .stat-column.last {
   flex: 1.5;
 }
@@ -351,6 +389,8 @@ button {
   left: 0;
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .icon-fg {
@@ -360,6 +400,8 @@ button {
   transform: translate(-50%, -50%);
   width: 20px;
   height: 20px;
+  object-fit: contain;
+  display: block;
 }
 
 .stat-icon-single {
@@ -367,9 +409,23 @@ button {
   height: 36px;
 }
 
+.stat-icon-rp {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: #000000;
+  flex-shrink: 0;
+}
+
 .stat-title {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 400;
   color: #000000;
 }
 
@@ -574,6 +630,21 @@ button {
 }
 
 .banner-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.banner-icon {
+  width: 65px;
+  margin-top: 30px;
+  height: 48px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.banner-text {
   flex: 1;
 }
 

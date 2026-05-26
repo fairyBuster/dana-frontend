@@ -90,13 +90,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {}
-  router.push('/hn/user')
+  router.push('/hn/home')
 }
 
 const faqItems = ref([

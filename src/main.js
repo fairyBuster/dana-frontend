@@ -3,13 +3,8 @@ import App from './App.vue'
 import router from './router'
 import i18n from './i18n'
 import './styles/global.css'
-import { startDomTranslation } from './utils/domTranslator'
 
 const app = createApp(App).use(router).use(i18n)
-
-// Inisialisasi auto translator jika bahasa bukan 'id'
-const savedLang = localStorage.getItem('user_language') || 'id'
-startDomTranslation(savedLang)
 
 // Sembunyikan splash overlay setelah router siap
 router.isReady().then(() => {

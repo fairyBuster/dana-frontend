@@ -128,7 +128,7 @@ const lastUpdatedText = computed(() => {
 })
 
 const goBack = () => {
-  router.back()
+  router.push('/hn/home')
 }
 
 const isSelected = (value) => selectedAvatar.value === value

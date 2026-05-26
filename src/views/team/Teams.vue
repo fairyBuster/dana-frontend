@@ -4,7 +4,12 @@
     <section id="section-header">
       <div class="header-container">
         <div class="header-text">
-          <h1 class="header-title">{{ teamTitle }}</h1>
+          <div class="header-top">
+            <button type="button" class="back-btn" aria-label="Kembali" @click="goBack">
+              <img src="/assets/images/34_129.svg" alt="" class="back-icon">
+            </button>
+            <h1 class="header-title">{{ teamTitle }}</h1>
+          </div>
           <p class="header-subtitle">{{ teamSubtitle }}</p>
         </div>
         <div class="header-image">
@@ -57,6 +62,7 @@
       <h3 class="list-title">Daftar Anggota</h3>
 
       <div v-if="members.length === 0 && !isLoading" class="empty-state">
+        <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
         <p class="empty-text">Belum ada anggota</p>
       </div>
 
@@ -189,6 +195,10 @@ const showPagination = computed(() => {
   return membersTotalPages.value > 1
 })
 
+const goBack = () => {
+  router.push('/hn/home')
+}
+
 const displayUid = computed(() => {
   const d = accountInfo.value || {}
   const uid = d.referral_code ?? d.id ?? d.user_id ?? null
@@ -311,11 +321,36 @@ h1, h2, h3, p {
   z-index: 2;
 }
 
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.back-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.back-icon {
+  width: 24px;
+  height: 24px;
+}
+
 .header-title {
   font-size: 24px;
   font-weight: 700;
   color: #000000;
-  margin-bottom: 8px;
+  margin: 0;
 }
 
 .header-subtitle {
@@ -517,6 +552,13 @@ h1, h2, h3, p {
 .empty-state {
   padding: 40px 0;
   text-align: center;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-text {

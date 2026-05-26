@@ -9,7 +9,7 @@
           v-model="query"
           type="search"
           class="search-input"
-          placeholder="Search bank"
+          placeholder="Cari bank"
           autocomplete="off"
         >
       </div>
@@ -42,7 +42,7 @@ const props = defineProps({
   visible: { type: Boolean, default: false },
   bankOptions: { type: Array, default: () => [] },
   selectedBankId: { type: [Number, String, null], default: null },
-  nullLabel: { type: String, default: 'Choose bank' }
+  nullLabel: { type: String, default: 'Pilih bank' }
 })
 
 const emit = defineEmits(['close', 'select'])
@@ -97,7 +97,7 @@ watch(() => props.visible, (newVal) => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgba(0, 0, 0, 0.35);
   z-index: 2050;
   display: flex;
   align-items: flex-end;
@@ -108,14 +108,14 @@ watch(() => props.visible, (newVal) => {
 .bank-selector-sheet {
   width: 100%;
   max-width: 412px;
-  background: #ffffff;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+  background: #fbfaf7;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
   overflow: hidden;
   height: 50vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
 }
 
 .bank-selector-search {
@@ -131,19 +131,24 @@ watch(() => props.visible, (newVal) => {
   width: 16px;
   height: 16px;
   transform: translateY(-50%);
-  fill: rgba(0, 0, 0, 0.45);
+  fill: rgba(0, 0, 0, 0.55);
 }
 
 .search-input {
   width: 100%;
   height: 40px;
   border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: #ffffff;
+  border: 1px solid #cfcfcf;
+  background: #fefefe;
   padding: 0 12px 0 40px;
   font-size: 14px;
   outline: none;
   font-family: inherit;
+}
+
+.search-input:focus {
+  border-color: #f3b73f;
+  box-shadow: 0 0 0 3px rgba(243, 183, 63, 0.22);
 }
 
 .bank-list {
@@ -167,13 +172,13 @@ watch(() => props.visible, (newVal) => {
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   color: #000000;
   transition: background-color 0.2s ease;
 }
 
 .bank-button:active {
-  background-color: #f8f9fa;
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .bank-name {
@@ -186,12 +191,12 @@ watch(() => props.visible, (newVal) => {
 
 .bank-button.active .bank-name {
   font-weight: 600;
-  color: #1b46f5;
+  color: #cd8c09;
 }
 
 .check-icon {
   width: 18px;
   height: 18px;
-  color: #1b46f5;
+  color: #cd8c09;
 }
 </style>

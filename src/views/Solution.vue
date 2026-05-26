@@ -1,6 +1,6 @@
-<template>
+<!-- <template>
   <div class="solution-page">
-    <!-- Header Section -->
+
     <section id="section-header" class="header-section">
       <header class="header-content">
         <a href="#" class="back-btn" aria-label="Go back" @click.prevent="goBack">
@@ -10,19 +10,18 @@
       </header>
     </section>
 
-    <!-- Agreement Section -->
     <section id="section-agreement" class="agreement-section">
       <div class="agreement-container">
-        <h2 class="agreement-main-title">HUE CUSTOMER AGREEMENT</h2>
+        <h2 class="agreement-main-title">DANA PROTEKSI CUSTOMER AGREEMENT</h2>
         <div class="agreement-text">
           <p>1. Introduction<br>
-          Welcome to HUE (Hybrid Unified Edge). By accessing or using HUE services, you agree to comply with and be bound by this Customer Agreement. If you do not agree, please do not use this platform.</p>
+          Welcome to Dana Proteksi. By accessing or using Dana Proteksi services, you agree to comply with and be bound by this Customer Agreement. If you do not agree, please do not use this platform.</p>
 
           <p>2. Service Description<br>
-          HUE provides a cloud computing and digital infrastructure system designed for resource management, distributed computing, and operational optimization. All system operations, outputs, and performance are processed automatically based on internal systems and real-time operational conditions.</p>
+          Dana Proteksi provides a cloud computing and digital infrastructure system designed for resource management, distributed computing, and operational optimization. All system operations, outputs, and performance are processed automatically based on internal systems and real-time operational conditions.</p>
 
           <p>3. User Responsibilities<br>
-          By using HUE, you agree that:</p>
+          By using Dana Proteksi, you agree that:</p>
           <ul>
             <li>You provide accurate and valid information during registration</li>
             <li>You are responsible for maintaining the security of your account</li>
@@ -46,16 +45,16 @@
             <li>Using the platform for unauthorized or illegal purposes</li>
             <li>Creating multiple accounts for manipulation or misuse</li>
           </ul>
-          <p>HUE enforces a zero-tolerance policy toward such activities.</p>
+          <p>Dana Proteksi enforces a zero-tolerance policy toward such activities.</p>
 
           <p>6. System Integrity & Compliance<br>
-          HUE is committed to maintaining a secure, transparent, and compliant environment. We reserve the right to monitor, restrict, suspend, or terminate accounts that violate our policies or compromise platform integrity.</p>
+          Dana Proteksi is committed to maintaining a secure, transparent, and compliant environment. We reserve the right to monitor, restrict, suspend, or terminate accounts that violate our policies or compromise platform integrity.</p>
 
           <p>7. No Affiliation<br>
-          HUE operates independently and is not affiliated with, endorsed by, or associated with any external companies, organizations, financial institutions, or third-party entities.</p>
+          Dana Proteksi operates independently and is not affiliated with, endorsed by, or associated with any external companies, organizations, financial institutions, or third-party entities.</p>
 
           <p>8. Limitation of Liability<br>
-          HUE shall not be held liable for:</p>
+          <p>Dana Proteksi shall not be held liable for:</p>
           <ul>
             <li>Any loss resulting from system variability or operational interruptions</li>
             <li>User decisions or misuse of the platform</li>
@@ -64,7 +63,7 @@
           <p>All services are provided "as is" without guarantees of specific performance or results.</p>
 
           <p>9. Account Suspension & Termination<br>
-          HUE reserves the right to suspend or terminate any account that:</p>
+          Dana Proteksi reserves the right to suspend or terminate any account that:</p>
           <ul>
             <li>Violates this agreement</li>
             <li>Engages in suspicious, abusive, or harmful activities</li>
@@ -72,15 +71,15 @@
           </ul>
 
           <p>10. Changes to Terms<br>
-          HUE may update or modify this agreement at any time. Continued use of the platform constitutes acceptance of the updated terms.</p>
+          Dana Proteksi may update or modify this agreement at any time. Continued use of the platform constitutes acceptance of the updated terms.</p>
 
           <p>11. Contact<br>
-          If you have any questions regarding this agreement, please contact the HUE support team.</p>
+          If you have any questions regarding this agreement, please contact the Dana Proteksi support team.</p>
         </div>
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { useRouter } from 'vue-router'

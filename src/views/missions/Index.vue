@@ -106,6 +106,7 @@
           </template>
 
           <div v-if="!sortedMissions.length" class="empty-state">
+            <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
             <p>Belum ada challenge tersedia</p>
           </div>
         </div>
@@ -161,13 +162,49 @@ const toNumber = (value) => {
 const formatCurrency = (value) => {
   const num = toNumber(value)
   const hasFraction = Math.abs(num % 1) > 1e-9
-  return formatAppCurrency(num, { decimals: hasFraction ? 2 : 0 })
+  return formatAppCurrency(num, {
+    symbol: 'Rp',
+    symbol_position: 'prefix',
+    symbol_space: true,
+    thousand_sep: '.',
+    decimal_sep: ',',
+    decimals: hasFraction ? 2 : 0
+  })
 }
 
 // Stats
 const totalInvites = computed(() => {
   const d = downlineStats.value || accountInfo.value || {}
-  return toNumber(d.total_downlines ?? d.downlines_total ?? d.total_referrals ?? 0)
+  const levels = Array.isArray(d?.levels) ? d.levels : []
+  if (levels.length) {
+    const level1 = levels.find((x) => Number(x?.level ?? x?.tier ?? x?.depth ?? 0) === 1) || levels[0]
+    const candidates = [
+      level1?.active,
+      level1?.active_members,
+      level1?.active_count,
+      level1?.active_downlines,
+      level1?.active_total,
+      level1?.count_active,
+      level1?.members_active
+    ]
+    const picked = candidates.find((v) => v !== undefined && v !== null && v !== '')
+    if (picked !== undefined) return toNumber(picked)
+  }
+
+  const candidates = [
+    d.active_level1,
+    d.active_level_1,
+    d.level1_active,
+    d.level_1_active,
+    d.level1_active_members,
+    d.active_members_level1,
+    d.active_downlines_level1,
+    d.active_referrals_level1
+  ]
+  const picked = candidates.find((v) => v !== undefined && v !== null && v !== '')
+  if (picked !== undefined) return toNumber(picked)
+
+  return 0
 })
 
 const completedCount = computed(() => {
@@ -177,7 +214,7 @@ const completedCount = computed(() => {
 const totalBonusText = computed(() => {
   const total = sortedMissions.value
     .filter(m => isMissionCompleted(m))
-    .reduce((acc, m) => acc + toNumber(m.reward), 0)
+    .reduce((acc, m) => acc + toNumber(m.claimed_reward_amount ?? m.claimed_reward ?? m.reward_claimed ?? m.reward_amount ?? m.reward), 0)
   return formatCurrency(total)
 })
 
@@ -196,7 +233,10 @@ const inviteLink = computed(() => {
 
 const copyLink = () => {
   if (!inviteLink.value || inviteLink.value === '-') return
-  navigator.clipboard.writeText(inviteLink.value).catch(() => {})
+  navigator.clipboard.writeText(inviteLink.value).then(() => {
+    successMessage.value = 'Link undangan berhasil disalin'
+    successModalOpen.value = true
+  }).catch(() => {})
 }
 
 const shareLink = async () => {
@@ -204,6 +244,8 @@ const shareLink = async () => {
   if (navigator.share) {
     try {
       await navigator.share({ title: 'Dana Proteksi', text: 'Gabung sekarang!', url: inviteLink.value })
+      successMessage.value = 'Link undangan berhasil dibagikan'
+      successModalOpen.value = true
     } catch (_) {}
   } else {
     copyLink()
@@ -364,7 +406,11 @@ const fetchDownlineStats = async () => {
 const claimNextMission = async () => {
   if (isClaiming.value) return
   const mission = sortedMissions.value.find(m => isMissionCurrentlyClaimable(m))
-  if (!mission?.id) return
+  if (!mission?.id) {
+    errorMessage.value = 'Target challenge belum terpenuhi lagi'
+    errorModalOpen.value = true
+    return
+  }
 
   isClaiming.value = true
   errorModalOpen.value = false
@@ -373,11 +419,25 @@ const claimNextMission = async () => {
     const resp = await missionAPI.claimMission(mission.id)
     const data = resp?.data || {}
     const amount = toNumber(data.reward_amount ?? data.reward ?? mission.reward)
-    successMessage.value = `Berhasil mengklaim ${formatCurrency(amount)}`
+    if (amount > 0) {
+      successMessage.value = 'Bonus berhasil ditambahkan ke saldo'
+    } else {
+      successMessage.value = 'Bonus berhasil ditambahkan ke saldo'
+    }
     successModalOpen.value = true
     await fetchMissions()
   } catch (err) {
-    errorMessage.value = extractErrorMessage(err)
+    const status = err?.response?.status
+    const raw = String(extractErrorMessage(err) || '').toLowerCase()
+    const notMet =
+      status === 400 ||
+      status === 403 ||
+      raw.includes('not') && raw.includes('eligible') ||
+      raw.includes('target') ||
+      raw.includes('belum') && raw.includes('terpenuhi') ||
+      raw.includes('not reached') ||
+      raw.includes('insufficient')
+    errorMessage.value = notMet ? 'Target challenge belum terpenuhi lagi' : extractErrorMessage(err)
     errorModalOpen.value = true
   } finally {
     isClaiming.value = false
@@ -763,6 +823,13 @@ onMounted(() => {
   padding: 20px;
   color: #737373;
   font-size: 13px;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 /* Footer */

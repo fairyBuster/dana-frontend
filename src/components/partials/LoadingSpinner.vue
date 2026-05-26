@@ -37,7 +37,7 @@ const { visible, overlay, containerClass, message } = toRefs(props)
 
 .lds-spinner {
   --spinner-size: 28px;
-  color: #ffffff;
+  color: #111111;
   display: inline-block;
   position: relative;
   width: var(--spinner-size);
@@ -89,7 +89,7 @@ const { visible, overlay, containerClass, message } = toRefs(props)
 .is-overlay {
   position: fixed;
   inset: 0;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0.18);
   z-index: 1050;
   display: grid;
   place-items: center;
@@ -102,11 +102,12 @@ const { visible, overlay, containerClass, message } = toRefs(props)
 }
 
 .spinner-box {
-  background-color: #3D3D3D;
+  background: linear-gradient(180deg, #FEFDFE 0%, #FDF8EA 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 10px;
 
   width: 180px;
-  max-width: 150px;
+  max-width: 180px;
   min-height: 150px;
   padding: 14px 16px;
   display: inline-flex;
@@ -115,13 +116,14 @@ const { visible, overlay, containerClass, message } = toRefs(props)
   justify-content: center;
   gap: 8px;
   pointer-events: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 .spinner-message {
   margin: 0;
   font-size: 10px;
   line-height: 1.2;
-  color: #ffffff;
+  color: #111111;
   text-align: center;
   font-weight: 400;
 }

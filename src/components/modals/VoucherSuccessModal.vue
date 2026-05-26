@@ -1,17 +1,17 @@
-<!-- <template>
+<template>
   <Teleport to="body">
-    <div v-if="modelValue" class="notification-screen" @click.self="close">
-      <div class="modal-card">
-        <div class="modal-content">
-          <h2 class="modal-title">{{ title || 'Parabéns pela conquista' }}</h2>
-          <img src="/assets/image/gift.png" alt="Diamond" class="modal-image">
-          <p class="modal-amount">{{ formattedAmount }}</p>
-        </div>
+    <div v-if="modelValue" class="voucher-overlay" @click.self="close">
+      <div class="voucher-card" role="dialog" aria-modal="true">
       
+        <div class="voucher-content">
+          <div class="voucher-title">{{ title }}</div>
+          <div class="voucher-amount">{{ formattedAmount }}</div>
+        </div>
+        <button type="button" class="voucher-btn" @click="close">Tutup</button>
       </div>
     </div>
   </Teleport>
-</template> -->
+</template>
 
 <script setup>
 import { computed } from 'vue'
@@ -28,7 +28,7 @@ const props = defineProps({
   },
   title: {
     type: String,
-    default: 'Parabéns pela conquista'
+    default: 'Anda mendapatkan'
   }
 })
 
@@ -47,9 +47,7 @@ const close = () => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-.notification-screen {
+.voucher-overlay {
   width: 100%;
   height: 100%;
   position: fixed;
@@ -60,69 +58,75 @@ const close = () => {
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  padding: 24px;
 }
 
-.modal-card {
-  width: 292px;
-  background: linear-gradient(180deg, rgba(26, 31, 58, 0.98) 0%, rgba(11, 13, 30, 0.98) 100%);
+.voucher-card {
+  width: 320px;
+  background: #fdf5e6;
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(243, 183, 63, 0.7);
   display: flex;
   flex-direction: column;
   font-family: 'Inter', sans-serif;
 }
 
-.modal-content {
-  padding: 18px 22px 16px;
+.voucher-hero {
+  display: flex;
+  justify-content: center;
+  padding: 16px 16px 0;
+}
+
+.voucher-hero-img {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+}
+
+.voucher-content {
+  padding: 10px 22px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 10px;
+  gap: 6px;
 }
 
-.modal-title {
-  color: rgba(255, 255, 255, 0.92);
+.voucher-title {
+  color: rgba(0, 0, 0, 0.82);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 18px;
   margin: 0;
 }
 
-.modal-image {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
-  margin: 0;
+.voucher-amount {
+  color: #000000;
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 40px;
+  letter-spacing: -0.5px;
 }
 
-.modal-amount {
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 16px;
-  margin: 0;
-}
-
-.modal-footer-btn {
+.voucher-btn {
   width: 100%;
-  height: 44px;
-  background: rgba(162, 150, 255, 0.55);
+  height: 46px;
+  background: linear-gradient(90deg, #F4C142 0%, #F8DD89 47%, #F5CA51 100%);
   border: none;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background-color 0.2s ease;
+  transition: transform 0.12s ease;
   padding: 0;
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 13px;
-  font-weight: 500;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
 }
 
-.modal-footer-btn:hover {
-  background: rgba(162, 150, 255, 0.7);
+.voucher-btn:active {
+  transform: scale(0.98);
 }
 </style>

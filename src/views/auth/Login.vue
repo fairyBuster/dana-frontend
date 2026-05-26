@@ -19,7 +19,7 @@
     <section id="section-login-form" class="mobile-section">
       <div class="form-container">
         <!-- Phone Input -->
-        <div v-if="loginMode === 'phone'" class="input-group">
+        <div class="input-group">
           <img src="/assets/images/8_326.svg" alt="User Icon" class="icon-left user-icon">
           <input
             type="tel"
@@ -28,23 +28,6 @@
             class="form-input"
             @blur="checkPhoneError"
             @focus="clearPhoneError"
-          >
-        </div>
-
-        <!-- Email Input -->
-        <div v-else class="input-group">
-          <img src="/assets/images/8_326.svg" alt="User Icon" class="icon-left user-icon">
-          <input
-            type="text"
-            v-model="formData.email"
-            :placeholder="ui.emailPlaceholder"
-            class="form-input"
-            inputmode="email"
-            autocomplete="email"
-            autocapitalize="off"
-            spellcheck="false"
-            @blur="checkEmailError"
-            @focus="clearEmailError"
           >
         </div>
 
@@ -57,12 +40,46 @@
             :placeholder="ui.passwordPlaceholder"
             class="form-input"
           >
-          <img
-            src="/assets/images/6_40.svg"
-            alt="Toggle Password Visibility"
+          <svg
+            v-if="passwordFieldType === 'password'"
             class="icon-right"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            role="button"
+            tabindex="0"
+            aria-label="Show password"
             @click="togglePasswordVisibility"
+            @keydown.enter.prevent="togglePasswordVisibility"
+            @keydown.space.prevent="togglePasswordVisibility"
           >
+            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <svg
+            v-else
+            class="icon-right"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            role="button"
+            tabindex="0"
+            aria-label="Hide password"
+            @click="togglePasswordVisibility"
+            @keydown.enter.prevent="togglePasswordVisibility"
+            @keydown.space.prevent="togglePasswordVisibility"
+          >
+            <path d="M3 3l18 18" />
+            <path d="M10.2 10.25a3 3 0 003.55 3.55" />
+            <path d="M6.23 6.23C4.6 7.51 3.35 9.5 2.46 12c1.27 4.06 5.06 7 9.54 7 1.47 0 2.88-.31 4.17-.87" />
+            <path d="M9.88 4.27A9.94 9.94 0 0112 5c4.48 0 8.27 2.94 9.54 7a11.2 11.2 0 01-3.03 4.57" />
+          </svg>
         </div>
 
         <!-- Slider Captcha -->
@@ -140,7 +157,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { setLanguage } from '../../i18n'
@@ -154,7 +171,7 @@ const router = useRouter()
 const { locale } = useI18n()
 
 const EN_UI = Object.freeze({
-  heroTitle: 'Start HUE and access advanced Cloud system features!',
+  heroTitle: 'Welcome to Dana Proteksi',
   heroSubtitle: 'Sign in to access your account securely',
   signInWithEmail: 'Sign in to console with email',
   signInWithPhone: 'Sign in to console with phone',
@@ -173,12 +190,12 @@ const EN_UI = Object.freeze({
   noAccount: 'No account?',
   createAccount: 'Register',
   forgotPassword: 'Forgot password?',
-  sliderHint: 'Slide the arrow to continue login',
-  sliderVerified: 'Verified'
+  sliderHint: 'Geser untuk melanjutkan verifikasi',
+  sliderVerified: 'Verifikasi berhasil'
 })
 
 const ID_UI_FALLBACK = Object.freeze({
-  heroTitle: 'Mulai HUE dan akses fitur sistem Cloud canggih!',
+  heroTitle: 'Selamat datang di Dana Proteksi',
   heroSubtitle: 'Masuk untuk mengakses akun Anda dengan aman',
   signInWithEmail: 'Masuk ke konsol dengan email',
   signInWithPhone: 'Masuk ke konsol dengan nomor',
@@ -197,132 +214,11 @@ const ID_UI_FALLBACK = Object.freeze({
   noAccount: 'Belum punya akun?',
   createAccount: 'Daftar',
   forgotPassword: 'Lupa kata sandi?',
-  sliderHint: 'Geser panah ini untuk melanjutkan login',
-  sliderVerified: 'Terverifikasi'
+  sliderHint: 'Geser untuk melanjutkan verifikasi',
+  sliderVerified: 'Verifikasi berhasil'
 })
 
 const ui = ref({ ...EN_UI })
-
-const MT_BASE_URL = String(import.meta?.env?.VITE_MT_API_URL || '').replace(/\/$/, '')
-const MT_API_KEY = String(import.meta?.env?.VITE_MT_API_KEY || localStorage.getItem('mt_api_key') || '').trim()
-const mtUrl = (path) => (MT_BASE_URL ? `${MT_BASE_URL}${path}` : path)
-const MT_CACHE_TTL_MS = 365 * 24 * 60 * 60 * 1000
-const MT_CACHE_MAX_ENTRIES = 500
-const mtCacheKey = (target) => `mt_cache_v2_${target}`
-const mtLegacyCacheKey = (target) => `mt_cache_v1_${target}`
-
-const getMtCache = (target) => {
-  try {
-    const now = Date.now()
-    const raw = localStorage.getItem(mtCacheKey(target))
-    const rawLegacy = localStorage.getItem(mtLegacyCacheKey(target))
-    const current = raw ? JSON.parse(raw) : {}
-    const legacy = rawLegacy ? JSON.parse(rawLegacy) : {}
-    const merged = { ...(legacy || {}), ...(current || {}) }
-    const out = {}
-    for (const k of Object.keys(merged || {})) {
-      const v = merged[k]
-      if (typeof v === 'string') {
-        out[k] = { v, e: now + MT_CACHE_TTL_MS }
-        continue
-      }
-      if (v && typeof v === 'object') {
-        const text = typeof v.v === 'string' ? v.v : ''
-        const exp = Number(v.e || 0)
-        if (!text) continue
-        if (exp > 0 && exp <= now) continue
-        out[k] = { v: text, e: now + MT_CACHE_TTL_MS }
-      }
-    }
-    return out
-  } catch (_) {
-    return {}
-  }
-}
-
-const setMtCache = (target, cacheObj) => {
-  try {
-    const now = Date.now()
-    const keys = Object.keys(cacheObj || {})
-    for (const k of keys) {
-      const ent = cacheObj[k]
-      const exp = Number(ent?.e || 0)
-      if (exp > 0 && exp <= now) delete cacheObj[k]
-    }
-    const remaining = Object.keys(cacheObj || {})
-    if (remaining.length > MT_CACHE_MAX_ENTRIES) {
-      remaining.sort((a, b) => (Number(cacheObj[a]?.e || 0) - Number(cacheObj[b]?.e || 0)))
-      const removeCount = remaining.length - MT_CACHE_MAX_ENTRIES
-      for (let i = 0; i < removeCount; i += 1) delete cacheObj[remaining[i]]
-    }
-    localStorage.setItem(mtCacheKey(target), JSON.stringify(cacheObj))
-  } catch (_) {}
-}
-
-const mtTranslateMany = async (texts, target, source = 'en') => {
-  const unique = Array.from(new Set((texts || []).map((t) => String(t || '')))).filter(Boolean)
-  if (!unique.length) return new Map()
-
-  const cache = getMtCache(target)
-  const out = new Map()
-  const missing = []
-
-  for (const t of unique) {
-    const ent = cache[t]
-    const exp = Number(ent?.e || 0)
-    const isExpired = exp > 0 && exp <= Date.now()
-    const cachedText = !isExpired && typeof ent?.v === 'string' ? ent.v : ''
-    if (cachedText) {
-      out.set(t, cachedText)
-    } else {
-      missing.push(t)
-    }
-  }
-
-  if (!missing.length) return out
-
-  const params = new URLSearchParams()
-  for (const t of missing) params.append('q', t)
-  params.append('source', source)
-  params.append('target', target)
-  params.append('format', 'text')
-  if (MT_API_KEY) params.append('api_key', MT_API_KEY)
-
-  const resp = await fetch(mtUrl('/translate'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params
-  })
-  if (!resp.ok) throw new Error(`translate_failed_${resp.status}`)
-
-  const data = await resp.json()
-  const translated = data?.translatedText
-  const translatedList = Array.isArray(translated) ? translated : (typeof translated === 'string' ? [translated] : [])
-
-  if (translatedList.length === 1 && missing.length > 1) {
-    for (const t of missing) {
-      out.set(t, '')
-    }
-    return out
-  }
-
-  if (translatedList.length !== missing.length) {
-    throw new Error('translate_shape_mismatch')
-  }
-
-  for (let i = 0; i < missing.length; i += 1) {
-    const srcText = missing[i]
-    const trText = String(translatedList[i] ?? '')
-    if (trText) {
-      cache[srcText] = { v: trText, e: Date.now() + MT_CACHE_TTL_MS }
-      out.set(srcText, trText)
-    }
-  }
-
-  setMtCache(target, cache)
-  return out
-}
-
 const applyUiLanguage = async (lang) => {
   if (lang === 'en') {
     ui.value = { ...EN_UI }
@@ -332,33 +228,15 @@ const applyUiLanguage = async (lang) => {
     ui.value = { ...EN_UI }
     return
   }
-
-  try {
-    const keys = Object.keys(EN_UI)
-    const sourceTexts = keys.map((k) => EN_UI[k])
-    const map = await mtTranslateMany(sourceTexts, 'id', 'en')
-    const next = {}
-    for (const k of keys) {
-      const translated = map.get(EN_UI[k])
-      next[k] = translated || ID_UI_FALLBACK[k] || EN_UI[k]
-    }
-    ui.value = next
-  } catch (_) {
-    ui.value = { ...ID_UI_FALLBACK }
-  }
+  ui.value = { ...ID_UI_FALLBACK }
 }
 
 const formData = reactive({
   phone: '',
-  email: '',
   password: '',
   captcha: ''
 })
 
-const loginMode = ref('phone')
-const switchLoginLabel = computed(() => {
-  return loginMode.value === 'phone' ? ui.value.signInWithEmail : ui.value.signInWithPhone
-})
 const passwordFieldType = ref('password')
 const isLoading = ref(false)
 const successMessage = ref('')
@@ -411,7 +289,12 @@ const onSliderEnd = () => {
     sliderLeft.value = maxLeft
     sliderVerified.value = true
   } else {
+    const movedEnough = sliderLeft.value > 20
     sliderLeft.value = -5
+    if (movedEnough) {
+      generalError.value = 'Verifikasi gagal, silakan coba lagi'
+      showErrorModal.value = true
+    }
   }
 }
 
@@ -431,12 +314,6 @@ const changeLanguage = (lang) => {
 
 const handleSelectCountry = (country) => {
   selectedCountry.value = country
-}
-
-const toggleLoginMode = () => {
-  loginMode.value = loginMode.value === 'phone' ? 'email' : 'phone'
-  generalError.value = ''
-  showErrorModal.value = false
 }
 
 const refreshCaptcha = () => {
@@ -459,27 +336,6 @@ const clearPhoneError = () => {
   isPhoneError.value = false
 }
 
-const checkEmailError = () => {
-  const email = String(formData.email || '').trim()
-  if (!email) {
-    generalError.value = 'Email is required'
-    showErrorModal.value = true
-    return
-  }
-  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  if (!ok) {
-    generalError.value = 'Email is not valid'
-    showErrorModal.value = true
-  }
-}
-
-const clearEmailError = () => {
-  if (generalError.value === 'Email is required' || generalError.value === 'Email is not valid') {
-    showErrorModal.value = false
-    generalError.value = ''
-  }
-}
-
 const togglePasswordVisibility = () => {
   if (passwordFieldType.value === 'password') {
     passwordFieldType.value = 'text'
@@ -491,12 +347,12 @@ const togglePasswordVisibility = () => {
 let notificationTimer = null
 
 const showCustomerServiceNotification = () => {
-  generalError.value = 'Instruksi pemulihan akun oleh layanan pelanggan. Silakan periksa.'
-  showErrorModal.value = true
+  successMessage.value = 'Kode OTP berhasil dikirim'
+  showSuccessModal.value = true
 
   if (notificationTimer) clearTimeout(notificationTimer)
   notificationTimer = setTimeout(() => {
-    showErrorModal.value = false
+    showSuccessModal.value = false
     notificationTimer = null
   }, 1800)
 }
@@ -510,35 +366,20 @@ const handleLogin = async () => {
   generalError.value = ''
   
   // Basic validation
-  if (loginMode.value === 'phone') {
-    if (!formData.phone.trim()) {
-      generalError.value = 'Phone number is required'
-      showErrorModal.value = true
-      return
-    }
-  } else {
-    const email = String(formData.email || '').trim()
-    if (!email) {
-      generalError.value = 'Email is required'
-      showErrorModal.value = true
-      return
-    }
-    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    if (!ok) {
-      generalError.value = 'Email is not valid'
-      showErrorModal.value = true
-      return
-    }
+  if (!formData.phone.trim()) {
+    generalError.value = 'Nomor ponsel belum diisi'
+    showErrorModal.value = true
+    return
   }
   
   if (!formData.password) {
-    generalError.value = 'Password is required'
+    generalError.value = 'Kata sandi belum diisi'
     showErrorModal.value = true
     return
   }
 
   if (!sliderVerified.value) {
-    generalError.value = 'Please complete the slider verification.'
+    generalError.value = 'Selesaikan verifikasi terlebih dahulu'
     showErrorModal.value = true
     return
   }
@@ -552,36 +393,25 @@ const handleLogin = async () => {
   isLoading.value = true
   
   try {
-    let payload = null
-    if (loginMode.value === 'phone') {
-      let phoneNumber = formData.phone.trim()
-
-      if (!phoneNumber.startsWith('+')) {
-        phoneNumber = phoneNumber.replace(/[^\d]/g, '')
-        if (!phoneNumber) {
-          generalError.value = 'Phone number must be numeric'
-          showErrorModal.value = true
-          return
-        }
-        if (phoneNumber.startsWith('0')) phoneNumber = phoneNumber.substring(1)
-        const dialCode = String(selectedCountry.value?.dialCode || '62').replace(/[^\d]/g, '')
-        phoneNumber = `+${dialCode}${phoneNumber}`
+    let phoneNumber = formData.phone.trim()
+    if (!phoneNumber.startsWith('+')) {
+      phoneNumber = phoneNumber.replace(/[^\d]/g, '')
+      if (!phoneNumber) {
+        generalError.value = 'Masukkan nomor ponsel yang teliti'
+        showErrorModal.value = true
+        return
       }
-
-      payload = {
-        phone: phoneNumber,
-        password: formData.password
-      }
-    } else {
-      payload = {
-        email: String(formData.email || '').trim(),
-        password: formData.password
-      }
+      if (phoneNumber.startsWith('0')) phoneNumber = phoneNumber.substring(1)
+      const dialCode = String(selectedCountry.value?.dialCode || '62').replace(/[^\d]/g, '')
+      phoneNumber = `+${dialCode}${phoneNumber}`
     }
 
-    const response = loginMode.value === 'email'
-      ? await authAPI.emailLogin(payload)
-      : await authAPI.login(payload)
+    const payload = {
+      phone: phoneNumber,
+      password: formData.password
+    }
+
+    const response = await authAPI.login(payload)
 
     // Extract token from response
     const data = response?.data || {}
@@ -593,7 +423,7 @@ const handleLogin = async () => {
     }
 
     if (!token) {
-      generalError.value = 'Token not found in response'
+      generalError.value = 'Gagal login, silakan periksa kembali data Anda'
       showErrorModal.value = true
       return
     }
@@ -609,7 +439,7 @@ const handleLogin = async () => {
       console.error('Error saving token:', error)
     }
     
-    successMessage.value = 'Successfully'
+    successMessage.value = 'Login berhasil'
     showSuccessModal.value = true
     setTimeout(() => {
       router.push('/hn/home')
@@ -633,44 +463,21 @@ const handleLogin = async () => {
     const serverText = pickErrorText(errorData).trim()
     const serverTextLower = serverText.toLowerCase()
     
-    // Default error
-    let msg = 'Account not found. Please register first.'
+    let msg = 'Gagal login, silakan periksa kembali data Anda'
     if (!error.response) {
-      msg = 'No connection. Please check your network and try again.'
+      msg = 'Tidak ada koneksi internet'
     }
 
     if (status === 401) {
-      const isEmail = loginMode.value === 'email'
-      if (serverTextLower.includes('please provide both') && serverTextLower.includes('password')) {
-        msg = isEmail ? 'Please provide both email and password.' : 'Please provide both phone number and password.'
-      } else if (serverTextLower.includes('invalid') && serverTextLower.includes('password')) {
-        msg = isEmail ? 'Invalid email or password. Please try again.' : 'Invalid phone number or password. Please try again.'
-      } else if (serverTextLower.includes('user account is disabled')) {
-        msg = 'Your account is temporarily restricted. Please contact customer service.'
-      } else if (serverTextLower.includes('user is banned')) {
-        msg = 'Your account has been blocked. Please contact customer service.'
-      } else if (serverTextLower.includes('user account is locked')) {
-        msg = 'Your account is locked. Please try again later or contact customer service.'
-      } else if (serverTextLower.includes('user account is expired')) {
-        msg = 'Your account has expired. Please contact customer service.'
-      } else if (serverTextLower.includes('user credentials are expired')) {
-        msg = 'Your credentials have expired. Please recover your account or contact Customer Service.'
-      } else {
-        msg = serverText || (isEmail ? 'Invalid email or password. Please try again.' : 'Invalid phone number or password. Please try again.')
-      }
+      msg = 'Kata sandi yang Anda masukkan salah'
     } else if (status === 404) {
-      msg = 'Account not found. Please register first.'
+      msg = 'Akun tidak ditemukan'
     } else if (status === 429 || serverTextLower.includes('throttle') || serverTextLower.includes('limit')) {
-      msg = 'Too many failed login attempts. Please try again later.'
+      msg = 'Terlalu banyak percobaan login, silakan coba lagi nanti'
     } else if (status === 400) {
-      const isEmail = loginMode.value === 'email'
-      if (serverTextLower.includes('please provide both') && serverTextLower.includes('password')) {
-        msg = isEmail ? 'Please provide both email and password.' : 'Please provide both phone number and password.'
-      } else if (serverTextLower.includes('invalid') && serverTextLower.includes('password')) {
-        msg = isEmail ? 'Invalid email or password. Please try again.' : 'Invalid phone number or password. Please try again.'
-      } else {
-        msg = serverText || msg
-      }
+      msg = 'Masukkan nomor ponsel yang teliti'
+    } else if (status >= 500) {
+      msg = 'Server sedang sibuk, silakan coba lagi'
     }
 
     generalError.value = msg

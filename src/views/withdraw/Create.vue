@@ -131,7 +131,7 @@
 
         <button
           class="submit-btn"
-          :disabled="!isValidAmount || isSubmitting"
+          :disabled="isSubmitting"
           @click="handleWithdraw"
         >
           <LoadingSpinner v-if="isSubmitting" :visible="true" message="" />
@@ -297,13 +297,7 @@ const selectedUserBank = computed(() => {
 })
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {}
-  router.push('/hn/user')
+  router.push('/hn/home')
 }
 
 const handleAmountInput = (event) => {
@@ -330,7 +324,12 @@ const selectQuickAmount = (value) => {
 }
 
 const handleBankSelectClick = () => {
-  isBottomSheetOpen.value = true
+  const hasBanks = (userBanks.value?.length || 0) > 0
+  if (!hasBanks) {
+    router.push('/hn/connect/add')
+    return
+  }
+  router.push('/hn/user/account')
 }
 
 const closeBottomSheet = () => {
@@ -346,7 +345,7 @@ const selectBank = (bank) => {
 
 const handleAddBank = () => {
   closeBottomSheet()
-  router.push('/hn/user/account')
+  router.push('/hn/connect/add')
 }
 
 const handleSuccessConfirm = () => {
@@ -371,24 +370,60 @@ const normalizeWithdrawErrorMessage = (err) => {
   const raw = (typeof data === 'string' && data) || data?.detail || data?.message || err?.message || ''
   const s = String(raw || '').toLowerCase()
   if (s.includes('saldo') || s.includes('balance') || s.includes('insufficient') || s.includes('tidak cukup')) {
-    return 'Pastikan nominal penarikan sesuai dengan saldo tersedia.'
+    return 'Saldo Anda tidak mencukupi'
   }
   if (s.includes('1 kali') || s.includes('sekali') || s.includes('daily') || s.includes('hari')) {
     return 'Anda hanya dapat melakukan 1 penarikan per hari.'
   }
   if (s.includes('minimum') || s.includes('maksimum') || s.includes('maximum') || s.includes('min')) {
-    return 'Pastikan nominal penarikan dalam batas yang diizinkan.'
+    return 'Minimal tarik tunai tidak sesuai'
   }
   if (raw) return String(raw)
   return 'Permintaan gagal, silakan coba lagi'
 }
 
 const handleWithdraw = async () => {
-  if (!isValidAmount.value) return
-  if (!selectedUserBankId.value) {
-    errorMessage.value = 'Silakan pilih rekening tujuan'
+  if (!numericAmount.value) {
+    errorMessage.value = 'Nominal tarik tunai belum diisi'
     errorModalOpen.value = true
     return
+  }
+  if (!selectedUserBankId.value) {
+    errorMessage.value = 'Atur rekening Anda dahulu'
+    errorModalOpen.value = true
+    return
+  }
+
+  const amountIdr = numericAmount.value
+  if (amountIdr < MIN_WITHDRAW_IDR) {
+    errorMessage.value = 'Minimal tarik tunai tidak sesuai'
+    errorModalOpen.value = true
+    return
+  }
+  if (amountIdr > MAX_WITHDRAW_IDR) {
+    errorMessage.value = 'Nominal melebihi batas'
+    errorModalOpen.value = true
+    return
+  }
+
+  const rate = Number(usdtToIdrRate.value || 0)
+  if (rate > 0) {
+    const amountUsd = amountIdr / rate
+    if (amountUsd < MIN_WITHDRAW_USDT_FOR_IDR) {
+      errorMessage.value = 'Minimal tarik tunai tidak sesuai'
+      errorModalOpen.value = true
+      return
+    }
+    if (amountUsd > MAX_WITHDRAW_USDT) {
+      errorMessage.value = 'Nominal melebihi batas'
+      errorModalOpen.value = true
+      return
+    }
+    if (amountUsd > withdrawableBalance.value) {
+      errorMessage.value = 'Saldo Anda tidak mencukupi'
+      errorModalOpen.value = true
+      return
+    }
   }
 
   const amountUsd = usdAmountToSubmit.value
@@ -400,7 +435,7 @@ const handleWithdraw = async () => {
       pin: '',
       service_id: serviceId.value ?? 0
     })
-    successMessage.value = 'Permintaan penarikan Anda telah diterima sistem.'
+    successMessage.value = 'Permintaan tarik uang sudah dibuat'
     hasRedirectedAfterSuccess = false
     successModalOpen.value = true
     if (successRedirectTimeoutId) {
@@ -473,6 +508,12 @@ const fetchUserBanks = async () => {
     const resp = await bankAPI.getUserBanks()
     const data = resp?.data
     const list = Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : []
+    if (!list.length) {
+      userBanks.value = []
+      selectedUserBankId.value = null
+      router.push('/hn/connect/add')
+      return
+    }
     userBanks.value = list
     const defaultBank = list.find((b) => Boolean(b?.is_default))
     const pick = defaultBank || list[0] || null
@@ -480,6 +521,7 @@ const fetchUserBanks = async () => {
   } catch (_) {
     userBanks.value = []
     selectedUserBankId.value = null
+    router.push('/hn/connect/add')
   }
 }
 

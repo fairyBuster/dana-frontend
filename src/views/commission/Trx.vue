@@ -3,7 +3,7 @@
     <!-- Header -->
     <section id="section-header">
       <header class="top-nav">
-        <button class="back-btn" aria-label="Go back" @click="goBack">
+        <button type="button" class="back-btn" aria-label="Kembali" @click="goBack">
           <img src="/assets/images/34_100.svg" alt="">
         </button>
         <h1 class="nav-title">Riwayat</h1>
@@ -20,9 +20,20 @@
 
     <!-- Filters -->
     <section id="section-filters">
-      <div class="filters-container">
+      <div class="filters-row">
         <button
-          v-for="item in filterItems"
+          v-for="item in filterItems.slice(0, 3)"
+          :key="item.key"
+          class="filter-chip"
+          :class="{ active: item.key === currentFilterKey }"
+          @click="selectFilter(item)"
+        >
+          {{ item.label }}
+        </button>
+      </div>
+      <div class="filters-row">
+        <button
+          v-for="item in filterItems.slice(3)"
           :key="item.key"
           class="filter-chip"
           :class="{ active: item.key === currentFilterKey }"
@@ -36,6 +47,7 @@
     <!-- History List -->
     <section id="section-history">
       <div v-if="!isLoading && commissions.length === 0" class="empty-state">
+        <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
         <p class="empty-text">Belum ada transaksi.</p>
       </div>
 
@@ -111,13 +123,7 @@ const currentFilterKey = computed(() => {
 })
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {}
-  router.push('/hn/user')
+  router.push('/hn/home')
 }
 
 const selectFilter = (item) => {
@@ -330,8 +336,8 @@ button {
 #section-header .top-nav {
   display: flex;
   align-items: center;
-  padding: 24px 22px;
-  gap: 8px;
+  padding: 24px 22px 16px;
+  gap: 16px;
 }
 
 #section-header .back-btn {
@@ -348,13 +354,13 @@ button {
 
 .nav-title {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000000;
 }
 
 /* Hero */
 #section-hero .hero-content {
-  padding: 24px 22px 16px;
+  padding: 16px 22px;
 }
 
 .page-title {
@@ -371,23 +377,29 @@ button {
 }
 
 /* Filters */
-#section-filters .filters-container {
-  padding: 0 22px;
+#section-filters {
+  padding: 8px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filters-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 6px;
+  gap: 6px;
 }
 
 .filter-chip {
-  width: 92px;
+  width: 88px;
   height: 30px;
   padding: 0;
   border-radius: 10px;
   border: 1px solid #cfcfcf;
   background-color: #fefefe;
   color: #000000;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -406,11 +418,11 @@ button {
 
 /* History */
 #section-history {
-  min-height: calc(100vh - 250px);
+  padding: 0 22px 40px;
+  min-height: calc(100vh - 280px);
 }
 
-#section-history .history-list {
-  padding: 32px 22px;
+.history-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -485,6 +497,13 @@ button {
 .empty-state {
   padding: 40px 22px;
   text-align: center;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-text {

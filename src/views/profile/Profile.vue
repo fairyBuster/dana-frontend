@@ -35,7 +35,7 @@
           <h2 class="user-name">{{ displayUsername }}</h2>
           <p class="user-contact">{{ displayPhone }}<br>ID: {{ displayUid }}</p>
         </div>
-        <div class="user-vip-status" @click="router.push('/hn/user/person')">
+        <div class="user-vip-status" @click="router.push('/hn/network/invite')">
           <span class="vip-level">{{ vipText }}</span>
           <img src="/assets/images/49_1111.svg" alt="" class="arrow-icon">
         </div>
@@ -79,6 +79,7 @@
             </div>
             <span class="item-label">Reward</span>
           </div>
+          <div class="divider"></div>
            <div class="grid-item" @click="showAttendanceModal = true">
             <div class="grid-icon-wrap">
               <img src="/assets/images/51_165.svg" alt="" class="icon-bg">
@@ -95,27 +96,27 @@
       <h3 class="section-title">Layanan</h3>
       <div class="white-card">
         <div class="services-grid">
-          <div class="service-item" @click="router.push('/hn/hall/sign')">
+          <div class="service-item" @click="router.push('/hn/review')">
             <img src="/assets/images/Sidebar.png" alt="" class="service-icon">
             <span class="service-label">Testimoni Nasabah</span>
           </div>
-          <div class="service-item" @click="router.push('/hn/user/history')">
+          <div class="service-item" @click="router.push('/hn/company')">
             <img src="/assets/images/Smartphone.png" alt="" class="service-icon">
             <span class="service-label">Legal Perusahaan</span>
           </div>
-          <div class="service-item" @click="router.push('/hn/network/community')">
+          <div class="service-item" @click="router.push('/hn/settings/device-info')">
             <img src="/assets/images/Eye.png" alt="" class="service-icon">
             <span class="service-label">Profil Saya</span>
           </div>
-          <div class="service-item" @click="router.push('/hn/user/contact')">
+          <div class="service-item" @click="router.push('/hn/user/change')">
             <img src="/assets/images/Edit.png" alt="" class="service-icon">
             <span class="service-label">Ubah Kata Sandi</span>
           </div>
-          <div class="service-item" @click="router.push('/hn/hall/outputhall')">
+          <div class="service-item" @click="router.push('/hn/legal/terms')">
             <img src="/assets/images/Book open.png" alt="" class="service-icon">
             <span class="service-label">Syarat Layanan</span>
           </div>
-          <div class="service-item" @click="router.push('/hn/settings/device-info')">
+          <div class="service-item" @click="router.push('/hn/legal/privacy')">
             <img src="/assets/images/Alert triangle.png" alt="" class="service-icon">
             <span class="service-label">Kebijakan Privasi</span>
           </div>
@@ -129,7 +130,7 @@
         <div class="banner-content">
           <h3 class="banner-title">Keamanan akun Anda adalah prioritas kami</h3>
           <p class="banner-desc">Pastikan informasi akun Anda selalu terkini dan aman.</p>
-          <button class="btn-learn-more" @click="router.push('/hn/legal/privacy')">
+          <button class="btn-learn-more" @click="router.push('/hn/user/help')">
             Pelajari lebih lanjut
             <img src="/assets/images/49_1111.svg" alt="" class="btn-arrow">
           </button>
@@ -341,12 +342,14 @@ button {
   align-items: center;
   text-align: center;
   cursor: pointer;
+ 
 }
 
 .action-icon {
   width: 39px;
   height: 39px;
   margin-bottom: 4px;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border-radius: 20px;
 }
 
@@ -361,6 +364,7 @@ button {
   position: relative;
   width: 37px;
   height: 37px;
+  
   margin: 0 auto 4px;
 }
 
@@ -368,6 +372,7 @@ button {
   position: absolute;
   top: 0;
   left: 0;
+  
   width: 100%;
   height: 100%;
 }
@@ -375,6 +380,7 @@ button {
 .logout-icon-wrap .icon-fg {
   position: absolute;
   top: 50%;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   left: 50%;
   transform: translate(-50%, -50%);
   width: 24px;

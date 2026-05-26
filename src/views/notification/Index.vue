@@ -26,6 +26,7 @@
         </article>
 
         <div v-if="notifications.length === 0 && !loading" class="empty-state">
+          <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
           <p>Belum ada notifikasi.</p>
         </div>
       </div>
@@ -43,13 +44,7 @@ const notifications = ref([])
 const loading = ref(false)
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {}
-  router.push('/hn/user')
+  router.push('/hn/home')
 }
 
 // Format currency
@@ -246,6 +241,13 @@ onMounted(() => {
 .empty-state {
   text-align: center;
   padding: 40px 20px;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-state p {

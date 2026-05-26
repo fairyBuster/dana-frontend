@@ -40,6 +40,7 @@
         <h3 class="section-title">Daftar Aset Saya</h3>
 
         <div v-if="!isLoading && investments.length === 0" class="empty-state">
+          <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
           <p class="empty-text">Belum ada aset proteksi.</p>
         </div>
 
@@ -49,7 +50,7 @@
           </div>
           <div class="ac-info">
             <h4 class="product-name">{{ inv.product_name || 'Produk' }}</h4>
-            <p class="product-category">{{ inv.product_category || 'Proteksi' }}</p>
+            <p class="product-category">{{ inv.product_golongan || 'Proteksi' }}</p>
           </div>
           <div class="ac-top-right">
             <div class="status-badge" :class="getStatusBadgeClass(inv)">
@@ -67,7 +68,7 @@
             <img :src="getClockIcon(inv)" alt="" class="period-clock">
             <span>Periode: {{ getDurationDays(inv) }} hari</span>
           </div>
-          <div class="ac-desc">{{ inv.product_description || 'Proteksi aset' }}</div>
+          <div class="ac-desc">{{ inv.product_specification || 'Proteksi aset' }}</div>
           <div class="ac-dates">
             Mulai kontrak: {{ formatDate(inv.created_at || inv.start_date) }}<br>
             Kontrak Selesai: {{ formatDate(inv.expires_at) }}
@@ -114,17 +115,11 @@ const showErrorModal = ref(false)
 const errorMessage = ref('')
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {}
   router.push('/hn/home')
 }
 
 const goToExplore = () => {
-  router.push('/hn/hall/taskhall')
+  router.push('/shop')
 }
 
 const normalizeResponse = (data) => {
@@ -212,14 +207,21 @@ const parseNumber = (value) => {
 
 const formatCurrency = (value) => {
   const num = parseNumber(value)
-  return formatAppCurrency(num)
+  return formatAppCurrency(num, {
+    symbol: 'Rp',
+    symbol_position: 'prefix',
+    symbol_space: true,
+    thousand_sep: '.',
+    decimal_sep: ',',
+    decimals: 0
+  })
 }
 
 const totalAssetDisplay = computed(() => {
   const total = investments.value.reduce((sum, inv) => {
     return sum + parseNumber(inv.total_amount || inv.product_price || 0)
   }, 0)
-  return formatAppCurrency(total)
+  return formatCurrency(total)
 })
 
 const pad2 = (n) => String(n).padStart(2, '0')
@@ -656,6 +658,13 @@ p, h1, h2, h3, h4 {
 .empty-state {
   padding: 40px 0;
   text-align: center;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-text {

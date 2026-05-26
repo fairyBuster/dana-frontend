@@ -55,6 +55,7 @@
     <!-- Reviews -->
     <section id="section-reviews">
       <div v-if="reviews.length === 0 && !isLoading" class="empty-state">
+        <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
         <p class="empty-text">Belum ada ulasan</p>
       </div>
 
@@ -426,6 +427,13 @@ img {
 .empty-state {
   padding: 40px 0;
   text-align: center;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-text {

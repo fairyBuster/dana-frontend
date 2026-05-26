@@ -14,6 +14,7 @@
     <section id="section-news-list" class="section-container">
       <div class="news-list-wrapper">
         <div v-if="articles.length === 0 && !isLoading" class="empty-state">
+          <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
           <p class="empty-text">No news yet</p>
         </div>
 
@@ -65,12 +66,7 @@ const errorMessage = ref('')
 const articles = ref([])
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) router.back()
-    else router.push('/hn/home')
-  } catch (_) {
-    router.push('/hn/home')
-  }
+  router.push('/hn/home')
 }
 
 const viewDetails = (articleId) => {
@@ -296,6 +292,13 @@ h1, h2, p {
 .empty-state {
   padding: 60px 20px;
   text-align: center;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-text {

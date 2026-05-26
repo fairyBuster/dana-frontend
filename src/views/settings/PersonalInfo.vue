@@ -148,7 +148,7 @@ const showErrorModal = ref(false)
 const modalMessage = ref('')
 
 const goBack = () => {
-  router.back()
+  router.push('/hn/home')
 }
 
 const openChat = () => {

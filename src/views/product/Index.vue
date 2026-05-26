@@ -34,6 +34,7 @@
     <section id="section-product-list">
       <div class="product-list-container">
         <div v-if="sortedProducts.length === 0" class="empty-state">
+          <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
           <p class="empty-text">Tidak ada produk tersedia</p>
         </div>
 
@@ -74,13 +75,25 @@
           </div>
           <div class="card-footer">
             <div class="footer-item">
-              <span class="footer-label">Proteksi harian</span>
-              <span class="footer-value">{{ formatProfitValue(product) }}</span>
+              <img src="/assets/images/Bar chart.png" alt="" class="footer-icon">
+              <div class="footer-text">
+                <span class="footer-label">Proteksi harian</span>
+                <div class="footer-value-row">
+                  <span v-if="getFooterAmountText(formatProfitValue(product)).showCurrency" class="footer-currency">Rp</span>
+                  <span class="footer-value">{{ getFooterAmountText(formatProfitValue(product)).text }}</span>
+                </div>
+              </div>
             </div>
             <div class="footer-divider"></div>
             <div class="footer-item right-align">
-              <span class="footer-label">Estimasi Keseluruhan</span>
-              <span class="footer-value">{{ formatTotalEstimate(product) }}</span>
+              <img src="/assets/images/Award.png" alt="" class="footer-icon">
+              <div class="footer-text">
+                <span class="footer-label">Estimasi Keseluruhan</span>
+                <div class="footer-value-row">
+                  <span v-if="getFooterAmountText(formatTotalEstimate(product)).showCurrency" class="footer-currency">Rp</span>
+                  <span class="footer-value">{{ getFooterAmountText(formatTotalEstimate(product)).text }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -92,7 +105,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { productAPI } from '@/services/api'
 import FooterBar from '@/components/partials/AppFooter.vue'
@@ -103,11 +116,22 @@ const router = useRouter()
 
 const products = ref([])
 const activeTab = ref(0)
-const tabs = ref([
-  { label: 'Semua', key: 'all' },
-  { label: 'Tersedia', key: 'active' },
-  { label: 'Habis', key: 'inactive' }
-])
+const normalizeCategory = (value) => {
+  const s = String(value ?? '').trim()
+  return s.replace(/\s+/g, ' ')
+}
+
+const tabs = computed(() => {
+  const set = new Set()
+  for (const p of products.value || []) {
+    const raw = p?.product_golongan ?? p?.golongan ?? p?.category ?? ''
+    const v = normalizeCategory(raw)
+    if (v) set.add(v)
+  }
+  const categories = Array.from(set)
+  categories.sort((a, b) => a.localeCompare(b, 'id-ID'))
+  return [{ label: 'Semua', key: '__all__' }, ...categories.map((c) => ({ label: c, key: c }))]
+})
 
 /* ─── Helpers ─── */
 const parseNumber = (value) => {
@@ -183,6 +207,14 @@ const formatTotalEstimate = (product) => {
   return formatAppCurrency(total, { decimals: 0 })
 }
 
+const getFooterAmountText = (value) => {
+  const raw = String(value ?? '').trim()
+  if (!raw || raw === '-') return { showCurrency: false, text: '-' }
+  const withoutRp = raw.replace(/\bRp\b\s*/g, '').trim()
+  if (!withoutRp || withoutRp === '-') return { showCurrency: false, text: '-' }
+  return { showCurrency: true, text: withoutRp }
+}
+
 const isOutOfStock = (product) => {
   const enabled = product?.stock_enabled
   if (enabled === false) return false
@@ -198,10 +230,13 @@ const normalizeProductsResponse = (data) => {
 }
 
 const filteredProducts = computed(() => {
-  const key = String(tabs.value?.[activeTab.value]?.key || 'all').toLowerCase()
-  if (key === 'inactive') return products.value.filter((p) => isOutOfStock(p))
-  if (key === 'active') return products.value.filter((p) => !isOutOfStock(p))
-  return products.value
+  const key = tabs.value?.[activeTab.value]?.key ?? '__all__'
+  if (key === '__all__') return products.value
+  const target = normalizeCategory(key)
+  return products.value.filter((p) => {
+    const raw = p?.product_golongan ?? p?.golongan ?? p?.category ?? ''
+    return normalizeCategory(raw) === target
+  })
 })
 
 const sortedProducts = computed(() => {
@@ -227,6 +262,19 @@ const setActiveTab = (idx) => {
   if (!Number.isFinite(n)) return
   activeTab.value = Math.max(0, Math.min(tabs.value.length - 1, n))
 }
+
+watch(
+  () => tabs.value.length,
+  (len) => {
+    const n = Number(len || 0)
+    if (!n) {
+      activeTab.value = 0
+      return
+    }
+    if (activeTab.value > n - 1) activeTab.value = 0
+  },
+  { immediate: true }
+)
 
 const getProductImage = (product) => {
   const raw = String(product?.image || '').trim()
@@ -331,6 +379,8 @@ onMounted(() => {
   padding: 12px 20px;
   display: flex;
   gap: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .category-btn {
@@ -488,12 +538,41 @@ onMounted(() => {
 
 .footer-item {
   display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-item.right-align {
+  justify-content: flex-start;
+}
+
+.footer-item.right-align .footer-text {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.footer-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.footer-text {
+  display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.footer-item.right-align {
-  text-align: right;
+.footer-value-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-currency {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
 }
 
 .footer-label {
@@ -516,6 +595,13 @@ onMounted(() => {
 .empty-state {
   padding: 40px 0;
   text-align: center;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-text {

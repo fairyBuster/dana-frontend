@@ -14,7 +14,7 @@
     <!-- Greeting -->
     <section id="section-greeting">
       <div class="greeting-container">
-        <h1 class="greeting-name">{{ username }} 👋🏻</h1>
+        <h1 class="greeting-name">{{ displayUsername }} 👋🏻</h1>
         <p class="greeting-text">Selamat datang!<br>Kelola dana Anda dengan aman.</p>
       </div>
     </section>
@@ -93,7 +93,7 @@
           </div>
           <span class="action-label">Pencairan<br>Dana</span>
         </router-link>
-        <router-link to="/hn/hall/taskhall" class="action-item">
+        <router-link to="/hn/user/history" class="action-item">
           <div class="action-icon-box">
             <img src="/assets/images/90e5a727cd9d3661692eee43d92cd502f933c397.png" alt="">
           </div>
@@ -105,11 +105,11 @@
           </div>
           <span class="action-label">Proteksi<br>Saya</span>
         </router-link>
-        <router-link to="/hn/network/invite" class="action-item">
+        <router-link to="/user/help" class="action-item">
           <div class="action-icon-box">
             <img src="/assets/images/77d0671ec600386d429d57f4d5d6bbae75556961.png" alt="">
           </div>
-          <span class="action-label">Undang<br>Teman</span>
+          <span class="action-label">Bantuan</span>
         </router-link>
       </div>
     </section>
@@ -118,14 +118,14 @@
     <section id="section-promo">
       <div class="promo-card" @click="goToMining">
         <div class="promo-content">
-          <h3 class="promo-title">Aktifkan Proteksi Dana Anda Sekarang</h3>
-          <p class="promo-desc">Dapatkan perlindungan ekstra untuk setiap transaksi dan aset digital Anda.</p>
+          <h3 class="promo-title">Dana Anda Aman,Tenang Setiap Saat</h3>
+          <p class="promo-desc">Dana Proteksi menggunakan sistem keamanan berlapis untuk melindungi aset Anda.</p>
           <div class="promo-btn">
             <span>Mulai Sekarang</span>
             <img src="/assets/images/10_81.svg" alt="">
           </div>
         </div>
-        <img src="/assets/images/75002cc318d16ea5609e34919bbba9c9767bc248.png" alt="" class="promo-illustration">
+        <img src="/assets/images/788.png" alt="" class="promo-illustration">
       </div>
     </section>
   </div>
@@ -142,11 +142,22 @@ import { formatAppCurrency } from '@/utils/settings'
 
 const router = useRouter()
 
-const username = ref('Username')
+const username = ref('')
 const mainBalance = ref(0)
 const depositBalance = ref(0)
 const interestTotal = ref(0)
 const isBalanceVisible = ref(true)
+
+const formatRupiah = (value) => {
+  return formatAppCurrency(value, {
+    symbol: 'Rp',
+    symbol_position: 'prefix',
+    symbol_space: true,
+    thousand_sep: '.',
+    decimal_sep: ',',
+    decimals: 0
+  })
+}
 
 const toAmount = (value) => {
   const n = Number(String(value ?? '').replace(/[^0-9.-]/g, ''))
@@ -154,19 +165,19 @@ const toAmount = (value) => {
 }
 
 const totalBalanceDisplay = computed(() => {
-  return formatAppCurrency(mainBalance.value + depositBalance.value + interestTotal.value)
+  return formatRupiah(mainBalance.value + depositBalance.value + interestTotal.value)
 })
 
 const depositBalanceDisplay = computed(() => {
-  return formatAppCurrency(depositBalance.value)
+  return formatRupiah(depositBalance.value)
 })
 
 const mainBalanceDisplay = computed(() => {
-  return formatAppCurrency(mainBalance.value)
+  return formatRupiah(mainBalance.value)
 })
 
 const interestDisplay = computed(() => {
-  return formatAppCurrency(interestTotal.value)
+  return formatRupiah(interestTotal.value)
 })
 
 const maskedBalance = computed(() => '••••••••')
@@ -174,6 +185,33 @@ const maskedBalance = computed(() => '••••••••')
 const toggleBalanceVisibility = () => {
   isBalanceVisible.value = !isBalanceVisible.value
 }
+
+const normalizePhoneTo08 = (raw) => {
+  const s = String(raw ?? '').trim()
+  if (!s) return ''
+  const digits = s.replace(/[^\d]/g, '')
+  if (!digits) return ''
+  if (digits.startsWith('0')) return digits
+  if (digits.startsWith('62')) return `0${digits.slice(2)}`
+  if (digits.startsWith('8')) return `0${digits}`
+  return digits
+}
+
+const maskMiddle = (text) => {
+  const s = String(text ?? '')
+  if (s.length <= 7) return s
+  const left = s.slice(0, 4)
+  const right = s.slice(-3)
+  const mid = '*'.repeat(Math.max(0, s.length - (4 + 3)))
+  return `${left}${mid}${right}`
+}
+
+const displayUsername = computed(() => {
+  const normalized = normalizePhoneTo08(username.value)
+  if (!normalized) return ''
+  if (normalized.startsWith('08')) return maskMiddle(normalized)
+  return maskMiddle(normalized)
+})
 
 const fetchAccountInfo = async () => {
   try {
@@ -184,7 +222,7 @@ const fetchAccountInfo = async () => {
 
     if (accountRes.status === 'fulfilled') {
       const data = accountRes.value?.data || {}
-      username.value = data?.username || 'Username'
+      username.value = data?.phone || ''
       mainBalance.value = toAmount(data?.balance ?? 0)
       depositBalance.value = toAmount(data?.balance_deposit ?? data?.deposit_balance ?? 0)
     }
@@ -198,8 +236,8 @@ const fetchAccountInfo = async () => {
 
 const goToDeposit = () => router.push('/hn/app/charge')
 const goToWithdraw = () => router.push('/hn/app/settlement')
-const goToPortfolio = () => router.push('/hn/hall/taskhall')
-const goToMining = () => router.push('/hn/hall/outputhall')
+const goToPortfolio = () => router.push('/hn/hall/outputhall')
+const goToMining = () => router.push('/shop')
 
 onMounted(() => {
   fetchAccountInfo()
@@ -483,7 +521,7 @@ a {
 }
 
 .promo-title {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 700;
   color: #060606;
   margin-bottom: 8px;

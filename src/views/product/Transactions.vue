@@ -1,6 +1,6 @@
-<template>
+<!-- <template>
   <div class="app-container">
-    <!-- Header -->
+   
     <section id="section-header">
       <header class="app-header">
         <a href="#/hn/user" class="back-button" aria-label="Go to profile">
@@ -30,7 +30,6 @@
       </header>
     </section>
 
-    <!-- Record List -->
     <section id="section-record-list">
       <div class="record-container">
         <div class="table-header">
@@ -70,7 +69,7 @@
       </div>
     </section>
   </div>
-</template>
+</template> -->
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'

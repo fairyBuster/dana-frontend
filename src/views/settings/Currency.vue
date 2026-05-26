@@ -71,7 +71,7 @@ const router = useRouter()
 const { t } = useI18n()
 
 const goBack = () => {
-  router.back()
+  router.push('/hn/home')
 }
 
 const selectedCurrency = ref('RP') // Default to Indonesian Rupiah

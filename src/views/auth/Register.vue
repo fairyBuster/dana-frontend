@@ -197,7 +197,7 @@
       <div class="otp-modal-container">
         <div class="otp-card">
           <div class="otp-card-header">
-            <p class="otp-description">Enter OTP</p>
+            <p class="otp-description">Masukkan OTP</p>
           </div>
 
           <div class="otp-input-box">
@@ -215,10 +215,10 @@
 
           <div class="otp-actions">
             <button class="otp-action otp-action--primary" type="button" @click="submitRegisterFromOtpModal" :disabled="isLoading || isRequestingOtp">
-              Confirm
+              Konfirmasi
             </button>
             <button class="otp-action otp-action--secondary" type="button" @click="closeOtpModal" :disabled="isLoading || isRequestingOtp">
-              Cancel
+              Batal
             </button>
           </div>
         </div>
@@ -227,11 +227,11 @@
 
     <ErrorModal
       v-model="showErrorModal"
-      :message="generalError || 'Registration error occurred.'"
+      :message="generalError || 'Silakan lengkapi data terlebih dahulu'"
     />
     <SuccessModal
       v-model="showSuccessModal"
-      :message="successMessage || 'Your account has been created.'"
+      :message="successMessage || 'Akun berhasil dibuat'"
     />
     <CountrySelector
       v-model:show="showCountrySelector"
@@ -282,8 +282,8 @@ const EN_UI = Object.freeze({
   signUp: 'Register',
   alreadyHaveAccount: 'Already have account?',
   signIn: 'Sign In',
-  sliderHint: 'Slide the arrow to continue',
-  sliderVerified: 'Verified'
+  sliderHint: 'Geser untuk melanjutkan verifikasi',
+  sliderVerified: 'Verifikasi berhasil'
 })
 
 const ID_UI_FALLBACK = Object.freeze({
@@ -311,132 +311,11 @@ const ID_UI_FALLBACK = Object.freeze({
   signUp: 'Daftar',
   alreadyHaveAccount: 'Sudah punya akun?',
   signIn: 'Masuk',
-  sliderHint: 'Geser panah ini untuk melanjutkan login',
-  sliderVerified: 'Terverifikasi'
+  sliderHint: 'Geser untuk melanjutkan verifikasi',
+  sliderVerified: 'Verifikasi berhasil'
 })
 
 const ui = ref({ ...EN_UI })
-
-const MT_BASE_URL = String(import.meta?.env?.VITE_MT_API_URL || '').replace(/\/$/, '')
-const MT_API_KEY = String(import.meta?.env?.VITE_MT_API_KEY || localStorage.getItem('mt_api_key') || '').trim()
-const mtUrl = (path) => (MT_BASE_URL ? `${MT_BASE_URL}${path}` : path)
-const MT_CACHE_TTL_MS = 365 * 24 * 60 * 60 * 1000
-const MT_CACHE_MAX_ENTRIES = 500
-const mtCacheKey = (target) => `mt_cache_v2_${target}`
-const mtLegacyCacheKey = (target) => `mt_cache_v1_${target}`
-
-const getMtCache = (target) => {
-  try {
-    const now = Date.now()
-    const raw = localStorage.getItem(mtCacheKey(target))
-    const rawLegacy = localStorage.getItem(mtLegacyCacheKey(target))
-    const current = raw ? JSON.parse(raw) : {}
-    const legacy = rawLegacy ? JSON.parse(rawLegacy) : {}
-    const merged = { ...(legacy || {}), ...(current || {}) }
-    const out = {}
-    for (const k of Object.keys(merged || {})) {
-      const v = merged[k]
-      if (typeof v === 'string') {
-        out[k] = { v, e: now + MT_CACHE_TTL_MS }
-        continue
-      }
-      if (v && typeof v === 'object') {
-        const text = typeof v.v === 'string' ? v.v : ''
-        const exp = Number(v.e || 0)
-        if (!text) continue
-        if (exp > 0 && exp <= now) continue
-        out[k] = { v: text, e: now + MT_CACHE_TTL_MS }
-      }
-    }
-    return out
-  } catch (_) {
-    return {}
-  }
-}
-
-const setMtCache = (target, cacheObj) => {
-  try {
-    const now = Date.now()
-    const keys = Object.keys(cacheObj || {})
-    for (const k of keys) {
-      const ent = cacheObj[k]
-      const exp = Number(ent?.e || 0)
-      if (exp > 0 && exp <= now) delete cacheObj[k]
-    }
-    const remaining = Object.keys(cacheObj || {})
-    if (remaining.length > MT_CACHE_MAX_ENTRIES) {
-      remaining.sort((a, b) => (Number(cacheObj[a]?.e || 0) - Number(cacheObj[b]?.e || 0)))
-      const removeCount = remaining.length - MT_CACHE_MAX_ENTRIES
-      for (let i = 0; i < removeCount; i += 1) delete cacheObj[remaining[i]]
-    }
-    localStorage.setItem(mtCacheKey(target), JSON.stringify(cacheObj))
-  } catch (_) {}
-}
-
-const mtTranslateMany = async (texts, target, source = 'en') => {
-  const unique = Array.from(new Set((texts || []).map((t) => String(t || '')))).filter(Boolean)
-  if (!unique.length) return new Map()
-
-  const cache = getMtCache(target)
-  const out = new Map()
-  const missing = []
-
-  for (const t of unique) {
-    const ent = cache[t]
-    const exp = Number(ent?.e || 0)
-    const isExpired = exp > 0 && exp <= Date.now()
-    const cachedText = !isExpired && typeof ent?.v === 'string' ? ent.v : ''
-    if (cachedText) {
-      out.set(t, cachedText)
-    } else {
-      missing.push(t)
-    }
-  }
-
-  if (!missing.length) return out
-
-  const params = new URLSearchParams()
-  for (const t of missing) params.append('q', t)
-  params.append('source', source)
-  params.append('target', target)
-  params.append('format', 'text')
-  if (MT_API_KEY) params.append('api_key', MT_API_KEY)
-
-  const resp = await fetch(mtUrl('/translate'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params
-  })
-  if (!resp.ok) throw new Error(`translate_failed_${resp.status}`)
-
-  const data = await resp.json()
-  const translated = data?.translatedText
-  const translatedList = Array.isArray(translated) ? translated : (typeof translated === 'string' ? [translated] : [])
-
-  if (translatedList.length === 1 && missing.length > 1) {
-    for (const t of missing) {
-      out.set(t, '')
-    }
-    return out
-  }
-
-  if (translatedList.length !== missing.length) {
-    throw new Error('translate_shape_mismatch')
-  }
-
-  for (let i = 0; i < missing.length; i += 1) {
-    const srcText = missing[i]
-    const trText = String(translatedList[i] ?? '')
-    if (trText) {
-      cache[srcText] = { v: trText, e: Date.now() + MT_CACHE_TTL_MS }
-      out.set(srcText, trText)
-    }
-  }
-
-  setMtCache(target, cache)
-  return out
-}
-
 const applyUiLanguage = async (lang) => {
   if (lang === 'en') {
     ui.value = { ...EN_UI }
@@ -446,20 +325,7 @@ const applyUiLanguage = async (lang) => {
     ui.value = { ...EN_UI }
     return
   }
-
-  try {
-    const keys = Object.keys(EN_UI)
-    const sourceTexts = keys.map((k) => EN_UI[k])
-    const map = await mtTranslateMany(sourceTexts, 'id', 'en')
-    const next = {}
-    for (const k of keys) {
-      const translated = map.get(EN_UI[k])
-      next[k] = translated || ID_UI_FALLBACK[k] || EN_UI[k]
-    }
-    ui.value = next
-  } catch (_) {
-    ui.value = { ...ID_UI_FALLBACK }
-  }
+  ui.value = { ...ID_UI_FALLBACK }
 }
 
 const formData = reactive({
@@ -491,7 +357,7 @@ const otpModalOpen = ref(false)
 const otpInput = ref(null)
 const otpActiveOverride = ref(null)
 const otpRequiredOverride = ref(null)
-const OTP_COOLDOWN_MS = 120000
+const OTP_COOLDOWN_MS = 300000
 const lastOtpRequestAt = ref(0)
 
 // Slider captcha state
@@ -534,7 +400,12 @@ const onSliderEnd = () => {
     sliderLeft.value = maxLeft
     sliderVerified.value = true
   } else {
+    const movedEnough = sliderLeft.value > 20
     sliderLeft.value = -10
+    if (movedEnough) {
+      generalError.value = 'Verifikasi gagal, silakan coba lagi'
+      showErrorModal.value = true
+    }
   }
 }
 
@@ -672,6 +543,31 @@ const refreshCaptcha = () => {
   formData.captcha = out
 }
 
+const phoneDigits = (raw) => String(raw ?? '').replace(/[^\d]/g, '')
+
+const validatePhoneInput = (raw) => {
+  const rawTrimmed = String(raw ?? '').trim()
+  const digits = phoneDigits(raw)
+  if (!digits) return { ok: false, message: rawTrimmed ? 'Masukkan nomor handphone yang valid' : 'Nomor handphone belum diisi' }
+  if (!digits.startsWith('08')) return { ok: false, message: 'Nomor handphone harus diawali 08' }
+  if (digits.length < 10 || digits.length > 15) return { ok: false, message: 'Masukkan nomor handphone yang valid' }
+  return { ok: true, message: '' }
+}
+
+const validatePasswordInput = (raw) => {
+  const v = String(raw ?? '')
+  if (!v) return { ok: false, message: 'Buat password terlebih dahulu' }
+  if (v.length < 6) return { ok: false, message: 'Password minimal 6 karakter' }
+  return { ok: true, message: '' }
+}
+
+const buildRandomEmail = () => {
+  const phone = phoneDigits(formData.phone)
+  const uniq = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`
+  const local = `user.${phone || 'guest'}.${uniq}`.toLowerCase()
+  return `${local}@example.com`
+}
+
 const formatPhoneNumber = () => {
   let phoneNumber = formData.phone.trim()
   if (!phoneNumber) return ''
@@ -687,9 +583,9 @@ const formatPhoneNumber = () => {
 
 const extractOtpErrorMessage = (err) => {
   const status = err?.response?.status
-  if (status === 503) return 'OTP service disabled'
+  if (status === 503) return 'Server sedang sibuk, silakan coba lagi'
   const data = err?.response?.data
-  if (!data) return err?.message || 'OTP sending failed'
+  if (!data) return 'Server sedang sibuk, silakan coba lagi'
   if (typeof data === 'string') return data
   if (data.detail) return String(data.detail)
   if (data.message) return String(data.message)
@@ -697,7 +593,7 @@ const extractOtpErrorMessage = (err) => {
   const firstVal = data[firstKey]
   if (Array.isArray(firstVal) && firstVal.length) return String(firstVal[0])
   if (firstVal) return String(firstVal)
-  return 'OTP sending failed'
+  return 'Server sedang sibuk, silakan coba lagi'
 }
 
 const requestOtp = async () => {
@@ -710,7 +606,7 @@ const requestOtp = async () => {
   const remainingMs = OTP_COOLDOWN_MS - (now - (lastOtpRequestAt.value || 0))
   if (remainingMs > 0) {
     showErrorModal.value = true
-    generalError.value = 'Tunggu 2 menit untuk minta OTP lagi.'
+    generalError.value = 'Terlalu banyak percobaan, tunggu 5 menit'
     return
   }
 
@@ -721,7 +617,7 @@ const requestOtp = async () => {
 
   const phoneNumber = formatPhoneNumber()
   if (!phoneNumber) {
-    generalError.value = 'Phone number must be numeric'
+    generalError.value = 'Masukkan nomor handphone yang valid'
     showErrorModal.value = true
     return
   }
@@ -733,7 +629,7 @@ const requestOtp = async () => {
     try {
       localStorage.setItem('last_otp_request_at', String(now))
     } catch (_) {}
-    successMessage.value = 'OTP sent successfully'
+    successMessage.value = 'Kode OTP berhasil dikirim'
     showSuccessModal.value = true
     otpModalOpen.value = true
     setTimeout(() => {
@@ -771,34 +667,22 @@ const handleRequestOtpAndOpenModal = async () => {
     showErrorModal.value = true
   }
 
-  const username = String(formData.username || '').trim()
-  const phoneRaw = String(formData.phone || '').trim()
-  const email = String(formData.email || '').trim()
-  const password = String(formData.password || '')
-  const password2 = String(formData.password2 || '')
+  const fullName = String(formData.username || '').trim()
+  if (!fullName) return showError('Nama lengkap belum diisi')
 
-  if (!phoneRaw) return showError('Nomor wajib diisi.')
-  if (!email) return showError('Email wajib diisi.')
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Format email tidak valid.')
-  if (!password) return showError('Password wajib diisi.')
-  if (!password2) return showError('Konfirmasi password wajib diisi.')
-  if (!username) return showError('Signature wajib diisi.')
+  const phoneCheck = validatePhoneInput(formData.phone)
+  if (!phoneCheck.ok) return showError(phoneCheck.message)
 
-  if (showReferral.value && !String(formData.referralCode || '').trim()) {
-  }
-  if (!String(formData.referralCode || '').trim()) return showError('Referral code wajib diisi.')
+  const passCheck = validatePasswordInput(formData.password)
+  if (!passCheck.ok) return showError(passCheck.message)
 
-  if (formData.password !== formData.password2) {
-    return showError('Passwords do not match.')
-  }
+  if (!String(formData.password2 || '')) return showError('Konfirmasi password belum diisi')
+  if (String(formData.password || '') !== String(formData.password2 || '')) return showError('Password tidak cocok')
 
-  if (!isTermsAccepted.value) {
-    return showError('Please agree to the Customer Agreement, Terms of Service and Privacy Policy.')
-  }
+  if (!String(formData.referralCode || '').trim()) return showError('Masukkan kode undangan dahulu')
 
-  if (!sliderVerified.value) {
-    return showError('Please complete the slider verification.')
-  }
+  if (!isTermsAccepted.value) return showError('Anda harus menyetujui Kebijakan Privasi dan Syarat Layanan')
+  if (!sliderVerified.value) return showError('Geser untuk melanjutkan verifikasi')
 
   if (!generatedCaptcha.value) {
     refreshCaptcha()
@@ -807,7 +691,7 @@ const handleRequestOtpAndOpenModal = async () => {
 
   const phoneNumber = formatPhoneNumber()
   if (!phoneNumber) {
-    return showError('Phone number must be numeric')
+    return showError('Masukkan nomor handphone yang valid')
   }
 
   if (!otpActive.value) {
@@ -825,7 +709,7 @@ const submitRegisterFromOtpModal = async () => {
   await handleRegister()
 }
 
-const sanitizeUsername = (value) => String(value ?? '').replace(/[^a-zA-Z0-9]/g, '')
+const sanitizeUsername = (value) => String(value ?? '').replace(/[^a-zA-Z0-9\s]/g, '')
 
 watch(
   () => formData.username,
@@ -880,34 +764,31 @@ const handleRegister = async (opts = {}) => {
     showErrorModal.value = true
   }
 
-  const username = String(formData.username || '').trim()
+  const fullName = String(formData.username || '').trim()
+  const usernameBackend = fullName.replace(/\s+/g, '')
   const phoneRaw = String(formData.phone || '').trim()
-  const email = String(formData.email || '').trim()
   const otp = String(formData.otp || '').trim()
   const password = String(formData.password || '')
   const password2 = String(formData.password2 || '')
   const forceNoOtp = Boolean(opts?.forceNoOtp)
   const retriedWithoutOtp = Boolean(opts?.retriedWithoutOtp)
 
-  if (!phoneRaw) return showError('Nomor wajib diisi.')
-  if (!email) return showError('Email wajib diisi.')
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Format email tidak valid.')
-  if (!password) return showError('Password wajib diisi.')
-  if (!password2) return showError('Konfirmasi password wajib diisi.')
-  if (!username) return showError('Signature wajib diisi.')
-  if (!forceNoOtp && otpRequired.value && !otp) return showError('OTP wajib diisi.')
+  if (!fullName) return showError('Nama lengkap belum diisi')
 
-  if (showReferral.value && !String(formData.referralCode || '').trim()) {
-  }
-  if (!String(formData.referralCode || '').trim()) return showError('Referral code wajib diisi.')
+  const phoneCheck = validatePhoneInput(phoneRaw)
+  if (!phoneCheck.ok) return showError(phoneCheck.message)
 
-  if (formData.password !== formData.password2) {
-    return showError('Passwords do not match.')
-  }
+  const passCheck = validatePasswordInput(password)
+  if (!passCheck.ok) return showError(passCheck.message)
 
-  if (!isTermsAccepted.value) {
-    return showError('Please agree to the Customer Agreement, Terms of Service and Privacy Policy.')
-  }
+  if (!password2) return showError('Konfirmasi password belum diisi')
+  if (password !== password2) return showError('Password tidak cocok')
+
+  if (!String(formData.referralCode || '').trim()) return showError('Masukkan kode undangan dahulu')
+
+  if (!isTermsAccepted.value) return showError('Anda harus menyetujui Kebijakan Privasi dan Syarat Layanan')
+  if (!sliderVerified.value) return showError('Geser untuk melanjutkan verifikasi')
+  if (!forceNoOtp && otpRequired.value && !otp) return showError('Verifikasi akun diperlukan')
 
   // Auto-generate captcha for submission
   if (!generatedCaptcha.value) {
@@ -921,15 +802,15 @@ const handleRegister = async (opts = {}) => {
     // Format phone number with country code
     const phoneNumber = formatPhoneNumber()
     if (!phoneNumber) {
-      return showError('Phone number must be numeric')
+      return showError('Masukkan nomor handphone yang valid')
     }
 
     const rand = Math.random().toString(36).slice(2, 10)
-    const emailToUse = email
-    const fullNameGenerated = `User ${rand}`
+    const emailToUse = buildRandomEmail()
+    const fullNameGenerated = fullName
     
     const payload = {
-      username: formData.username.trim(),
+      username: usernameBackend || `user${rand}`,
       phone: phoneNumber,
       email: emailToUse,
       full_name: fullNameGenerated,
@@ -942,7 +823,7 @@ const handleRegister = async (opts = {}) => {
     
     const response = await authAPI.register(payload)
     
-    successMessage.value = 'Successfully'
+    successMessage.value = 'Akun berhasil dibuat'
     showSuccessModal.value = true
     otpModalOpen.value = false
     
@@ -970,7 +851,7 @@ const handleRegister = async (opts = {}) => {
         rawFallbackLower.includes('too many') ||
         rawFallbackLower.includes('throttle')
       if (isRateLimited) {
-        generalError.value = 'Too many attempts. Please try again later.'
+        generalError.value = 'Terlalu banyak percobaan, tunggu 5 menit'
         showErrorModal.value = true
         return
       }
@@ -983,7 +864,7 @@ const handleRegister = async (opts = {}) => {
           usernameMessage.includes('exists')
         generalError.value = isAlreadyTaken
           ? 'Username sudah digunakan'
-          : 'Invalid data format. Please check your input.'
+          : 'Silakan lengkapi data terlebih dahulu'
       } else if (errorData.phone) {
         const phoneErrors = Array.isArray(errorData.phone) ? errorData.phone : [errorData.phone]
         const phoneMessage = phoneErrors.map((x) => String(x || '')).join(' ').toLowerCase()
@@ -993,7 +874,7 @@ const handleRegister = async (opts = {}) => {
           phoneMessage.includes('phone number is already registered') ||
           phoneCompact.includes('alreadyregistered')
         if (isAlreadyRegistered) {
-          generalError.value = 'already registered'
+          generalError.value = 'Nomor handphone sudah terdaftar'
           showErrorModal.value = true
           return
         }
@@ -1003,7 +884,7 @@ const handleRegister = async (opts = {}) => {
           phoneMessage.includes('tidak terdeteksi') && phoneMessage.includes('whatsapp')
         generalError.value = looksLikeNoWhatsapp
           ? 'Tidak ada whatsapp'
-          : 'Phone number already in use. Use a different number or login.'
+          : 'Nomor handphone sudah terdaftar'
       } else if (errorData.otp) {
         const otpErrors = Array.isArray(errorData.otp) ? errorData.otp : [errorData.otp]
         const otpMessage = otpErrors.map((x) => String(x || '')).join(' ').toLowerCase()
@@ -1020,7 +901,7 @@ const handleRegister = async (opts = {}) => {
           if (!retriedWithoutOtp) {
             return await handleRegister({ forceNoOtp: true, retriedWithoutOtp: true })
           }
-          generalError.value = 'OTP tidak aktif'
+          generalError.value = 'Verifikasi akun diperlukan'
         } else {
           const isOtpMissing =
             otpMessage.includes('required') ||
@@ -1036,14 +917,14 @@ const handleRegister = async (opts = {}) => {
           if (isOtpRequiredByServer) {
             otpActiveOverride.value = true
             otpRequiredOverride.value = true
-            generalError.value = 'OTP wajib diisi.'
+            generalError.value = 'Verifikasi akun diperlukan'
             otpModalOpen.value = true
             setTimeout(() => {
               if (otpInput.value) otpInput.value.focus()
             }, 120)
           } else {
             otpActiveOverride.value = true
-            generalError.value = 'Invalid OTP'
+            generalError.value = 'Verifikasi akun diperlukan'
             otpModalOpen.value = true
             setTimeout(() => {
               if (otpInput.value) otpInput.value.focus()
@@ -1056,12 +937,13 @@ const handleRegister = async (opts = {}) => {
         const isEmailRegistered = emailMessage.includes('already') || emailMessage.includes('exists') || emailMessage.includes('registered')
         generalError.value = isEmailRegistered ? 'Email sudah terdaftar' : 'Format email tidak valid.'
       } else if (errorData.referral_code || errorData.referralCode) {
-        generalError.value = 'Invalid referral code. Please check and try again.'
+        generalError.value = 'Kode referral tidak ditemukan'
       } else {
-        generalError.value = 'Invalid data format. Please check your input.'
+        generalError.value = 'Silakan lengkapi data terlebih dahulu'
       }
+      if (status >= 500) generalError.value = 'Server sedang sibuk, silakan coba lagi'
     } else {
-      generalError.value = 'No connection. Please check your network and try again.'
+      generalError.value = 'Tidak ada koneksi internet'
     }
     
     showErrorModal.value = true

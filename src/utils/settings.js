@@ -6,14 +6,14 @@ export const appSettings = reactive({
   frontendUrl: null,
   settings: null,
   currency: {
-    currency_code: 'USD',
-    rate_to_idr: '17000.000000',
-    symbol: '$',
+    currency_code: 'IDR',
+    rate_to_idr: '1',
+    symbol: 'Rp',
     symbol_position: 'prefix',
     symbol_space: true,
-    thousand_sep: ',',
-    decimal_sep: '.',
-    decimals: 2
+    thousand_sep: '.',
+    decimal_sep: ',',
+    decimals: 0
   },
   isLoaded: false
 })
@@ -40,15 +40,16 @@ export const initSettings = async () => {
     if (currencyResp.status === 'fulfilled') {
       const data = currencyResp.value?.data || null
       if (data && typeof data === 'object') {
+        const rateFromApi = data.rate_to_idr ?? appSettings.currency.rate_to_idr ?? '1'
         appSettings.currency = {
-          currency_code: String(data.currency_code || appSettings.currency.currency_code || 'USD'),
-          rate_to_idr: String(data.rate_to_idr || appSettings.currency.rate_to_idr || '1'),
-          symbol: String(data.symbol || appSettings.currency.symbol || ''),
-          symbol_position: String(data.symbol_position || appSettings.currency.symbol_position || 'prefix'),
-          symbol_space: Boolean(data.symbol_space ?? appSettings.currency.symbol_space),
-          thousand_sep: String(data.thousand_sep || appSettings.currency.thousand_sep || ','),
-          decimal_sep: String(data.decimal_sep || appSettings.currency.decimal_sep || '.'),
-          decimals: Number.isFinite(Number(data.decimals)) ? Number(data.decimals) : Number(appSettings.currency.decimals || 2)
+          currency_code: 'IDR',
+          rate_to_idr: String(rateFromApi),
+          symbol: 'Rp',
+          symbol_position: 'prefix',
+          symbol_space: true,
+          thousand_sep: '.',
+          decimal_sep: ',',
+          decimals: 0
         }
       }
     }

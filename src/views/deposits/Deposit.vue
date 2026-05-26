@@ -50,6 +50,7 @@
               :key="amt.value"
               class="amount-btn"
               :class="{ active: selectedQuickAmount === amt.value }"
+              :disabled="amt.value < MIN_DEPOSIT || amt.value > MAX_DEPOSIT"
               @click="selectQuickAmount(amt.value)"
             >
               {{ amt.label }}
@@ -80,7 +81,7 @@
       <div class="footer-container">
         <button
           class="submit-btn"
-          :disabled="!isValidAmount || isLoading"
+          :disabled="isLoading"
           @click="handleDeposit"
         >
           <LoadingSpinner v-if="isLoading" :visible="true" message="" />
@@ -125,8 +126,19 @@ const toAmount = (value) => {
   return Number.isFinite(n) ? n : 0
 }
 
+const formatRupiah = (value) => {
+  return formatAppCurrency(value, {
+    symbol: 'Rp',
+    symbol_position: 'prefix',
+    symbol_space: true,
+    thousand_sep: '.',
+    decimal_sep: ',',
+    decimals: 0
+  })
+}
+
 const depositBalanceDisplay = computed(() => {
-  return formatAppCurrency(depositBalance.value)
+  return formatRupiah(depositBalance.value)
 })
 
 const numericAmount = computed(() => {
@@ -143,13 +155,7 @@ const isValidAmount = computed(() => {
 })
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {}
-  router.push('/hn/user')
+  router.push('/hn/home')
 }
 
 const handleAmountInput = (event) => {
@@ -165,7 +171,7 @@ const handleAmountInput = (event) => {
     selectedQuickAmount.value = null
     return
   }
-  depositAmount.value = formatAppCurrency(num, { symbol: '', decimals: 0 })
+  depositAmount.value = formatRupiah(num)
 
   // Check if matches a quick amount
   const match = quickAmounts.find(a => a.value === num)
@@ -173,8 +179,9 @@ const handleAmountInput = (event) => {
 }
 
 const selectQuickAmount = (value) => {
+  if (value < MIN_DEPOSIT || value > MAX_DEPOSIT) return
   selectedQuickAmount.value = value
-  depositAmount.value = formatAppCurrency(value, { symbol: '', decimals: 0 })
+  depositAmount.value = formatRupiah(value)
 }
 
 const fetchBalance = async () => {
@@ -198,6 +205,11 @@ const extractErrorMessage = (err) => {
 }
 
 const handleDeposit = async () => {
+  if (!numericAmount.value) {
+    showErrorModal.value = true
+    errorMessage.value = 'Nominal isi ulang belum diisi'
+    return
+  }
   if (!isValidAmount.value) return
 
   isLoading.value = true

@@ -1,5 +1,4 @@
 import { createI18n } from 'vue-i18n'
-import { startDomTranslation, stopDomTranslation } from '../utils/domTranslator'
 
 const messages = {}
 
@@ -20,10 +19,7 @@ export function setLanguage(lang) {
   i18n.global.locale.value = lang
   localStorage.setItem('user_language', lang)
   document.documentElement.setAttribute('lang', lang)
-  
-  stopDomTranslation()
-  startDomTranslation(lang)
-  
+
   return true
 }
 

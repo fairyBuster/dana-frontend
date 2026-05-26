@@ -1,19 +1,27 @@
 <template>
-  <div class="policy-page">
-    <section id="section-header">
+  <div class="terms-page">
+    <section id="section-terms">
       <div class="app-container">
-        <header class="page-header">
-          <a href="#" class="back-button" aria-label="Go back" @click.prevent="goBack">
-            <img src="/assets/images/8_401.svg" alt="" aria-hidden="true">
-          </a>
+        <header class="header">
+          <button type="button" class="back-button" aria-label="Kembali" @click="goBack">
+            <img src="/assets/images/8_401.svg" alt="" class="back-icon" aria-hidden="true">
+          </button>
           <h1 class="page-title">Kebijakan Privasi</h1>
         </header>
+        <main class="content">
+          <div class="terms-text">{{ policyText }}</div>
+        </main>
       </div>
     </section>
-    <section id="section-content">
-      <div class="app-container">
-        <article class="privacy-content">
-          <div class="text-body">Selamat datang di Dana Proteksi. Kami menghargai privasi setiap pengguna dan berkomitmen untuk melindungi data pribadi yang diberikan melalui website dan layanan kami.
+  </div>
+</template>
+
+<script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const policyText = `Selamat datang di Dana Proteksi. Kami menghargai privasi setiap pengguna dan berkomitmen untuk melindungi data pribadi yang diberikan melalui website dan layanan kami.
 Kebijakan Privasi ini menjelaskan bagaimana Dana Proteksi mengumpulkan, menggunakan, menyimpan, dan melindungi informasi pengguna saat mengakses layanan kami.
 1. Informasi yang Kami Kumpulkan
 Kami dapat mengumpulkan beberapa informasi dari pengguna, termasuk namun tidak terbatas pada:
@@ -75,42 +83,11 @@ Setiap perubahan akan dipublikasikan melalui halaman ini. Pengguna disarankan un
 12. Hubungi Kami
 Apabila pengguna memiliki pertanyaan, permintaan, atau keluhan terkait Kebijakan Privasi ini, pengguna dapat menghubungi kami melalui:
 Dana Proteksi  Email: [email perusahaan]  Website: [alamat website]  Layanan Bantuan: [kontak/halaman bantuan]
-Dengan menggunakan layanan Dana Proteksi, pengguna dianggap telah membaca, memahami, dan menyetujui Kebijakan Privasi ini.</div>
-        </article>
-      </div>
-    </section>
-  </div>
-</template>
-
-<script setup>
-import { onBeforeUnmount, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
+Dengan menggunakan layanan Dana Proteksi, pengguna dianggap telah membaca, memahami, dan menyetujui Kebijakan Privasi ini.`
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {
-  }
-
-  const token = String(localStorage.getItem('auth_token') || '').trim()
-  router.push(token ? '/hn/user' : '/hn/console')
+  router.push('/hn/home')
 }
-
-const handleScroll = () => {
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
 </script>
 
 <style scoped>
@@ -118,30 +95,34 @@ onBeforeUnmount(() => {
   box-sizing: border-box;
 }
 
-.policy-page {
+.terms-page {
   font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f5f5f5;
+  background: linear-gradient(360deg, #FEFDFE 0%, #FDF8EA 100%);
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+#section-terms {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 .app-container {
   width: 100%;
   max-width: 412px;
-  min-height: auto;
-  background: linear-gradient(180deg, #FEFDFE 0%, #FDF8EA 100%);
+  min-height: 100vh;
+  background: linear-gradient(360deg, #FEFDFE 0%, #FDF8EA 100%);
   position: relative;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
 }
 
-/* Header */
-.page-header {
+.header {
   display: flex;
   align-items: center;
   padding: 25px 19px;
@@ -155,37 +136,33 @@ onBeforeUnmount(() => {
   height: 20px;
   text-decoration: none;
   flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 
-.back-button img {
+.back-icon {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .page-title {
-  margin: 0;
-  margin-left: 28px;
+  margin: 0 0 0 28px;
   font-size: 20px;
   font-weight: 700;
-  color: #000000;
   line-height: 1.2;
+  color: #000000;
 }
 
-/* Content */
-#section-content .app-container {
-  min-height: auto;
-  box-shadow: none;
-  background: transparent;
+.content {
+  padding: 18px 21px 40px 21px;
 }
 
-.privacy-content {
-  padding: 18px 23px 60px 21px;
-}
-
-.text-body {
+.terms-text {
   color: #0e0e0e;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;

@@ -3,7 +3,7 @@
     <!-- Header -->
     <section id="section-header">
       <div class="header-content">
-        <button class="back-icon-btn" aria-label="Go back" @click="goBack">
+        <button type="button" class="back-icon-btn" aria-label="Kembali" @click="goBack">
           <img src="/assets/images/34_129.svg" alt="" class="back-icon">
         </button>
         <h1 class="header-title">Riwayat</h1>
@@ -20,7 +20,7 @@
     <section id="section-filters">
       <div class="filters-row">
         <button
-          v-for="item in filterItems.slice(0, 4)"
+          v-for="item in filterItems.slice(0, 3)"
           :key="item.key"
           class="filter-chip"
           :class="{ active: item.key === currentFilterKey }"
@@ -31,7 +31,7 @@
       </div>
       <div class="filters-row">
         <button
-          v-for="item in filterItems.slice(4)"
+          v-for="item in filterItems.slice(3)"
           :key="item.key"
           class="filter-chip"
           :class="{ active: item.key === currentFilterKey }"
@@ -49,6 +49,7 @@
       </div>
 
       <div v-else-if="displayTransactions.length === 0" class="empty-state">
+        <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
         <p class="empty-text">Belum ada transaksi.</p>
       </div>
 
@@ -156,13 +157,7 @@ const showPagination = computed(() => {
 })
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {}
-  router.push('/hn/user')
+  router.push('/hn/home')
 }
 
 const selectFilter = (item) => {
@@ -314,7 +309,7 @@ button {
 
 /* Header */
 #section-header {
-  padding: 48px 22px 20px;
+  padding: 24px 22px 16px;
 }
 
 .header-content {
@@ -342,7 +337,7 @@ button {
 
 /* Title */
 #section-title {
-  padding: 0 22px 20px;
+  padding: 16px 22px;
 }
 
 .main-title {
@@ -359,7 +354,7 @@ button {
 
 /* Filters */
 #section-filters {
-  padding: 0 22px 24px;
+  padding: 8px 22px 24px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -468,6 +463,13 @@ button {
 .empty-state {
   padding: 40px 0;
   text-align: center;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-text {

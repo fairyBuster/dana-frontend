@@ -5,7 +5,7 @@
       <div class="container">
         <header class="header">
           <router-link to="/hn/home" class="logo-link">
-            <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="HUE Logo" class="logo">
+            <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="Dana Proteksi Logo" class="logo">
           </router-link>
           <button
             ref="menuBtnEl"
@@ -30,7 +30,7 @@
         <div class="hero">
           <div class="hero-content">
             <h1 class="hero-title">The Next Generation of Mining</h1>
-            <p class="hero-subtitle">HUE is a decentralized mining platform that makes simple, secure, and accessible for everyone.</p>
+            <p class="hero-subtitle">Dana Proteksi adalah platform digital yang membantu melindungi dan mengelola aktivitas dana Anda secara aman.</p>
             <router-link to="/hn/network" class="hero-btn">
               Start Mining
               <img src="/assets/image/4287_723.svg" alt="" class="btn-icon">
@@ -53,9 +53,9 @@
       <div class="container">
         <div class="about-container">
           <div class="about-content">
-            <span class="about-label">ABOUT HUE</span>
+            <span class="about-label">TENTANG DANA PROTEKSI</span>
             <h2 class="about-title">Building the future of decentralized mining</h2>
-            <p class="about-desc">HUE is designed to bring blockchain and mining technology to everyone. We provide a transparent, secure, and high-performance ecosystem where anyone can grow.</p>
+            <p class="about-desc">Dana Proteksi dirancang untuk membantu pengguna mendapatkan layanan informasi, pemantauan, dan perlindungan dengan ekosistem yang transparan dan aman.</p>
           </div>
           <div class="about-image-wrapper">
             <img src="/assets/image/04694.png" alt="Global Network" class="about-globe">
@@ -85,13 +85,13 @@
         <footer class="footer">
           <div class="footer-left">
             <div class="footer-brand">
-              <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="HUE Logo" class="footer-logo">
-              <span class="footer-brand-name">HUE</span>
+              <img src="/assets/image/d6fdfec9af71120ed69cee9c9560f6254901b2e8.png" alt="Dana Proteksi Logo" class="footer-logo">
+              <span class="footer-brand-name">Dana Proteksi</span>
             </div>
-            <p class="footer-desc">HUE is a next-generation decentralized mining platform for everyone.</p>
+            <p class="footer-desc">Dana Proteksi membantu Anda mengelola dan melindungi aktivitas dana dengan aman.</p>
             <div class="footer-copy">
               <img src="/assets/image/4288_753.svg" alt="Copyright" class="copy-icon">
-              <span>2026 HUE. All rights reserved.</span>
+              <span>2026 Dana Proteksi. All rights reserved.</span>
             </div>
           </div>
           <div class="footer-right">

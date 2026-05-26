@@ -4,7 +4,7 @@
     <section id="section-topnav">
       <div class="mobile-container">
         <header class="top-nav">
-          <button class="back-button" aria-label="Go back" @click="goBack">
+          <button type="button" class="back-button" aria-label="Kembali" @click="goBack">
             <img src="/assets/images/25_265.svg" alt="">
           </button>
           <h1 class="nav-title">Riwayat</h1>
@@ -22,12 +22,23 @@
       </div>
     </section>
 
-    <!-- Filter Tabs -->
-    <section id="section-filtertabs">
+    <!-- Filters -->
+    <section id="section-filters">
       <div class="mobile-container">
-        <div class="filter-tabs">
+        <div class="filters-row">
           <button
-            v-for="item in filterItems"
+            v-for="item in filterItems.slice(0, 3)"
+            :key="item.key"
+            class="filter-chip"
+            :class="{ active: item.key === currentFilterKey }"
+            @click="selectFilter(item)"
+          >
+            {{ item.label }}
+          </button>
+        </div>
+        <div class="filters-row">
+          <button
+            v-for="item in filterItems.slice(3)"
             :key="item.key"
             class="filter-chip"
             :class="{ active: item.key === currentFilterKey }"
@@ -43,6 +54,7 @@
     <section id="section-historylist">
       <div class="mobile-container">
         <div v-if="!isLoading && transactions.length === 0" class="empty-state">
+          <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
           <p class="empty-text">Belum ada transaksi.</p>
         </div>
 
@@ -130,13 +142,7 @@ const showPagination = computed(() => {
 })
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {}
-  router.push('/hn/user')
+  router.push('/hn/home')
 }
 
 const selectFilter = (item) => {
@@ -323,7 +329,7 @@ onBeforeUnmount(() => {
   padding: 24px 0 16px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .back-button {
@@ -349,7 +355,7 @@ onBeforeUnmount(() => {
 
 /* Page Header */
 .page-header {
-  padding: 0 0 16px;
+  padding: 16px 0;
 }
 
 .page-title {
@@ -360,30 +366,42 @@ onBeforeUnmount(() => {
 }
 
 .page-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: #635f5f;
   margin: 0;
 }
 
-/* Filter Tabs */
-.filter-tabs {
-  padding: 0 0 24px;
+/* Filters */
+#section-filters {
+  padding: 8px 0 24px;
+}
+
+#section-filters .mobile-container {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 6px;
   flex-wrap: wrap;
-  gap: 8px 10px;
 }
 
 .filter-chip {
-  padding: 6px 14px;
-  border-radius: 10px;
-  border: 1px solid #cfcfcf;
   background-color: #fefefe;
+  border: 1px solid #cfcfcf;
+  border-radius: 10px;
+  width: 88px;
+  height: 30px;
+  font-size: 11px;
+  font-weight: 600;
   color: #000000;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
+  padding: 0;
 }
 
 .filter-chip.active {
@@ -469,6 +487,13 @@ onBeforeUnmount(() => {
 .empty-state {
   padding: 40px 0;
   text-align: center;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-text {

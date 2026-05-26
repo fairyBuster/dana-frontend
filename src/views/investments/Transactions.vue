@@ -3,7 +3,7 @@
     <!-- Header -->
     <section id="section-header">
       <header class="top-nav">
-        <button class="back-btn" aria-label="Go back" @click="goBack">
+        <button type="button" class="back-btn" aria-label="Kembali" @click="goBack">
           <img src="/assets/images/34_59.svg" alt="">
         </button>
         <h1 class="nav-title">Riwayat</h1>
@@ -20,11 +20,22 @@
 
     <!-- Filters -->
     <section id="section-filters">
-      <div class="filter-group">
+      <div class="filters-row">
         <button
-          v-for="item in filterItems"
+          v-for="item in filterItems.slice(0, 3)"
           :key="item.key"
-          class="filter-btn"
+          class="filter-chip"
+          :class="{ active: item.key === currentFilterKey }"
+          @click="selectFilter(item)"
+        >
+          {{ item.label }}
+        </button>
+      </div>
+      <div class="filters-row">
+        <button
+          v-for="item in filterItems.slice(3)"
+          :key="item.key"
+          class="filter-chip"
           :class="{ active: item.key === currentFilterKey }"
           @click="selectFilter(item)"
         >
@@ -36,6 +47,7 @@
     <!-- Transactions -->
     <section id="section-transactions">
       <div v-if="!isLoading && transactions.length === 0" class="empty-state">
+        <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
         <p class="empty-text">Belum ada transaksi.</p>
       </div>
 
@@ -112,13 +124,7 @@ const showPagination = computed(() => {
 })
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {}
-  router.push('/hn/user')
+  router.push('/hn/home')
 }
 
 const selectFilter = (item) => {
@@ -274,7 +280,7 @@ onMounted(() => {
 
 .nav-title {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000000;
 }
 
@@ -299,38 +305,39 @@ onMounted(() => {
 /* Filters */
 #section-filters {
   padding: 8px 22px 24px;
-}
-
-.filter-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.filter-btn {
-  width: 92px;
+.filters-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  width: 88px;
   height: 30px;
   border-radius: 10px;
   border: 1px solid #cfcfcf;
   background-color: #fefefe;
   color: #000000;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 0;
+  justify-content: center;
   transition: all 0.2s ease;
+  padding: 0;
 }
 
-.filter-btn.active {
+.filter-chip.active {
   border-color: #f3b73f;
   color: #f3b73f;
 }
 
-.filter-btn:hover {
+.filter-chip:hover {
   border-color: #f3b73f;
 }
 
@@ -405,6 +412,13 @@ onMounted(() => {
 .empty-state {
   padding: 40px 0;
   text-align: center;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-text {

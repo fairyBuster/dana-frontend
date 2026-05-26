@@ -4,10 +4,10 @@
     <section id="section-header">
       <div class="mobile-container">
         <header class="top-header">
-          <button class="back-btn" aria-label="Go back" @click="goBack">
+          <button type="button" class="back-btn" aria-label="Kembali" @click="goBack">
             <img src="/assets/images/25_204.svg" alt="">
           </button>
-          <span class="header-title">Riwayat</span>
+          <h1 class="header-title">Riwayat</h1>
         </header>
       </div>
     </section>
@@ -16,7 +16,7 @@
     <section id="section-title">
       <div class="mobile-container">
         <div class="title-area">
-          <h1 class="main-title">Riwayat</h1>
+          <h2 class="main-title">Riwayat</h2>
           <p class="subtitle">Lihat semua aktivitas transaksi Anda.</p>
         </div>
       </div>
@@ -25,17 +25,28 @@
     <!-- Filters -->
     <section id="section-filters">
       <div class="mobile-container">
-        <nav class="filter-nav" aria-label="Transaction filters">
+        <div class="filters-row">
           <button
-            v-for="item in filterItems"
+            v-for="item in filterItems.slice(0, 3)"
             :key="item.key"
-            class="filter-btn"
+            class="filter-chip"
             :class="{ active: item.key === currentFilterKey }"
             @click="selectFilter(item)"
           >
             {{ item.label }}
           </button>
-        </nav>
+        </div>
+        <div class="filters-row">
+          <button
+            v-for="item in filterItems.slice(3)"
+            :key="item.key"
+            class="filter-chip"
+            :class="{ active: item.key === currentFilterKey }"
+            @click="selectFilter(item)"
+          >
+            {{ item.label }}
+          </button>
+        </div>
       </div>
     </section>
 
@@ -43,6 +54,7 @@
     <section id="section-transactions">
       <div class="mobile-container">
         <div v-if="!isLoading && transactions.length === 0" class="empty-state">
+          <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
           <p class="empty-text">Belum ada transaksi.</p>
         </div>
 
@@ -124,13 +136,7 @@ const showPagination = computed(() => {
 })
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {}
-  router.push('/hn/user')
+  router.push('/hn/home')
 }
 
 const selectFilter = (item) => {
@@ -286,7 +292,7 @@ button {
 .top-header {
   display: flex;
   align-items: center;
-  padding: 48px 0 20px 0;
+  padding: 24px 0 16px 0;
   gap: 16px;
 }
 
@@ -312,7 +318,7 @@ button {
 
 /* Title */
 .title-area {
-  padding: 10px 0 24px 0;
+  padding: 16px 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -332,35 +338,44 @@ button {
 }
 
 /* Filters */
-.filter-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-bottom: 32px;
+#section-filters {
+  padding: 8px 0 24px;
 }
 
-.filter-btn {
-  height: 30px;
-  padding: 0 16px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 600;
+#section-filters .mobile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
   background-color: #fefefe;
   border: 1px solid #cfcfcf;
+  border-radius: 10px;
+  width: 88px;
+  height: 30px;
+  font-size: 11px;
+  font-weight: 600;
   color: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
-  white-space: nowrap;
   transition: all 0.2s ease;
+  padding: 0;
 }
 
-.filter-btn.active {
+.filter-chip.active {
   border-color: #f3b73f;
   color: #f3b73f;
 }
 
-.filter-btn:hover {
+.filter-chip:hover {
   border-color: #f3b73f;
 }
 
@@ -437,6 +452,13 @@ button {
 .empty-state {
   padding: 40px 0;
   text-align: center;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .empty-text {

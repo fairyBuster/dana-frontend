@@ -62,15 +62,7 @@ const handleHeroError = (e) => {
 }
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-    } else {
-      router.push('/hn/home/news')
-    }
-  } catch (_) {
-    router.push('/hn/home/news')
-  }
+  router.push('/hn/home')
 }
 
 const escapeHtml = (unsafe) => {

@@ -103,7 +103,7 @@ const showSuccessModal = ref(false)
 const successMessage = ref('')
 
 const goBack = () => {
-  router.back()
+  router.push('/hn/home')
 }
 
 const fetchUserInfo = async () => {
@@ -173,7 +173,7 @@ const handleChangePassword = async () => {
 }
 
 const handleSuccessClose = () => {
-  router.back()
+  router.push('/hn/home')
 }
 
 onMounted(() => {

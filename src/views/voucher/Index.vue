@@ -15,18 +15,18 @@
         <p class="subtitle">Klaim hadiah setelah teman yang Anda undang aktif.</p>
       </div>
       <div class="image-wrapper">
-        <img src="/assets/images/68c2be2206a4f5902d14b9909706770db36b8116.png" alt="" class="gift-box">
+        <img :src="giftImageSrc" alt="" class="gift-box">
       </div>
     </section>
 
     <!-- Action -->
     <section id="section-action">
       <div class="action-container">
-        <div class="claim-button" :class="{ disabled: isLoading || remainingChances <= 0 }" @click="handleClaim">
+        <div class="claim-button" :class="{ disabled: isLoading }" @click="handleClaim">
           <img src="/assets/images/a37dd03310f239f4d877133c0d7e34c39ee385bd.png" alt="" class="button-bg">
           <span class="button-text">{{ isLoading ? 'Membuka...' : 'Buka Kotak Disini' }}</span>
         </div>
-        <p class="footer-text">Kesempatan membuka kotak adalah: {{ remainingChances }}</p>
+        <p class="footer-text">Kesempatan membuka kotak adalah: {{ remainingChancesDisplay }}</p>
       </div>
     </section>
   </div>
@@ -37,9 +37,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { voucherAPI, transactionAPI } from '@/services/api'
+import { rouletteAPI } from '@/services/api'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import ErrorModal from '@/components/modals/AppErrorModal.vue'
 import VoucherSuccessModal from '@/components/modals/VoucherSuccessModal.vue'
@@ -52,16 +52,34 @@ const errorMessage = ref('')
 const showSuccessModal = ref(false)
 const claimedAmount = ref(0)
 const successTitle = ref('Berhasil menerima bonus')
-const remainingChances = ref(1)
+const remainingChances = ref(null)
+const hasClaimed = ref(false)
+const hasLoadedInitialTickets = ref(false)
+
+const remainingChancesDisplay = computed(() => {
+  if (remainingChances.value === null || remainingChances.value === undefined) return '-'
+  const n = Number(remainingChances.value)
+  return Number.isFinite(n) ? String(n) : '-'
+})
+
+const giftImageSrc = computed(() => {
+  return hasClaimed.value ? '/assets/images/gift-open.png' : '/assets/images/68c2be2206a4f5902d14b9909706770db36b8116.png'
+})
 
 const goBack = () => {
   router.go(-1)
 }
 
-const formatCurrency = (value) => {
-  const num = Number(String(value ?? 0).replace(/[^0-9.-]/g, ''))
-  if (!Number.isFinite(num)) return formatAppCurrency(0, { decimals: 0 })
-  return formatAppCurrency(num, { decimals: 0 })
+const parseNumber = (value) => {
+  if (value === null || value === undefined || value === '') return null
+  const raw = String(value).trim()
+  if (!raw) return null
+  const sign = raw.startsWith('-') ? '-' : ''
+  const unsigned = raw.replace(/^[+-]/, '')
+  const digitsOnly = unsigned.replace(/[^0-9]/g, '')
+  if (!digitsOnly) return null
+  const n = Number(`${sign}${digitsOnly}`)
+  return Number.isFinite(n) ? n : null
 }
 
 const extractErrorMessage = (err) => {
@@ -92,19 +110,8 @@ const extractErrorMessage = (err) => {
     if (!raw) return ''
     const m = raw.toLowerCase()
 
-    if (m.includes('user invalid')) return 'Kode salah'
-    if (m.includes('voucher tidak ditemukan')) return 'Kode salah'
-    if (m.includes('nominal voucher tidak valid')) return 'Kode salah'
-
-    if (m.includes('kuota voucher harian telah habis')) return 'Kesempatan habis'
-    if (m.includes('voucher telah mencapai batas penggunaan')) return 'Kesempatan habis'
-    if (m.includes('anda sudah klaim voucher ini hari ini')) return 'Sudah diklaim hari ini'
-    if (m.includes('voucher ini sudah digunakan oleh akun anda')) return 'Sudah diklaim'
-
-    if (m.includes('voucher tidak aktif')) return 'Tidak aktif'
-    if (m.includes('voucher belum dapat diklaim')) return 'Belum tersedia'
-
-    if (m.includes('voucher sudah kedaluwarsa') || m.includes('kedaluwarsa')) return 'Sudah kedaluwarsa'
+    if (m.includes('cannot spin') || m.includes('tidak bisa spin') || m.includes('tidak dapat spin')) return 'Kesempatan habis'
+    if (m.includes('ticket') && m.includes('habis')) return 'Kesempatan habis'
 
     return ''
   }
@@ -121,34 +128,28 @@ const extractErrorMessage = (err) => {
   return mapped || msg || err?.message || 'Permintaan gagal, silakan coba lagi'
 }
 
-const fetchChances = async () => {
-  try {
-    const resp = await voucherAPI.getChances?.()
-    const data = resp?.data || {}
-    const chances = Number(data?.remaining ?? data?.chances ?? 1)
-    remainingChances.value = Number.isFinite(chances) ? Math.max(0, chances) : 1
-  } catch (_) {
-    remainingChances.value = 1
-  }
-}
-
 const handleClaim = async () => {
-  if (isLoading.value || remainingChances.value <= 0) return
+  if (isLoading.value) return
 
   isLoading.value = true
   showErrorModal.value = false
   errorMessage.value = ''
   try {
-    const resp = await voucherAPI.claim({})
+    const resp = await rouletteAPI.spin()
     const data = resp?.data || {}
-    const amountRaw = Number(data?.amount ?? 0)
-    claimedAmount.value = Number.isFinite(amountRaw) ? amountRaw : 0
-    successTitle.value = 'Berhasil menerima bonus'
+    const before = Number(data?.tickets_before ?? null)
+    const after = Number(data?.tickets_after ?? null)
+    remainingChances.value = Number.isFinite(after) ? after : (Number.isFinite(before) ? before : remainingChances.value)
+    hasLoadedInitialTickets.value = true
+
+    const prizeAmount = parseNumber(data?.prize_amount)
+    claimedAmount.value = prizeAmount !== null ? prizeAmount : 0
+    successTitle.value = 'Anda mendapatkan'
     showSuccessModal.value = true
-    remainingChances.value = Math.max(0, remainingChances.value - 1)
-    fetchChances()
+    hasClaimed.value = true
   } catch (err) {
-    errorMessage.value = extractErrorMessage(err)
+    const msg = extractErrorMessage(err)
+    errorMessage.value = msg
     showErrorModal.value = true
   } finally {
     isLoading.value = false
@@ -156,7 +157,7 @@ const handleClaim = async () => {
 }
 
 onMounted(() => {
-  fetchChances()
+  if (!hasLoadedInitialTickets.value) remainingChances.value = null
 })
 </script>
 

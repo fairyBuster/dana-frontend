@@ -3,29 +3,41 @@
     <div class="bottom-nav-wrapper">
       <nav class="bottom-nav">
         <router-link to="/hn/user" class="nav-item" :class="{ active: isActive('/user') }">
-          <img src="/assets/images/1d78a069d6a76e2ec636e530125cf4db307129e3.png" alt="Akun">
+          <img
+            :src="isActive('/user') ? '/assets/images/user-yellow.png' : '/assets/images/1d78a069d6a76e2ec636e530125cf4db307129e3.png'"
+            alt="Akun"
+          >
           <span>Akun</span>
         </router-link>
 
-        <router-link to="/hn/network/community" class="nav-item" :class="{ active: isActive('/network/community') }">
-          <img src="/assets/images/5b2eccc7619171bb782ad486b942686a17d4b9ce.png" alt="Tim Saya">
+        <router-link to="/network/invite" class="nav-item" :class="{ active: isActive('/network/community') }">
+          <img
+            :src="isActive('/network/invite') ? '/assets/images/team-yellow.png' : '/assets/images/5b2eccc7619171bb782ad486b942686a17d4b9ce.png'"
+            alt="Tim Saya"
+          >
           <span>Tim Saya</span>
         </router-link>
 
-        <router-link to="/hn/home" class="nav-item center-nav-item" aria-label="Dana Proteksi">
+        <router-link to="/hn/shop" class="nav-item center-nav-item" aria-label="Dana Proteksi">
           <div class="center-btn-bg">
-            <img src="/assets/images/4203ed5d8bff488a8cf30f0b005e7a986e2dcd66.png" alt="Dana Proteksi">
+            <img src="/assets/images/image 68.png" alt="Dana Proteksi">
           </div>
           <span class="center-label">Dana Proteksi</span>
         </router-link>
 
         <router-link to="/hn/company" class="nav-item" :class="{ active: isActive('/company') }">
-          <img src="/assets/images/70e90e171ca2d494dec7257a0f52b7dd0d4457b7.png" alt="Perusahaan">
+          <img
+            :src="isActive('/company') ? '/assets/images/company-yellow.png' : '/assets/images/70e90e171ca2d494dec7257a0f52b7dd0d4457b7.png'"
+            alt="Perusahaan"
+          >
           <span>Perusahaan</span>
         </router-link>
 
         <router-link to="/hn/home" class="nav-item" :class="{ active: isActive('/home') }">
-          <img src="/assets/images/fef79759a740c692456b4430087bdf71a331718c.png" alt="Beranda">
+          <img
+            :src="isActive('/home') ? '/assets/images/home-yellow.png' : '/assets/images/image 67.png'"
+            alt="Beranda"
+          >
           <span>Beranda</span>
         </router-link>
       </nav>
@@ -103,10 +115,10 @@ const isActive = (basePath) => {
 
 .center-nav-item {
   position: relative;
-  margin-top: 0;
+  margin-top: 10px;
   justify-content: flex-end;
   height: 100%;
-  padding-bottom: 12px;
+  padding-bottom: 18px;
 }
 
 .center-btn-bg {

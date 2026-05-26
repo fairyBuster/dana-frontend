@@ -3,11 +3,25 @@
     <section id="section-terms">
       <div class="app-container">
         <header class="header">
-          <img src="/assets/images/9_20.svg" alt="Back" class="back-icon" @click="goBack">
+          <button type="button" class="back-button" aria-label="Kembali" @click="goBack">
+            <img src="/assets/images/9_20.svg" alt="" class="back-icon" aria-hidden="true">
+          </button>
           <h1 class="page-title">Syarat Layanan</h1>
         </header>
         <main class="content">
-          <div class="terms-text">Selamat datang di Dana Proteksi. Dengan mengakses, mendaftar, atau menggunakan layanan Dana Proteksi, pengguna dianggap telah membaca, memahami, dan menyetujui seluruh Syarat Layanan ini.
+          <div class="terms-text">{{ termsText }}</div>
+        </main>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const termsText = `Selamat datang di Dana Proteksi. Dengan mengakses, mendaftar, atau menggunakan layanan Dana Proteksi, pengguna dianggap telah membaca, memahami, dan menyetujui seluruh Syarat Layanan ini.
 Syarat Layanan ini mengatur penggunaan website, akun, fitur, informasi, dan layanan digital yang disediakan oleh Dana Proteksi.
 1. Definisi
 Dalam Syarat Layanan ini:
@@ -90,42 +104,11 @@ Dengan tetap menggunakan layanan setelah perubahan dilakukan, pengguna dianggap 
 16. Hubungi Kami
 Apabila pengguna memiliki pertanyaan, keluhan, atau permintaan terkait Syarat Layanan ini, pengguna dapat menghubungi kami melalui:
 Dana Proteksi  Email: [email perusahaan]  Website: [alamat website]  Layanan Bantuan: [kontak/halaman bantuan]
-Dengan menggunakan layanan Dana Proteksi, pengguna dianggap telah membaca, memahami, dan menyetujui seluruh Syarat Layanan ini.</div>
-        </main>
-      </div>
-    </section>
-  </div>
-</template>
-
-<script setup>
-import { onBeforeUnmount, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
+Dengan menggunakan layanan Dana Proteksi, pengguna dianggap telah membaca, memahami, dan menyetujui seluruh Syarat Layanan ini.`
 
 const goBack = () => {
-  try {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-  } catch (_) {
-  }
-
-  const token = String(localStorage.getItem('auth_token') || '').trim()
-  router.push(token ? '/hn/user' : '/hn/console')
+  router.push('/hn/home')
 }
-
-const handleScroll = () => {
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
 </script>
 
 <style scoped>
@@ -137,9 +120,10 @@ onBeforeUnmount(() => {
   font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f5f5f5;
+  background: linear-gradient(360deg, #FEFDFE 0%, #FDF8EA 100%);
   display: flex;
   justify-content: center;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -154,30 +138,42 @@ onBeforeUnmount(() => {
   width: 100%;
   max-width: 412px;
   min-height: 100vh;
-  background: linear-gradient(180deg, #FEFDFE 0%, #FDF8EA 100%);
+  background: linear-gradient(360deg, #FEFDFE 0%, #FDF8EA 100%);
   position: relative;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
 }
 
 .header {
   display: flex;
-  align-items: flex-start;
-  padding: 25px 19px 0;
+  align-items: center;
+  padding: 25px 19px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  text-decoration: none;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 
 .back-icon {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  cursor: pointer;
-  margin-top: 6px;
 }
 
 .page-title {
   margin: 0 0 0 28px;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  line-height: 33px;
+  line-height: 1.2;
   color: #000000;
 }
 

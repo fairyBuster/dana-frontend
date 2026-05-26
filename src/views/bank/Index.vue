@@ -37,7 +37,10 @@
 
       <div v-if="isLoading" class="empty-state">Memuat...</div>
 
-      <div v-else-if="userBanks.length === 0" class="empty-state">Belum ada rekening terdaftar</div>
+      <div v-else-if="userBanks.length === 0" class="empty-state">
+        <img src="/assets/images/empty.jpg" alt="" class="empty-icon">
+        <p>Belum ada rekening terdaftar</p>
+      </div>
 
       <div
         v-else
@@ -55,9 +58,9 @@
         </div>
       </div>
 
-      <button class="btn-add" :disabled="isNavigating" @click="goToAdd">
+      <!-- <button class="btn-add" :disabled="isNavigating" @click="goToAdd">
         + Tambah Rekening
-      </button>
+      </button> -->
     </section>
   </div>
 </template>
@@ -372,6 +375,13 @@ img {
   color: #737373;
   text-align: center;
   padding: 20px 0;
+}
+
+.empty-icon {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .btn-add {
