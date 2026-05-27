@@ -107,7 +107,7 @@ Dana Proteksi  Email: [email perusahaan]  Website: [alamat website]  Layanan Ban
 Dengan menggunakan layanan Dana Proteksi, pengguna dianggap telah membaca, memahami, dan menyetujui seluruh Syarat Layanan ini.`
 
 const goBack = () => {
-  router.push('/hn/home')
+  router.go(-1)
 }
 </script>
 

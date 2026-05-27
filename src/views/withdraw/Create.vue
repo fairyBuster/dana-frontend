@@ -252,7 +252,7 @@ const numericAmount = computed(() => {
 
 const displayAmount = computed(() => withdrawAmount.value || '')
 
-const balanceDisplay = computed(() => formatAppCurrency(withdrawableBalance.value * (usdtToIdrRate.value || 16000)))
+const balanceDisplay = computed(() => formatAppCurrency(withdrawableBalance.value * (usdtToIdrRate.value || 16000), { symbol: 'Rp', decimals: 0 }))
 
 const usdAmountToSubmit = computed(() => {
   const rate = Number(usdtToIdrRate.value || 0)

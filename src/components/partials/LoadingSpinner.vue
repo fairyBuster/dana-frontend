@@ -6,10 +6,7 @@
     aria-busy="true"
   >
     <div class="spinner-box">
-      <div class="lds-spinner" aria-hidden="true">
-        <div></div><div></div><div></div><div></div><div></div><div></div>
-        <div></div><div></div><div></div><div></div><div></div><div></div>
-      </div>
+      <div class="custom-loader" aria-hidden="true"></div>
       <p v-if="message" class="spinner-message">{{ message }}</p>
     </div>
   </div>
@@ -29,54 +26,36 @@ const { visible, overlay, containerClass, message } = toRefs(props)
 </script>
 
 <style scoped>
-.lds-spinner,
-.lds-spinner div,
-.lds-spinner div:after {
-  box-sizing: border-box;
+.custom-loader {
+  width: 50px;
+  height: 50px;
+  display: grid;
 }
 
-.lds-spinner {
-  --spinner-size: 28px;
-  color: #111111;
-  display: inline-block;
-  position: relative;
-  width: var(--spinner-size);
-  height: var(--spinner-size);
+.custom-loader::before,
+.custom-loader::after {
+  content: "";
+  grid-area: 1 / 1;
+  --c: radial-gradient(farthest-side, #766DF4 92%, #0000);
+  background:
+    var(--c) 50% 0,
+    var(--c) 50% 100%,
+    var(--c) 100% 50%,
+    var(--c) 0 50%;
+  background-size: 12px 12px;
+  background-repeat: no-repeat;
+  animation: s2 1s infinite;
 }
 
-.lds-spinner div {
-  transform-origin: calc(var(--spinner-size) / 2) calc(var(--spinner-size) / 2);
-  animation: lds-spinner 1.2s linear infinite;
+.custom-loader::before {
+  margin: 4px;
+  filter: hue-rotate(45deg);
+  background-size: 8px 8px;
+  animation-timing-function: linear;
 }
 
-.lds-spinner div:after {
-  content: " ";
-  display: block;
-  position: absolute;
-  top: calc(var(--spinner-size) * 0.04);
-  left: calc(var(--spinner-size) * 0.46);
-  width: calc(var(--spinner-size) * 0.08);
-  height: calc(var(--spinner-size) * 0.22);
-  border-radius: 20%;
-  background: currentColor;
-}
-
-.lds-spinner div:nth-child(1) { transform: rotate(0deg); animation-delay: -1.1s; }
-.lds-spinner div:nth-child(2) { transform: rotate(30deg); animation-delay: -1s; }
-.lds-spinner div:nth-child(3) { transform: rotate(60deg); animation-delay: -0.9s; }
-.lds-spinner div:nth-child(4) { transform: rotate(90deg); animation-delay: -0.8s; }
-.lds-spinner div:nth-child(5) { transform: rotate(120deg); animation-delay: -0.7s; }
-.lds-spinner div:nth-child(6) { transform: rotate(150deg); animation-delay: -0.6s; }
-.lds-spinner div:nth-child(7) { transform: rotate(180deg); animation-delay: -0.5s; }
-.lds-spinner div:nth-child(8) { transform: rotate(210deg); animation-delay: -0.4s; }
-.lds-spinner div:nth-child(9) { transform: rotate(240deg); animation-delay: -0.3s; }
-.lds-spinner div:nth-child(10) { transform: rotate(270deg); animation-delay: -0.2s; }
-.lds-spinner div:nth-child(11) { transform: rotate(300deg); animation-delay: -0.1s; }
-.lds-spinner div:nth-child(12) { transform: rotate(330deg); animation-delay: 0s; }
-
-@keyframes lds-spinner {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
+@keyframes s2 {
+  100% { transform: rotate(.5turn); }
 }
 
 .spinner-overlay {

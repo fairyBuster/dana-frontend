@@ -74,6 +74,16 @@
       </div>
     </section>
 
+    <section v-if="faqModalOpen" id="section-faq-modal" class="faq-modal-overlay" @click.self="closeFaqModal">
+      <div class="faq-modal" role="dialog" aria-modal="true" :aria-label="activeFaq?.title || 'FAQ'">
+        <div class="faq-modal-header">
+          <h3 class="faq-modal-title">{{ activeFaq?.title || '' }}</h3>
+          <button type="button" class="faq-modal-close" aria-label="Tutup" @click="closeFaqModal">×</button>
+        </div>
+        <p class="faq-modal-body">{{ activeFaq?.body || '' }}</p>
+      </div>
+    </section>
+
     <!-- Footer -->
     <section id="section-footer">
       <div class="footer-container">
@@ -121,9 +131,16 @@ const faqItems = ref([
   }
 ])
 
+const faqModalOpen = ref(false)
+const activeFaq = ref(null)
+
 const openFaqItem = (item) => {
-  // Could navigate to a FAQ detail page or expand inline
-  // For now, just a placeholder
+  activeFaq.value = item || null
+  faqModalOpen.value = true
+}
+
+const closeFaqModal = () => {
+  faqModalOpen.value = false
 }
 
 const openTelegram = () => {
@@ -362,6 +379,63 @@ button {
   height: 1px;
   background-color: rgba(0, 0, 0, 0.1);
   margin: 0 16px;
+}
+
+.faq-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.faq-modal {
+  width: 100%;
+  max-width: 360px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+}
+
+.faq-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.faq-modal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1.3;
+}
+
+.faq-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.75);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.faq-modal-body {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #333333;
+  white-space: pre-wrap;
 }
 
 /* Footer */

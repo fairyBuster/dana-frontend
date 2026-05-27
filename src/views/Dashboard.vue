@@ -122,7 +122,7 @@
           <p class="promo-desc">Dana Proteksi menggunakan sistem keamanan berlapis untuk melindungi aset Anda.</p>
           <div class="promo-btn">
             <span>Mulai Sekarang</span>
-            <img src="/assets/images/10_81.svg" alt="">
+            <img src="/assets/images/icon.png" alt="" style="width: 11px; height: 11px;">
           </div>
         </div>
         <img src="/assets/images/788.png" alt="" class="promo-illustration">
@@ -237,7 +237,7 @@ const fetchAccountInfo = async () => {
 const goToDeposit = () => router.push('/hn/app/charge')
 const goToWithdraw = () => router.push('/hn/app/settlement')
 const goToPortfolio = () => router.push('/hn/hall/outputhall')
-const goToMining = () => router.push('/shop')
+const goToMining = () => router.push('/hall/outputhall/history')
 
 onMounted(() => {
   fetchAccountInfo()

@@ -64,7 +64,7 @@
               <img src="/assets/images/f8648f6433668b71d57f0c9b7251b169b98c2581.png" alt="" class="tx-icon">
             </div>
             <div class="tx-details">
-              <h3 class="tx-title">{{ trx.title }}</h3>
+              <h3 class="tx-title">Isi ulang berhasil</h3>
               <span class="tx-date">{{ trx.date }}</span>
             </div>
             <div class="tx-amount">{{ trx.amount }}</div>

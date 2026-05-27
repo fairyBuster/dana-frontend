@@ -26,31 +26,33 @@
           <div class="detail-label">ID Pengguna</div>
           <div class="detail-value">{{ displayUid }}</div>
         </div>
-        <div class="divider"></div>
+       
 
+        <br>
         <div class="detail-item">
           <div class="detail-label">Bank Pencairan Dana</div>
           <div class="detail-value">{{ displayBank }}</div>
         </div>
-        <div class="divider"></div>
+        <br>
 
         <div class="detail-item">
           <div class="detail-label">VIP Saat Ini</div>
           <div class="detail-value">{{ displayVip }}</div>
         </div>
-        <div class="divider"></div>
+        <br>
+     
 
         <div class="detail-item">
           <div class="detail-label">Nama Saya</div>
           <div class="detail-value">{{ displayUsername }}</div>
         </div>
-        <div class="divider"></div>
+       <br>
 
         <div class="detail-item">
           <div class="detail-label">Nomor Saya</div>
           <div class="detail-value">{{ displayPhone }}</div>
         </div>
-        <div class="divider"></div>
+      <br>
 
         <div class="detail-item">
           <div class="detail-label">Dana Proteksi Saya</div>
@@ -64,7 +66,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { authAPI } from '@/services/api'
+import { authAPI, bankAPI } from '@/services/api'
 
 const router = useRouter()
 
@@ -84,6 +86,7 @@ const userInfo = ref({
 })
 
 const isLoading = ref(false)
+const userBanks = ref([])
 
 const displayUid = computed(() => {
   const d = userInfo.value
@@ -93,8 +96,12 @@ const displayUid = computed(() => {
 
 const displayBank = computed(() => {
   const d = userInfo.value
-  const bankName = d.bank_name || d.payout_bank || ''
-  const bankAccount = d.bank_account || d.payout_account || ''
+  const banks = Array.isArray(userBanks.value) ? userBanks.value : []
+  const activeBank = banks.find((b) => Boolean(b?.is_default)) || banks[0] || null
+  const bankNameFromUserBanks = String(activeBank?.bank_name || activeBank?.bank?.name || activeBank?.name || '').trim()
+  const bankAccountFromUserBanks = String(activeBank?.account_number || activeBank?.account_no || '').trim()
+  const bankName = bankNameFromUserBanks || d.bank_name || d.payout_bank || ''
+  const bankAccount = bankAccountFromUserBanks || d.bank_account || d.payout_account || ''
   if (bankName && bankAccount) return `${bankName}-${bankAccount}`
   if (bankName) return bankName
   if (bankAccount) return bankAccount
@@ -143,6 +150,22 @@ const fetchAccountInfo = async () => {
   }
 }
 
+const normalizeBanksResponse = (data) => {
+  if (!data) return []
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data.results)) return data.results
+  return []
+}
+
+const fetchUserBanks = async () => {
+  try {
+    const resp = await bankAPI.getUserBanks()
+    userBanks.value = normalizeBanksResponse(resp?.data)
+  } catch (_) {
+    userBanks.value = []
+  }
+}
+
 const fetchRankStatus = async () => {
   try {
     const resp = await authAPI.getRankStatus()
@@ -160,7 +183,7 @@ const goBack = () => {
 }
 
 onMounted(() => {
-  Promise.all([fetchAccountInfo(), fetchRankStatus()])
+  Promise.all([fetchAccountInfo(), fetchRankStatus(), fetchUserBanks()])
 })
 </script>
 

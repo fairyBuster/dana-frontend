@@ -30,10 +30,10 @@
       </div>
 
       <div class="user-card">
-        <img src="/assets/images/108294978d9cad25785261933372f80a0602c03d.png" alt="" class="user-avatar">
+        <img src="/assets/images/Dana Proteksi_20260526_162515_0000.png" alt="" class="user-avatar">
         <div class="user-details">
           <h2 class="user-name">{{ displayUsername }}</h2>
-          <p class="user-contact">{{ displayPhone }}<br>ID: {{ displayUid }}</p>
+          <p class="user-contact">{{ displayPhoneMasked }}<br>ID: {{ displayUid }}</p>
         </div>
         <div class="user-vip-status" @click="router.push('/hn/network/invite')">
           <span class="vip-level">{{ vipText }}</span>
@@ -205,6 +205,18 @@ const displayPhone = computed(() => {
   return p || '-'
 })
 
+const maskMiddle = (raw, leftKeep, rightKeep) => {
+  const value = String(raw ?? '').trim()
+  if (!value || value === '-') return '-'
+  if (value.length <= leftKeep + rightKeep) return value
+  const left = value.slice(0, leftKeep)
+  const right = value.slice(value.length - rightKeep)
+  const stars = '*'.repeat(Math.max(3, value.length - leftKeep - rightKeep))
+  return `${left}${stars}${right}`
+}
+
+const displayPhoneMasked = computed(() => maskMiddle(displayPhone.value, 4, 3))
+
 const displayEmail = computed(() => {
   const d = accountInfo.value || {}
   const e = String(d.email || d.user_email || d.mail || '').trim()
@@ -364,7 +376,7 @@ button {
   position: relative;
   width: 37px;
   height: 37px;
-  
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
   margin: 0 auto 4px;
 }
 
@@ -380,7 +392,6 @@ button {
 .logout-icon-wrap .icon-fg {
   position: absolute;
   top: 50%;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   left: 50%;
   transform: translate(-50%, -50%);
   width: 24px;

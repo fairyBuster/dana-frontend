@@ -106,7 +106,7 @@ const dotPages = computed(() => {
   justify-content: center;
   gap: 10px;
   padding: 8px 10px;
-  background: #f2f2f2;
+  background: #fdf8ea;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
 }
@@ -116,7 +116,7 @@ const dotPages = computed(() => {
   padding: 0 12px;
   border-radius: 6px;
   border: none;
-  background: transparent;
+  background: #f4bd40;
   color: rgba(0, 0, 0, 0.75);
   font-size: 13px;
   font-weight: 600;
@@ -125,7 +125,7 @@ const dotPages = computed(() => {
 }
 
 .nav-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -145,7 +145,7 @@ const dotPages = computed(() => {
   height: 30px;
   border-radius: 6px;
   border: none;
-  background: transparent;
+  background: rgba(244, 189, 64, 0.25);
   color: rgba(0, 0, 0, 0.85);
   font-size: 13px;
   font-weight: 600;
@@ -163,7 +163,7 @@ const dotPages = computed(() => {
 }
 
 .page-btn.active {
-  background: #d9534f;
+  background: #f4bd40;
   color: #ffffff;
 }
 </style>

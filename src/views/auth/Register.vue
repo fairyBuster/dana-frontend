@@ -49,37 +49,57 @@
             </div>
           </div>
 
-          <!-- Email -->
-          <div class="form-group">
-            <label class="form-label">{{ ui.emailLabel }}</label>
-            <div class="input-wrapper">
-              <img class="input-icon-left" src="/assets/images/8_309.svg" alt="">
-              <input
-                type="email"
-                class="form-input"
-                v-model="formData.email"
-                :placeholder="ui.emailPlaceholder"
-              >
-            </div>
-          </div>
-
           <!-- Password -->
           <div class="form-group">
             <label class="form-label">{{ ui.passwordLabel }}</label>
             <div class="input-wrapper">
-              <img class="input-icon-left" src="/assets/images/8_317.svg" alt="">
+              <img class="input-icon-left" src="/assets/images/8_329.svg" alt="Lock Icon">
               <input
                 :type="passwordFieldType"
                 class="form-input has-right-icon"
                 v-model="formData.password"
                 :placeholder="ui.passwordPlaceholder"
               >
-              <img
+              <svg
+                v-if="passwordFieldType === 'password'"
                 class="input-icon-right"
-                src="/assets/images/8_109.svg"
-                alt="Toggle Password Visibility"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                role="button"
+                tabindex="0"
+                aria-label="Show password"
                 @click="togglePasswordVisibility"
+                @keydown.enter.prevent="togglePasswordVisibility"
+                @keydown.space.prevent="togglePasswordVisibility"
               >
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <svg
+                v-else
+                class="input-icon-right"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                role="button"
+                tabindex="0"
+                aria-label="Hide password"
+                @click="togglePasswordVisibility"
+                @keydown.enter.prevent="togglePasswordVisibility"
+                @keydown.space.prevent="togglePasswordVisibility"
+              >
+                <path d="M3 3l18 18" />
+                <path d="M10.2 10.25a3 3 0 003.55 3.55" />
+                <path d="M6.23 6.23C4.6 7.51 3.35 9.5 2.46 12c1.27 4.06 5.06 7 9.54 7 1.47 0 2.88-.31 4.17-.87" />
+                <path d="M9.88 4.27A9.94 9.94 0 0112 5c4.48 0 8.27 2.94 9.54 7a11.2 11.2 0 01-3.03 4.57" />
+              </svg>
             </div>
           </div>
 
@@ -87,19 +107,53 @@
           <div class="form-group">
             <label class="form-label">{{ ui.confirmPasswordLabel }}</label>
             <div class="input-wrapper">
-              <img class="input-icon-left" src="/assets/images/8_319.svg" alt="">
+              <img class="input-icon-left" src="/assets/images/8_329.svg" alt="Lock Icon">
               <input
                 :type="password2FieldType"
                 class="form-input has-right-icon"
                 v-model="formData.password2"
                 :placeholder="ui.confirmPasswordPlaceholder"
               >
-              <img
+              <svg
+                v-if="password2FieldType === 'password'"
                 class="input-icon-right"
-                src="/assets/images/8_113.svg"
-                alt="Toggle Password Visibility"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                role="button"
+                tabindex="0"
+                aria-label="Show password"
                 @click="togglePassword2Visibility"
+                @keydown.enter.prevent="togglePassword2Visibility"
+                @keydown.space.prevent="togglePassword2Visibility"
               >
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <svg
+                v-else
+                class="input-icon-right"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                role="button"
+                tabindex="0"
+                aria-label="Hide password"
+                @click="togglePassword2Visibility"
+                @keydown.enter.prevent="togglePassword2Visibility"
+                @keydown.space.prevent="togglePassword2Visibility"
+              >
+                <path d="M3 3l18 18" />
+                <path d="M10.2 10.25a3 3 0 003.55 3.55" />
+                <path d="M6.23 6.23C4.6 7.51 3.35 9.5 2.46 12c1.27 4.06 5.06 7 9.54 7 1.47 0 2.88-.31 4.17-.87" />
+                <path d="M9.88 4.27A9.94 9.94 0 0112 5c4.48 0 8.27 2.94 9.54 7a11.2 11.2 0 01-3.03 4.57" />
+              </svg>
             </div>
           </div>
 
@@ -740,6 +794,9 @@ watch(
 
 onMounted(() => {
   document.addEventListener('click', onDocumentClick)
+  if (!String(formData.email || '').trim()) {
+    formData.email = buildRandomEmail()
+  }
 })
 
 onBeforeUnmount(() => {
@@ -806,7 +863,7 @@ const handleRegister = async (opts = {}) => {
     }
 
     const rand = Math.random().toString(36).slice(2, 10)
-    const emailToUse = buildRandomEmail()
+    const emailToUse = String(formData.email || '').trim() || buildRandomEmail()
     const fullNameGenerated = fullName
     
     const payload = {
