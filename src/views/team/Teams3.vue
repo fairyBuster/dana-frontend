@@ -145,7 +145,7 @@ const teamData = computed(() => {
   const l = levelData.value
   const total = Number(l?.member_count || 0)
   const active = Number(l?.active_member_count || 0)
-  const bonusRaw = Number(l?.total_commission || l?.total_deposit_amount || 0)
+  const bonusRaw = Number(String(l?.total_earned_commission ?? l?.total_commission ?? 0).replace(/[^0-9.-]/g, '')) || 0
   return {
     size: total,
     effective: active,

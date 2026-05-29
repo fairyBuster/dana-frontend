@@ -165,7 +165,7 @@ const toAmount = (value) => {
 }
 
 const totalBalanceDisplay = computed(() => {
-  return formatRupiah(mainBalance.value + depositBalance.value + interestTotal.value)
+  return formatRupiah(mainBalance.value)
 })
 
 const depositBalanceDisplay = computed(() => {
@@ -177,7 +177,7 @@ const mainBalanceDisplay = computed(() => {
 })
 
 const interestDisplay = computed(() => {
-  return formatRupiah(interestTotal.value)
+  return formatRupiah(mainBalance.value)
 })
 
 const maskedBalance = computed(() => '••••••••')

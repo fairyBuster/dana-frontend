@@ -243,7 +243,7 @@ img {
 
 .input-label {
   color: #b1893b;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   margin: 0 0 10px 0;
 }
@@ -253,7 +253,7 @@ img {
   border: none;
   resize: none;
   font-family: inherit;
-  font-size: 12px;
+  font-size: 14px;
   color: #000000;
   outline: none;
   flex-grow: 1;

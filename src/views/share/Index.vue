@@ -64,7 +64,7 @@
       <div class="section-inner">
         <div class="invite-card">
           <div class="invite-header">
-            <div class="invite-icon-block"></div>
+            <div class="invite-icon-block"><img src="/assets/images/Link.png" alt="" style="width: 20px; height: 20px;"></div>
             <h2 class="invite-title">Link Undangan</h2>
           </div>
           <div class="invite-actions">
@@ -150,7 +150,7 @@
 <script setup>
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { authAPI } from '@/services/api'
+import { authAPI, commissionAPI } from '@/services/api'
 import { getFrontendUrl, formatAppCurrency } from '@/utils/settings'
 import FooterBar from '@/components/partials/AppFooter.vue'
 import SuccessModal from '@/components/modals/AppSuccessModal.vue'
@@ -174,11 +174,45 @@ const formatRupiah = (value) => {
   })
 }
 
+const toAmount = (value) => {
+  const raw = String(value ?? '').trim()
+  if (!raw) return 0
+  const s = raw.replace(/\s+/g, '').replace(/[^0-9,.-]/g, '')
+  const lastDot = s.lastIndexOf('.')
+  const lastComma = s.lastIndexOf(',')
+  const lastSep = Math.max(lastDot, lastComma)
+  if (lastSep > -1) {
+    const intPart = s.slice(0, lastSep).replace(/[.,]/g, '').replace(/[^0-9-]/g, '')
+    const fracPart = s.slice(lastSep + 1).replace(/[^0-9]/g, '')
+    const normalized = fracPart ? `${intPart || '0'}.${fracPart}` : `${intPart || '0'}`
+    const n = Number(normalized)
+    return Number.isFinite(n) ? n : 0
+  }
+  const digits = s.replace(/[^0-9-]/g, '')
+  const n = Number(digits)
+  return Number.isFinite(n) ? n : 0
+}
+
 const teamStats = computed(() => {
   const data = accountData.value || {}
-  const total = Number(data.team_count ?? data.total_team ?? 0)
-  const active = Number(data.active_team ?? data.active_members ?? 0)
-  const bonus = Number(data.team_bonus ?? data.total_commission ?? 0)
+  const levels = Array.isArray(data.levels) ? data.levels : null
+  if (levels) {
+    const slice = levels.filter((x) => {
+      const lvl = Number(x?.level)
+      return Number.isFinite(lvl) && lvl >= 1 && lvl <= 3
+    })
+    const total = slice.reduce((sum, x) => sum + toAmount(x?.members_total), 0)
+    const active = slice.reduce((sum, x) => sum + toAmount(x?.members_active), 0)
+    const bonus = slice.reduce((sum, x) => sum + toAmount(x?.profit_commission_amount) + toAmount(x?.purchase_commission_amount), 0)
+    return {
+      totalMembers: total,
+      activeMembers: active,
+      totalBonus: formatRupiah(bonus)
+    }
+  }
+  const total = toAmount(data.team_count ?? data.total_team ?? 0)
+  const active = toAmount(data.active_team ?? data.active_members ?? 0)
+  const bonus = toAmount(data.team_bonus ?? data.total_commission ?? 0)
   return {
     totalMembers: total,
     activeMembers: active,
@@ -220,16 +254,25 @@ const buildInviteLink = (code) => {
 
 const loadAccountInfo = async () => {
   await ensureFrontendBaseUrl()
+  let data = {}
   try {
     const resp = await authAPI.getAccountInfo()
-    const data = resp?.data || {}
-    accountData.value = data
-    referralCode.value = String(data.referral_code || '').trim()
-    inviteLink.value = buildInviteLink(referralCode.value)
+    data = resp?.data || {}
   } catch (_) {
-    referralCode.value = ''
-    inviteLink.value = buildInviteLink('')
+    data = {}
   }
+
+  try {
+    const statsResp = await commissionAPI.getDownlineStats()
+    const levels = statsResp?.data?.levels
+    if (Array.isArray(levels)) {
+      data = { ...data, levels }
+    }
+  } catch (_) {}
+
+  accountData.value = data
+  referralCode.value = String(data.referral_code || '').trim()
+  inviteLink.value = buildInviteLink(referralCode.value)
 }
 
 const copyLink = () => {
@@ -461,6 +504,12 @@ button {
   height: 26px;
   background-color: #fcf2dd;
   border-radius: 5px;
+  display: grid;
+  place-items: center;
+}
+
+.invite-icon-block img {
+  display: block;
 }
 
 .invite-title {

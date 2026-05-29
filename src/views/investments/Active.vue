@@ -464,8 +464,8 @@ p, h1, h2, h3, h4 {
 .asset-card {
   display: grid;
   grid-template-columns: 57px 1fr auto;
-  gap: 10px 12px;
-  padding: 14px;
+  gap: 5px 12px;
+  padding: 14px 14px;
   background-color: #fefffe;
   border-radius: 10px;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
@@ -519,7 +519,7 @@ p, h1, h2, h3, h4 {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  padding-top: 2px;
+  padding-top: -10px;
 }
 
 .status-badge {
@@ -565,6 +565,7 @@ p, h1, h2, h3, h4 {
   grid-column: 2;
   grid-row: 2;
   font-size: 12px;
+  margin-top: -60px;
   color: #000000;
   align-self: center;
 }
@@ -577,6 +578,7 @@ p, h1, h2, h3, h4 {
   justify-content: flex-end;
   gap: 4px;
   font-size: 11px;
+  margin-top: -60px;
   color: #818181;
 }
 
@@ -589,6 +591,7 @@ p, h1, h2, h3, h4 {
   grid-column: 1 / span 2;
   grid-row: 3;
   font-size: 11px;
+  margin-top: -60px;
   color: #818181;
   align-self: end;
   margin-top: 4px;
@@ -600,8 +603,8 @@ p, h1, h2, h3, h4 {
   font-size: 10px;
   color: #000000;
   text-align: right;
-  line-height: 1.4;
-  margin-top: 4px;
+  margin-top: -6px;
+  line-height: 1.2;
 }
 
 /* Footer */

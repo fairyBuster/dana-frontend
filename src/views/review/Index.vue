@@ -470,7 +470,7 @@ img {
 
 .review-author {
   color: #b1893b;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   margin-bottom: 8px;
   display: block;
@@ -478,7 +478,7 @@ img {
 
 .review-text {
   color: rgba(0, 0, 0, 0.5);
-  font-size: 12px;
+  font-size: 14px;
   margin: 0 0 auto 0;
   line-height: 1.4;
 }
@@ -489,7 +489,7 @@ img {
 
 .review-date {
   color: #b1893b;
-  font-size: 10px;
+  font-size: 12px;
   display: block;
   margin-bottom: 6px;
 }

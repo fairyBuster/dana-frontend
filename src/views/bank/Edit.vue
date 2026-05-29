@@ -73,15 +73,7 @@
           >
         </div>
 
-        <div class="form-group">
-          <label>Nomor Telepon</label>
-          <input
-            type="tel"
-            v-model="formData.phone"
-            placeholder="Masukkan nomor telepon"
-            inputmode="tel"
-          >
-        </div>
+       
       </form>
     </section>
 

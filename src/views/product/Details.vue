@@ -88,17 +88,10 @@
         <p class="terms-text">Saya setuju dengan <span class="highlight">Kebijakan Privasi</span> dan <span class="highlight">Syarat Layanan</span></p>
       </div>
 
-      <button class="pay-button" :disabled="!isConfirmed || isPurchasing" @click="confirmPurchase">
+      <button class="pay-button" :disabled="!isConfirmed || isPurchasing" @click="executePurchase">
         {{ isPurchasing ? 'Memproses...' : 'Bayar Sekarang' }}
       </button>
     </section>
-
-    <ConfirmationModal
-      v-model="showPurchaseModal"
-      message="Apakah Anda yakin ingin membeli produk ini?"
-      :amount="purchaseAmountDisplay"
-      @confirm="executePurchase"
-    />
 
     <SuccessModal
       v-model="successModalOpen"
@@ -115,7 +108,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { productAPI } from '@/services/api'
 import SuccessModal from '@/components/modals/AppSuccessModal.vue'
 import ErrorModal from '@/components/modals/AppErrorModal.vue'
-import ConfirmationModal from '@/components/modals/ConfirmationModal.vue'
 import LoadingSpinner from '@/components/partials/LoadingSpinner.vue'
 import { appSettings, formatAppCurrency } from '@/utils/settings'
 import { resolveImageUrl } from '@/utils/imageCache'
@@ -126,7 +118,6 @@ const route = useRoute()
 const product = ref(null)
 const isLoading = ref(false)
 const isConfirmed = ref(false)
-const showPurchaseModal = ref(false)
 const isPurchasing = ref(false)
 const successModalOpen = ref(false)
 const errorModalOpen = ref(false)
@@ -258,13 +249,6 @@ const goBack = () => {
   router.go(-1)
 }
 
-const confirmPurchase = () => {
-  if (!isConfirmed.value) return
-  errorMessage.value = ''
-  errorModalOpen.value = false
-  showPurchaseModal.value = true
-}
-
 const extractPurchaseErrorMessage = (data) => {
   if (!data) return ''
   if (typeof data === 'string') return data
@@ -295,9 +279,9 @@ const extractPurchaseErrorMessage = (data) => {
 
 const executePurchase = async () => {
   if (isPurchasing.value) return
+  if (!isConfirmed.value) return
   const productId = Number(route.params.id)
   if (!Number.isFinite(productId)) return
-  showPurchaseModal.value = false
   errorMessage.value = ''
   errorModalOpen.value = false
   isPurchasing.value = true
